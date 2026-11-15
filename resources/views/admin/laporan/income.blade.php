@@ -3,6 +3,9 @@
 @section('title', 'Laporan Pendapatan')
 
 @section('content')
+<div class="container-xxl pt-3"><div class="alert alert-info">Pendapatan berasal dari pembayaran terverifikasi dan catatan pemasukan manual. Pesanan belum dibayar dan pembayaran yang dibatalkan tidak dihitung. Periode mengikuti tanggal pencatatan transaksi, bukan tanggal uang masuk bank. Catatan manual hanya untuk pemasukan di luar pesanan aplikasi.</div>
+@if(auth()->user()->role === 'admin_desa')<a class="btn btn-outline-primary mb-3" href="{{ route('admin.refunds.index') }}">Periksa Pengembalian Dana Warga</a>@endif</div>
+
 <style>
     .animate-fade-up {
         animation: fadeUp 0.5s ease-out forwards;
@@ -470,7 +473,7 @@
                 <div class="text-center py-5">
                     <div class="mb-3"><i class="bx bx-notepad fs-1 text-muted opacity-25"></i></div>
                     <h6 class="text-muted fw-bold mb-1">Belum ada transaksi manual</h6>
-                    <p class="text-muted small mb-3">Catat pendapatan di luar sistem secara manual di sini</p>
+                    <p class="text-muted small mb-3">Catat hanya pemasukan di luar pesanan aplikasi, agar pendapatan tidak dihitung dua kali.</p>
                     <button class="btn btn-sm btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#manualTransactionModal">
                         Tambah Data
                     </button>
@@ -518,7 +521,7 @@
                                 </td>
                                 <td>
                                      @if($report->proof_image)
-                                        <button class="btn btn-sm btn-light border rounded-pill px-3" onclick="viewProof('{{ asset('storage/' . $report->proof_image) }}', '{{ $report->name }}')">
+                                        <button class="btn btn-sm btn-light border rounded-pill px-3" data-proof="{{ route('admin.laporan.manual.proof', $report->id) }}" data-title="{{ $report->name }}" onclick="viewProof(this.dataset.proof, this.dataset.title)">
                                             <i class="bx bx-image-alt me-1"></i>Lihat
                                         </button>
                                      @else

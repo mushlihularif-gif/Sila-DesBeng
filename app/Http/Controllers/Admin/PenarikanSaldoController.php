@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminNotification;
 use App\Models\PenarikanSaldo;
-use App\Models\WalletTransaction;
+use App\Models\Region;
+use App\Support\SaldoWilayah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -30,7 +32,7 @@ class PenarikanSaldoController extends Controller
      */
     private function beriTahuWilayah(PenarikanSaldo $penarikan, string $judul, string $pesan): void
     {
-        \App\Models\AdminNotification::create([
+        AdminNotification::create([
             'type' => 'penarikan_saldo',
             'reference_id' => $penarikan->id,
             'region_id' => $penarikan->region_id,
@@ -42,6 +44,7 @@ class PenarikanSaldoController extends Controller
 
     public function index(Request $request)
     {
+        abort_unless(auth()->user()?->role === 'super_admin', 403);
         $status = $request->get('status', 'berjalan');
 
         $query = PenarikanSaldo::with(['region', 'pengaju', 'petugas'])
@@ -71,8 +74,8 @@ class PenarikanSaldoController extends Controller
         // Posisi dana yang benar-benar dipegang Diskominfotik, berikut rincian
         // siapa memilikinya. Tanpa ini mereka menyetujui pencairan tanpa pernah
         // melihat berapa total yang ada di tangan.
-        $dana = \App\Support\SaldoWilayah::ringkasanPlatform();
-        $rincianWilayah = \App\Support\SaldoWilayah::rincianPerWilayah();
+        $dana = SaldoWilayah::ringkasanPlatform();
+        $rincianWilayah = SaldoWilayah::rincianPerWilayah();
 
         return view('admin.super_sistem.penarikan_saldo', compact(
             'penarikan', 'status', 'ringkasan', 'dana', 'rincianWilayah'
@@ -81,28 +84,47 @@ class PenarikanSaldoController extends Controller
 
     public function approve(Request $request, PenarikanSaldo $penarikan)
     {
+        abort_unless(auth()->user()?->role === 'super_admin', 403);
         $request->validate([
             'catatan_admin' => 'nullable|string|max:500',
+            'proof' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
         abort_if($penarikan->sudahSelesai(), 422, 'Pengajuan ini sudah diproses sebelumnya.');
 
-        DB::transaction(function () use ($request, $penarikan) {
-            $penarikan->update([
-                'status' => PenarikanSaldo::SELESAI,
-                'catatan_admin' => $request->input('catatan_admin'),
-                'diproses_oleh' => auth()->id(),
-                'diselesaikan_pada' => now(),
-            ]);
+        $path = null;
+        try {
+            DB::transaction(function () use ($request, $penarikan, &$path) {
+                Region::whereKey($penarikan->region_id)->lockForUpdate()->firstOrFail();
+                $penarikan = PenarikanSaldo::whereKey($penarikan->id)->lockForUpdate()->firstOrFail();
+                abort_if($penarikan->sudahSelesai(), 409, 'Pengajuan sudah diproses.');
+                $reserved = PenarikanSaldo::where('region_id', $penarikan->region_id)->where('id', '!=', $penarikan->id)->whereIn('status', [PenarikanSaldo::MENUNGGU, PenarikanSaldo::DIPROSES, PenarikanSaldo::SELESAI])->sum('jumlah');
+                abort_if(SaldoWilayah::totalPemasukan($penarikan->region_id) - $reserved < $penarikan->jumlah, 409, 'Saldo berubah. Periksa rekonsiliasi sebelum mencatat pencairan.');
+                $path = $request->file('proof')->store('withdrawal-evidence', 'private');
+                abort_unless($path, 500, 'Bukti gagal disimpan.');
+                $penarikan->update([
+                    'proof_path' => $path,
+                    'status' => PenarikanSaldo::SELESAI,
+                    'catatan_admin' => $request->input('catatan_admin'),
+                    'diproses_oleh' => auth()->id(),
+                    'diselesaikan_pada' => now(),
+                ]);
 
-            $this->beriTahuWilayah(
-                $penarikan,
-                'Penarikan Saldo Berhasil',
-                'Pencairan Rp ' . number_format($penarikan->jumlah, 0, ',', '.') . ' ke '
-                    . $penarikan->nama_bank . ' sudah ditransfer Diskominfotik.'
-                    . ($request->filled('catatan_admin') ? ' Catatan: ' . $request->input('catatan_admin') : '')
-            );
-        });
+                $this->beriTahuWilayah(
+                    $penarikan,
+                    'Penarikan Saldo Berhasil',
+                    'Pencairan Rp '.number_format($penarikan->jumlah, 0, ',', '.').' ke '
+                        .$penarikan->nama_bank.' sudah ditransfer Diskominfotik.'
+                        .($request->filled('catatan_admin') ? ' Catatan: '.$request->input('catatan_admin') : '')
+                );
+            });
+
+        } catch (\Throwable $e) {
+            if ($path) {
+                \Storage::disk('private')->delete($path);
+            }
+            throw $e;
+        }
 
         Log::info('Penarikan saldo disetujui', [
             'penarikan_id' => $penarikan->id,
@@ -112,8 +134,8 @@ class PenarikanSaldoController extends Controller
         ]);
 
         return redirect()->back()->with('success',
-            'Penarikan sebesar Rp ' . number_format($penarikan->jumlah, 0, ',', '.') . ' ditandai selesai. '
-            . 'Pastikan transfer manual ke rekening wilayah sudah benar-benar dikirim.');
+            'Penarikan sebesar Rp '.number_format($penarikan->jumlah, 0, ',', '.').' ditandai selesai. '
+            .'Pastikan transfer manual ke rekening wilayah sudah benar-benar dikirim.');
     }
 
     /**
@@ -126,42 +148,46 @@ class PenarikanSaldoController extends Controller
      */
     public function reject(Request $request, PenarikanSaldo $penarikan)
     {
+        abort_unless(auth()->user()?->role === 'super_admin', 403);
         $request->validate([
             'catatan_admin' => 'required|string|max:500',
         ], [
             'catatan_admin.required' => 'Sebutkan kendalanya, supaya wilayah tahu apa yang perlu diperbaiki.',
         ]);
 
-        abort_if($penarikan->sudahSelesai(), 422, 'Pengajuan ini sudah diproses sebelumnya.');
+        return DB::transaction(function () use ($request, $penarikan) {
+            $penarikan = PenarikanSaldo::whereKey($penarikan->id)->lockForUpdate()->firstOrFail();
+            abort_if($penarikan->sudahSelesai(), 422, 'Pengajuan ini sudah diproses sebelumnya.');
 
-        // Saldo TIDAK dipulihkan lewat transaksi terpisah — SaldoWilayah
-        // menghitung ulang dari wallet_transactions setiap saat, dan yang
-        // mengurangi saldo hanyalah pengajuan yang masih berjalan atau selesai.
-        // Begitu statusnya berubah, baris ini berhenti ikut dihitung dengan
-        // sendirinya.
-        $penarikan->update([
-            'status' => PenarikanSaldo::GAGAL_PROSES,
-            'catatan_admin' => $request->input('catatan_admin'),
-            'diproses_oleh' => auth()->id(),
-            'diselesaikan_pada' => now(),
-        ]);
+            // Saldo TIDAK dipulihkan lewat transaksi terpisah — SaldoWilayah
+            // menghitung ulang dari wallet_transactions setiap saat, dan yang
+            // mengurangi saldo hanyalah pengajuan yang masih berjalan atau selesai.
+            // Begitu statusnya berubah, baris ini berhenti ikut dihitung dengan
+            // sendirinya.
+            $penarikan->update([
+                'status' => PenarikanSaldo::GAGAL_PROSES,
+                'catatan_admin' => $request->input('catatan_admin'),
+                'diproses_oleh' => auth()->id(),
+                'diselesaikan_pada' => now(),
+            ]);
 
-        $this->beriTahuWilayah(
-            $penarikan,
-            'Penarikan Tidak Bisa Diproses',
-            'Pencairan Rp ' . number_format($penarikan->jumlah, 0, ',', '.') . ' terkendala: '
-                . $request->input('catatan_admin') . '. Saldo Anda kembali utuh dan bisa diajukan lagi.'
-        );
+            $this->beriTahuWilayah(
+                $penarikan,
+                'Penarikan Tidak Bisa Diproses',
+                'Pencairan Rp '.number_format($penarikan->jumlah, 0, ',', '.').' terkendala: '
+                    .$request->input('catatan_admin').'. Saldo Anda kembali utuh dan bisa diajukan lagi.'
+            );
 
-        Log::info('Penarikan saldo tidak bisa diproses', [
-            'penarikan_id' => $penarikan->id,
-            'region_id' => $penarikan->region_id,
-            'jumlah' => $penarikan->jumlah,
-            'kendala' => $request->input('catatan_admin'),
-            'oleh' => auth()->user()->email,
-        ]);
+            Log::info('Penarikan saldo tidak bisa diproses', [
+                'penarikan_id' => $penarikan->id,
+                'region_id' => $penarikan->region_id,
+                'jumlah' => $penarikan->jumlah,
+                'kendala' => $request->input('catatan_admin'),
+                'oleh' => auth()->user()->email,
+            ]);
 
-        return redirect()->back()->with('success',
-            'Ditandai tidak bisa diproses. Saldo wilayah kembali utuh dan mereka bisa mengajukan ulang.');
+            return redirect()->back()->with('success',
+                'Ditandai tidak bisa diproses. Saldo wilayah kembali utuh dan mereka bisa mengajukan ulang.');
+        });
     }
 }

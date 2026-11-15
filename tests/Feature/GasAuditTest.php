@@ -45,6 +45,7 @@ class GasAuditTest extends TestCase
         Schema::create('wallet_transactions', function (Blueprint $t) {
             $t->id(); foreach (['region_id','reference_id'] as $col) $t->integer($col); $t->integer('verified_by')->nullable();
             foreach (['type','source','reference_type','status','proof_path','notes'] as $col) $t->string($col)->nullable(); $t->decimal('amount',12,2); $t->timestamps();
+            $t->string('refund_status')->nullable(); $t->string('refund_proof')->nullable(); $t->timestamp('refunded_at')->nullable(); $t->integer('refunded_by')->nullable();
         });
         Schema::create('admin_notifications', function (Blueprint $t) {
             $t->id(); $t->string('type'); $t->integer('reference_id'); $t->integer('region_id'); $t->string('title'); $t->text('message'); $t->boolean('is_read'); $t->timestamps();

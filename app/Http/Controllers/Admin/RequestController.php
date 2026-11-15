@@ -709,16 +709,11 @@ class RequestController extends Controller
                         $order->completion_time = now();
                     }
 
-                    // Jalur ini dulu sama sekali tidak menyentuh ledger, jadi
-                    // pembayaran manual yang diselesaikan dari halaman Permintaan
-                    // & Pengajuan tertinggal 'pending' selamanya — sementara
-                    // pesanan yang diselesaikan dari halaman Transaksi tercatat
-                    // benar. Hasilnya bergantung pada tombol mana yang ditekan.
-                    \App\Models\WalletTransaction::tandaiPembayaranManualDiterima(
-                        $type,
-                        $order->id,
-                        auth()->id(),
-                    );
+                    if ((float)$order->total_amount > 0) {
+                        $paidRows = \App\Models\WalletTransaction::where('reference_type',$type)->where('reference_id',$order->id)->lockForUpdate()->get();
+                        abort_unless($paidRows->isNotEmpty() && $paidRows->every(fn($r)=>$r->status==='verified' && (int)$r->region_id===(int)auth()->user()->region_id)
+                            && abs((float)$paidRows->sum('amount')-(float)$order->total_amount)<0.005,409,'Konfirmasi pembayaran diterima sebelum menyelesaikan layanan.');
+                    }
 
                     // FIX: Return stock when admin marks rental as completed
                     if ($type === 'rental' && $oldStatus !== 'completed') {

@@ -460,6 +460,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Keuangan wilayah: ringkasan saldo dan pencairannya. Dipisah dari Pengaturan
     // karena ini pekerjaan berulang (lihat uang masuk, cairkan), bukan
     // konfigurasi sekali-atur seperti nomor rekening.
+    Route::get('/keuangan/pengembalian', [\App\Http\Controllers\Admin\RefundController::class, 'index'])->name('admin.refunds.index');
+    Route::post('/keuangan/pengembalian/{id}', [\App\Http\Controllers\Admin\RefundController::class, 'complete'])->name('admin.refunds.complete');
+    Route::get('/keuangan/pengembalian/{id}/bukti', [\App\Http\Controllers\Admin\RefundController::class, 'proof'])->name('admin.refunds.proof');
+    Route::get('/keuangan/penarikan/{id}/bukti', [\App\Http\Controllers\Admin\KeuanganController::class, 'proof'])->name('admin.keuangan.proof');
     Route::get('/keuangan', [\App\Http\Controllers\Admin\KeuanganController::class, 'index'])->name('admin.keuangan.index');
     Route::post('/keuangan/tarik-saldo', [\App\Http\Controllers\Admin\KeuanganController::class, 'tarikSaldo'])->name('admin.keuangan.tarik');
     Route::post('/keuangan/penarikan/{penarikan}/batal', [\App\Http\Controllers\Admin\KeuanganController::class, 'batalkanPenarikan'])->name('admin.keuangan.batal');
@@ -721,6 +725,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/log', [\App\Http\Controllers\Admin\ReportController::class, 'logs'])->name('admin.laporan.log')->middleware('staff.permission:platform_aktivitas');
         
         // Route Transaksi Manual
+        Route::get('/manual-transaction/{id}/proof', [\App\Http\Controllers\Admin\ReportController::class, 'manualProof'])->name('admin.laporan.manual.proof');
+        Route::get('/payment-record/{id}/proof', [\App\Http\Controllers\Admin\ReportController::class, 'paymentProof'])->name('admin.finance.proof');
         Route::post('/manual-transaction', [\App\Http\Controllers\Admin\ReportController::class, 'storeManualTransaction'])->name('admin.laporan.manual.store');
         Route::put('/manual-transaction/{id}', [\App\Http\Controllers\Admin\ReportController::class, 'updateManualTransaction'])->name('admin.laporan.manual.update');
         Route::delete('/manual-transaction/{id}', [\App\Http\Controllers\Admin\ReportController::class, 'destroyManualTransaction'])->name('admin.laporan.manual.destroy');

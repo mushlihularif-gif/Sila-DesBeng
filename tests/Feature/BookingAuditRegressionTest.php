@@ -41,6 +41,7 @@ class BookingAuditRegressionTest extends TestCase
             $t->id(); $t->integer('region_id'); $t->string('type'); $t->string('source');
             $t->string('reference_type'); $t->integer('reference_id'); $t->string('status');
             $t->string('proof_path')->nullable(); $t->decimal('amount', 12, 2); $t->timestamps(); $t->text('notes')->nullable();
+            $t->string('refund_status')->nullable(); $t->string('refund_proof')->nullable(); $t->timestamp('refunded_at')->nullable(); $t->integer('refunded_by')->nullable();
         });
         Schema::create('saldo_warga', function (Blueprint $t) {
             $t->id(); $t->integer('user_id'); $t->integer('region_id'); $t->string('type');

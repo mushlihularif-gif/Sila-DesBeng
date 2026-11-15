@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\RentalBooking;
+use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
+use App\Models\FasilitasUmumBooking;
 use App\Models\GasOrder;
 use App\Models\ManualReport;
+use App\Models\MobilBooking;
+use App\Models\Region;
+use App\Models\RentalBooking;
+use App\Support\FinanceRecords;
+use App\Support\FinancialProof;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use App\Models\ActivityLog;
 
 class ReportController extends Controller
 {
@@ -22,22 +26,30 @@ class ReportController extends Controller
 
         // Query Penyewaan
         $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->with('user')->orderByDesc('created_at');
-        
+
         // Query Gas
         $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->with('user')->orderByDesc('created_at');
 
         // Query Mobil
-        $mobilQuery = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->with(['user', 'mobil'])->orderByDesc('created_at');
+        $mobilQuery = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->with(['user', 'mobil'])->orderByDesc('created_at');
 
         // Query Fasilitas Umum
-        $fasilitasQuery = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->orderByDesc('created_at');
+        $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->orderByDesc('created_at');
 
         $user = auth()->user();
         if ($user->isStaff()) {
-            if (!$user->hasUnitPermission('sewa_alat')) $rentalQuery->whereRaw('1 = 0');
-            if (!$user->hasUnitPermission('gas')) $gasQuery->whereRaw('1 = 0');
-            if (!$user->hasUnitPermission('sewa_mobil')) $mobilQuery->whereRaw('1 = 0');
-            if (!$user->hasUnitPermission('fasilitas_umum')) $fasilitasQuery->whereRaw('1 = 0');
+            if (! $user->hasUnitPermission('sewa_alat')) {
+                $rentalQuery->whereRaw('1 = 0');
+            }
+            if (! $user->hasUnitPermission('gas')) {
+                $gasQuery->whereRaw('1 = 0');
+            }
+            if (! $user->hasUnitPermission('sewa_mobil')) {
+                $mobilQuery->whereRaw('1 = 0');
+            }
+            if (! $user->hasUnitPermission('fasilitas_umum')) {
+                $fasilitasQuery->whereRaw('1 = 0');
+            }
         }
 
         // Terapkan Filter
@@ -77,322 +89,51 @@ class ReportController extends Controller
 
     public function income(Request $request)
     {
-        $activeServices = $this->getActivatedServices();
-        // Dapatkan tahun yang dipilih (default ke tahun sekarang)
-        $yearRequest = $request->input('year', now()->year);
-        $year = (int)$yearRequest; // Strict integer cast
-
-        // Ambil daftar tahun yang tersedia dari database (Strict Integer)
-        $rentalYears = RentalBooking::withTrashed()
-            ->selectRaw('YEAR(created_at) as year')
-            ->distinct()
-            ->pluck('year')
-            ->map(fn($y) => (int)$y)
-            ->toArray();
-            
-        $gasYears = GasOrder::withTrashed()
-            ->selectRaw('YEAR(created_at) as year')
-            ->distinct()
-            ->pluck('year')
-            ->map(fn($y) => (int)$y)
-            ->toArray();
-            
-        $mobilYears = \App\Models\MobilBooking::withTrashed()
-            ->selectRaw('YEAR(created_at) as year')
-            ->distinct()
-            ->pluck('year')
-            ->map(fn($y) => (int)$y)
-            ->toArray();
-            
-        $fasilitasYears = \App\Models\FasilitasUmumBooking::withTrashed()
-            ->selectRaw('YEAR(created_at) as year')
-            ->distinct()
-            ->pluck('year')
-            ->map(fn($y) => (int)$y)
-            ->toArray();
-            
-        $pasarYears = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()
-            ->selectRaw('YEAR(created_at) as year')
-            ->distinct()
-            ->pluck('year')
-            ->map(fn($y) => (int)$y)
-            ->toArray();
-        
-        // Gabungkan dengan tahun sekarang secara eksplisit (Hard Merge)
-        $allYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, $pasarYears, [(int)now()->year]));
-        $availableYears = array_values($allYears);
-        rsort($availableYears);
-
-        $user = auth()->user();
-        $isStaff = $user->isStaff();
-        $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
-        $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
-        $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
-        $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
-        $canViewPasar = !$isStaff || $user->hasUnitPermission('pasar_daerah');
-
-        // Hitung total pendapatan per unit dari sistem (Filter Tahunan)
-        $totalPenyewaan = $canViewRental ? $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount') : 0;
-            
-        $totalGas = $canViewGas ? $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->selectRaw('SUM(price * quantity) as total')
-            ->value('total') ?? 0 : 0;
-            
-        $totalMobil = $canViewMobil ? $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount') : 0;
-            
-        $totalFasilitas = $canViewFasilitas ? $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount') : 0;
-            
-        $totalPasar = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('grand_total') : 0;
-        
-        // Hitung total dari laporan manual (Filter Tahunan)
-        $manualPenyewaan = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
-            ->where('category', 'penyewaan')
-            ->sum(\DB::raw('amount * quantity'));
-            
-        $manualGas = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
-            ->where('category', 'gas')
-            ->sum(\DB::raw('amount * quantity'));
-
-        $manualMobil = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
-            ->where('category', 'mobil')
-            ->sum(\DB::raw('amount * quantity'));
-
-        $manualFasilitas = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
-            ->where('category', 'fasilitas')
-            ->sum(\DB::raw('amount * quantity'));
-
-        $manualPasar = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
-            ->where('category', 'pasar')
-            ->sum(\DB::raw('amount * quantity'));
-            
-        $manualLainnya = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
-            ->where('category', 'lainnya')
-            ->sum(\DB::raw('amount * quantity'));
-        
-        // Total keseluruhan
-        $totalPenyewaan += $manualPenyewaan;
-        $totalGas += $manualGas;
-        $totalMobil += $manualMobil;
-        $totalFasilitas += $manualFasilitas;
-        $totalPasar += $manualPasar;
-        $totalPendapatan = $totalPenyewaan + $totalGas + $totalMobil + $totalFasilitas + $totalPasar + $manualLainnya;
-
-        // Hitung pendapatan per bulan
-        $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        $monthlyIncome = array_fill_keys($months, 0);
-
-        // Pendapatan dari sistem (RentalBooking)
-        $rentalMonthly = $canViewRental ? $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
-            ->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->groupBy('month')
-            ->pluck('total', 'month') : collect();
-
-        foreach ($rentalMonthly as $month => $amount) {
-            $monthlyIncome[self::getMonthName($month)] += $amount;
-        }
-
-        // Pendapatan dari sistem (GasOrder)
-        $gasMonthly = $canViewGas ? $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->selectRaw('SUM(price * quantity) as total, MONTH(created_at) as month')
-            ->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->groupBy('month')
-            ->pluck('total', 'month') : collect();
-
-        foreach ($gasMonthly as $month => $amount) {
-            $monthlyIncome[self::getMonthName($month)] += $amount;
-        }
-
-        // Pendapatan dari sistem (MobilBooking)
-        $mobilMonthly = $canViewMobil ? $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
-            ->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->groupBy('month')
-            ->pluck('total', 'month') : collect();
-
-        foreach ($mobilMonthly as $month => $amount) {
-            $monthlyIncome[self::getMonthName($month)] += $amount;
-        }
-
-        // Pendapatan dari sistem (FasilitasUmumBooking)
-        $fasilitasMonthly = $canViewFasilitas ? $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
-            ->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->groupBy('month')
-            ->pluck('total', 'month') : collect();
-
-        foreach ($fasilitasMonthly as $month => $amount) {
-            $monthlyIncome[self::getMonthName($month)] += $amount;
-        }
-
-        // Pendapatan dari sistem (PasarOrder)
-        $pasarMonthly = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->selectRaw('SUM(grand_total) as total, MONTH(created_at) as month')
-            ->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->groupBy('month')
-            ->pluck('total', 'month') : collect();
-
-        foreach ($pasarMonthly as $month => $amount) {
-            $monthlyIncome[self::getMonthName($month)] += $amount;
-        }
-        
-        // Pendapatan dari laporan manual
-        $manualMonthly = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->selectRaw('SUM(amount * quantity) as total, MONTH(transaction_date) as month')
-            ->whereYear('transaction_date', $year)
-            ->groupBy('month')
-            ->pluck('total', 'month');
-
-        foreach ($manualMonthly as $month => $amount) {
-            $monthlyIncome[self::getMonthName($month)] += $amount;
-        }
-
-        // Data untuk chart
+        FinanceRecords::authorize();
+        $request->validate(['year' => 'nullable|integer|between:1900,2100', 'month' => 'nullable|integer|between:1,12']);
+        $year = $request->integer('year', now()->year);
+        $current = FinanceRecords::summary($year);
+        $previous = FinanceRecords::summary($year - 1);
+        $totalPenyewaan = $current['rental']['revenue'];
+        $totalGas = $current['gas']['revenue'];
+        $totalMobil = $current['mobil']['revenue'];
+        $totalFasilitas = $current['fasilitas']['revenue'];
+        $totalPasar = $current['pasar']['revenue']; // Historical transactions remain available.
+        $manualLainnya = $current['lainnya']['revenue'];
+        $totalPendapatan = $current['total']['revenue'];
+        $rentalCount = $current['rental']['transactions'];
+        $gasCount = $current['gas']['transactions'];
+        $mobilCount = $current['mobil']['transactions'];
+        $fasilitasCount = $current['fasilitas']['transactions'];
+        $pasarCount = $current['pasar']['transactions'];
+        $monthlyIncome = [];
         $dataPoints = [];
-        foreach ($monthlyIncome as $month => $income) {
-            $dataPoints[] = ['label' => $month, 'y' => $income];
+        $growth = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $value = FinanceRecords::summary($year, $month)['total']['revenue'];
+            $monthlyIncome[self::getMonthName($month)] = $value;
+            $dataPoints[] = ['label' => self::getMonthName($month), 'y' => $value];
         }
-
-        // Ambil data untuk detail per unit (Difilter Berdasarkan Tahun)
-        $rentalRequests = $canViewRental ? $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)->get() : collect();
-        $gasOrders = $canViewGas ? $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->whereYear('created_at', $year)->get() : collect();
-        
-        // Ambil laporan manual (Difilter Berdasarkan Tahun)
-        $manualReports = $this->applyRegionFilter(ManualReport::with('creator'), 'creator', true)
-            ->whereYear('transaction_date', $year)
-            ->orderByDesc('transaction_date')
-            ->get();
-
-        // Hitung total transaksi untuk Donut Chart (Filter Tahunan)
-        $rentalCount = $canViewRental ? RentalBooking::withTrashed()->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count() : 0;
-            
-        $gasCount = $canViewGas ? GasOrder::withTrashed()->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count() : 0;
-            
-        $mobilCount = $canViewMobil ? \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count() : 0;
-
-        $fasilitasCount = $canViewFasilitas ? \App\Models\FasilitasUmumBooking::withTrashed()->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count() : 0;
-
-        $pasarCount = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $year)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count() : 0;
-            
-        // Ambil Data Tahun Saat Ini (Yearly Total)
-        $currentYearData = [
-            'rental' => $totalPenyewaan,
-            'gas' => $totalGas,
-            'mobil' => $totalMobil,
-            'fasilitas' => $totalFasilitas,
-            'pasar' => $totalPasar,
-            'total' => $totalPendapatan
-        ];
-
-        // Ambil Data Tahun Sebelumnya
-        $prevYear = $year - 1;
-        
-        $prevTotalPenyewaan = $canViewRental ? RentalBooking::withTrashed()->whereYear('created_at', $prevYear)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount') : 0;
-            
-        $prevTotalGas = $canViewGas ? GasOrder::withTrashed()->whereYear('created_at', $prevYear)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum(\DB::raw('price * quantity')) : 0;
-            
-        $prevTotalMobil = $canViewMobil ? \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $prevYear)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount') : 0;
-            
-        $prevTotalFasilitas = $canViewFasilitas ? \App\Models\FasilitasUmumBooking::withTrashed()->whereYear('created_at', $prevYear)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount') : 0;
-            
-        $prevTotalPasar = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $prevYear)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('grand_total') : 0;
-            
-        $prevManualRevenue = ManualReport::whereYear('transaction_date', $prevYear)
-            ->sum(\DB::raw('amount * quantity'));
-            
-        $prevTotalPendapatan = $prevTotalPenyewaan + $prevTotalGas + $prevTotalMobil + $prevTotalFasilitas + $prevTotalPasar + $prevManualRevenue;
-        
-        $prevYearData = [
-            'rental' => $prevTotalPenyewaan,
-            'gas' => $prevTotalGas,
-            'mobil' => $prevTotalMobil,
-            'fasilitas' => $prevTotalFasilitas,
-            'pasar' => $prevTotalPasar,
-            'total' => $prevTotalPendapatan
-        ];
-
-        // Hitung Fungsi Pertumbuhan
-        $calculateGrowth = function($current, $previous) {
-            if ($previous == 0) {
-                return $current > 0 ? 100 : 0;
-            }
-            return round((($current - $previous) / $previous) * 100, 1);
-        };
-
-        // Ambil Bulan Terpilih (untuk Tampilan Detail Chart)
-        $selectedMonth = $request->input('month', date('m'));
-        $currentMonthData = $this->getTotalPendapatanData($selectedMonth, $year);
-
-        $growth = [
-            'total' => $calculateGrowth($currentYearData['total'], $prevYearData['total']),
-            'rental' => $calculateGrowth($currentYearData['rental'], $prevYearData['rental']),
-            'gas' => $calculateGrowth($currentYearData['gas'], $prevYearData['gas']),
-            'mobil' => $calculateGrowth($currentYearData['mobil'], $prevYearData['mobil']),
-            'fasilitas' => $calculateGrowth($currentYearData['fasilitas'], $prevYearData['fasilitas']),
-            'pasar' => $calculateGrowth($currentYearData['pasar'], $prevYearData['pasar']),
-        ];
-
-        // Teruskan Data Total Pendapatan (untuk Tampilan Detail) - sama seperti currentMonthData
-        $totalPendapatanData = $currentMonthData;
-        
-        // Ambil data Unit Populer (perbandingan penyewaan vs gas)
+        foreach (['total', 'rental', 'gas', 'mobil', 'fasilitas', 'pasar'] as $type) {
+            $old = $previous[$type]['revenue'];
+            $value = $current[$type]['revenue'];
+            $growth[$type] = $old == 0 ? ($value > 0 ? 100 : 0) : round(($value - $old) / $old * 100, 1);
+        }
+        $availableYears = FinanceRecords::payments()->pluck('created_at')
+            ->concat(FinanceRecords::manual()->pluck('transaction_date'))
+            ->filter()->map(fn ($date) => Carbon::parse($date)->year)
+            ->push(now()->year)->unique()->sortDesc()->values()->all();
+        $manualReports = FinanceRecords::manual()->with('creator')->whereYear('transaction_date', $year)->orderByDesc('transaction_date')->get();
+        $rentalRequests = collect();
+        $gasOrders = collect();
+        $totalPendapatanData = FinanceRecords::summary($year, $request->integer('month', now()->month));
         $unitPopulerData = $this->getUnitPopulerData($year);
-
         $activeServices = $this->getActivatedServices();
 
-        return view('admin.laporan.income', compact(
-            'totalPenyewaan',
-            'totalGas',
-            'totalMobil',
-            'totalFasilitas',
-            'totalPasar',
-            'totalPendapatan',
-            'monthlyIncome',
-            'dataPoints',
-            'rentalRequests',
-            'gasOrders',
-            'manualReports',
-            'manualLainnya',
-            'rentalCount',
-            'gasCount',
-            'mobilCount',
-            'fasilitasCount',
-            'pasarCount',
-            'year',
-            'totalPendapatanData',
-            'unitPopulerData',
-            'growth',
-            'availableYears',
-            'activeServices'
-        ));
+        return view('admin.laporan.income', compact('totalPenyewaan', 'totalGas', 'totalMobil', 'totalFasilitas', 'totalPasar',
+            'totalPendapatan', 'monthlyIncome', 'dataPoints', 'rentalRequests', 'gasOrders', 'manualReports', 'manualLainnya',
+            'rentalCount', 'gasCount', 'mobilCount', 'fasilitasCount', 'pasarCount', 'year', 'totalPendapatanData',
+            'unitPopulerData', 'growth', 'availableYears', 'activeServices'));
     }
 
     /**
@@ -408,12 +149,12 @@ class ReportController extends Controller
         // Parameter filter
         $year = $request->input('year', now()->year);
         $month = $request->input('month', now()->month);
-        
-        $selectedKecamatanId = \App\Models\Region::where('type', 'kecamatan')
+
+        $selectedKecamatanId = Region::where('type', 'kecamatan')
             ->where('name', 'Kecamatan Bengkalis')
             ->value('id');
         abort_if(! $selectedKecamatanId, 404, 'Kecamatan Bengkalis belum terdaftar.');
-        $desaIdsDalamCakupan = \App\Models\Region::where('parent_id', $selectedKecamatanId)
+        $desaIdsDalamCakupan = Region::where('parent_id', $selectedKecamatanId)
             ->whereIn('type', ['desa', 'kelurahan'])
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
@@ -424,12 +165,12 @@ class ReportController extends Controller
             $selectedDesaId = 'all';
         }
         $regionIdsDalamCakupan = array_merge([(int) $selectedKecamatanId], $desaIdsDalamCakupan);
-        
+
         // Base query for transactions (NOT strict, to see descendant activity)
-        $baseRental = $this->applyRegionFilter(\App\Models\RentalBooking::withTrashed(), 'barang', false);
-        $baseGas = $this->applyRegionFilter(\App\Models\GasOrder::withTrashed(), 'gas', false);
-        $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', false);
-        $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', false);
+        $baseRental = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', false);
+        $baseGas = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', false);
+        $baseMobil = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', false);
+        $baseFasilitas = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', false);
 
         $baseRental->whereHas('barang', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
         $baseGas->whereHas('gas', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
@@ -438,31 +179,55 @@ class ReportController extends Controller
 
         $user = auth()->user();
         if ($user->isStaff()) {
-            if (!$user->hasUnitPermission('sewa_alat')) $baseRental->whereRaw('1 = 0');
-            if (!$user->hasUnitPermission('gas')) $baseGas->whereRaw('1 = 0');
-            if (!$user->hasUnitPermission('sewa_mobil')) $baseMobil->whereRaw('1 = 0');
-            if (!$user->hasUnitPermission('fasilitas_umum')) $baseFasilitas->whereRaw('1 = 0');
+            if (! $user->hasUnitPermission('sewa_alat')) {
+                $baseRental->whereRaw('1 = 0');
+            }
+            if (! $user->hasUnitPermission('gas')) {
+                $baseGas->whereRaw('1 = 0');
+            }
+            if (! $user->hasUnitPermission('sewa_mobil')) {
+                $baseMobil->whereRaw('1 = 0');
+            }
+            if (! $user->hasUnitPermission('fasilitas_umum')) {
+                $baseFasilitas->whereRaw('1 = 0');
+            }
         }
 
         // Terapkan filter dropdown Kecamatan/Desa jika ada
         if ($selectedDesaId && $selectedDesaId !== 'all') {
-            $baseRental->whereHas('barang', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
-            $baseGas->whereHas('gas', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
-            $baseMobil->whereHas('mobil', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
-            $baseFasilitas->whereHas('fasilitas', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
+            $baseRental->whereHas('barang', function ($q) use ($selectedDesaId) {
+                $q->where('region_id', $selectedDesaId);
+            });
+            $baseGas->whereHas('gas', function ($q) use ($selectedDesaId) {
+                $q->where('region_id', $selectedDesaId);
+            });
+            $baseMobil->whereHas('mobil', function ($q) use ($selectedDesaId) {
+                $q->where('region_id', $selectedDesaId);
+            });
+            $baseFasilitas->whereHas('fasilitas', function ($q) use ($selectedDesaId) {
+                $q->where('region_id', $selectedDesaId);
+            });
         } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
-            $desaIds = \App\Models\Region::where('parent_id', $selectedKecamatanId)->pluck('id')->toArray();
+            $desaIds = Region::where('parent_id', $selectedKecamatanId)->pluck('id')->toArray();
             $desaIds[] = $selectedKecamatanId;
-            $baseRental->whereHas('barang', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
-            $baseGas->whereHas('gas', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
-            $baseMobil->whereHas('mobil', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
-            $baseFasilitas->whereHas('fasilitas', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
+            $baseRental->whereHas('barang', function ($q) use ($desaIds) {
+                $q->whereIn('region_id', $desaIds);
+            });
+            $baseGas->whereHas('gas', function ($q) use ($desaIds) {
+                $q->whereIn('region_id', $desaIds);
+            });
+            $baseMobil->whereHas('mobil', function ($q) use ($desaIds) {
+                $q->whereIn('region_id', $desaIds);
+            });
+            $baseFasilitas->whereHas('fasilitas', function ($q) use ($desaIds) {
+                $q->whereIn('region_id', $desaIds);
+            });
         }
 
         // Kinerja Per Bulan (Januari - Desember)
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
         $monthlyPerformance = array_fill_keys($months, 0);
-        
+
         $rentalMonthly = $baseRental->clone()->selectRaw('COUNT(*) as total, MONTH(created_at) as month')
             ->whereYear('created_at', $year)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->groupBy('month')->pluck('total', 'month');
         $gasMonthly = $baseGas->clone()->selectRaw('COUNT(*) as total, MONTH(created_at) as month')
@@ -481,7 +246,7 @@ class ReportController extends Controller
         // Kalkulasi Persentase Kinerja (Bulan ini vs Bulan lalu)
         $currentMonthTotal = $monthlyPerformance[$months[$month - 1]] ?? 0;
         $lastMonthTotal = $month > 1 ? ($monthlyPerformance[$months[$month - 2]] ?? 0) : 0;
-        
+
         $growth = 0;
         if ($lastMonthTotal > 0) {
             $growth = round((($currentMonthTotal - $lastMonthTotal) / $lastMonthTotal) * 100, 1);
@@ -493,25 +258,25 @@ class ReportController extends Controller
         $kecamatanList = collect();
         $desaList = collect();
         if (in_array(auth()->user()->role, ['super_admin'])) {
-            $kecamatanList = \App\Models\Region::whereKey($selectedKecamatanId)->get();
+            $kecamatanList = Region::whereKey($selectedKecamatanId)->get();
             if ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
-                $desaList = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $selectedKecamatanId)->get();
+                $desaList = Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $selectedKecamatanId)->get();
             } else {
-                $desaList = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $selectedKecamatanId)->get();
+                $desaList = Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $selectedKecamatanId)->get();
             }
         }
 
         // Dynamic Year Generation
-        $rentalYears = \App\Models\RentalBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
-        $gasYears = \App\Models\GasOrder::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
-        $mobilYears = \App\Models\MobilBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
-        $fasilitasYears = \App\Models\FasilitasUmumBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
+        $rentalYears = RentalBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
+        $gasYears = GasOrder::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
+        $mobilYears = MobilBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
+        $fasilitasYears = FasilitasUmumBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
         $laporanYears = [];
-        
+
         $availableYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, $laporanYears, [now()->year]));
         rsort($availableYears);
         $years = collect($availableYears);
-        
+
         // Total per unit layanan
         $serviceTotals = [
             'rental' => $rentalMonthly->sum(),
@@ -526,7 +291,7 @@ class ReportController extends Controller
         if ($request->ajax()) {
             // Render HTML options for desa dropdown
             $desaOptionsHtml = '<option value="all">-- Semua Desa --</option>';
-            foreach($desaList as $desa) {
+            foreach ($desaList as $desa) {
                 $selected = ($selectedDesaId == $desa->id) ? 'selected' : '';
                 $desaOptionsHtml .= '<option value="'.$desa->id.'" '.$selected.'>'.$desa->name.'</option>';
             }
@@ -537,7 +302,7 @@ class ReportController extends Controller
                 'growth' => $growth,
                 'currentMonthTotal' => $currentMonthTotal,
                 'serviceTotals' => $serviceTotals,
-                'desaOptionsHtml' => $desaOptionsHtml
+                'desaOptionsHtml' => $desaOptionsHtml,
             ]);
         }
 
@@ -547,7 +312,7 @@ class ReportController extends Controller
             'selectedKecamatanId', 'selectedDesaId', 'serviceTotals', 'activeServices'
         ));
     }
-    
+
     /**
      * Ambil data Unit Populer - Perbandingan antara penyewaan dan penjualan gas
      */
@@ -558,46 +323,45 @@ class ReportController extends Controller
         $gasData = [];
         $mobilData = [];
         $fasilitasData = [];
-        
+
         $user = auth()->user();
         $isStaff = $user->isStaff();
-        $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
-        $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
-        $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
-        $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
-        
+        $canViewRental = ! $isStaff || $user->hasUnitPermission('sewa_alat');
+        $canViewGas = ! $isStaff || $user->hasUnitPermission('gas');
+        $canViewMobil = ! $isStaff || $user->hasUnitPermission('sewa_mobil');
+        $canViewFasilitas = ! $isStaff || $user->hasUnitPermission('fasilitas_umum');
+
         for ($month = 1; $month <= 12; $month++) {
             // Hitung pesanan penyewaan
             $rentalCount = $canViewRental ? $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->count() : 0;
-            
+
             // Hitung pesanan gas
             $gasCount = $canViewGas ? $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->count() : 0;
-                
+
             // Hitung pesanan mobil
-            $mobilCount = $canViewMobil ? $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->whereYear('created_at', $year)
+            $mobilCount = $canViewMobil ? $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->count() : 0;
-                
+
             // Hitung pesanan fasilitas umum
-            $fasilitasCount = $canViewFasilitas ? $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->whereYear('created_at', $year)
+            $fasilitasCount = $canViewFasilitas ? $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->count() : 0;
-                
-            
+
             $rentalData[] = $rentalCount;
             $gasData[] = $gasCount;
             $mobilData[] = $mobilCount;
             $fasilitasData[] = $fasilitasCount;
         }
-        
+
         return [
             'categories' => $months,
             'rental' => $rentalData,
@@ -611,185 +375,9 @@ class ReportController extends Controller
      * Ambil data Total Pendapatan - Rincian pendapatan berdasarkan unit
      */
     private function getTotalPendapatanData($month, $year)
-    {   
-        $user = auth()->user();
-        $isStaff = $user->isStaff();
-        $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
-        $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
-        $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
-
-        // Pendapatan Penyewaan Alat
-        $rentalRevenue = $canViewRental ? RentalBooking::withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount') : 0;
-        
-        $rentalTransactions = $canViewRental ? RentalBooking::withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count() : 0;
-        
-        // Pendapatan Penjualan Gas
-        $gasRevenue = $canViewGas ? GasOrder::withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum(\DB::raw('price * quantity')) : 0;
-        
-        $gasTransactions = $canViewGas ? GasOrder::withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count() : 0;
-            
-        // Pendapatan Sewa Mobil
-        $mobilRevenue = $canViewMobil ? \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount') : 0;
-        
-        $mobilTransactions = $canViewMobil ? \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count() : 0;
-            
-        $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
-        $canViewPasar = !$isStaff || $user->hasUnitPermission('pasar_daerah');
-            
-        // Pendapatan Fasilitas Umum
-        $fasilitasRevenue = $canViewFasilitas ? \App\Models\FasilitasUmumBooking::withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount') : 0;
-            
-        $fasilitasTransactions = $canViewFasilitas ? \App\Models\FasilitasUmumBooking::withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count() : 0;
-            
-        // Pendapatan Pasar Daerah
-        $pasarRevenue = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
-            ->sum('grand_total') : 0;
-            
-        $pasarTransactions = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
-            ->count() : 0;
-
-        // Hitung total dari laporan manual per kategori bulan ini
-        $manualPenyewaanMonth = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'penyewaan')
-            ->sum(\DB::raw('amount * quantity'));
-        $manualPenyewaanTrans = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'penyewaan')
-            ->count();
-
-        $manualGasMonth = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'gas')
-            ->sum(\DB::raw('amount * quantity'));
-        $manualGasTrans = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'gas')
-            ->count();
-
-        $manualMobilMonth = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'mobil')
-            ->sum(\DB::raw('amount * quantity'));
-        $manualMobilTrans = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'mobil')
-            ->count();
-
-        $manualFasilitasMonth = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'fasilitas')
-            ->sum(\DB::raw('amount * quantity'));
-        $manualFasilitasTrans = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'fasilitas')
-            ->count();
-
-        $manualPasarMonth = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'pasar')
-            ->sum(\DB::raw('amount * quantity'));
-        $manualPasarTrans = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'pasar')
-            ->count();
-
-        $manualLainnyaMonth = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'lainnya')
-            ->sum(\DB::raw('amount * quantity'));
-        $manualLainnyaTrans = ManualReport::whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->where('category', 'lainnya')
-            ->count();
-
-        $rentalRevenue += $manualPenyewaanMonth;
-        $rentalTransactions += $manualPenyewaanTrans;
-
-        $gasRevenue += $manualGasMonth;
-        $gasTransactions += $manualGasTrans;
-
-        $mobilRevenue += $manualMobilMonth;
-        $mobilTransactions += $manualMobilTrans;
-
-        $fasilitasRevenue += $manualFasilitasMonth;
-        $fasilitasTransactions += $manualFasilitasTrans;
-
-        $pasarRevenue += $manualPasarMonth;
-        $pasarTransactions += $manualPasarTrans;
-
-        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $fasilitasRevenue + $pasarRevenue + $manualLainnyaMonth;
-        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $fasilitasTransactions + $pasarTransactions + $manualLainnyaTrans;
-        
-        return [
-            'rental' => [
-                'revenue' => $rentalRevenue,
-                'transactions' => $rentalTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($rentalRevenue / $totalRevenue) * 100, 1) : 0
-            ],
-            'gas' => [
-                'revenue' => $gasRevenue,
-                'transactions' => $gasTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($gasRevenue / $totalRevenue) * 100, 1) : 0
-            ],
-            'mobil' => [
-                'revenue' => $mobilRevenue,
-                'transactions' => $mobilTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($mobilRevenue / $totalRevenue) * 100, 1) : 0
-            ],
-            'fasilitas' => [
-                'revenue' => $fasilitasRevenue,
-                'transactions' => $fasilitasTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($fasilitasRevenue / $totalRevenue) * 100, 1) : 0
-            ],
-            'pasar' => [
-                'revenue' => $pasarRevenue,
-                'transactions' => $pasarTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($pasarRevenue / $totalRevenue) * 100, 1) : 0
-            ],
-            'lainnya' => [
-                'revenue' => $manualLainnyaMonth,
-                'transactions' => $manualLainnyaTrans,
-                'percentage' => $totalRevenue > 0 ? round(($manualLainnyaMonth / $totalRevenue) * 100, 1) : 0
-            ],
-            'total' => [
-                'revenue' => $totalRevenue,
-                'transactions' => $totalTransactions
-            ],
-            'month' => $month,
-            'year' => $year
-        ];
+    {
+        return FinanceRecords::summary((int) $year, (int) $month);
     }
-
-
 
     public function logs(Request $request)
     {
@@ -798,11 +386,11 @@ class ReportController extends Controller
         // Cari (Deskripsi atau Nama Pengguna)
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->searchWhereLike(['description', 'action'], $search)
-                  ->orWhereHas('user', function($u) use ($search) {
-                      $u->searchWhereLike('name', $search);
-                  });
+                    ->orWhereHas('user', function ($u) use ($search) {
+                        $u->searchWhereLike('name', $search);
+                    });
             });
         }
 
@@ -828,7 +416,7 @@ class ReportController extends Controller
     public function clearLogs(Request $request)
     {
         // Hanya super_admin atau admin kabupaten yang boleh membersihkan log
-        if (!in_array(auth()->user()->role, ['super_admin'])) {
+        if (! in_array(auth()->user()->role, ['super_admin'])) {
             return back()->with('error', 'Akses ditolak. Anda tidak memiliki izin untuk membersihkan log.');
         }
 
@@ -837,7 +425,7 @@ class ReportController extends Controller
             'password' => 'required',
         ]);
 
-        if (!Hash::check($request->password, auth()->user()->password)) {
+        if (! Hash::check($request->password, auth()->user()->password)) {
             return back()->with('error', 'Password tidak valid. Pembersihan log dibatalkan.');
         }
 
@@ -855,178 +443,91 @@ class ReportController extends Controller
 
         return back()->with('success', 'Log aktivitas berhasil dibersihkan.');
     }
-    
+
     /**
      * Simpan transaksi manual baru
      */
     public function storeManualTransaction(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'category' => 'required|in:penyewaan,gas,mobil,fasilitas,lainnya',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'amount' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:1',
-            'payment_method' => 'required|in:tunai',
-            'transaction_date' => 'required|date',
-            'proof_image' => 'nullable|image|max:2048', // Maks 2MB
-        ], [
-            'category.required' => 'Kategori harus dipilih',
-            'category.in' => 'Kategori tidak valid',
-            'name.required' => 'Nama item harus diisi',
-            'amount.required' => 'Harga harus diisi',
-            'amount.numeric' => 'Harga harus berupa angka',
-            'amount.min' => 'Harga tidak boleh negatif',
-            'quantity.required' => 'Jumlah harus diisi',
-            'quantity.integer' => 'Jumlah harus berupa angka bulat',
-            'quantity.min' => 'Jumlah minimal 1',
-            'payment_method.required' => 'Metode pembayaran harus dipilih',
-            'payment_method.in' => 'Metode pembayaran tidak valid',
-            'transaction_date.required' => 'Tanggal transaksi harus diisi',
-            'transaction_date.date' => 'Format tanggal tidak valid',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        try {
-            $proofImagePath = null;
-            if ($request->hasFile('proof_image')) {
-                $path = $request->file('proof_image')->store('manual-reports', 'public');
-                $proofImagePath = $path;
-            }
-
-            $manualReport = ManualReport::create([
-                'category' => $request->category,
-                'name' => $request->name,
-                'description' => $request->description,
-                'amount' => $request->amount,
-                'quantity' => $request->quantity,
-                'payment_method' => $request->payment_method,
-                'transaction_date' => $request->transaction_date,
-                'created_by' => Auth::id(),
-                'region_id' => Auth::user()->region_id,
-                'proof_image' => $proofImagePath,
-            ]);
-
-            // Log Activity
-            \App\Models\ActivityLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'Create Manual Report',
-                'description' => "Membuat laporan manual: {$request->name} ({$request->category})",
-                'ip_address' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Laporan transaksi berhasil ditambahkan',
-                'data' => $manualReport
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+        return $this->saveManual($request);
     }
-    
-    /**
-     * Perbarui transaksi manual yang ada
-     */
+
     public function updateManualTransaction(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'category' => 'required|in:penyewaan,gas,mobil,fasilitas,lainnya',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'amount' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:1',
-            'payment_method' => 'required|in:tunai',
-            'transaction_date' => 'required|date',
-            'proof_image' => 'nullable|image|max:2048',
-        ]);
+        return $this->saveManual($request, (int) $id);
+    }
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+    private function saveManual(Request $request, ?int $id = null)
+    {
+        FinanceRecords::authorize(true);
+        if ($id) {
+            FinanceRecords::manual()->findOrFail($id);
         }
-
+        $data = $request->validate([
+            'category' => 'required|in:penyewaan,gas,mobil,fasilitas,lainnya', 'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:2000', 'amount' => 'required|numeric|min:0|max:9999999999.99',
+            'quantity' => 'required|integer|min:1|max:10000', 'payment_method' => 'required|in:tunai',
+            'transaction_date' => 'required|date|before_or_equal:today', 'proof_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+        unset($data['proof_image']);
+        $path = null;
         try {
-            $manualReport = ManualReport::findOrFail($id);
-            
-            $data = [
-                'category' => $request->category,
-                'name' => $request->name,
-                'description' => $request->description,
-                'amount' => $request->amount,
-                'quantity' => $request->quantity,
-                'payment_method' => $request->payment_method,
-                'transaction_date' => $request->transaction_date,
-            ];
-
             if ($request->hasFile('proof_image')) {
-                // Hapus gambar lama jika ada (from storage disk)
-                if ($manualReport->proof_image && \Storage::disk('public')->exists($manualReport->proof_image)) {
-                    \Storage::disk('public')->delete($manualReport->proof_image);
+                $path = $request->file('proof_image')->store('manual-reports', 'private');
+                if (! $path) {
+                    throw new \RuntimeException('Evidence storage failed');
                 }
-
-                $path = $request->file('proof_image')->store('manual-reports', 'public');
                 $data['proof_image'] = $path;
             }
+            $report = \DB::transaction(function () use ($request, $data, $id) {
+                $report = $id ? FinanceRecords::manual()->lockForUpdate()->findOrFail($id) : new ManualReport;
+                $before = $report->getAttributes();
+                $report->fill($data);
+                if (! $id) {
+                    $report->created_by = auth()->id();
+                }
+                $report->region_id = auth()->user()->region_id;
+                $report->save();
+                ActivityLog::create(['user_id' => auth()->id(), 'action' => $id ? 'Update Manual Report' : 'Create Manual Report',
+                    'description' => json_encode(['report_id' => $report->id, 'before' => $before, 'after' => $report->getAttributes()], JSON_UNESCAPED_UNICODE), 'ip_address' => $request->ip()]);
 
-            $manualReport->update($data);
+                return $report;
+            });
 
-            // Log Activity
-            \App\Models\ActivityLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'Update Manual Report',
-                'description' => "Memperbarui laporan manual: {$request->name}",
-                'ip_address' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Laporan transaksi berhasil diperbarui',
-                'data' => $manualReport
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => true, 'message' => 'Catatan pendapatan tersimpan.', 'data' => $report]);
+        } catch (\Throwable $e) {
+            if ($path) {
+                \Storage::disk('private')->delete($path);
+            }
+            throw $e;
         }
     }
-    
-    /**
-     * Hapus transaksi manual
-     */
+
     public function destroyManualTransaction($id)
     {
-        try {
-            $manualReport = ManualReport::findOrFail($id);
-            
-            if ($manualReport->proof_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($manualReport->proof_image)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($manualReport->proof_image);
-            }
-            
-            $manualReport->delete();
+        FinanceRecords::authorize(true);
+        \DB::transaction(function () use ($id) {
+            $report = FinanceRecords::manual()->lockForUpdate()->findOrFail($id);
+            ActivityLog::create(['user_id' => auth()->id(), 'action' => 'Cancel Manual Report',
+                'description' => json_encode(['report_id' => $report->id, 'before' => $report->getAttributes()], JSON_UNESCAPED_UNICODE), 'ip_address' => request()->ip()]);
+            $report->delete(); // Retain the record and evidence for audit; exclude it from active income.
+        });
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Laporan transaksi berhasil dihapus'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json(['success' => true, 'message' => 'Catatan dibatalkan. Riwayat dan bukti tetap disimpan untuk audit.']);
+    }
+
+    public function manualProof(int $id)
+    {
+        $report = FinanceRecords::manual()->withTrashed()->findOrFail($id);
+
+        return FinancialProof::response($report->proof_image);
+    }
+
+    public function paymentProof(int $id)
+    {
+        $entry = FinanceRecords::payments()->findOrFail($id);
+
+        return FinancialProof::response($entry->proof_path);
     }
 
     /**
@@ -1057,157 +558,38 @@ class ReportController extends Controller
      */
     public function incomeHistory(Request $request)
     {
+        FinanceRecords::authorize();
+        $request->validate(['filter' => 'nullable|in:minggu_ini,bulan_ini,tahun_ini,semua']);
         $filter = $request->input('filter', 'bulan_ini');
         $activeServices = $this->getActivatedServices();
-        
-        $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'alat'));
-        $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
-        $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
-        $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-
-        $queryStartDate = null;
+        $queryStartDate = match ($filter) {
+            'minggu_ini' => now()->startOfWeek(), 'bulan_ini' => now()->startOfMonth(), 'tahun_ini' => now()->startOfYear(), default => null
+        };
         $queryEndDate = now();
-
-        if ($filter == 'minggu_ini') {
-            $queryStartDate = now()->startOfWeek();
-        } elseif ($filter == 'bulan_ini') {
-            $queryStartDate = now()->startOfMonth();
-        } elseif ($filter == 'tahun_ini') {
-            $queryStartDate = now()->startOfYear();
-        }
-
-        $history = collect();
-
-        if ($isRentalActive) {
-            $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)
-                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-                ->with(['user', 'barang']);
-            
-            if ($queryStartDate) {
-                $rentalQuery->whereBetween('created_at', [$queryStartDate, $queryEndDate]);
-            }
-            
-            $rentals = $rentalQuery->get()->map(function($item) {
-                return (object)[
-                    'id' => $item->id,
-                    'type' => 'Penyewaan Alat',
-                    'item_name' => $item->barang->nama_barang ?? 'Barang',
-                    'date' => $item->created_at,
-                    'amount' => $item->total_amount,
-                    'payment_method' => $item->payment_method ?? 'Transfer',
-                    'status' => $item->status,
-                    'user_name' => $item->user->name ?? 'User',
-                    'user_photo' => $item->user->profile_photo_url ?? null,
-                    'location' => $item->delivery_address ?? $item->user->address ?? '-',
-                    'proof' => $item->payment_proof,
-                    'proof_route' => route('receipt.rental.view', $item->id),
-                    'proof_download' => route('receipt.rental.download', $item->id),
-                ];
-            });
-            $history = $history->merge($rentals);
-        }
-
-        if ($isGasActive) {
-            $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)
-                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-                ->with(['user', 'gas']);
-            
-            if ($queryStartDate) {
-                $gasQuery->whereBetween('created_at', [$queryStartDate, $queryEndDate]);
-            }
-            
-            $gas = $gasQuery->get()->map(function($item) {
-                return (object)[
-                    'id' => $item->id,
-                    'type' => 'Pembelian Gas',
-                    'item_name' => $item->gas->type ?? 'Gas',
-                    'date' => $item->created_at,
-                    'amount' => $item->price * $item->quantity,
-                    'payment_method' => $item->payment_method ?? 'Transfer',
-                    'status' => $item->status,
-                    'user_name' => $item->user->name ?? 'User',
-                    'user_photo' => $item->user->profile_photo_url ?? null,
-                    'location' => $item->address ?? $item->user->address ?? '-',
-                    'proof' => $item->proof_of_payment ?? $item->payment_proof,
-                    'proof_route' => route('receipt.gas.view', $item->id),
-                    'proof_download' => route('receipt.gas.download', $item->id),
-                ];
-            });
-            $history = $history->merge($gas);
-        }
-
-        if ($isMobilActive) {
-            $mobilQuery = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)
-                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-                ->with(['user', 'mobil']);
-            
-            if ($queryStartDate) {
-                $mobilQuery->whereBetween('created_at', [$queryStartDate, $queryEndDate]);
-            }
-            
-            $mobil = $mobilQuery->get()->map(function($item) {
-                return (object)[
-                    'id' => $item->id,
-                    'type' => 'Penyewaan Transportasi',
-                    'item_name' => $item->mobil->nama_mobil ?? 'Transportasi',
-                    'date' => $item->created_at,
-                    'amount' => $item->total_amount,
-                    'payment_method' => $item->payment_method ?? 'Transfer',
-                    'status' => $item->status,
-                    'user_name' => $item->user->name ?? 'User',
-                    'user_photo' => $item->user->profile_photo_url ?? null,
-                    'location' => $item->delivery_address ?? $item->user->address ?? '-',
-                    'proof' => $item->payment_proof,
-                    'proof_route' => route('receipt.mobil.view', $item->id),
-                    'proof_download' => route('receipt.mobil.download', $item->id),
-                ];
-            });
-            $history = $history->merge($mobil);
-        }
-
-        if ($isFasilitasActive) {
-            $fasilitasQuery = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)
-                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-                ->with(['user', 'fasilitas']);
-            
-            if ($queryStartDate) {
-                $fasilitasQuery->whereBetween('created_at', [$queryStartDate, $queryEndDate]);
-            }
-            
-            $fasilitas = $fasilitasQuery->get()->map(function($item) {
-                return (object)[
-                    'id' => $item->id,
-                    'type' => 'Fasilitas Umum',
-                    'item_name' => $item->fasilitas->nama_fasilitas ?? 'Fasilitas',
-                    'date' => $item->created_at,
-                    'amount' => $item->total_amount,
-                    'payment_method' => $item->payment_method ?? 'Transfer',
-                    'status' => $item->status,
-                    'user_name' => $item->user->name ?? 'User',
-                    'user_photo' => $item->user->profile_photo_url ?? null,
-                    'location' => $item->user->address ?? '-',
-                    'proof' => $item->payment_proof,
-                    'proof_route' => route('receipt.fasilitas.view', $item->id),
-                    'proof_download' => route('receipt.fasilitas.download', $item->id),
-                ];
-            });
-            $history = $history->merge($fasilitas);
-        }
+        $query = FinanceRecords::payments()->when($queryStartDate, fn ($q) => $q->whereBetween('created_at', [$queryStartDate, $queryEndDate]));
+        $names = ['rental' => 'Sewa Alat', 'gas' => 'Gas Daerah', 'mobil' => 'Sewa Transportasi', 'fasilitas' => 'Fasilitas Umum', 'pasar' => 'Arsip Pasar Daerah'];
+        $history = $query->get()->map(function ($entry) use ($names) {
+            return (object) ['id' => $entry->reference_id, 'type' => $names[$entry->reference_type],
+                'item_name' => 'Pembayaran pesanan #'.$entry->reference_id, 'date' => $entry->created_at, 'amount' => $entry->amount,
+                'payment_method' => $entry->source === 'gateway' ? 'Gateway' : 'Manual (tunai/transfer/e-wallet)',
+                'status' => 'verified', 'user_name' => '-', 'user_photo' => null, 'location' => '-', 'proof' => $entry->proof_path,
+                'proof_route' => $entry->proof_path ? route('admin.finance.proof', $entry->id) : null, 'proof_download' => null];
+        });
 
         // Laporan Manual
-        $manualQuery = $this->applyRegionFilter(ManualReport::query(), 'creator', true)
+        $manualQuery = FinanceRecords::manual()
             ->with('creator');
-        
+
         if ($queryStartDate) {
             $manualQuery->whereBetween('transaction_date', [$queryStartDate->format('Y-m-d'), $queryEndDate->format('Y-m-d')]);
         }
-        
-        $manual = $manualQuery->get()->map(function($item) {
-            return (object)[
+
+        $manual = $manualQuery->get()->map(function ($item) {
+            return (object) [
                 'id' => $item->id,
-                'type' => 'Laporan Manual (' . ($item->category_label ?? ucfirst($item->category)) . ')',
-                'item_name' => $item->name . ($item->description ? ' - '.$item->description : ''),
-                'date' => \Carbon\Carbon::parse($item->transaction_date),
+                'type' => 'Laporan Manual ('.($item->category_label ?? ucfirst($item->category)).')',
+                'item_name' => $item->name.($item->description ? ' - '.$item->description : ''),
+                'date' => Carbon::parse($item->transaction_date),
                 'amount' => $item->amount * $item->quantity,
                 'payment_method' => $item->payment_method ?? 'Tunai',
                 'status' => 'completed',
@@ -1215,11 +597,11 @@ class ReportController extends Controller
                 'user_photo' => $item->creator->profile_photo_url ?? null,
                 'location' => '-',
                 'proof' => $item->proof_image,
-                'proof_route' => $item->proof_image ? asset('storage/' . $item->proof_image) : null,
+                'proof_route' => $item->proof_image ? route('admin.laporan.manual.proof', $item->id) : null,
                 'proof_download' => null,
             ];
         });
-        
+
         $history = $history->merge($manual);
 
         // Sort by date descending

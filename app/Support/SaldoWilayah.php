@@ -27,7 +27,7 @@ class SaldoWilayah
     public static function tersedia(int $regionId): float
     {
         $masuk = WalletTransaction::where('region_id', $regionId)
-            ->where('source', 'gateway')
+            ->where('source', 'gateway')->whereIn('type', ['masuk', 'ditahan', 'dilepas'])
             ->where('status', 'verified')
             ->sum('amount');
 
@@ -46,7 +46,7 @@ class SaldoWilayah
     public static function tertahan(int $regionId): float
     {
         return (float) WalletTransaction::where('region_id', $regionId)
-            ->where('source', 'gateway')
+            ->where('source', 'gateway')->whereIn('type', ['masuk', 'ditahan', 'dilepas'])
             ->where('status', 'pending')
             ->sum('amount');
     }
@@ -68,7 +68,7 @@ class SaldoWilayah
     public static function totalPemasukan(int $regionId): float
     {
         return (float) WalletTransaction::where('region_id', $regionId)
-            ->where('source', 'gateway')
+            ->where('source', 'gateway')->whereIn('type', ['masuk', 'ditahan', 'dilepas'])
             ->where('status', 'verified')
             ->sum('amount');
     }
@@ -83,7 +83,7 @@ class SaldoWilayah
     public static function jumlahPesananSelesai(int $regionId): int
     {
         return WalletTransaction::where('region_id', $regionId)
-            ->where('source', 'gateway')
+            ->where('source', 'gateway')->whereIn('type', ['masuk', 'ditahan', 'dilepas'])
             ->where('status', 'verified')
             ->distinct()
             ->count(\Illuminate\Support\Facades\DB::raw('CONCAT(reference_type, "-", reference_id)'));
@@ -146,7 +146,7 @@ class SaldoWilayah
     public static function rincianPerWilayah()
     {
         return WalletTransaction::query()
-            ->where('source', 'gateway')
+            ->where('source', 'gateway')->whereIn('type', ['masuk', 'ditahan', 'dilepas'])
             ->where('status', 'verified')
             ->selectRaw('region_id, SUM(amount) as total_masuk')
             ->groupBy('region_id')

@@ -16,11 +16,11 @@ class WalletTransaction extends Model
         'status',
         'verified_by',
         'proof_path',
-        'notes',
+        'notes', 'refund_status', 'refund_proof', 'refunded_at', 'refunded_by',
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2',
+        'amount' => 'decimal:2', 'refunded_at' => 'datetime',
     ];
 
     public function region()
@@ -119,16 +119,30 @@ class WalletTransaction extends Model
      */
     public static function batalkanDanRefund(string $referenceType, int $referenceId, string $alasan): void
     {
-        [$userId, $regionId] = self::pemilikPesanan($referenceType, $referenceId);
-
-        \App\Support\DompetWarga::kembalikanUntukPesanan(
-            $referenceType, $referenceId, $userId, $regionId, $alasan
-        );
-
-        self::where('reference_type', $referenceType)
-            ->where('reference_id', $referenceId)
-            ->whereIn('status', ['pending', 'verified'])
-            ->update(['status' => 'rejected', 'notes' => $alasan]);
+        \DB::transaction(function () use ($referenceType, $referenceId, $alasan) {
+            $rows = self::where('reference_type', $referenceType)->where('reference_id', $referenceId)
+                ->orderBy('id')->lockForUpdate()->get();
+            $verified = $rows->where('status', 'verified');
+            if ($verified->isNotEmpty()) {
+                [$userId, $regionId] = self::pemilikPesanan($referenceType, $referenceId);
+                abort_unless($userId && $regionId && $verified->every(fn ($r) => (int)$r->region_id === (int)$regionId),
+                    409, 'Pemilik atau wilayah pembayaran perlu diperiksa sebelum pembatalan.');
+                if ($verified->contains('source', 'gateway')) {
+                    \App\Support\DompetWarga::kembalikanUntukPesanan($referenceType, $referenceId, $userId, $regionId, $alasan);
+                }
+                foreach ($verified->where('source', 'manual') as $entry) {
+                    $entry->refund_status = 'pending';
+                    $entry->save();
+                }
+                if ($verified->contains('source', 'manual')) {
+                    Notification::create(['user_id'=>$userId, 'type'=>'status_berubah', 'title'=>'Pengembalian Dana Menunggu Pengelola',
+                        'message'=>'Pesanan #'.$referenceId.' dibatalkan. Pembayaran manual yang sudah diterima perlu dikembalikan oleh pengelola desa. Pembatalan ini belum berarti uang sudah ditransfer.',
+                        'is_read'=>false]);
+                }
+            }
+            self::whereKey($rows->modelKeys())->whereIn('status', ['pending', 'verified'])
+                ->update(['status'=>'rejected', 'notes'=>$alasan]);
+        });
     }
 
     /**

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ManualReport extends Model
 {
-    use HasFactory;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected static function boot()
     {

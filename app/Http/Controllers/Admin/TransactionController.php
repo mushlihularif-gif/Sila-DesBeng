@@ -198,21 +198,25 @@ class TransactionController extends Controller
         $baseRental = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('payment_proof')->orWhereIn('status', $activeStatuses);
         });
+        if (!$canViewRental) $baseRental->whereRaw('1 = 0');
         $rentalCount = (clone $baseRental)->count();
         
         $baseGas = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('proof_of_payment')->orWhereIn('status', $activeStatuses);
         });
+        if (!$canViewGas) $baseGas->whereRaw('1 = 0');
         $gasCount = (clone $baseGas)->count();
 
         $baseMobil = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('payment_proof')->orWhereIn('status', $activeStatuses);
         });
+        if (!$canViewMobil) $baseMobil->whereRaw('1 = 0');
         $mobilCount = (clone $baseMobil)->count();
 
         $baseFasilitas = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->where(function($q) use ($activeStatuses) {
             $q->whereIn('status', $activeStatuses);
         });
+        if (!$canViewFasilitas) $baseFasilitas->whereRaw('1 = 0');
         $fasilitasCount = (clone $baseFasilitas)->count();
 
 
@@ -231,7 +235,7 @@ class TransactionController extends Controller
             $m = strtolower($method ?? '');
             if (str_contains($m, 'transfer') || str_contains($m, 'bank')) {
                 $transferCount++;
-            } elseif (str_contains($m, 'qris') || str_contains($m, 'gopay') || str_contains($m, 'ovo') || str_contains($m, 'dana') || str_contains($m, 'shopee') || str_contains($m, 'linkaja') || str_contains($m, 'digital')) {
+            } elseif (str_contains($m, 'ewallet') || str_contains($m, 'qris') || str_contains($m, 'gopay') || str_contains($m, 'ovo') || str_contains($m, 'dana') || str_contains($m, 'shopee') || str_contains($m, 'linkaja') || str_contains($m, 'digital')) {
                 $digitalCount++;
             } else {
                 // Asumsi jika bukan transfer dan bukan digital, maka Tunai / Cash
@@ -257,184 +261,52 @@ class TransactionController extends Controller
 
     public function verify(Request $request, $id, $type)
     {
-        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, 'verify');
-        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'verify');
-
-        $this->pastikanBolehMenangani($type, $id);
-
-        if ($type === 'rental') {
-            $model = RentalBooking::withTrashed()->findOrFail($id);
-        } elseif ($type === 'mobil') {
-            $model = MobilBooking::withTrashed()->findOrFail($id);
-        } elseif ($type === 'fasilitas') {
-            $model = FasilitasUmumBooking::withTrashed()->findOrFail($id);
-        } else {
-            $model = GasOrder::withTrashed()->findOrFail($id);
-        }
-
-        $oldStatus = $model->status;
-        $model->update(['status' => 'completed']);
-
-        // Tandai pembayaran MANUAL pesanan ini sudah diterima. Sebelumnya blok
-        // ini menyapu semua baris 'pending' termasuk yang gateway, sehingga
-        // menekan tombol selesai bisa "melunasi" pesanan yang kode bayarnya
-        // kedaluwarsa tanpa pernah dibayar. Baris gateway kini hanya berubah
-        // lewat webhook penyedia pembayaran.
-        \App\Models\WalletTransaction::tandaiPembayaranManualDiterima(
-            $type === 'gas' ? 'gas' : $type,
-            $model->id,
-            auth()->id(),
-        );
-
-        // Kembalikan stok barang jika status sebelumnya belum selesai
-        if ($type === 'rental' && $oldStatus !== 'completed') {
-            if (!$model->relationLoaded('barang')) $model->load('barang');
-            if ($model->barang) $model->barang->increaseStock($model->quantity);
-        } elseif ($type === 'mobil' && $oldStatus !== 'completed') {
-            if (!$model->relationLoaded('mobil')) $model->load('mobil');
-            if ($model->mobil) $model->mobil->update(['status' => 'tersedia']);
-        } elseif ($type === 'fasilitas' && $oldStatus !== 'completed') {
-            if (!$model->relationLoaded('fasilitas')) $model->load('fasilitas');
-            if ($model->fasilitas) {
-                $model->fasilitas->increment('stok');
-                $model->fasilitas->update(['status' => 'tersedia']);
-            }
-        }
-
-        // Trigger notifikasi: Pengajuan Selesai
-        $notification = new Notification();
-        $notification->title = "Transaksi Selesai";
-        $notification->message = "Transaksi Anda (#{$model->id}) untuk {$type} telah diselesaikan.";
-        $notification->type = 'pengajuan_selesai';
-        $notification->user_id = $model->user_id; // User yang transaksi
-        $notification->admin_id = auth()->id(); // Admin yang menyelesaikan
-        $notification->save();
-
-        // Audit log for payment verification
-        ActivityLog::create([
-            'action' => 'verify_payment',
-            'description' => "Admin verified payment for {$type} #{$id}",
-            'user_id' => auth()->id(),
-            'ip_address' => $request->ip(),
-        ]);
-
-        session()->flash('success', "Bukti pembayaran {$type} telah diverifikasi.");
-
-        return redirect()->back();
+        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int)$id, 'verify');
+        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int)$id, 'verify');
+        return $this->reviewPayment($request, $id, $type, false);
     }
 
     public function reject(Request $request, $id, $type)
     {
-        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, 'reject-payment');
-        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'reject-payment');
+        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int)$id, 'reject-payment');
+        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int)$id, 'reject-payment');
+        $request->validate(['reason'=>'required|string|max:500']);
+        return $this->reviewPayment($request, $id, $type, true);
+    }
 
+    private function reviewPayment(Request $request, int $id, string $type, bool $reject)
+    {
         $this->pastikanBolehMenangani($type, $id);
-
-        $request->validate([
-            'reason' => 'required|string|max:500',
-        ]);
-
-        if ($type === 'rental') {
-            $model = RentalBooking::withTrashed()->findOrFail($id);
-        } elseif ($type === 'mobil') {
-            $model = MobilBooking::withTrashed()->findOrFail($id);
-        } elseif ($type === 'fasilitas') {
-            $model = FasilitasUmumBooking::withTrashed()->findOrFail($id);
-        } else {
-            $model = GasOrder::withTrashed()->findOrFail($id);
-        }
-
-        $model->update([
-            'status' => 'rejected',
-            'rejection_reason' => $request->reason,
-        ]);
-
-        // Sekaligus mengembalikan uangnya ke dompet warga kalau pembayarannya
-        // memang sudah terverifikasi — lihat WalletTransaction::batalkanDanRefund().
-        \App\Models\WalletTransaction::batalkanDanRefund(
-            $type === 'gas' ? 'gas' : $type,
-            $model->id,
-            'Bukti pembayaran ditolak admin: ' . $request->reason
-        );
-
-        // Trigger notifikasi: Bukti Pembayaran Ditolak
-        $notification = new Notification();
-        $notification->title = "Bukti Pembayaran Ditolak";
-        $notification->message = "Bukti pembayaran untuk transaksi Anda (#{$model->id}) untuk {$type} telah ditolak oleh " . auth()->user()->name . ". Alasan: {$request->reason}";
-        $notification->type = 'status_berubah'; // atau buat type baru seperti 'bukti_ditolak'
-        $notification->user_id = $model->user_id; // User yang upload bukti
-        $notification->admin_id = auth()->id(); // Admin yang menolak
-        $notification->save();
-
-        // Audit log for payment rejection
-        ActivityLog::create([
-            'action' => 'reject_payment',
-            'description' => "Admin rejected payment for {$type} #{$id}. Reason: {$request->reason}",
-            'user_id' => auth()->id(),
-            'ip_address' => $request->ip(),
-        ]);
-
-        session()->flash('warning', "Bukti pembayaran {$type} ditolak: {$request->reason}");
-
-        return redirect()->back();
+        \DB::transaction(function () use ($request, $id, $type, $reject) {
+            [$model] = self::WILAYAH_PER_TIPE[$type];
+            $order = $model::lockForUpdate()->findOrFail($id);
+            abort_if(in_array($order->status,['completed','cancelled','rejected','returned'],true),409,'Pesanan sudah ditutup.');
+            $rows = \App\Models\WalletTransaction::where('reference_type',$type)->where('reference_id',$id)->lockForUpdate()->get();
+            abort_unless($rows->isNotEmpty() && abs((float)$rows->sum('amount')-(float)$order->total_amount)<0.005
+                && $rows->every(fn($r)=>(int)$r->region_id === (int)auth()->user()->region_id && $r->source==='manual' && in_array($r->status,['pending','verified'],true)),409,'Nominal, wilayah, atau catatan pembayaran perlu diperiksa.');
+            $paid=$rows->every(fn($r)=>$r->status==='verified');
+            if ($reject) {
+                abort_if($paid || $rows->contains('status','verified') || !$order->payment_proof,409,'Pembayaran ini tidak dapat dikembalikan untuk diperbaiki.');
+                $order->payment_proof=null;
+                $order->save();
+                \App\Models\WalletTransaction::whereKey($rows->modelKeys())->update(['proof_path'=>null,'notes'=>$request->reason]);
+            } else {
+                abort_unless($order->payment_method==='tunai' || $order->payment_proof,422,'Unggah bukti pembayaran terlebih dahulu.');
+                if ($paid) return;
+                \App\Models\WalletTransaction::tandaiPembayaranManualDiterima($type,$id,auth()->id());
+            }
+            ActivityLog::create(['user_id'=>auth()->id(),'action'=>$reject?'reject_payment':'verify_payment',
+                'description'=>$type.' #'.$id.($reject ? ': '.$request->reason : ': pembayaran diterima'),'ip_address'=>$request->ip()]);
+            Notification::create(['user_id'=>$order->user_id,'type'=>'status_berubah','title'=>$reject?'Perbaiki Bukti Pembayaran':'Pembayaran Diterima',
+                'message'=>$reject?'Bukti pembayaran perlu diperbaiki: '.$request->reason:'Pembayaran pesanan #'.$id.' diterima. Proses layanan dilanjutkan pengelola.']);
+        });
+        return back()->with('success',$reject?'Bukti dikembalikan untuk diperbaiki.':'Pembayaran dikonfirmasi. Status layanan tidak berubah.');
     }
 
     public function updateStatus(Request $request, $id, $type, $status)
     {
-        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, $status);
-        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, $status);
-
-        $this->pastikanBolehMenangani($type, $id);
-
-        // Validasi status yang diperbolehkan
-        $allowedStatuses = ['being_prepared', 'in_delivery', 'arrived', 'completed', 'approved'];
-        
-        if (!in_array($status, $allowedStatuses)) {
-             return redirect()->back()->with('error', 'Status tidak valid.');
-        }
-
-        if ($type === 'rental') {
-            $model = RentalBooking::withTrashed()->findOrFail($id); // Model RentalBooking
-        } elseif ($type === 'gas') {
-            $model = GasOrder::withTrashed()->findOrFail($id); // Model GasOrder
-        } elseif ($type === 'mobil') {
-            $model = MobilBooking::withTrashed()->findOrFail($id);
-        } elseif ($type === 'fasilitas') {
-            $model = FasilitasUmumBooking::withTrashed()->findOrFail($id);
-        } else {
-             return redirect()->back()->with('error', 'Tipe transaksi tidak valid.');
-        }
-
-        // Update status
-        $model->status = $status;
-        $model->save();
-
-        // Buat pesan notifikasi yang deskriptif
-        $title = "Status Pesanan Diperbarui";
-        $message = "Status pesanan {$type} Anda telah diperbarui menjadi: " . $this->getStatusLabel($status);
-
-        // Kustomisasi pesan berdasarkan status spesifik
-        if ($status === 'being_prepared') {
-            $message = "Pesanan Anda sedang dipersiapkan oleh petugas.";
-        } elseif ($status === 'in_delivery') {
-            $message = "Pesanan Anda sedang dalam pengiriman ke lokasi tujuan.";
-        } elseif ($status === 'arrived') {
-             $message = "Pesanan Anda telah tiba di lokasi pengiriman.";
-        } elseif ($status === 'completed') {
-             $title = "Pesanan Selesai";
-             $message = "Terima kasih! Pesanan Anda telah selesai.";
-        }
-
-        // Simpan notifikasi
-        $notification = new Notification();
-        $notification->title = $title;
-        $notification->message = $message;
-        $notification->type = 'status_berubah';
-        $notification->user_id = $model->user_id;
-        $notification->admin_id = auth()->id();
-        $notification->save();
-
-        return redirect()->back()->with('success', 'Status berhasil diperbarui menjadi ' . $this->getStatusLabel($status));
+        $request->merge(['status'=>$status]);
+        return app(RequestController::class)->updateStatus($request,$type,$id);
     }
 
     private function getStatusLabel($status)

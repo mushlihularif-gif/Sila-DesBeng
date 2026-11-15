@@ -56,7 +56,7 @@ class PenarikanSaldo extends Model
         'no_rekening',
         'nama_pemilik',
         'status',
-        'catatan_admin',
+        'catatan_admin', 'proof_path',
         'diproses_oleh',
         'diajukan_pada',
         'diselesaikan_pada',

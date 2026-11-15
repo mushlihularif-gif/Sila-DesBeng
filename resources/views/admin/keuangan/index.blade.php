@@ -4,6 +4,10 @@
 @section('page-title', 'Keuangan Wilayah')
 
 @section('content')
+@if(auth()->user()->role === 'admin_desa')
+<div class="container-xxl pt-4"><a href="{{ route('admin.refunds.index') }}" class="btn btn-outline-primary">Pengembalian Dana Warga</a></div>
+@endif
+
 @php
     // Peta nama -> berkas logo, memakai aset yang sama dengan form Pengaturan
     // Pembayaran supaya bank yang dipilih di sana tampil konsisten di sini.

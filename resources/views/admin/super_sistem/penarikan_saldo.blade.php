@@ -263,6 +263,7 @@
                                     'dibatalkan' => 'secondary',
                                     default => 'secondary',
                                 } }}">{{ $p->labelStatus() }}</span>
+                                @if($p->proof_path)<a href="{{ route('admin.keuangan.proof', $p->id) }}" target="_blank" rel="noopener">Bukti pencairan</a>@endif
                                 @if($p->sudahSelesai() && $p->catatan_admin)
                                     <div><small class="text-muted">{{ $p->catatan_admin }}</small></div>
                                 @endif
@@ -278,8 +279,8 @@
 
                                     <div class="modal fade" id="acc-{{ $p->id }}" tabindex="-1">
                                         <div class="modal-dialog">
-                                            <form method="POST" action="{{ route('admin.sistem-platform.penarikan.approve', $p) }}">
-                                                @csrf
+                                            <form method="POST" action="{{ route('admin.sistem-platform.penarikan.approve', $p) }}" enctype="multipart/form-data">
+                                                @csrf<div class="p-3"><label>Bukti transfer pencairan (JPG, PNG, WebP; maksimal 5 MB)<input class="form-control" type="file" name="proof" accept="image/jpeg,image/png,image/webp" required></label></div>
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h6 class="modal-title">Setujui Penarikan</h6>
