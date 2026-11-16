@@ -108,12 +108,12 @@ class MediaController extends Controller
         if ($kyc) {
             abort_unless($kyc->status === 'pending' && $kyc->user, 404);
             $media->authorize($kyc->user);
-            return $media->render($kyc->$column, $type);
+            return $media->renderIdentity($kyc, $type);
         }
         $column = $type . '_photo_path';
         $owner = \App\Models\User::whereIn($column, $paths)->firstOrFail();
         abort_unless($owner->verification_status === 'pending', 404);
         $media->authorize($owner, true);
-        return $media->render($owner->$column, $type);
+        return $media->renderIdentity($owner, $type);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Region;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class IdentityMediaService
@@ -27,14 +28,26 @@ class IdentityMediaService
         abort_unless(in_array($owner->region_id, $regions), 403);
     }
 
-    public function render(string $path, string $type)
+    /** Call only after the controller authorizes this database record. */
+    public function renderIdentity(Model $record, string $type)
+    {
+        $column = IdentityDocumentContext::pathColumn($record, $type);
+        $versionColumn = IdentityDocumentContext::versionColumn($record, $type);
+        $path = $record->$column;
+        abort_unless($path, 404);
+        $version = (int) ($record->$versionColumn ?? 1);
+        $aad = $version === 2 ? IdentityDocumentContext::aad($record, $type, $path) : null;
+        return $this->render($path, $type, $aad, $version);
+    }
+
+    public function render(string $path, string $type, ?string $additionalData = null, int $expectedVersion = 1)
     {
         abort_unless(in_array($type, ['ktp', 'face'], true), 404);
         abort_if(str_contains($path, '..') || str_contains($path, "\0") || str_contains($path, '\\'), 404);
         $disk = Storage::disk('private');
         abort_unless($disk->exists($path), 404);
         try {
-            $bytes = FileEncryptionService::decrypt($disk->get($path));
+            $bytes = FileEncryptionService::decrypt($disk->get($path), $additionalData, $expectedVersion);
             if (!$bytes) {
                 throw new \RuntimeException('Invalid encrypted image');
             }

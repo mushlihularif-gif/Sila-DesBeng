@@ -5,7 +5,6 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class VerificationController extends Controller
 {
@@ -33,22 +32,10 @@ class VerificationController extends Controller
         $ktpFile = $request->file('ktp_photo');
         $faceFile = $request->file('face_photo');
 
-        // Enkripsi isi file
-        $ktpEncrypted = \App\Services\FileEncryptionService::encrypt($ktpFile->get());
-        $faceEncrypted = \App\Services\FileEncryptionService::encrypt($faceFile->get());
-
-        // Simpan file terenkripsi ke disk private
-        $ktpPath = 'verifications/ktp/ktp_' . uniqid() . '.enc';
-        $facePath = 'verifications/face/face_' . uniqid() . '.enc';
-        
-        Storage::disk('private')->put($ktpPath, $ktpEncrypted);
-        Storage::disk('private')->put($facePath, $faceEncrypted);
-
-        $user->ktp_photo_path = $ktpPath;
-        $user->face_photo_path = $facePath;
-        $user->ktp_rejection_reason = null; // reset alasan
-        $user->verification_status = 'pending';
-        $user->save();
+        app(\App\Services\IdentityDocumentStorage::class)->save($user, [
+            'ktp' => $ktpFile->get(),
+            'face' => $faceFile->get(),
+        ], ['ktp_rejection_reason' => null, 'verification_status' => 'pending']);
 
         return redirect()->back()->with('success', 'Data verifikasi berhasil dikirim. Harap tunggu persetujuan Admin.');
     }

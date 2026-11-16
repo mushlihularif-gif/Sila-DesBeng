@@ -86,7 +86,7 @@ class UserVerificationController extends Controller
         abort_unless($user->verification_status === 'pending', 404);
         $path = $type === 'ktp' ? $user->ktp_photo_path : $user->face_photo_path;
         abort_unless($path, 404);
-        return app(\App\Services\IdentityMediaService::class)->render($path, $type);
+        return app(\App\Services\IdentityMediaService::class)->renderIdentity($user, $type);
     }
 
     public function approve($id)

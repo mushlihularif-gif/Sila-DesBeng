@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\KycVerification;
 use App\Services\OcrService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
 
 class KycController extends Controller
 {
@@ -30,18 +28,10 @@ class KycController extends Controller
         $ktpFile = $request->file('ktp_image');
         $fileContent = $ktpFile->get();
 
-        // Enkripsi isi file menggunakan ChaCha20
-        $encryptedContent = \App\Services\FileEncryptionService::encrypt($fileContent);
-
-        // Simpan file terenkripsi ke disk private
-        $fileName = 'ktp_' . uniqid() . '.enc';
-        $path = 'kyc/ktp/' . $fileName;
-        Storage::disk('private')->put($path, $encryptedContent);
-
         // Proses OCR menggunakan file temporer asli
         $ocrData = $this->ocrService->extractKtpData($ktpFile->getRealPath());
 
-        // Validasi: pastikan gambar yang diunggah benar-benar KTP dengan mengecek apakah NIK berhasil dideteksi
+        // Pemeriksaan kelengkapan hasil OCR, bukan pembuktian keaslian KTP.
         if (empty($ocrData) || empty($ocrData['nik'])) {
             return response()->json([
                 'success' => false,
@@ -49,21 +39,7 @@ class KycController extends Controller
             ], 400);
         }
 
-        $oldKycs = KycVerification::where('user_id', $user->id)->whereIn('status', ['draft', 'pending', 'rejected'])->get();
-        foreach ($oldKycs as $oldKyc) {
-            if ($oldKyc->ktp_image_path && Storage::disk('private')->exists($oldKyc->ktp_image_path)) {
-                Storage::disk('private')->delete($oldKyc->ktp_image_path);
-            }
-            if ($oldKyc->face_image_path && Storage::disk('private')->exists($oldKyc->face_image_path)) {
-                Storage::disk('private')->delete($oldKyc->face_image_path);
-            }
-            \App\Models\AdminNotification::where('type', 'kyc')->where('reference_id', $oldKyc->id)->delete();
-            $oldKyc->delete();
-        }
-
-        $kyc = KycVerification::create([
-            'user_id' => $user->id,
-            'ktp_image_path' => $path,
+        $kyc = app(\App\Services\IdentityDocumentStorage::class)->createDraft($user, [
             'nik_from_ocr' => $request->nik ?? $ocrData['nik'] ?? null,
             'name_from_ocr' => $request->name ?? $ocrData['name'] ?? null,
             'address_from_ocr' => $request->address ?? $ocrData['address'] ?? null,
@@ -72,8 +48,7 @@ class KycController extends Controller
             'kecamatan_from_ocr' => $request->kecamatan ?? $ocrData['kecamatan'] ?? null,
             'desa_from_ocr' => $request->desa ?? $ocrData['desa'] ?? null,
             'gender_from_ocr' => $ocrData['gender'] ?? null,
-            'status' => 'draft' 
-        ]);
+        ], $fileContent);
 
         return response()->json([
             'success' => true,
@@ -103,17 +78,12 @@ class KycController extends Controller
             'status' => 'pending',
         ];
         
+        $documents = [];
         // Handle face image if uploaded
         if ($request->hasFile('face_image')) {
             $faceFile = $request->file('face_image');
             $fileContent = $faceFile->get();
-            $encryptedContent = \App\Services\FileEncryptionService::encrypt($fileContent);
-            
-            $fileName = 'face_' . uniqid() . '.enc';
-            $path = 'kyc/face/' . $fileName;
-            Storage::disk('private')->put($path, $encryptedContent);
-            
-            $updateData['face_image_path'] = $path;
+            $documents['face'] = $fileContent;
         }
 
         if ($request->has('nik')) $updateData['nik_from_ocr'] = $request->nik;
@@ -124,7 +94,7 @@ class KycController extends Controller
         if ($request->has('kecamatan')) $updateData['kecamatan_from_ocr'] = $request->kecamatan;
         if ($request->has('desa')) $updateData['desa_from_ocr'] = $request->desa;
 
-        $kyc->update($updateData);
+        app(\App\Services\IdentityDocumentStorage::class)->save($kyc, $documents, $updateData);
 
         $user = $request->user();
         $user->update(['verification_status' => 'pending']);

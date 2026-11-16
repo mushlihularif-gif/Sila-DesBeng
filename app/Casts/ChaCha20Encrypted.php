@@ -9,16 +9,12 @@ use Illuminate\Support\Facades\Log;
 /**
  * ChaCha20-Poly1305 Encrypted Cast (Defense in Depth — Database Level Encryption)
  *
- * Mengenkripsi data sensitif pada level database menggunakan algoritma
- * ChaCha20-Poly1305 melalui library Libsodium (built-in PHP 7.2+).
+ * Mengenkripsi data sensitif melalui Libsodium atau OpenSSL.
+ * - Authenticated Encryption (AEAD): kerahasiaan dan pemeriksaan integritas
+ * - Nonce acak per operasi; bukan mekanisme pencegahan replay
+ * - Dokumen versi 2 memakai AAD; cast kolom database tetap kompatibel versi 1
  *
- * Keunggulan dibandingkan AES-256-CBC bawaan Laravel:
- * - Performa lebih tinggi pada perangkat tanpa instruksi hardware AES-NI
- * - Authenticated Encryption (AEAD): menjamin integritas + kerahasiaan data
- * - Nonce unik per operasi: mencegah serangan replay
- *
- * Format penyimpanan di database:
- * Base64( nonce_12_bytes + ciphertext + auth_tag_16_bytes )
+ * Format: prefix versi + Base64(nonce_12_bytes + ciphertext + auth_tag_16_bytes).
  *
  * @see https://www.php.net/manual/en/function.sodium-crypto-aead-chacha20poly1305-ietf-encrypt.php
  */
@@ -29,6 +25,18 @@ class ChaCha20Encrypted implements CastsAttributes
      * Mencegah double-encryption pada data yang sudah diproses.
      */
     private const ENCRYPTED_PREFIX = '$chacha20$';
+
+    public function __construct(private readonly ?string $additionalData = null)
+    {
+        if ($additionalData === '') {
+            throw new \InvalidArgumentException('Konteks dokumen tidak boleh kosong.');
+        }
+    }
+
+    private function prefix(): string
+    {
+        return $this->additionalData === null ? self::ENCRYPTED_PREFIX : '$chacha20:v2$';
+    }
 
     /**
      * Decrypt: Membaca data terenkripsi dari database dan mengembalikan plaintext.
@@ -46,7 +54,10 @@ class ChaCha20Encrypted implements CastsAttributes
         }
 
         // Jika data tidak memiliki prefix enkripsi, kembalikan apa adanya (data lama/plaintext)
-        if (!str_starts_with($value, self::ENCRYPTED_PREFIX)) {
+        if (!str_starts_with($value, $this->prefix())) {
+            if ($this->additionalData !== null || str_starts_with($value, '$chacha20:')) {
+                throw new \RuntimeException('Versi enkripsi dokumen tidak sesuai.');
+            }
             return $value;
         }
 
@@ -54,16 +65,16 @@ class ChaCha20Encrypted implements CastsAttributes
         if (function_exists('sodium_crypto_aead_chacha20poly1305_ietf_decrypt')) {
             try {
                 $encryptionKey = $this->deriveKey();
-                $encoded = substr($value, strlen(self::ENCRYPTED_PREFIX));
+                $encoded = substr($value, strlen($this->prefix()));
                 $decoded = base64_decode($encoded, true);
 
-                if ($decoded !== false && strlen($decoded) >= 12) {
+                if ($decoded !== false && strlen($decoded) >= 28) {
                     $nonce = substr($decoded, 0, 12);
                     $ciphertext = substr($decoded, 12);
 
                     $plaintext = sodium_crypto_aead_chacha20poly1305_ietf_decrypt(
                         $ciphertext,
-                        '',
+                        $this->additionalData ?? '',
                         $nonce,
                         $encryptionKey
                     );
@@ -85,7 +96,7 @@ class ChaCha20Encrypted implements CastsAttributes
             && in_array('chacha20-poly1305', openssl_get_cipher_methods(), true)) {
             try {
                 $encryptionKey = $this->deriveKey();
-                $encoded = substr($value, strlen(self::ENCRYPTED_PREFIX));
+                $encoded = substr($value, strlen($this->prefix()));
                 $decoded = base64_decode($encoded, true);
 
                 if ($decoded !== false && strlen($decoded) >= 28) {
@@ -94,7 +105,7 @@ class ChaCha20Encrypted implements CastsAttributes
                     $cipher = substr($cipherWithTag, 0, -16);
                     $tag = substr($cipherWithTag, -16);
 
-                    $plain = openssl_decrypt($cipher, 'chacha20-poly1305', $encryptionKey, OPENSSL_RAW_DATA, $nonce, $tag);
+                    $plain = openssl_decrypt($cipher, 'chacha20-poly1305', $encryptionKey, OPENSSL_RAW_DATA, $nonce, $tag, $this->additionalData ?? '');
                     if ($plain !== false) {
                         return $plain;
                     }
@@ -125,7 +136,7 @@ class ChaCha20Encrypted implements CastsAttributes
         }
 
         // Cegah double-encryption
-        if (str_starts_with($value, self::ENCRYPTED_PREFIX)) {
+        if ($this->additionalData === null && str_starts_with($value, self::ENCRYPTED_PREFIX)) {
             return $value;
         }
 
@@ -137,14 +148,14 @@ class ChaCha20Encrypted implements CastsAttributes
 
                 $ciphertext = sodium_crypto_aead_chacha20poly1305_ietf_encrypt(
                     $value,
-                    '',
+                    $this->additionalData ?? '',
                     $nonce,
                     $encryptionKey
                 );
 
                 sodium_memzero($encryptionKey);
 
-                return self::ENCRYPTED_PREFIX . base64_encode($nonce . $ciphertext);
+                return $this->prefix() . base64_encode($nonce . $ciphertext);
             } catch (\Throwable $e) {
                 // Lanjut ke fallback OpenSSL
             }
@@ -165,11 +176,13 @@ class ChaCha20Encrypted implements CastsAttributes
                     $encryptionKey,
                     OPENSSL_RAW_DATA,
                     $nonce,
-                    $tag
+                    $tag,
+                    $this->additionalData ?? '',
+                    16
                 );
 
                 if ($ciphertext !== false) {
-                    return self::ENCRYPTED_PREFIX . base64_encode($nonce . $ciphertext . $tag);
+                    return $this->prefix() . base64_encode($nonce . $ciphertext . $tag);
                 }
             } catch (\Throwable $e) {
                 Log::error("ChaCha20 OpenSSL Encrypt Error [{$key}]: " . $e->getMessage());

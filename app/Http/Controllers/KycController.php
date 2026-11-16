@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\KycVerification;
 use App\Services\OcrService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class KycController extends Controller
@@ -66,20 +65,12 @@ class KycController extends Controller
         $image = $manager->read($ktpFile->getRealPath());
 
         // Encode image ke jpg
-        $watermarkedKtp = (string) $image->encodeByExtension('jpg', 80);
-
-        // Enkripsi isi file yang sudah di-watermark menggunakan ChaCha20
-        $encryptedContent = \App\Services\FileEncryptionService::encrypt($watermarkedKtp);
-
-        // Simpan file terenkripsi ke disk private
-        $fileName = 'ktp_' . uniqid() . '.enc';
-        $path = 'kyc/ktp/' . $fileName;
-        Storage::disk('private')->put($path, $encryptedContent);
+        $ktpJpeg = (string) $image->encodeByExtension('jpg', 80);
 
         // Proses OCR menggunakan file temporer asli (belum terenkripsi)
         $ocrData = $this->ocrService->extractKtpData($ktpFile->getRealPath());
 
-        // Validasi: pastikan gambar yang diunggah benar-benar KTP dengan mengecek apakah NIK berhasil dideteksi
+        // Pemeriksaan kelengkapan hasil OCR, bukan pembuktian keaslian KTP.
         if (empty($ocrData) || empty($ocrData['nik'])) {
             return response()->json([
                 'success' => false,
@@ -87,23 +78,7 @@ class KycController extends Controller
             ], 400);
         }
 
-        // Hapus verifikasi yang draft/pending/rejected sebelumnya beserta file fisik & notifikasinya
-        $oldKycs = KycVerification::where('user_id', $user->id)->whereIn('status', ['draft', 'pending', 'rejected'])->get();
-        foreach ($oldKycs as $oldKyc) {
-            if ($oldKyc->ktp_image_path && Storage::disk('private')->exists($oldKyc->ktp_image_path)) {
-                Storage::disk('private')->delete($oldKyc->ktp_image_path);
-            }
-            if ($oldKyc->face_image_path && Storage::disk('private')->exists($oldKyc->face_image_path)) {
-                Storage::disk('private')->delete($oldKyc->face_image_path);
-            }
-            \App\Models\AdminNotification::where('type', 'kyc')->where('reference_id', $oldKyc->id)->delete();
-            $oldKyc->delete();
-        }
-
-        // Buat record KYC baru dengan status draft (belum selesai verifikasi scan wajah)
-        $kyc = KycVerification::create([
-            'user_id' => $user->id,
-            'ktp_image_path' => $path,
+        $kyc = app(\App\Services\IdentityDocumentStorage::class)->createDraft($user, [
             'nik_from_ocr' => $ocrData['nik'] ?? null,
             'name_from_ocr' => $ocrData['name'] ?? null,
             'address_from_ocr' => $ocrData['address'] ?? null,
@@ -112,8 +87,7 @@ class KycController extends Controller
             'kecamatan_from_ocr' => $ocrData['kecamatan'] ?? null,
             'desa_from_ocr' => $ocrData['desa'] ?? null,
             'gender_from_ocr' => $ocrData['gender'] ?? null,
-            'status' => 'draft' 
-        ]);
+        ], $ktpJpeg);
 
         return response()->json([
             'success' => true,
@@ -143,7 +117,7 @@ class KycController extends Controller
                 ->firstOrFail();
 
             // Process base64 face_image
-            $imagePath = null;
+            $documents = [];
             if ($request->face_image) {
                 $image_parts = explode(";base64,", $request->face_image);
                 if (count($image_parts) == 2) {
@@ -153,22 +127,14 @@ class KycController extends Controller
                     $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
                     $image = $manager->read($image_base64);
                     
-                    $watermarkedFace = (string) $image->encodeByExtension('jpg', 80);
+                    $faceJpeg = (string) $image->encodeByExtension('jpg', 80);
 
-                    // Enkripsi isi gambar menggunakan ChaCha20
-                    $encryptedFace = \App\Services\FileEncryptionService::encrypt($watermarkedFace);
-                    
-                    $fileName = 'face_' . uniqid() . '.enc';
-                    $imagePath = 'kyc/face/' . $fileName;
-                    
-                    // Simpan ke disk private
-                    Storage::disk('private')->put($imagePath, $encryptedFace);
+                    $documents['face'] = $faceJpeg;
                 }
             }
 
             $updateData = [
                 'face_scan_data' => $request->face_data ?? [],
-                'face_image_path' => $imagePath,
                 'status' => 'pending', // Status resmi diajukan setelah scan wajah lengkap
             ];
             
@@ -195,7 +161,7 @@ class KycController extends Controller
                 $updateData['kecamatan_from_ocr'] = $request->edited_kecamatan;
             }
 
-            $kyc->update($updateData);
+            app(\App\Services\IdentityDocumentStorage::class)->save($kyc, $documents, $updateData);
 
             $user = Auth::user();
             $user->update(['verification_status' => 'pending']);
@@ -218,10 +184,10 @@ class KycController extends Controller
                 'message' => 'Data verifikasi berhasil dikirim dan menunggu persetujuan Admin.'
             ]);
         } catch (\Throwable $e) {
-            \Log::error('KYC Submit Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            \Log::error('KYC Submit Error', ['exception' => get_class($e)]);
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memproses data verifikasi: ' . $e->getMessage()
+                'message' => 'Gagal memproses data verifikasi. Silakan coba kembali.'
             ], 500);
         }
     }
