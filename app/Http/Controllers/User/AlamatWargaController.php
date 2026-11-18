@@ -123,8 +123,8 @@ class AlamatWargaController extends Controller
             'rw'            => 'nullable|string|max:10',
             'kode_pos'      => 'nullable|string|max:10',
             'patokan'       => 'nullable|string|max:255',
-            'latitude'      => 'nullable|numeric|between:-90,90',
-            'longitude'     => 'nullable|numeric|between:-180,180',
+            'latitude'      => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude'     => 'nullable|required_with:latitude|numeric|between:-180,180',
         ], [
             'nama_penerima.required' => 'Nama penerima wajib diisi.',
             'no_telepon.required'    => 'Nomor telepon wajib diisi.',

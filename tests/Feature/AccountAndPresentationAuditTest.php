@@ -78,6 +78,38 @@ class AccountAndPresentationAuditTest extends TestCase
         $this->assertStringNotContainsString('google.com/maps',$html);
     }
 
+    public function test_citizen_rt_and_rw_navigation_links_resolve_and_allow_the_current_role(): void
+    {
+        view()->share('errors', new \Illuminate\Support\ViewErrorBag());
+        foreach ([1, 2, 3] as $id) {
+            $account = $this->user($id);
+            $this->actingAs($account);
+            $html = view('users.profile', ['isSettings' => false, 'user' => $account,
+                'kecamatan_name' => null, 'desa_name' => 'Desa A', 'rw_name' => '02', 'rt_name' => '01',
+                'kecamatans' => collect(), 'currentDesaId' => 1])->render();
+            $dom = new \DOMDocument();
+            @$dom->loadHTML($html);
+            $xpath = new \DOMXPath($dom);
+            $checked = 0;
+            foreach ($xpath->query('//header//a[@href] | //nav//a[@href]') as $link) {
+                $url = $link->getAttribute('href');
+                if (!str_starts_with($url, url('/')) || $link->hasAttribute('onclick')) continue;
+                $request = Request::create($url, 'GET', server: ['HTTP_ACCEPT' => 'application/json']);
+                $route = \Illuminate\Support\Facades\Route::getRoutes()->match($request);
+                $request->setRouteResolver(fn () => $route);
+                foreach ($route->gatherMiddleware() as $middleware) {
+                    [$alias, $arguments] = array_pad(explode(':', $middleware, 2), 2, '');
+                    if (!in_array($alias, ['auth', 'role'], true)) continue;
+                    $args = $arguments === '' ? [] : explode(',', $arguments);
+                    $response = app(\App\Http\Middleware\CheckRole::class)->handle($request, fn () => response('ok'), ...$args);
+                    $this->assertSame(200, $response->getStatusCode(), $account->role.' sees forbidden link '.$url);
+                }
+                $checked++;
+            }
+            $this->assertGreaterThan(3, $checked, $account->role);
+        }
+    }
+
     public function test_chat_metadata_and_provider_terms_use_readable_values(): void
     {
         foreach (['{"name":"Sound System","id":12}'=>'Sound System','{bad json'=>'Produk layanan','Sound System'=>'Sound System'] as $raw=>$expected) {

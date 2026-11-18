@@ -88,11 +88,11 @@ class NotificationController extends Controller
             if (request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+                    'message' => 'Notifikasi belum berhasil dihapus. Silakan coba kembali.'
                 ], 500);
             }
 
-            return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Notifikasi belum berhasil dihapus. Silakan coba kembali.');
         }
     }
 }

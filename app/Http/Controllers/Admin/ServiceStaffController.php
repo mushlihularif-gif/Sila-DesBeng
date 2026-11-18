@@ -28,7 +28,7 @@ class ServiceStaffController extends Controller
     public function index()
     {
         $manager = $this->manager();
-        $staff = User::where('role', 'staff')->where('region_id', $manager->region_id)->with('staffPermissions')->orderBy('name')->get();
+        $staff = User::where('role', 'staff')->where('region_id', $manager->region_id)->with('staffPermissions')->get()->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
 
         return view('admin.staff.index', ['staff' => $staff, 'units' => StaffAccess::UNITS]);
     }

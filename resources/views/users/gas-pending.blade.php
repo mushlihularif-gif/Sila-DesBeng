@@ -30,7 +30,7 @@
     <div class="flex-1 bg-white p-6 rounded-t-3xl -mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] relative z-10 flex flex-col items-center">
         <!-- Optional: Banner or Illustration can go here -->
         <div class="text-center mt-8">
-            <img src="{{ asset('assets/img/illustrations/undraw_pending.svg') }}" alt="Pending" class="w-48 h-auto mx-auto mb-6 opacity-70" onerror="this.style.display='none'">
+            <img src="{{ asset('User/img/elemen/verifff.png') }}" alt="Pending" class="w-48 h-auto mx-auto mb-6 opacity-70" onerror="this.style.display='none'">
             <h2 class="text-lg font-bold text-gray-800 mb-2">Selesaikan Pembayaran Anda</h2>
             <p class="text-gray-500 max-w-sm mx-auto">Pesanan Anda telah berhasil dibuat namun belum dibayar. Segera lakukan pembayaran agar pesanan dapat diproses oleh pihak pengelola.</p>
         </div>

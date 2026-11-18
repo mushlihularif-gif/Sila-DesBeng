@@ -98,22 +98,7 @@ class GasSalesUserController extends Controller
         // dari produknya. Akibatnya kotak "Alamat Pusat Layanan" kosong meski
         // petugas sudah mengisi lokasi beserta titik petanya, dan tombol
         // "Lihat lokasi" jatuh ke tautan Google Maps yang dipaku di view.
-        $lokasiLayanan = $item->lokasi
-            ? \App\Models\LokasiLayanan::where('region_id', $item->region_id)
-                ->where('nama', $item->lokasi)
-                ->first()
-            : null;
-
-        // Produk lama bisa punya lokasi yang belum terdaftar di daftar wilayah;
-        // koordinat pada barisnya sendiri tetap dipakai supaya petanya muncul.
-        if (! $lokasiLayanan && $item->lokasi) {
-            $lokasiLayanan = new \App\Models\LokasiLayanan([
-                'nama'      => $item->lokasi,
-                'latitude'  => $item->latitude,
-                'longitude' => $item->longitude,
-            ]);
-        }
-
+        $lokasiLayanan = \App\Support\ServiceLocation::forItem($item);
 
         // Buku alamat warga, supaya alamat pengiriman tidak perlu diketik ulang
         // di setiap unit layanan.

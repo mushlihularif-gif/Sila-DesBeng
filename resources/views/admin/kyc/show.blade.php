@@ -100,6 +100,12 @@
         </div>
     </div>
 
+    @if($errors->any())
+        <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
+    @endif
+    @if(session('warning'))
+        <div class="alert alert-warning" role="alert">{{ session('warning') }}</div>
+    @endif
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
             <div class="d-flex align-items-center">
@@ -124,8 +130,8 @@
         <div class="alert alert-success border-success-subtle rounded-3 mb-4 d-flex align-items-center gap-3 py-3 px-4">
             <i class="bx bx-shield-check fs-2 text-success flex-shrink-0"></i>
             <div>
-                <div class="fw-bold text-dark">Verifikasi Selesai dan Berkas Fisik Dimusnahkan (Kepatuhan Privasi UU PDP)</div>
-                <div class="small text-muted">Pengajuan ini telah disetujui resmi. Demi melindungi privasi warga dan mencegah ancaman kebocoran data (zero footprint), seluruh file fisik foto e-KTP dan foto wajah/biometrik telah dihapus permanen secara otomatis dari server.</div>
+                <div class="fw-bold text-dark">Verifikasi Selesai</div>
+                <div class="small text-muted">{{ ($kyc->ktp_image_path || $kyc->face_image_path) ? 'Keputusan tersimpan. Pembersihan berkas belum selesai dan perlu ditindaklanjuti pengelola.' : 'Keputusan tersimpan. Berkas KTP dan wajah telah dihapus dari penyimpanan aplikasi.' }}</div>
             </div>
         </div>
     @elseif(!$kyc->face_image_path)
@@ -133,7 +139,7 @@
             <i class="bx bx-info-circle fs-2 text-warning flex-shrink-0"></i>
             <div>
                 <div class="fw-bold text-dark">Informasi Peninjauan: Pengajuan Berkas KTP</div>
-                <div class="small text-muted">Warga mengajukan verifikasi tanpa melampirkan foto scan wajah/selfie (misalnya kendala perangkat kamera atau jaringan). Anda tetap dapat meninjau keabsahan berkas e-KTP dan data kependudukan secara langsung, kemudian memberikan persetujuan atau meminta perbaikan berkas.</div>
+                <div class="small text-muted">Foto wajah belum tersedia. Minta warga melengkapi pengajuan sebelum memberikan persetujuan.</div>
             </div>
         </div>
     @endif
@@ -155,7 +161,7 @@
                     @endif
                 </div>
                 <div class="card-body pt-4">
-                    @if($kyc->ktp_image_path)
+                    @if($kyc->status === 'pending' && $kyc->ktp_image_path)
                         <div class="ktp-preview-container mb-3">
                             <img src="{{ route('media.secure.ktp', basename($kyc->ktp_image_path)) }}" class="ktp-preview-img" alt="KTP {{ $kyc->user->name ?? 'Warga' }}">
                         </div>
@@ -172,8 +178,8 @@
                             <div class="mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center bg-label-success" style="width: 60px; height: 60px;">
                                 <i class="bx bx-shield-quarter fs-2 text-success"></i>
                             </div>
-                            <p class="text-dark small mb-0 fw-bold">Berkas e-KTP Telah Dihapus</p>
-                            <small class="text-muted" style="font-size: 0.75rem;">Dimusnahkan otomatis dari server demi keamanan dan privasi warga (UU PDP).</small>
+                            <p class="text-dark small mb-0 fw-bold">{{ $kyc->ktp_image_path ? 'Pembersihan e-KTP Belum Selesai' : 'Berkas e-KTP Telah Dihapus' }}</p>
+                            <small class="text-muted" style="font-size: 0.75rem;">Foto tidak ditampilkan setelah keputusan pemeriksaan.</small>
                         </div>
                     @else
                         <div class="text-center py-4">
@@ -191,7 +197,7 @@
                         @if($kyc->status === 'approved')
                             <i class="bx bx-shield-check text-success fs-4 me-2"></i>
                             <h6 class="mb-0 fw-bold text-dark">Foto Wajah / Biometrik</h6>
-                        @elseif($kyc->face_scan_data && count($kyc->face_scan_data) > 0)
+                        @elseif(is_array($kyc->face_scan_data) && count($kyc->face_scan_data) > 0)
                             <i class="bx bx-scan text-success fs-4 me-2"></i>
                             <h6 class="mb-0 fw-bold text-dark">Hasil Scan Wajah (Biometrik)</h6>
                         @elseif($kyc->face_image_path)
@@ -204,8 +210,8 @@
                     </div>
                     @if($kyc->status === 'approved')
                         <span class="badge bg-label-success rounded-pill px-2 py-1"><i class="bx bx-check-shield me-1"></i> Terverifikasi</span>
-                    @elseif($kyc->face_scan_data && count($kyc->face_scan_data) > 0)
-                        <span class="badge bg-label-success rounded-pill px-2 py-1"><i class="bx bx-scan me-1"></i> Scan Kamera AI (Liveness)</span>
+                    @elseif(is_array($kyc->face_scan_data) && count($kyc->face_scan_data) > 0)
+                        <span class="badge bg-label-success rounded-pill px-2 py-1"><i class="bx bx-scan me-1"></i> Gerakan Kamera</span>
                     @elseif($kyc->face_image_path)
                         <span class="badge bg-label-primary rounded-pill px-2 py-1"><i class="bx bx-camera me-1"></i> Foto Selfie (Unggah)</span>
                     @else
@@ -213,7 +219,7 @@
                     @endif
                 </div>
                 <div class="card-body pt-4">
-                    @if($kyc->face_image_path)
+                    @if($kyc->status === 'pending' && $kyc->face_image_path)
                         <div class="ktp-preview-container mb-3" style="max-height: 290px; display: flex; align-items: center; justify-content: center;">
                             <img src="{{ route('media.secure.face', basename($kyc->face_image_path)) }}" class="ktp-preview-img" style="max-height: 260px;" alt="Foto Wajah / Selfie {{ $kyc->user->name ?? 'Warga' }}">
                         </div>
@@ -230,8 +236,8 @@
                             <div class="mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center bg-label-success" style="width: 60px; height: 60px;">
                                 <i class="bx bx-shield-check fs-2 text-success"></i>
                             </div>
-                            <p class="text-dark small mb-0 fw-bold">Foto Wajah Telah Dihapus</p>
-                            <small class="text-muted" style="font-size: 0.75rem;">Dokumen biometrik fisik telah dimusnahkan secara aman dari server.</small>
+                            <p class="text-dark small mb-0 fw-bold">{{ $kyc->face_image_path ? 'Pembersihan Foto Wajah Belum Selesai' : 'Foto Wajah Telah Dihapus' }}</p>
+                            <small class="text-muted" style="font-size: 0.75rem;">Foto tidak ditampilkan setelah keputusan pemeriksaan.</small>
                         </div>
                     @else
                         <div class="text-center py-4 mb-3 bg-light rounded-3 border">
@@ -248,15 +254,15 @@
                             <i class="bx bx-shield-quarter text-success fs-3 flex-shrink-0 mt-1"></i>
                             <div>
                                 <h6 class="mb-1 fw-bold text-success" style="font-size: 0.9rem;">Status: Terverifikasi dan Dilindungi</h6>
-                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Identitas warga telah terverifikasi resmi. Seluruh data kependudukan tersimpan terenkripsi dengan algoritma ChaCha20-Poly1305 dan blind indexing SHA-256.</p>
+                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Identitas warga telah terverifikasi resmi. Kolom identitas tertentu disimpan terenkripsi. Keputusan pemeriksaan tetap tercatat pada pengajuan ini.</p>
                             </div>
                         </div>
-                    @elseif($kyc->face_scan_data && count($kyc->face_scan_data) > 0)
+                    @elseif(is_array($kyc->face_scan_data) && count($kyc->face_scan_data) > 0)
                         <div class="p-3 rounded-3 bg-label-success border border-success-subtle d-flex align-items-start gap-3">
                             <i class="bx bx-check-shield text-success fs-3 flex-shrink-0 mt-1"></i>
                             <div>
-                                <h6 class="mb-1 fw-bold text-success" style="font-size: 0.9rem;">Liveness Detection Valid (Scan AI)</h6>
-                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Sistem otomatis memvalidasi keaslian wajah, kedipan mata, dan gerakan anti-spoofing via kamera langsung ({{ count($kyc->face_scan_data) }} frame biometrik terekam).</p>
+                                <h6 class="mb-1 fw-bold text-success" style="font-size: 0.9rem;">Data Gerakan Kamera Tersedia</h6>
+                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Perangkat mengirim {{ count($kyc->face_scan_data) }} catatan gerakan kamera. Data ini belum membuktikan keaslian identitas. Tetap cocokkan foto wajah dengan KTP.</p>
                             </div>
                         </div>
                     @elseif($kyc->face_image_path)
@@ -272,7 +278,7 @@
                             <i class="bx bx-info-circle text-warning fs-3 flex-shrink-0 mt-1"></i>
                             <div>
                                 <h6 class="mb-1 fw-bold text-warning" style="font-size: 0.9rem;">Foto Wajah Tidak Tersedia</h6>
-                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Pengajuan tidak menyertakan foto wajah atau rekaman biometrik. Peninjauan dilakukan manual melalui pencocokan berkas dokumen e-KTP.</p>
+                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Foto wajah belum tersedia. Pengajuan perlu dilengkapi sebelum disetujui.</p>
                             </div>
                         </div>
                     @endif
@@ -505,7 +511,7 @@
                                 <form action="{{ route('admin.kyc.approve', $kyc->id) }}" method="POST" id="form-approve" class="m-0">
                                     @csrf
                                     <input type="hidden" name="admin_notes" id="approve_notes" value="Data Sesuai dengan e-KTP">
-                                    <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold d-inline-flex align-items-center" onclick="confirmApprove()">
+                                    <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold d-inline-flex align-items-center" onclick="confirmApprove()" @disabled(!$kyc->ktp_image_path || !$kyc->face_image_path)>
                                         <i class="bx bx-check-double me-1 fs-5"></i> Setujui & Perbarui Profil
                                     </button>
                                 </form>
@@ -542,7 +548,7 @@
 
 @push('modals')
 <!-- Modal Perbesar Foto KTP -->
-@if($kyc->ktp_image_path)
+@if($kyc->status === 'pending' && $kyc->ktp_image_path)
 <div class="modal fade" id="ktpModal" tabindex="-1" aria-labelledby="ktpModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
@@ -565,7 +571,7 @@
 @endif
 
 <!-- Modal Perbesar Foto Wajah / Selfie -->
-@if($kyc->face_image_path)
+@if($kyc->status === 'pending' && $kyc->face_image_path)
 <div class="modal fade" id="faceModal" tabindex="-1" aria-labelledby="faceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
@@ -626,7 +632,7 @@
         if (typeof Swal !== 'undefined') {
             Swal.fire({
                 title: 'Setujui Verifikasi?',
-                text: 'Data profil akun warga akan otomatis diselaraskan sesuai dengan hasil pembacaan e-KTP resmi.',
+                text: 'Pastikan KTP dan foto wajah telah diperiksa. Nama dan NIK akan diperbarui; domisili tetap mengikuti akun.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#71dd37',
@@ -644,7 +650,7 @@
                 }
             });
         } else {
-            if (confirm('Apakah Anda yakin ingin menyetujui verifikasi ini? Data profil akun warga akan otomatis diperbarui sesuai e-KTP.')) {
+            if (confirm('Apakah Anda yakin ingin menyetujui verifikasi ini? Nama dan NIK akan diperbarui; domisili tetap mengikuti akun.')) {
                 document.getElementById('form-approve').submit();
             }
         }

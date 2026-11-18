@@ -66,22 +66,6 @@
                         </label>
 
                         @if(config('services.google_maps.api_key'))
-                            {{-- Sengaja BUKAN .input-group. Kalau Places API tersedia,
-                                 <input> di bawah ditukar dengan elemen kustom
-                                 <gmp-place-autocomplete> milik Google — dan elemen itu
-                                 memutus tata letak input-group: ikon depan terlempar ke
-                                 baris sendiri, tombol di belakangnya turun ke bawah.
-                                 Susunan flex biasa aman untuk kedua kemungkinan. --}}
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <div class="flex-grow-1 wadah-cari-alamat">
-                                    <input type="text" class="form-control" id="cariAlamat"
-                                           placeholder="Cari nama tempat atau alamat...">
-                                </div>
-                                <button class="btn btn-outline-secondary flex-shrink-0" type="button" id="btnLokasiSaya"
-                                        title="Pakai posisi saya sekarang">
-                                    <i class="bx bx-current-location"></i>
-                                </button>
-                            </div>
                             <div id="petaLokasi" class="rounded-3 border"
                                  style="width: 100%; height: 300px; background: #f5f5f9;"></div>
                         @else
@@ -91,7 +75,7 @@
                                 <i class="bx bx-error-circle"></i>
                                 Kunci Google Maps belum diisi, jadi peta tidak dapat ditampilkan.
                                 Koordinat masih bisa diisi manual di bawah. Super Admin dapat mengisinya
-                                di <strong>Integrasi Payment Gateway pada Sistem Platform</strong>.
+                                di <strong>Integrasi API pada Sistem Platform</strong>.
                             </div>
                         @endif
                     </div>
@@ -155,6 +139,7 @@
 @endpush
 
 @push('scripts')
+@include('partials.google-maps-loader')
 <script>
     const RUTE_SIMPAN = @json(route('admin.lokasi-layanan.store'));
     const RUTE_UBAH   = @json(url('admin/lokasi-layanan'));
@@ -163,7 +148,7 @@
     // punya koordinat sama sekali.
     const TITIK_AWAL = { lat: 1.4854, lng: 102.1512 };
 
-    let peta = null, penanda = null, geocoder = null;
+    let locationPicker;
 
     function siapkanFormulir(data) {
         const f = document.getElementById('formLokasi');
@@ -193,126 +178,12 @@
     }
 
     function pasangPeta() {
-        const wadah = document.getElementById('petaLokasi');
-        if (!wadah || typeof google === 'undefined' || !google.maps) return;
-
-        const f = document.getElementById('formLokasi');
-        const lat = parseFloat(f.latitude.value);
-        const lng = parseFloat(f.longitude.value);
-        const titik = (!isNaN(lat) && !isNaN(lng)) ? { lat: lat, lng: lng } : TITIK_AWAL;
-
-        if (!peta) {
-            geocoder = new google.maps.Geocoder();
-            peta = new google.maps.Map(wadah, {
-                zoom: 15, center: titik, mapTypeId: 'roadmap',
-                streetViewControl: false, mapTypeControl: true, fullscreenControl: true,
-            });
-            penanda = new google.maps.Marker({
-                position: titik, map: peta, draggable: true,
-                title: 'Geser penanda atau klik peta untuk menentukan titik',
-            });
-
-            peta.addListener('click', (e) => pindahkanPenanda(e.latLng));
-            penanda.addListener('dragend', (e) => pindahkanPenanda(e.latLng));
-        } else {
-            peta.setCenter(titik);
-            penanda.setPosition(titik);
-        }
-
-        // Ukuran wadah berubah ketika modal terbuka; tanpa resize petanya
-        // terpotong dan tersangkut di pojok kiri atas.
-        google.maps.event.trigger(peta, 'resize');
-        peta.setCenter(titik);
+        const element = document.getElementById('petaLokasi');
+        if (!element) return;
+        if (locationPicker) return locationPicker.sync();
+        const form = document.getElementById('formLokasi');
+        SegiMaps.picker({ element, latitude: form.latitude, longitude: form.longitude, address: form.alamat })
+            .then(picker => { locationPicker = picker; picker.sync(); }).catch(() => {});
     }
-
-    function pindahkanPenanda(latLng) {
-        penanda.setPosition(latLng);
-        const f = document.getElementById('formLokasi');
-        f.latitude.value  = latLng.lat().toFixed(7);
-        f.longitude.value = latLng.lng().toFixed(7);
-
-        // Alamat diisikan otomatis hanya kalau kolomnya masih kosong, supaya
-        // alamat yang sudah diketik admin tidak tertimpa.
-        if (geocoder && !f.alamat.value.trim()) {
-            geocoder.geocode({ location: latLng }, (hasil, status) => {
-                if (status === 'OK' && hasil[0]) {
-                    f.alamat.value = hasil[0].formatted_address;
-                }
-            });
-        }
-    }
-
-    // Saran alamat dipasang setelah Maps siap, karena helper-nya memeriksa
-    // kelas mana yang tersedia (Places baru / Places lama / Geocoder saja).
-    let saranTerpasang = false;
-
-    function pasangSaran() {
-        if (saranTerpasang) return;
-        const cari = document.getElementById('cariAlamat');
-        if (!cari || typeof pasangSaranAlamat !== 'function' || typeof google === 'undefined') return;
-
-        saranTerpasang = true;
-        pasangSaranAlamat(cari, function (t) {
-            const titik = new google.maps.LatLng(t.lat, t.lng);
-            if (peta) { peta.setCenter(titik); peta.setZoom(17); }
-            pindahkanPenanda(titik);
-
-            const f = document.getElementById('formLokasi');
-            // Alamat dari Google mengisi kolom Alamat, bukan menimpa Nama Lokasi:
-            // namanya biasanya sebutan setempat ("Gudang BUM Desa"), bukan
-            // alamat resmi.
-            if (t.alamat) f.alamat.value = t.alamat;
-            if (t.nama && !f.nama.value.trim()) f.nama.value = t.nama;
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const btnPosisi = document.getElementById('btnLokasiSaya');
-        if (btnPosisi) {
-            btnPosisi.addEventListener('click', function () {
-                if (!navigator.geolocation) {
-                    showSiladesBengToast('warning', 'Tidak Didukung',
-                        'Perangkat ini tidak mendukung penentuan lokasi otomatis.');
-                    return;
-                }
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        const t = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-                        peta.setCenter(t);
-                        peta.setZoom(17);
-                        pindahkanPenanda(t);
-                    },
-                    () => showSiladesBengToast('error', 'Gagal',
-                        'Tidak bisa membaca posisi Anda. Pastikan izin lokasi diberikan.')
-                );
-            });
-        }
-
-        // Peta dipasang ulang tiap modal dibuka, karena ukurannya baru
-        // diketahui setelah modal benar-benar terlihat.
-        const modal = document.getElementById('modalLokasi');
-        if (modal) {
-            modal.addEventListener('shown.bs.modal', function () {
-                pasangPeta();
-                pasangSaran();
-            });
-        }
-    });
-
-    // Dipanggil Google lewat parameter callback= setelah pustakanya siap.
-    window.siapkanPetaLokasi = function () {
-        pasangPeta();
-        pasangSaran();
-    };
 </script>
-
-@if(config('services.google_maps.api_key'))
-    @include('partials.saran-alamat')
-    {{-- libraries=places diperlukan untuk saran ketik alamat. Kalau Places API
-         belum diaktifkan di proyek Google Cloud, pustakanya tetap dimuat tetapi
-         kelas autocomplete-nya tidak tersedia — helper saran-alamat menanganinya
-         dengan turun ke pencarian lewat Geocoder. --}}
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places&loading=async&callback=siapkanPetaLokasi"></script>
-@endif
 @endpush

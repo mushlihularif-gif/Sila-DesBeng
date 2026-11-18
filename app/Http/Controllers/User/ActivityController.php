@@ -220,7 +220,7 @@ class ActivityController extends Controller
             
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus riwayat: ' . $e->getMessage()
+                'message' => 'Riwayat belum berhasil dihapus. Silakan coba kembali.'
             ], 500);
         }
     }

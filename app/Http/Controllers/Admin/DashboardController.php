@@ -418,7 +418,7 @@ public function index(Request $request)
             });
         
         // Cari di Pengguna
-        $users = $this->managedUsers()->searchWhereLike(['name', 'email'], $search)
+        $users = \App\Support\UserDirectory::search($this->managedUsers(), $search)
             ->get()
             ->map(function($item) {
                 return [

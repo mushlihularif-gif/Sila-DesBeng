@@ -124,15 +124,12 @@
                     <div>
                         <div class="flex items-center justify-between mb-1">
                             <label class="block text-sm font-semibold text-gray-700">Titik Peta</label>
-                            <button type="button" id="al-posisi-saya"
-                                    class="text-xs font-semibold text-blue-600 hover:text-blue-700">
-                                Pakai posisi saya
-                            </button>
+
                         </div>
                         <div id="al-peta" class="w-full rounded-lg border border-gray-300"
                              style="height: 240px; background:#f3f4f6;"></div>
                         <p class="text-xs text-gray-500 mt-1" id="al-ket-titik">
-                            Klik peta atau geser penanda supaya petugas tahu persis rumah Anda.
+                            Tentukan titik, lalu tekan Simpan Alamat. Alamat ini dapat dipilih kembali saat memesan.
                         </p>
                     </div>
                     @endif
@@ -231,6 +228,7 @@
 @endsection
 
 @push('scripts')
+@include('partials.google-maps-loader')
 <script>
     // ---- Buku alamat ----
     // Satu formulir dipakai untuk tambah dan ubah; yang berubah hanya action
@@ -271,66 +269,16 @@
 
     function ubahAlamat(data) { isiFormAlamat(data); }
 
-    // ---- Peta alamat ----
-    const TITIK_AWAL_ALAMAT = { lat: 1.4854, lng: 102.1512 };   // Kabupaten Bengkalis
-    let petaAlamat = null, penandaAlamat = null, geocoderAlamat = null;
-
-    function pasangPetaAlamat(pusatkanUlang) {
-        const wadah = document.getElementById('al-peta');
-        if (!wadah || typeof google === 'undefined' || !google.maps) return;
-
-        const f = document.getElementById('form-alamat');
-        const lat = parseFloat(f.latitude.value), lng = parseFloat(f.longitude.value);
-        const adaTitik = !isNaN(lat) && !isNaN(lng);
-        const titik = adaTitik ? { lat, lng } : TITIK_AWAL_ALAMAT;
-
-        if (!petaAlamat) {
-            geocoderAlamat = new google.maps.Geocoder();
-            petaAlamat = new google.maps.Map(wadah, {
-                zoom: adaTitik ? 17 : 14, center: titik, mapTypeId: 'roadmap',
-                streetViewControl: false, mapTypeControl: false,
-                gestureHandling: 'cooperative',
-            });
-            penandaAlamat = new google.maps.Marker({
-                position: titik, map: petaAlamat, draggable: true,
-                title: 'Geser ke titik rumah Anda',
-            });
-            petaAlamat.addListener('click', (e) => pindahTitikAlamat(e.latLng));
-            penandaAlamat.addListener('dragend', (e) => pindahTitikAlamat(e.latLng));
-        } else if (pusatkanUlang) {
-            petaAlamat.setCenter(titik);
-            petaAlamat.setZoom(adaTitik ? 17 : 14);
-            penandaAlamat.setPosition(titik);
-        }
-
-        google.maps.event.trigger(petaAlamat, 'resize');
-        petaAlamat.setCenter(titik);
-        segarkanKetTitik(adaTitik);
+    let addressPicker;
+    function pasangPetaAlamat() {
+        const element = document.getElementById('al-peta');
+        if (!element) return;
+        if (addressPicker) return addressPicker.sync();
+        SegiMaps.picker({ element,
+            latitude: document.getElementById('al-lat'), longitude: document.getElementById('al-lng'),
+            address: document.getElementById('al-detail')
+        }).then(picker => { addressPicker = picker; picker.sync(); }).catch(() => {});
     }
-
-    function pindahTitikAlamat(latLng) {
-        const f = document.getElementById('form-alamat');
-        penandaAlamat.setPosition(latLng);
-        f.latitude.value  = latLng.lat().toFixed(7);
-        f.longitude.value = latLng.lng().toFixed(7);
-        segarkanKetTitik(true);
-    }
-
-    function segarkanKetTitik(ada) {
-        const el = document.getElementById('al-ket-titik');
-        const f = document.getElementById('form-alamat');
-        if (!el) return;
-        if (ada && f.latitude.value) {
-            el.textContent = 'Titik tersimpan: ' + f.latitude.value + ', ' + f.longitude.value;
-            el.className = 'text-xs text-green-600 mt-1 font-semibold';
-        } else {
-            el.textContent = 'Klik peta atau geser penanda supaya petugas tahu persis rumah Anda.';
-            el.className = 'text-xs text-gray-500 mt-1';
-        }
-    }
-
-    // Dipanggil Google lewat parameter callback= setelah pustakanya siap.
-    window.siapkanPetaAlamat = function () { pasangPetaAlamat(false); };
 
     document.addEventListener('DOMContentLoaded', function () {
         const baru  = document.getElementById('btn-alamat-baru');
@@ -355,27 +303,7 @@
             });
         });
 
-        const btnPos = document.getElementById('al-posisi-saya');
-        if (btnPos) {
-            btnPos.addEventListener('click', function () {
-                if (!navigator.geolocation) {
-                    showToast('Perangkat ini tidak mendukung penentuan lokasi otomatis.', 'warning');
-                    return;
-                }
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        const t = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-                        petaAlamat.setCenter(t); petaAlamat.setZoom(18); pindahTitikAlamat(t);
-                    },
-                    () => showToast('Tidak bisa membaca posisi Anda. Pastikan izin lokasi diberikan.', 'error')
-                );
-            });
-        }
     });
 </script>
 
-@if(config('services.google_maps.api_key'))
-<script async defer
-    src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&loading=async&callback=siapkanPetaAlamat"></script>
-@endif
 @endpush

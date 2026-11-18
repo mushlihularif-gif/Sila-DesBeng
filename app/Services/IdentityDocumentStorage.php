@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\AdminNotification;
 use App\Models\KycVerification;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\{DB, Storage};
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -13,6 +15,9 @@ class IdentityDocumentStorage
 {
     public function createDraft(User $owner, array $fields, string $ktpBytes): KycVerification
     {
+        if ($owner->fresh()->verification_status === 'verified') {
+            throw ValidationException::withMessages(['ktp_image' => 'Identitas akun sudah terverifikasi.']);
+        }
         // Allocate the submission ID before constructing AAD. OCR must have succeeded first.
         $kyc = KycVerification::create(array_merge($fields, [
             'user_id' => $owner->id, 'status' => 'draft',
@@ -30,11 +35,14 @@ class IdentityDocumentStorage
             ->where('id', '<', $kyc->id)->whereIn('status', ['draft', 'pending', 'rejected'])->get();
         foreach ($oldKycs as $old) {
             foreach (['ktp_image_path', 'face_image_path'] as $column) {
-                if ($old->$column) Storage::disk('private')->delete($old->$column);
+                if ($old->$column) {
+                    Storage::disk('private')->delete($old->$column);
+                }
             }
-            \App\Models\AdminNotification::where('type', 'kyc')->where('reference_id', $old->id)->delete();
+            AdminNotification::where('type', 'kyc')->where('reference_id', $old->id)->delete();
             $old->delete();
         }
+
         return $kyc;
     }
 
@@ -45,8 +53,16 @@ class IdentityDocumentStorage
         try {
             DB::transaction(function () use ($record, $documents, $attributes, &$written) {
                 $locked = $record->newQuery()->lockForUpdate()->findOrFail($record->getKey());
-                if ($locked instanceof KycVerification && !in_array($locked->status, ['draft', 'pending'], true)) {
+                if ($locked instanceof KycVerification && ! in_array($locked->status, ['draft', 'pending'], true)) {
                     throw ValidationException::withMessages(['kyc_id' => 'Pengajuan ini sudah selesai ditinjau.']);
+                }
+                $owner = $locked instanceof User ? $locked : User::lockForUpdate()->findOrFail($locked->user_id);
+                if ($owner->verification_status === 'verified') {
+                    throw ValidationException::withMessages(['kyc_id' => 'Identitas akun sudah terverifikasi.']);
+                }
+                $submitting = $locked instanceof KycVerification && ($attributes['status'] ?? null) === 'pending';
+                if ($submitting && $locked->status !== 'draft') {
+                    throw ValidationException::withMessages(['kyc_id' => 'Pengajuan sudah dikirim. Tunggu hasil pemeriksaan admin.']);
                 }
                 $oldPaths = [];
                 $updates = $attributes;
@@ -57,18 +73,32 @@ class IdentityDocumentStorage
                     $path = $scope.'/'.$type.'/'.$type.'_'.Str::uuid().'.enc';
                     $ciphertext = FileEncryptionService::encrypt($bytes, IdentityDocumentContext::aad($locked, $type, $path));
                     $written[] = $path;
-                    if (!Storage::disk('private')->put($path, $ciphertext)) {
+                    if (! Storage::disk('private')->put($path, $ciphertext)) {
                         throw new \RuntimeException('Berkas identitas gagal disimpan.');
                     }
-                    if ($locked->$column) $oldPaths[] = $locked->$column;
+                    if ($locked->$column) {
+                        $oldPaths[] = $locked->$column;
+                    }
                     $updates[$column] = $path;
                     $updates[$versionColumn] = 2;
                 }
                 $locked->forceFill($updates)->save();
+                if ($submitting) {
+                    $owner->update(['verification_status' => 'pending']);
+                    AdminNotification::create([
+                        'type' => 'kyc', 'reference_id' => $locked->id, 'region_id' => $owner->region_id,
+                        'title' => 'Pengajuan Verifikasi Identitas (KYC)',
+                        'message' => 'Warga '.($owner->name ?? 'Warga').' mengajukan verifikasi data e-KTP dan foto wajah.',
+                        'is_read' => false,
+                    ]);
+                    DB::afterCommit(fn () => NotificationService::notifyKycSubmitted($owner));
+                }
                 DB::afterCommit(function () use ($oldPaths) {
                     foreach ($oldPaths as $oldPath) {
                         try {
-                            if (Storage::disk('private')->delete($oldPath)) continue;
+                            if (Storage::disk('private')->delete($oldPath)) {
+                                continue;
+                            }
                         } catch (\Throwable $e) {
                             // Committed new files must not be deleted on cleanup failure.
                         }
@@ -77,7 +107,9 @@ class IdentityDocumentStorage
                 });
             });
         } catch (\Throwable $e) {
-            foreach ($written as $path) Storage::disk('private')->delete($path);
+            foreach ($written as $path) {
+                Storage::disk('private')->delete($path);
+            }
             throw $e;
         }
         $record->refresh();

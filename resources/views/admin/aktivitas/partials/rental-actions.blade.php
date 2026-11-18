@@ -37,7 +37,7 @@
                 <button class="btn btn-primary" onclick="updateStatus('arrived')">Alat Sudah Diserahkan ke Penyewa</button>
             @endif
         @elseif($request->status === 'in_delivery')
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadProofModal">Alat Sudah Tiba — Unggah Bukti</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadProofModal">Alat Sudah Tiba â€” Unggah Bukti</button>
         @elseif($request->status === 'arrived')
             @if($rentalPaid)
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#returnModal">Catat Pengembalian Alat</button>

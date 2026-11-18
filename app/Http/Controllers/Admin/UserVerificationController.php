@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Region;
 use App\Models\User;
+use App\Services\IdentityMediaService;
+use App\Services\IdentityReviewService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class UserVerificationController extends Controller
@@ -42,7 +44,7 @@ class UserVerificationController extends Controller
             return [];
         }
 
-        return array_merge([$admin->region_id], \App\Models\Region::getDescendantIds($admin->region_id));
+        return array_merge([$admin->region_id], Region::getDescendantIds($admin->region_id));
     }
 
     private function pastikanDalamJangkauan(User $warga): void
@@ -60,7 +62,15 @@ class UserVerificationController extends Controller
     {
         $this->pastikanPeninjau();
 
-        $query = User::where('verification_status', 'pending');
+        // Pengajuan KYC baru memiliki antrean sendiri. Halaman kompatibilitas
+        // hanya menampilkan foto yang memang tersimpan pada akun lama.
+        $query = User::where('verification_status', 'pending')
+            ->where(fn ($q) => $q->whereNotNull('ktp_photo_path')->orWhereNotNull('face_photo_path'))
+            ->whereNotExists(function ($q) {
+                $q->selectRaw('1')->from('kyc_verifications')
+                    ->whereColumn('kyc_verifications.user_id', 'users.id')
+                    ->whereIn('kyc_verifications.status', ['draft', 'pending']);
+            });
 
         // Dulu hanya admin_desa/RT/RW yang dibatasi, sehingga admin kecamatan
         // ikut melihat warga kecamatan LAIN - bukan cuma desa bawahannya.
@@ -86,45 +96,33 @@ class UserVerificationController extends Controller
         abort_unless($user->verification_status === 'pending', 404);
         $path = $type === 'ktp' ? $user->ktp_photo_path : $user->face_photo_path;
         abort_unless($path, 404);
-        return app(\App\Services\IdentityMediaService::class)->renderIdentity($user, $type);
+
+        return app(IdentityMediaService::class)->renderIdentity($user, $type);
     }
 
     public function approve($id)
     {
         $this->pastikanPeninjau();
+        $cleaned = app(IdentityReviewService::class)
+            ->reviewLegacy((int) $id, Auth::user(), true, null);
 
-        $user = User::findOrFail($id);
-        $this->pastikanDalamJangkauan($user);
-
-        $user->verification_status = 'verified';
-        $user->verified_at = now();
-        $user->save();
-
-        return redirect()->back()->with('success', "Warga {$user->name} berhasil diverifikasi!");
+        return $this->reviewResponse($cleaned, 'Verifikasi warga disetujui.');
     }
 
     public function reject(Request $request, $id)
     {
         $this->pastikanPeninjau();
+        $data = $request->validate(['reason' => 'required|string|max:500']);
+        $cleaned = app(IdentityReviewService::class)
+            ->reviewLegacy((int) $id, Auth::user(), false, $data['reason']);
 
-        $request->validate([
-            'reason' => 'required|string|max:500'
-        ]);
+        return $this->reviewResponse($cleaned, 'Verifikasi warga ditolak.');
+    }
 
-        $user = User::findOrFail($id);
-        $this->pastikanDalamJangkauan($user);
-
-        $user->verification_status = 'rejected';
-        $user->ktp_rejection_reason = $request->reason;
-        
-        // Hapus file yang jelek agar tidak menuhi storage
-        if ($user->ktp_photo_path) Storage::disk('private')->delete($user->ktp_photo_path);
-        if ($user->face_photo_path) Storage::disk('private')->delete($user->face_photo_path);
-        
-        $user->ktp_photo_path = null;
-        $user->face_photo_path = null;
-        $user->save();
-
-        return redirect()->back()->with('success', "Verifikasi warga {$user->name} ditolak karena: {$request->reason}");
+    private function reviewResponse(bool $cleaned, string $message)
+    {
+        return redirect()->back()->with($cleaned ? 'success' : 'warning', $message.' '.($cleaned
+            ? 'Berkas foto telah dihapus dari penyimpanan aplikasi.'
+            : 'Pembersihan berkas belum selesai. Hubungi pengelola untuk mengulang pembersihan.'));
     }
 }

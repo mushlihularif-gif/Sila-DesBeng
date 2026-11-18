@@ -58,8 +58,8 @@ class ProfileAlamatApiController extends Controller
             'rw'            => 'nullable|string|max:10',
             'kode_pos'      => 'nullable|string|max:10',
             'patokan'       => 'nullable|string|max:255',
-            'latitude'      => 'nullable|numeric',
-            'longitude'     => 'nullable|numeric',
+            'latitude'      => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude'     => 'nullable|required_with:latitude|numeric|between:-180,180',
             'is_utama'      => 'boolean'
         ]);
 
@@ -126,8 +126,8 @@ class ProfileAlamatApiController extends Controller
             'rw'            => 'nullable|string|max:10',
             'kode_pos'      => 'nullable|string|max:10',
             'patokan'       => 'nullable|string|max:255',
-            'latitude'      => 'nullable|numeric',
-            'longitude'     => 'nullable|numeric',
+            'latitude'      => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude'     => 'nullable|required_with:latitude|numeric|between:-180,180',
             'is_utama'      => 'boolean'
         ]);
 

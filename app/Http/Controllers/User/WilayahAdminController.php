@@ -92,13 +92,7 @@ class WilayahAdminController extends Controller
             ->whereIn('region_id', $allowedRegionIds)
             ->where('role', 'user');
 
-        $wargas = $usersQuery->when($search, function ($query, $search) {
-                return $query->where(function($q) use ($search) {
-                    $q->searchWhereLike(['name', 'email'], $search);
-                });
-            })
-            ->orderBy('name', 'asc')
-            ->paginate(15)
+        $wargas = \App\Support\UserDirectory::paginate($usersQuery, $search, 15)
             ->appends(['search' => $search]);
 
         return view('user.wilayah.warga', compact('wargas', 'search'));

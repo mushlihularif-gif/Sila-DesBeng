@@ -84,7 +84,7 @@ class NotificationController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+                'message' => 'Notifikasi belum berhasil dihapus. Silakan coba kembali.'
             ], 500);
         }
     }

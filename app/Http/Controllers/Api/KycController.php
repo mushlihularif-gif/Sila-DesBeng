@@ -65,6 +65,13 @@ class KycController extends Controller
             'kyc_id' => 'required|exists:kyc_verifications,id',
             'face_data' => 'required', // Now can be string or array
             'face_image' => 'nullable|image|max:5120',
+            'nik' => 'sometimes|required|digits:16',
+            'name' => 'sometimes|required|string|max:255',
+            'address' => 'sometimes|nullable|string|max:2000',
+            'rt' => 'sometimes|nullable|string|max:20',
+            'rw' => 'sometimes|nullable|string|max:20',
+            'desa' => 'sometimes|nullable|string|max:255',
+            'kecamatan' => 'sometimes|nullable|string|max:255',
         ]);
 
         $kyc = KycVerification::where('id', $request->kyc_id)
@@ -73,6 +80,9 @@ class KycController extends Controller
 
         // Handle face_data whether it's array or string (from multipart form data)
         $faceData = is_string($request->face_data) ? json_decode($request->face_data, true) : $request->face_data;
+        if (!is_array($faceData)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['face_data' => 'Data kamera harus berupa objek atau daftar JSON.']);
+        }
         $updateData = [
             'face_scan_data' => $faceData,
             'status' => 'pending',
@@ -85,6 +95,9 @@ class KycController extends Controller
             $fileContent = $faceFile->get();
             $documents['face'] = $fileContent;
         }
+        if (empty($documents['face']) && !$kyc->face_image_path) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['face_image' => 'Lampirkan foto wajah sebelum mengirim pengajuan.']);
+        }
 
         if ($request->has('nik')) $updateData['nik_from_ocr'] = $request->nik;
         if ($request->has('name')) $updateData['name_from_ocr'] = $request->name;
@@ -95,19 +108,6 @@ class KycController extends Controller
         if ($request->has('desa')) $updateData['desa_from_ocr'] = $request->desa;
 
         app(\App\Services\IdentityDocumentStorage::class)->save($kyc, $documents, $updateData);
-
-        $user = $request->user();
-        $user->update(['verification_status' => 'pending']);
-
-        // Buat AdminNotification saat pengajuan lengkap
-        \App\Models\AdminNotification::create([
-            'type' => 'kyc',
-            'reference_id' => $kyc->id,
-            'region_id' => $user->region_id,
-            'title' => 'Pengajuan Verifikasi Identitas (KYC)',
-            'message' => "Warga " . ($user->name ?? 'Warga') . " mengajukan verifikasi data e-KTP dan scan wajah.",
-            'is_read' => false,
-        ]);
 
         return response()->json([
             'success' => true,

@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative bg-cover bg-center bg-no-repeat" style="background-image: url('{{ asset('User/img/elemen/entrance.png') }}');">
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative bg-cover bg-center bg-no-repeat">
+    @include('partials.abstract-bg')
     <!-- Glassmorphism Overlay -->
     <div class="absolute inset-0 bg-white/30 backdrop-blur-md"></div>
     

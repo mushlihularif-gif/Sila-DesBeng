@@ -261,7 +261,7 @@
                                     $diantar = ($request->delivery_method ?? null) === 'antar';
                                 @endphp
 
-                                @if($tLat && $tLng)
+                                @if(is_numeric($tLat) && is_numeric($tLng) && abs((float) $tLat) <= 90 && abs((float) $tLng) <= 180)
                                     <div class="mt-2">
                                         <a href="https://www.google.com/maps/search/?api=1&query={{ $tLat }},{{ $tLng }}"
                                            target="_blank" rel="noopener"
@@ -930,26 +930,7 @@ if (returnForm) {
      halaman detail pesanan yang diambil sendiri tidak memanggil Google Maps
      tanpa keperluan. --}}
 @if(config('services.google_maps.api_key'))
-<script>
-    window.pasangPetaPesanan = function () {
-        const el = document.getElementById('peta-titik-pesanan');
-        if (!el || typeof google === 'undefined' || !google.maps) return;
-
-        const titik = {
-            lat: parseFloat(el.dataset.lat),
-            lng: parseFloat(el.dataset.lng),
-        };
-        if (isNaN(titik.lat) || isNaN(titik.lng)) return;
-
-        const peta = new google.maps.Map(el, {
-            zoom: 17, center: titik, mapTypeId: 'roadmap',
-            streetViewControl: false, mapTypeControl: false,
-            gestureHandling: 'cooperative',
-        });
-        new google.maps.Marker({ position: titik, map: peta, title: 'Titik antar pemesan' });
-    };
-</script>
-<script async defer
-    src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&loading=async&callback=pasangPetaPesanan"></script>
+@include('partials.google-maps-loader')
+<script>SegiMaps.display(document.getElementById('peta-titik-pesanan'));</script>
 @endif
 @endpush

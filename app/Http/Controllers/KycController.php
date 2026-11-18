@@ -102,9 +102,9 @@ class KycController extends Controller
             'kyc_id' => 'required|exists:kyc_verifications,id',
             'face_data' => 'nullable|array',
             'face_image' => 'nullable|string|max:7000000',
-            'edited_nik' => 'nullable|string|max:30',
+            'edited_nik' => 'nullable|digits:16',
             'edited_nama' => 'nullable|string|max:255',
-            'edited_alamat' => 'nullable|string',
+            'edited_alamat' => 'nullable|string|max:2000',
             'edited_rt' => 'nullable|string|max:20',
             'edited_rw' => 'nullable|string|max:20',
             'edited_desa' => 'nullable|string|max:255',
@@ -161,28 +161,17 @@ class KycController extends Controller
                 $updateData['kecamatan_from_ocr'] = $request->edited_kecamatan;
             }
 
+            if (empty($documents['face']) && !$kyc->face_image_path) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['face_image' => 'Lampirkan foto wajah sebelum mengirim pengajuan.']);
+            }
             app(\App\Services\IdentityDocumentStorage::class)->save($kyc, $documents, $updateData);
-
-            $user = Auth::user();
-            $user->update(['verification_status' => 'pending']);
-
-            // Buat AdminNotification untuk dropdown navbar & dashboard (HANYA saat sudah submit lengkap)
-            \App\Models\AdminNotification::create([
-                'type' => 'kyc',
-                'reference_id' => $kyc->id,
-                'region_id' => $user->region_id,
-                'title' => 'Pengajuan Verifikasi Identitas (KYC)',
-                'message' => "Warga " . ($user->name ?? 'Warga') . " mengajukan verifikasi data e-KTP dan scan wajah.",
-                'is_read' => false,
-            ]);
-
-            // Buat notifikasi untuk warga pemohon
-            \App\Services\NotificationService::notifyKycSubmitted($user);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Data verifikasi berhasil dikirim dan menunggu persetujuan Admin.'
             ]);
+        } catch (\Illuminate\Validation\ValidationException|\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
+            throw $e;
         } catch (\Throwable $e) {
             \Log::error('KYC Submit Error', ['exception' => get_class($e)]);
             return response()->json([

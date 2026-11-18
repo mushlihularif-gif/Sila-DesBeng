@@ -312,35 +312,7 @@
 
                     <!-- Panel Info Kantor Pengelola (Hanya muncul jika Supir Sendiri / Lepas Kunci) -->
                     <div id="kantor-pengelola-info-box" class="mb-6 space-y-4">
-                        <div class="bg-gradient-to-br from-blue-50/70 to-indigo-50/50 border border-blue-100 rounded-2xl p-5 shadow-sm">
-                            <div class="flex items-start justify-between gap-4 mb-3">
-                                <div>
-                                    <span class="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100/80 px-2.5 py-0.5 rounded-md">
-                                        Titik Temu Serah Terima
-                                    </span>
-                                    <h4 class="text-base md:text-lg font-bold text-gray-900 mt-1.5">
-                                        {{ $setting->location_name ?? 'Kantor Pengelola Layanan Daerah' }}
-                                    </h4>
-                                    <p class="text-xs md:text-sm text-gray-600 mt-1 leading-relaxed">
-                                        {{ $setting->address ?? 'Alamat operasional kantor pengelola' }}
-                                    </p>
-                                </div>
-                                @if($setting && $setting->latitude && $setting->longitude)
-                                <a href="https://www.google.com/maps?q={{ $setting->latitude }},{{ $setting->longitude }}" 
-                                   target="_blank" 
-                                   class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-white text-blue-600 hover:text-blue-700 text-xs font-bold rounded-xl shadow-sm border border-blue-200 transition-all hover:shadow">
-                                    <i class="bx bx-map"></i> Buka Peta
-                                </a>
-                                @endif
-                            </div>
-
-                            @if($setting && $setting->operating_hours)
-                            <div class="flex items-center gap-2 text-xs text-gray-600 pt-2 border-t border-blue-100">
-                                <i class="bx bx-time text-blue-600 text-base"></i>
-                                <span>Jam Operasional: <strong>{{ $setting->operating_hours }}</strong></span>
-                            </div>
-                            @endif
-                        </div>
+                        <x-service-location :item="$item" />
 
                         <div class="bg-amber-50/80 border-l-4 border-amber-400 p-4 rounded-r-2xl">
                             <div class="flex items-start gap-2.5">

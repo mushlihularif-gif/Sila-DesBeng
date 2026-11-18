@@ -142,4 +142,55 @@ class ServiceStaffAuditTest extends TestCase
         $this->assertStringNotContainsString('@endif',$html);
     }
 
+    public function test_full_admin_navigation_renders_and_each_link_matches_the_roles_permissions(): void
+    {
+        Schema::table('admin_notifications', function (Blueprint $t) {
+            $t->boolean('is_read')->default(false);
+            $t->timestamps();
+        });
+        foreach (['2026_06_15_182007_create_services_table.php', '2026_06_15_182008_create_region_services_table.php', '2026_06_22_151200_add_is_exclusive_to_region_services_table.php'] as $file) {
+            (require database_path('migrations/'.$file))->up();
+        }
+        foreach (['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Transportasi', 'Fasilitas Umum', 'Pengumuman'] as $i => $name) {
+            DB::table('services')->insert(['id' => $i + 1, 'name' => $name, 'slug' => 'service-'.$i]);
+            foreach ([1, 5] as $regionId) {
+                DB::table('region_services')->insert(['region_id' => $regionId, 'service_id' => $i + 1, 'is_active' => true]);
+            }
+        }
+        $staff = $this->createStaff(['units' => array_keys(StaffAccess::UNITS)]);
+        $super = $this->user(7);
+        $super->role = 'super_admin';
+        view()->share('errors', new \Illuminate\Support\ViewErrorBag());
+        foreach ([$staff, $this->user(4), $super] as $account) {
+            $this->actingAs($account);
+            $html = view('admin.layouts.admin')->render();
+            $dom = new \DOMDocument();
+            @$dom->loadHTML($html);
+            $xpath = new \DOMXPath($dom);
+            $checked = 0;
+            foreach ($xpath->query('//aside//a[@href] | //nav//a[@href]') as $link) {
+                $url = $link->getAttribute('href');
+                if (!str_starts_with($url, url('/')) || $link->hasAttribute('onclick')) continue;
+                $request = Request::create($url, 'GET', server: ['HTTP_ACCEPT' => 'application/json']);
+                $route = Route::getRoutes()->match($request);
+                $request->setRouteResolver(fn () => $route);
+                $request->setUserResolver(fn () => $account);
+                foreach ($route->gatherMiddleware() as $middleware) {
+                    [$alias, $arguments] = array_pad(explode(':', $middleware, 2), 2, '');
+                    $class = [
+                        'auth' => CheckRole::class, 'role' => CheckRole::class,
+                        'staff.permission' => \App\Http\Middleware\CheckStaffPermission::class,
+                        'platform.permission' => \App\Http\Middleware\CheckPlatformPermission::class,
+                    ][$alias] ?? null;
+                    if (!$class) continue;
+                    $args = $arguments === '' ? [] : explode(',', $arguments);
+                    $response = app($class)->handle($request, fn () => response('ok'), ...$args);
+                    $this->assertSame(200, $response->getStatusCode(), $account->role.' sees forbidden link '.$url);
+                }
+                $checked++;
+            }
+            $this->assertGreaterThan(3, $checked, $account->role);
+        }
+    }
+
 }

@@ -313,7 +313,7 @@
                                                     Lokasi <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="text" class="form-control modern-input" id="lokasi" 
-                                                       name="lokasi" value="Desa Pematang Duku Timur" required />
+                                                       name="lokasi" value="{{ old('lokasi') }}" placeholder="Isi alamat lokasi layanan" required />
                                             </div>
                                             
                                         </div>

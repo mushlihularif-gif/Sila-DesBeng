@@ -135,7 +135,7 @@ class NotificationController extends Controller
 
             return redirect()->back()->with('success', 'Notifikasi berhasil dihapus.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus notifikasi: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Notifikasi belum berhasil dihapus. Silakan coba kembali.');
         }
     }
 
@@ -145,7 +145,7 @@ class NotificationController extends Controller
             // Hard delete dinonaktifkan demi keamanan audit log (Log Wiping Defense)
             return redirect()->back()->with('error', 'Penghapusan massal dinonaktifkan untuk menjaga integritas Audit Trail.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus semua notifikasi: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Notifikasi belum berhasil dihapus. Silakan coba kembali.');
         }
     }
 }

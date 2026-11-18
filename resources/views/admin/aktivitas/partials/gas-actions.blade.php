@@ -37,10 +37,10 @@
                 <button class="btn btn-primary" onclick="updateStatus('arrived')">Gas Siap Diambil</button>
             @endif
         @elseif($request->status === 'in_delivery')
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadProofModal">Gas Sudah Tiba — Unggah Bukti</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadProofModal">Gas Sudah Tiba â€” Unggah Bukti</button>
         @elseif($request->status === 'arrived')
             @if($gasPaid)
-                <button class="btn btn-success" onclick="updateStatus('completed')">Gas Diterima — Selesaikan Pesanan</button>
+                <button class="btn btn-success" onclick="updateStatus('completed')">Gas Diterima â€” Selesaikan Pesanan</button>
             @else
                 <p class="alert alert-warning">Konfirmasi uang diterima sebelum menyelesaikan pesanan.</p>
             @endif

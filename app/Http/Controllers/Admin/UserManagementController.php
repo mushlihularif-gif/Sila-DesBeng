@@ -74,13 +74,7 @@ class UserManagementController extends Controller
             $usersQuery->whereIn('region_id', $filterAllowedIds);
         }
         
-        $users = $usersQuery->when($search, function ($query, $search) {
-                return $query->where(function($q) use ($search) {
-                    $q->searchWhereLike(['name', 'email'], $search);
-                });
-            })
-            ->orderBy('name', 'asc')
-            ->paginate(10)
+        $users = \App\Support\UserDirectory::paginate($usersQuery, $search, 10)
             ->appends([
                 'search' => $search, 
                 'filter_kecamatan_id' => $filter_kecamatan_id,

@@ -76,6 +76,7 @@
 
     @endif
 
+    <button type="button" id="btn-alamat-baru-pesanan" class="mt-3 text-sm font-semibold text-blue-700 underline">Gunakan alamat baru untuk pesanan ini</button>
     @unless($gunakanPetaTerpisah ?? false)
     <div class="mt-3 rounded-xl border border-blue-100 bg-blue-50/60 p-3">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -106,6 +107,7 @@
 </div>
 
 @push('scripts')
+@include('partials.google-maps-loader')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const daftar = document.getElementById('daftar-alamat-tersimpan');
@@ -117,50 +119,18 @@
         const petaEl = document.getElementById('peta-alamat-pesanan');
         const statusEl = document.getElementById('status-alamat-pesanan');
         const tombolSimpan = document.getElementById('btn-simpan-alamat-pesanan');
-        let peta = null, penanda = null;
+        let picker = null;
         let alamatTersimpanTerpilih = false;
 
-        function aturTitik(lat, lng, zoom = 17) {
+        function aturTitik(lat, lng) {
             if (elLat) elLat.value = Number(lat).toFixed(7);
             if (elLng) elLng.value = Number(lng).toFixed(7);
-            if (peta && penanda) {
-                penanda.setLatLng([lat, lng]);
-                peta.setView([lat, lng], zoom);
-            }
+            picker?.sync();
         }
-
-        function siapkanPeta() {
-            if (!petaEl || !window.L || peta) return;
-            const lat = parseFloat(elLat?.value) || 1.4854;
-            const lng = parseFloat(elLng?.value) || 102.1512;
-            peta = L.map(petaEl).setView([lat, lng], elLat?.value ? 17 : 13);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(peta);
-            penanda = L.marker([lat, lng], { draggable: true }).addTo(peta);
-            peta.on('click', e => aturTitik(e.latlng.lat, e.latlng.lng));
-            penanda.on('dragend', e => {
-                const titik = e.target.getLatLng();
-                aturTitik(titik.lat, titik.lng);
-            });
-            setTimeout(() => peta?.invalidateSize(), 100);
-        }
-
-        function muatLeaflet() {
-            if (window.L) return siapkanPeta();
-            if (document.getElementById('leaflet-address-css')) return;
-            const css = document.createElement('link');
-            css.id = 'leaflet-address-css'; css.rel = 'stylesheet';
-            css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-            document.head.appendChild(css);
-            const js = document.createElement('script');
-            js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-            js.onload = siapkanPeta;
-            js.onerror = () => { if (statusEl) statusEl.textContent = 'Peta tidak berhasil dimuat. Periksa koneksi, atau simpan alamat melalui menu Alamat Saya.'; };
-            document.head.appendChild(js);
-        }
-
-        if (petaEl) muatLeaflet();
+        if (petaEl) SegiMaps.picker({
+            element: petaEl, latitude: elLat, longitude: elLng, address: elAlamat,
+            onChange: () => { alamatTersimpanTerpilih = false; }
+        }).then(value => { picker = value; }).catch(() => {});
 
         function pakai(kartu) {
             const isi = JSON.parse(kartu.dataset.isi || '{}');
@@ -175,10 +145,7 @@
             if (elLat) elLat.value = isi.lat ?? '';
             if (elLng) elLng.value = isi.lng ?? '';
             if (isi.lat != null && isi.lng != null) aturTitik(isi.lat, isi.lng);
-            else if (peta && penanda) {
-                penanda.setLatLng([1.4854, 102.1512]);
-                peta.setView([1.4854, 102.1512], 13);
-            }
+            else picker?.sync();
             alamatTersimpanTerpilih = true;
             window.dispatchEvent(new CustomEvent('alamat-warga-dipilih', { detail: isi }));
 
@@ -189,6 +156,15 @@
         }
 
         daftar?.querySelectorAll('.kartu-alamat').forEach(kartu => kartu.addEventListener('click', function () { pakai(this); }));
+        document.getElementById('btn-alamat-baru-pesanan')?.addEventListener('click', () => {
+            alamatTersimpanTerpilih = false;
+            if (elAlamat) { elAlamat.value = ''; elAlamat.dispatchEvent(new Event('input', { bubbles: true })); elAlamat.focus(); }
+            if (elLat) elLat.value = '';
+            if (elLng) elLng.value = '';
+            picker?.sync();
+            daftar?.querySelectorAll('.kartu-alamat').forEach(k => k.classList.remove('ring-2', 'ring-blue-500'));
+            if (statusEl) statusEl.textContent = 'Isi alamat dan pilih titik baru. Alamat tersimpan Anda tetap tersedia.';
+        });
 
         // Alamat utama diisikan otomatis kalau kolomnya masih kosong. Warga yang
         // hanya punya satu alamat jadi tidak perlu menekan apa pun.
@@ -226,9 +202,10 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     },
                     body: JSON.stringify({
-                        nama_penerima: @json(auth()->user()->name),
-                        no_telepon: @json(auth()->user()->phone ?? auth()->user()->kontak ?? ''),
-                        region_id: @json(auth()->user()->region_id),
+                        nama_penerima: elNama?.value.trim() || @json(auth()->user()->name),
+                        no_telepon: elTelepon?.value.trim() || @json(auth()->user()->phone ?? auth()->user()->kontak ?? ''),
+                        // Alamat pesanan bisa berbeda dari domisili akun. Wilayah
+                        // opsional; jangan mengirim ID RT sebagai ID desa alamat.
                         detail_alamat: detail,
                         latitude: elLat.value,
                         longitude: elLng.value,
@@ -237,6 +214,7 @@
                 });
                 const hasil = await response.json();
                 if (!response.ok) throw new Error(hasil.message || Object.values(hasil.errors || {}).flat()[0] || 'Alamat gagal disimpan.');
+                alamatTersimpanTerpilih = true;
                 statusEl.textContent = hasil.message || 'Alamat tersimpan. Anda dapat menggunakannya pada pesanan berikutnya.';
                 statusEl.className = 'mt-2 text-xs text-green-700 font-semibold';
                 window.dispatchEvent(new CustomEvent('alamat-warga-tersimpan', { detail: hasil.alamat || {} }));

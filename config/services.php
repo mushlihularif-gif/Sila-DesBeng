@@ -38,11 +38,12 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => config('app.url') . '/auth/google/callback',
+        'redirect' => env('GOOGLE_REDIRECT_URL') ?: rtrim(env('APP_URL', 'http://localhost'), '/') . '/auth/google/callback',
     ],
 
     'google_maps' => [
         'api_key' => env('GOOGLE_MAPS_API_KEY'),
+        'map_id' => env('GOOGLE_MAPS_MAP_ID', 'DEMO_MAP_ID'),
     ],
 
     // Kotak masuk Gmail via IMAP (baca-saja) untuk panel kanan dashboard admin.
