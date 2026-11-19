@@ -69,6 +69,21 @@ class PartnershipAuditTest extends TestCase
         $this->assertSame([true,false,false], array_column($data,'is_joined'));
     }
 
+    public function test_service_directory_renders_without_district_officials_or_contact_data(): void
+    {
+        // These fixtures deliberately contain no organization or system-settings tables.
+        $this->actingAs($this->user(1));
+        view()->share('errors', new ViewErrorBag());
+        $page = app(\App\Http\Controllers\User\RegionDirectoryController::class)->index(Request::create('/'));
+        $html = $page->render();
+        $this->assertStringContainsString('Layanan di Kecamatan Bengkalis', $html);
+        $this->assertStringContainsString('unit-carousel-container', $html);
+        $this->assertStringContainsString('Lihat desa yang sudah dan belum bergabung', $html);
+        $this->assertStringNotContainsString('Struktur Organisasi dan Tata Kerja', $html);
+        $this->assertStringNotContainsString('Pemerintah Kecamatan Bengkalis', $html);
+        if ($directory = getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($directory.'/service-directory.html', $html);
+    }
+
     public function test_rt_rw_form_does_not_depend_on_an_active_village_admin(): void
     {
         // Desa B has an active service, but its village administrator is inactive.

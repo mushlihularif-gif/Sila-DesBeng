@@ -148,12 +148,6 @@
                                             $kinerjaTitle = 'Kinerja Tingkat Kabupaten';
                                             $pendapatanTitle = 'Jumlah Pendapatan Layanan Kabupaten';
                                             $perbandinganTitle = 'Perbandingan Transaksi Kabupaten';
-                                        } elseif ($role == 'admin_kecamatan') {
-                                            $name = \App\Models\Region::find(auth()->user()->region_id)->name ?? 'Kecamatan';
-                                            $regionName = 'Pemerintah ' . $name;
-                                            $kinerjaTitle = 'Kinerja Tingkat Kecamatan';
-                                            $pendapatanTitle = 'Jumlah Pendapatan Layanan Kecamatan';
-                                            $perbandinganTitle = 'Perbandingan Transaksi Kecamatan';
                                         } else {
                                             $name = \App\Models\Region::find(auth()->user()->region_id)->name ?? 'Desa';
                                             $regionName = 'Pemerintah ' . $name;

@@ -226,18 +226,6 @@
                                     @endforeach
                                 </select>
                             </div>
-                            @elseif(auth()->user()->role === 'admin_kecamatan')
-                            <div class="col-12 col-md-7">
-                                <label class="form-label fw-semibold text-muted small mb-1">Filter Desa/Kelurahan</label>
-                                <select id="filter_desa_id" name="filter_desa_id" class="form-select bg-light border-0" onchange="this.form.submit()">
-                                    <option value="">-- Semua Desa --</option>
-                                    @foreach($desaOptions as $opt)
-                                        <option value="{{ $opt->id }}" {{ request('filter_desa_id') == $opt->id ? 'selected' : '' }}>
-                                            {{ $opt->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
                             @else
                             <div class="col-12 col-md-7">
                                 <!-- Spacer untuk admin desa -->

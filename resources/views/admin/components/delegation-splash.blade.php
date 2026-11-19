@@ -24,7 +24,7 @@
                     </div>
 
                     <p class="text-muted mb-4">
-                        Sebagai <strong>{{ Auth::user()->role === 'super_admin' ? 'Super Admin' : (Auth::user()->role === 'admin_kecamatan' ? 'Admin Kecamatan' : 'Admin Desa') }}</strong>, Anda bertindak sebagai <strong>Supervisor</strong>. Anda tetap dapat masuk, memantau, dan jika dalam keadaan darurat (staf kewalahan/berhalangan), Anda dapat mengambil alih operasional harian.
+                        Sebagai <strong>{{ Auth::user()->role === 'super_admin' ? 'Super Admin' : 'Admin Desa' }}</strong>, Anda bertindak sebagai <strong>Supervisor</strong>. Anda tetap dapat masuk, memantau, dan jika dalam keadaan darurat (staf kewalahan/berhalangan), Anda dapat mengambil alih operasional harian.
                     </p>
 
                     <div class="d-grid gap-2">

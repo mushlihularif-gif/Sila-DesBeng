@@ -168,7 +168,7 @@ class AppServiceProvider extends ServiceProvider
                 } else if (in_array($user->role, ['admin_desa'])) {
                     // Staf memakai region_id warisan pembuatnya, jadi cabang yang
                     // sama dengan admin wilayah sudah tepat.
-                    // For admin_kecamatan and admin_desa, check their own region_id
+                    // For region administrators, check their own region_id
                     $region = \App\Models\Region::with(['services' => fn($q) => $q->wherePivot('is_active', true)])->find($user->region_id);
                     if ($region) {
                         $activeServicesMenu = $region->services->pluck('name')->toArray();

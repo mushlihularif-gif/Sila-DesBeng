@@ -329,9 +329,6 @@
                     $roleBadgeClass = 'bg-label-info';
                     if (in_array($user->role, ['super_admin'])) {
                         $roleBadgeClass = 'bg-label-danger';
-                    } elseif ($user->role === 'admin_kecamatan') {
-                        $roleLabel = 'Kecamatan';
-                        $roleBadgeClass = 'bg-label-warning';
                     } elseif ($user->role === 'admin_desa') {
                         $roleLabel = 'Desa';
                         $roleBadgeClass = 'bg-label-primary';
@@ -455,9 +452,6 @@
             $roleBadgeClass = 'bg-label-info';
             if (in_array($user->role, ['super_admin'])) {
                 $roleBadgeClass = 'bg-label-danger';
-            } elseif ($user->role === 'admin_kecamatan') {
-                $roleLabel = 'Kecamatan';
-                $roleBadgeClass = 'bg-label-warning';
             } elseif ($user->role === 'admin_desa') {
                 $roleLabel = 'Desa';
                 $roleBadgeClass = 'bg-label-primary';

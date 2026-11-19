@@ -858,14 +858,7 @@
 
         updateKecamatan();
         
-        @if(auth()->user()->role === 'admin_kecamatan')
-            kabSelect.value = "{{ auth()->user()->region->parent_id ?? '' }}";
-            kabSelect.dispatchEvent(new Event('change'));
-            kecSelect.value = "{{ auth()->user()->region_id }}";
-            kecSelect.dispatchEvent(new Event('change'));
-            kabSelect.disabled = true;
-            kecSelect.disabled = true;
-        @elseif(auth()->user()->role === 'admin_desa')
+        @if(auth()->user()->role === 'admin_desa')
             let desaId = "{{ auth()->user()->region_id }}";
             let myDesa = regions.find(r => r.id == desaId);
             if(myDesa) {

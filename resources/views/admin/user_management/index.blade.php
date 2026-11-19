@@ -132,24 +132,6 @@
                             @endforeach
                         </select>
                     </div>
-                @elseif(auth()->user()->role === 'admin_kecamatan')
-                    <div class="col-12 col-md-7">
-                        <div class="input-group modern-search shadow-sm bg-white">
-                            <span class="input-group-text"><i class="bx bx-search"></i></span>
-                            <input type="text" id="search" name="search" class="form-control" placeholder="Cari nama, username, email..." value="{{ $search }}">
-                            <button class="btn btn-primary px-4" type="submit" style="font-weight: 600; font-size: 0.9rem; height: 44px;">Cari</button>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-5">
-                        <select id="filter_desa_id" name="filter_desa_id" class="form-select modern-select shadow-sm bg-white">
-                            <option value="">-- Semua Desa --</option>
-                            @foreach($desaOptions as $opt)
-                                <option value="{{ $opt->id }}" {{ $filter_desa_id == $opt->id ? 'selected' : '' }}>
-                                    {{ $opt->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
                 @else
                     <div class="col-12 col-md-6">
                         <div class="input-group modern-search shadow-sm bg-white">

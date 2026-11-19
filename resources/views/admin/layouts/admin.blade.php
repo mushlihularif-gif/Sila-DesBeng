@@ -1349,9 +1349,7 @@
                                 <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="menu-link">
                                     @php
                                         $sidebarRegionLabel = 'Pemerintah Desa';
-                                        if(auth()->user()->role === 'admin_kecamatan') {
-                                            $sidebarRegionLabel = 'Pemerintah Kecamatan';
-                                        } elseif(in_array(auth()->user()->role, ['super_admin'])) {
+                                        if(in_array(auth()->user()->role, ['super_admin'])) {
                                             $sidebarRegionLabel = 'Pemerintah Kabupaten';
                                         }
                                     @endphp
@@ -1571,7 +1569,6 @@
                                             'admin_desa' => 'Admin Desa',
                                             'admin_rw' => 'Admin RW',
                                             'admin_rt' => 'Admin RT',
-                                            'admin_kecamatan' => 'Admin Kecamatan',
                                             'staff' => 'Staf Unit',
                                             'user' => 'Pengguna',
                                         ];
