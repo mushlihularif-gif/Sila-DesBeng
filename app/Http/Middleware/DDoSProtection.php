@@ -3,23 +3,14 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Cache\FileStore;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Skenario 32: Advanced DDoS Protection Middleware
- * 
- * Pertahanan berlapis terhadap serangan DDoS (Distributed Denial of Service):
- * - Layer 1: Rate limiting per IP (maks 100 request/menit)
- * - Layer 2: Auto-ban IP yang melebihi batas (blokir 30 menit)
- * - Layer 3: Deteksi pola serangan (request terlalu cepat)
- * - Layer 4: Challenge untuk request mencurigakan
- * 
- * Mengapa: Serangan DDoS membanjiri server dengan jutaan request palsu
- * hingga server kehabisan RAM/CPU dan web mati total.
- */
+/** Application request limits per IP, configured in config/ddos.php. */
 class DDoSProtection
 {
     /**
@@ -37,6 +28,16 @@ class DDoSProtection
 
     public function handle(Request $request, Closure $next): Response
     {
+        try {
+            return $this->handleRequest($request, $next);
+        } catch (LockTimeoutException) {
+            // Contention is not another strike against a shared connection.
+            return $this->limited($request, 1);
+        }
+    }
+
+    private function handleRequest(Request $request, Closure $next): Response
+    {
         $ip = $request->ip();
         
         // Skip untuk localhost/development
@@ -53,18 +54,17 @@ class DDoSProtection
 
         // Layer 1: Cek apakah IP sudah di-ban
         $ban = Cache::get('ddos_ban:' . $ip);
+        if (is_int($ban) && $ban <= now()->timestamp) {
+            Cache::forget('ddos_ban:' . $ip);
+            $ban = null;
+        }
         if ($ban !== null) {
             // Versi sebelumnya menyimpan true tanpa waktu berakhir.
             $wait = is_int($ban) ? max(1, $ban - now()->timestamp) : $this->batas('ban_menit', 10) * 60;
             return $this->limited($request, $wait);
         }
 
-        // Cache::increment menggunakan operasi atomik pada cache store yang
-        // mendukungnya. Pola get()+put() sebelumnya dapat kehilangan hit saat
-        // banyak request bersamaan memakai IP yang sama.
-        $perSecondKey = 'ddos_sec:' . $ip;
-        Cache::add($perSecondKey, 0, now()->addSecond());
-        $perSecondCount = Cache::increment($perSecondKey);
+        $perSecondCount = $this->countWindow('ddos_sec:' . $ip, 1);
 
         // Layer 2: Cek rate limit per detik (deteksi burst/flood)
         if ($perSecondCount > $this->batas('per_detik', 30)) {
@@ -72,9 +72,7 @@ class DDoSProtection
         }
         
         // Layer 3: Cek rate limit per menit
-        $perMinuteKey = 'ddos_min:' . $ip;
-        Cache::add($perMinuteKey, 0, now()->addMinute());
-        $perMinuteCount = Cache::increment($perMinuteKey);
+        $perMinuteCount = $this->countWindow('ddos_min:' . $ip, 60);
 
         if ($perMinuteCount > $this->batas('per_menit', 600)) {
             return $this->limited($request, $this->addStrike($ip, $request, 60) ?? 60);
@@ -124,6 +122,30 @@ class DDoSProtection
         return response()->view('errors.429', ['limitMessage' => $message], 429, $headers);
     }
 
+    private function countWindow(string $key, int $seconds): int
+    {
+        if (!(Cache::getStore() instanceof FileStore)) {
+            Cache::add($key, 0, now()->addSeconds($seconds));
+            return (int) Cache::increment($key);
+        }
+
+        // FileStore::increment is read/modify/write, not atomic. If its key expires
+        // between add() and increment(), it can recreate the counter without TTL.
+        // Keep the expiry inside the payload and serialize changes with a file lock.
+        // A new namespace leaves old, potentially immortal counters unused.
+        $key .= ':window-v3';
+        return Cache::lock($key.':lock', 5)->block(1, function () use ($key, $seconds) {
+            $now = now()->timestamp;
+            $window = Cache::get($key);
+            if (!is_array($window) || ($window['expires'] ?? 0) <= $now) {
+                $window = ['count'=>0, 'expires'=>$now + $seconds];
+            }
+            $window['count']++;
+            Cache::put($key, $window, max(1, $window['expires'] - $now));
+            return $window['count'];
+        });
+    }
+
     private function addStrike(string $ip, Request $request, int $windowSeconds): ?int
     {
         // Semua permintaan berlebih tetap ditolak, satu lonjakan dihitung sekali.
@@ -131,8 +153,7 @@ class DDoSProtection
             return null;
         }
         $key = 'ddos_strike_v2:' . $ip;
-        Cache::add($key, 0, now()->addHour());
-        $strikes = Cache::increment($key);
+        $strikes = $this->countWindow($key, 3600);
         if ($strikes < $this->batas('strike', 5)) {
             return null;
         }
@@ -140,6 +161,7 @@ class DDoSProtection
         $expires = now()->addMinutes($this->batas('ban_menit', 10));
         Cache::put('ddos_ban:' . $ip, $expires->timestamp, $expires);
         Cache::forget($key);
+        Cache::forget($key.':window-v3');
         Log::warning('DDOS_PROTECTION: IP BANNED', [
             'ip' => $ip, 'strikes' => $strikes, 'path' => $request->path(),
         ]);
