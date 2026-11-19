@@ -114,10 +114,14 @@ class PartnerApplicationController extends Controller
             }
         }
 
+        // RT/RW use the account's village, independently of whether its admin is active.
+        $canApplyRtRw = $userDesa && $userKecamatan?->id === $kecamatanFokus->id;
+
         return view('pages.kemitraan.create', compact(
             'regions',
             'kecamatans',
             'isJoined',
+            'canApplyRtRw',
             'userDesa',
             'userKecamatan',
             'existingRws',

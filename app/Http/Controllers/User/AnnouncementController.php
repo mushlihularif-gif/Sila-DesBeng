@@ -55,14 +55,14 @@ class AnnouncementController extends Controller
 
     public function show($id)
     {
-        $announcement = Announcement::with(['region', 'admin', 'laporan', 'laporan.user', 'images'])
+        $announcement = Announcement::with(['region', 'admin', 'publisher', 'images'])
             ->visibleTo(auth()->user())
             ->findOrFail($id);
 
         app(\App\Services\ContentViewService::class)->record($announcement, request());
 
         // Ambil rekomendasi kabar dari kategori yang sama terlebih dahulu
-        $relatedAnnouncements = Announcement::where('is_active', true)
+        $relatedAnnouncements = Announcement::with('images')->visibleTo(auth()->user())
             ->where('id', '!=', $id)
             ->where('post_category', $announcement->post_category)
             ->orderBy('published_at', 'desc')
@@ -72,7 +72,7 @@ class AnnouncementController extends Controller
         // Jika kurang dari 4, lengkapi dengan kabar aktif lainnya agar rekomendasi tidak kosong
         if ($relatedAnnouncements->count() < 4) {
             $excludeIds = array_merge([$id], $relatedAnnouncements->pluck('id')->toArray());
-            $otherAnnouncements = Announcement::where('is_active', true)
+            $otherAnnouncements = Announcement::with('images')->visibleTo(auth()->user())
                 ->whereNotIn('id', $excludeIds)
                 ->orderBy('published_at', 'desc')
                 ->take(4 - $relatedAnnouncements->count())

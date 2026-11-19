@@ -69,6 +69,43 @@ class PartnershipAuditTest extends TestCase
         $this->assertSame([true,false,false], array_column($data,'is_joined'));
     }
 
+    public function test_rt_rw_form_does_not_depend_on_an_active_village_admin(): void
+    {
+        // Desa B has an active service, but its village administrator is inactive.
+        $this->actingAs($this->user(6));
+        $page = app(PartnerApplicationController::class)->create();
+        $this->assertFalse($page->getData()['isJoined']);
+        $this->assertTrue($page->getData()['canApplyRtRw']);
+        view()->share('errors', new ViewErrorBag());
+        $html = $page->render();
+        foreach (['desa', 'rw', 'rt'] as $role) {
+            preg_match('/<button[^>]*data-partner-role="'.$role.'"[^>]*>/', $html, $button);
+            $this->assertNotEmpty($button);
+            $this->assertStringNotContainsString('disabled', $button[0]);
+        }
+        $this->assertStringContainsString('id="domicile_fields"', $html);
+        $this->assertStringContainsString('id="region_selectors"', $html);
+        if ($directory = getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($directory.'/partnership-no-admin.html', $html);
+    }
+
+    public function test_missing_or_outside_domicile_explains_unavailable_rt_rw_roles(): void
+    {
+        foreach ([null, 10] as $regionId) {
+            DB::table('users')->where('id',1)->update(['region_id'=>$regionId]);
+            $this->actingAs($this->user(1));
+            $page = app(PartnerApplicationController::class)->create();
+            $this->assertFalse($page->getData()['canApplyRtRw']);
+            view()->share('errors', new ViewErrorBag());
+            $html = $page->render();
+            foreach (['rw', 'rt'] as $role) {
+                preg_match('/<button[^>]*data-partner-role="'.$role.'"[^>]*>/', $html, $button);
+                $this->assertNotEmpty($button);
+                $this->assertStringContainsString('disabled', $button[0]);
+            }
+            $this->assertStringContainsString('Lengkapi domisili', $html);
+        }
+    }
+
     public function test_web_rejects_rt_request_without_a_domicile(): void
     {
         DB::table('users')->where('id',1)->update(['region_id'=>null]);

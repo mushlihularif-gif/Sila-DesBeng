@@ -99,7 +99,7 @@
                         } else if(document.getElementById('btn-open-login-mobile')) {
                             document.getElementById('btn-open-login-mobile').click();
                         }" class="btn-outline shadow-sm hover:shadow-lg">
-                        <span>{{ $isJoined ? 'Daftarkan Jabatan Pengurus RT/RW' : 'Daftarkan Kemitraan Desa' }}</span>
+                        <span>Ajukan Kepengurusan Wilayah</span>
                     </button>
                 @else
                     @if(auth()->user()->verification_status !== 'verified')
@@ -115,11 +115,11 @@
                             setTimeout(() => { t.style.transform = 'translateX(150%)'; t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
                             setTimeout(() => { window.location.href = '{{ route('user.verifikasi.index') }}'; }, 1500);
                         " class="btn-outline shadow-sm hover:shadow-lg">
-                            <span>{{ $isJoined ? 'Daftarkan Jabatan Pengurus RT/RW' : 'Daftarkan Kemitraan Desa' }}</span>
+                            <span>Ajukan Kepengurusan Wilayah</span>
                         </button>
                     @else
                         <button onclick="openModal()" class="btn-outline shadow-sm hover:shadow-lg">
-                            <span>{{ $isJoined ? 'Daftarkan Jabatan Pengurus RT/RW' : 'Daftarkan Kemitraan Desa' }}</span>
+                            <span>Ajukan Kepengurusan Wilayah</span>
                         </button>
                     @endif
                 @endguest
@@ -386,10 +386,10 @@
                             {{-- Judul Tengah --}}
                             <div class="text-center flex-1 px-4">
                                 <h3 class="text-2xl font-bold text-gray-900 uppercase tracking-wide" id="modal-title">
-                                    {{ $isJoined ? 'FORM PENGAJUAN KEMITRAAN WILAYAH' : 'FORM PENGAJUAN KEMITRAAN DESA' }}
+                                    Form Pengajuan Pengelola Wilayah
                                 </h3>
                                 <p class="text-base text-gray-500 mt-2">
-                                    {{ $isJoined ? 'Daftarkan wilayah Anda untuk bergabung' : 'Daftarkan desa Anda untuk bergabung' }}
+                                    Ajukan kepengurusan desa, kelurahan, RW, atau RT sesuai mandat Anda.
                                 </p>
                                 <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis</p>
                             </div>
@@ -424,10 +424,16 @@
                                 <legend class="font-bold text-gray-900 mb-2">Daftar sebagai apa?</legend>
                                 <p class="text-sm text-gray-600 mb-3">Pilih jabatan yang Anda ajukan. Akun pengelola aktif setelah pengajuan disetujui.</p>
                                 <div class="segi-role-choices">
-                                    @foreach(($isJoined ? ['rw' => 'Pengurus RW', 'rt' => 'Pengurus RT'] : ['desa' => 'Pengelola Desa / Kelurahan']) as $kind => $label)
-                                        <button type="button" class="segi-outline" data-partner-role="{{ $kind }}" aria-pressed="false">{{ $label }}</button>
+                                    @foreach(['desa' => 'Pengelola Desa / Kelurahan', 'rw' => 'Pengurus RW', 'rt' => 'Pengurus RT'] as $kind => $label)
+                                        <button type="button" class="segi-outline" data-partner-role="{{ $kind }}" aria-pressed="false" @disabled($kind === 'desa' ? $isJoined : !$canApplyRtRw)>{{ $label }}</button>
                                     @endforeach
                                 </div>
+                                @if(!$canApplyRtRw)
+                                    <p class="text-sm text-gray-600 mt-3">Pengajuan RT/RW memerlukan domisili akun di desa atau kelurahan Kecamatan Bengkalis. Lengkapi domisili melalui <a href="{{ url('/pengaturan') }}" class="underline">Pengaturan</a> terlebih dahulu.</p>
+                                @endif
+                                @if($isJoined)
+                                    <p class="text-sm text-gray-600 mt-3">Desa Anda sudah memiliki Admin Desa aktif. Anda dapat mengajukan kepengurusan RT atau RW yang masih tersedia.</p>
+                                @endif
                                 <p class="text-xs text-gray-500 mt-3">Staf layanan dibuat oleh Admin Desa melalui menu Staf Layanan.</p>
                             </fieldset>
                             {{-- Baris 1: Data Pribadi & Jabatan (4 kolom) --}}
@@ -440,12 +446,9 @@
                                     <label for="region_type" class="block text-sm font-semibold text-gray-700 mb-1">Tingkat Jabatan</label>
                                     <select id="region_type" name="region_type" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789]" required onchange="updateJabatanOptions()">
                                         <option value="" disabled selected>Pilih Tingkat</option>
-                                        @if(!$isJoined)
-                                            <option value="desa">Pemerintah Desa / Kelurahan</option>
-                                        @else
-                                            <option value="rw">Pengurus RW</option>
-                                            <option value="rt">Pengurus RT</option>
-                                        @endif
+                                        <option value="desa" @disabled($isJoined)>Pemerintah Desa / Kelurahan</option>
+                                        <option value="rw" @disabled(!$canApplyRtRw)>Pengurus RW</option>
+                                        <option value="rt" @disabled(!$canApplyRtRw)>Pengurus RT</option>
                                     </select>
                                 </div>
                                 <div>
@@ -473,12 +476,13 @@
                             <div class="flex items-center gap-2 mb-4">
                                 <svg class="w-6 h-6 shrink-0" style="color: #2f80ed;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                 <h4 class="font-bold text-gray-800 text-sm ml-1">
-                                    {{ $isJoined ? 'Informasi Wilayah Domisili Anda' : 'Informasi Wilayah Anda' }}
+                                    Wilayah yang Diajukan
                                 </h4>
                                 <div class="flex-1 border-b border-gray-200"></div>
                             </div>
 
-                            @if($isJoined)
+                            @if($canApplyRtRw)
+                                <div id="domicile_fields" style="display: none;">
                                 {{-- Wilayah Domisili Terkunci (3 Kolom) --}}
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-4">
                                     {{-- Kabupaten --}}
@@ -504,7 +508,7 @@
                                         <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Desa / Kelurahan</label>
                                         <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-700 text-sm font-bold shadow-sm flex items-center justify-between">
                                             <span>{{ $userDesa->name ?? '-' }}</span>
-                                            <span class="text-[11px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-normal">Terdaftar</span>
+                                            <span class="text-[11px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-normal">Domisili Akun</span>
                                         </div>
                                     </div>
                                 </div>
@@ -512,7 +516,7 @@
                                 {{-- Notice Penguncian Wilayah --}}
                                 <div class="mb-5 px-3.5 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
                                     <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                                    <span>Wilayah Kabupaten, Kecamatan, dan Desa dikunci otomatis sesuai identitas akun terverifikasi Anda untuk menjaga keamanan serta mencegah pendaftaran lintas desa.</span>
+                                    <span>Pengajuan RT/RW mengikuti domisili akun Anda. Wilayah desa tidak dapat diganti melalui formulir ini.</span>
                                 </div>
 
                                 {{-- Box Pilihan / Input Wilayah RW atau RT --}}
@@ -602,9 +606,11 @@
                                         </div>
                                     </div>
                                 </div>
-                            @else
+                                </div>
+                            @endif
+                            @if(!$isJoined)
                                 {{-- Baris 2: Pemilihan Wilayah Desa Baru (Jika Desa Belum Terdaftar) --}}
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6" id="region_selectors">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6" id="region_selectors" style="display: none;">
                                     {{-- Kabupaten (Fixed) --}}
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kabupaten</label>
@@ -627,7 +633,7 @@
                                     {{-- Kelurahan/Desa (Langsung Aktif) --}}
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Desa / Kelurahan</label>
-                                        <select id="sel_desa" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" required onchange="onDesaChange()">
+                                        <select id="sel_desa" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" disabled onchange="onDesaChange()">
                                             <option value="" disabled selected>Pilih Desa / Kelurahan</option>
                                         </select>
                                     </div>
@@ -644,7 +650,7 @@
                                 {{-- Upload Dokumen --}}
                                 <div>
                                     <label for="document" class="block text-sm font-semibold text-gray-700 mb-1">
-                                        {{ $isJoined ? 'Unggah Surat Pendukung / Bukti Mandat (Maks 5MB)' : 'Unggah SK / Surat Tugas Resmi (Maks 5MB)' }}
+                                        Unggah SK / Surat Tugas / Bukti Mandat (Maks 5MB)
                                     </label>
                                     <label for="document" class="flex items-center gap-3 rounded-lg border-2 border-dashed border-gray-300 px-4 py-4 bg-gray-50 hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer group">
                                         <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
@@ -657,7 +663,7 @@
                                                 <span class="text-gray-500">atau seret dan lepas</span>
                                             </div>
                                             <p class="text-xs text-gray-400 mt-0.5" id="file-name-display">
-                                                {{ $isJoined ? 'SK, Surat Tugas, Surat Pengantar Desa, atau Berita Acara Mandat (PDF, PNG, JPG maks 5MB)' : 'SK Jabatan atau Surat Tugas resmi Pemerintah Desa (PDF, PNG, JPG maks 5MB)' }}
+                                                SK, Surat Tugas, Surat Pengantar Desa, atau Berita Acara Mandat sesuai jabatan yang diajukan (PDF, PNG, JPG maks 5MB)
                                             </p>
                                         </div>
                                     </label>
@@ -666,9 +672,9 @@
                                 {{-- Pesan Tambahan --}}
                                 <div>
                                     <label for="reason" class="block text-sm font-semibold text-gray-700 mb-1">
-                                        {{ $isJoined ? 'Catatan / Alasan Pengajuan Mandat' : 'Pesan Tambahan' }}
+                                        Catatan / Alasan Pengajuan Mandat
                                     </label>
-                                    <textarea id="reason" name="reason" rows="3" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="{{ $isJoined ? 'Tuliskan catatan singkat pengajuan mandat atau alasan mengajukan kepengurusan RT/RW...' : 'Alasan mengapa wilayah desa Anda ingin bergabung...' }}">{{ old('reason') }}</textarea>
+                                    <textarea id="reason" name="reason" rows="3" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="Jelaskan mandat dan alasan pengajuan kepengurusan Anda...">{{ old('reason') }}</textarea>
                                 </div>
                             </div>
 
@@ -739,7 +745,7 @@
 @endpush
 
 <script>
-    const isJoined = @json($isJoined);
+    const canApplyRtRw = @json($canApplyRtRw);
     const allRegions = @json($regions);
     const existingRwsData = @json($existingRwsData ?? []);
     const userDesaId = {{ $userDesa ? $userDesa->id : 'null' }};
@@ -757,7 +763,7 @@
     const selRegionType = document.getElementById('region_type');
     const positionSel = document.getElementById('position');
     
-    // Elements for isJoined mode
+    // Fields for RT/RW applications within the account domicile
     const sectionWilayahRtRw = document.getElementById('section_wilayah_rtrw');
     const boxInputRw = document.getElementById('box_input_rw');
     const boxInputRt = document.getElementById('box_input_rt');
@@ -778,6 +784,15 @@
 
     function updateJabatanOptions() {
         const type = selRegionType.value;
+        const isLocalRole = ['rw', 'rt'].includes(type) && canApplyRtRw;
+        const domicileFields = document.getElementById('domicile_fields');
+        const villageFields = document.getElementById('region_selectors');
+        if (domicileFields) domicileFields.style.display = isLocalRole ? 'block' : 'none';
+        if (villageFields) villageFields.style.display = type === 'desa' ? '' : 'none';
+        if (selDesa) { selDesa.disabled = type !== 'desa'; selDesa.required = type === 'desa'; }
+        hiddenParent.value = '';
+        hiddenName.value = '';
+        hiddenParentRwName.value = '';
         positionSel.innerHTML = '<option value="" disabled selected>Pilih Jabatan</option>';
         
         let options = [];
@@ -795,7 +810,7 @@
             positionSel.appendChild(el);
         });
 
-        if (isJoined) {
+        if (isLocalRole) {
             if (sectionWilayahRtRw) sectionWilayahRtRw.style.display = 'block';
             if (type === 'rw') {
                 if (boxInputRw) boxInputRw.style.display = 'block';
@@ -816,7 +831,7 @@
             } else {
                 if (sectionWilayahRtRw) sectionWilayahRtRw.style.display = 'none';
             }
-        } else {
+        } else if (type === 'desa') {
             // Mode Desa Belum Terdaftar
             if (selDesa) {
                 selDesa.disabled = true;
@@ -824,6 +839,7 @@
             }
             if (selKec && selKec.value) onKecamatanChange();
         }
+        checkSubmitButtonState();
     }
 
     // --- LOGIKA PENGURUS RW ---
@@ -884,7 +900,7 @@
     }
 
     function syncRwValues() {
-        if (!isJoined) return;
+        if (!canApplyRtRw || selRegionType.value !== 'rw') return;
         hiddenParent.value = userDesaId;
         hiddenParentRwName.value = '';
 
@@ -1025,7 +1041,7 @@
     }
 
     function syncRtValues() {
-        if (!isJoined) return;
+        if (!canApplyRtRw || selRegionType.value !== 'rt') return;
 
         // Tentukan RW Induk
         if (selRtParentRw && selRtParentRw.value && selRtParentRw.value !== '__manual__') {
@@ -1075,7 +1091,7 @@
         const btn = document.getElementById('btn-submit-partner');
         if (!btn) return;
         const type = selRegionType ? selRegionType.value : '';
-        if (isJoined) {
+        if (canApplyRtRw) {
             if ((type === 'rw' && isRwBlocked) || (type === 'rt' && isRtBlocked)) {
                 btn.disabled = true;
                 btn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -1086,7 +1102,7 @@
         btn.classList.remove('opacity-50', 'cursor-not-allowed');
     }
 
-    // Handler untuk Mode Desa Belum Bergabung (isJoined == false)
+    // Fields for village administrator applications
     function initDesaPilihan() {
         if (!selDesa) return;
         const kecId = selKec ? selKec.value : (allRegions.find(r => r.type === 'kecamatan')?.id || '');
@@ -1113,10 +1129,11 @@
     }
 
     function updateFormHiddenValuesDesa() {
-        if (isJoined) return;
+        if (selRegionType.value !== 'desa') return;
+        hiddenParentRwName.value = '';
         if (selKec && selDesa) {
             hiddenParent.value = selKec.value;
-            hiddenName.value = selDesa.options[selDesa.selectedIndex]?.text || '';
+            hiddenName.value = selDesa.value ? selDesa.options[selDesa.selectedIndex]?.text || '' : '';
         }
     }
 
@@ -1125,7 +1142,7 @@
     if (partnerForm) {
         partnerForm.addEventListener('submit', function(e) {
             const type = selRegionType.value;
-            if (isJoined) {
+            if (['rw', 'rt'].includes(type) && canApplyRtRw) {
                 if (type === 'rw') {
                     syncRwValues();
                     if (isRwBlocked) {
