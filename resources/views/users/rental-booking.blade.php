@@ -541,8 +541,8 @@
                             <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
                         </div>
                         
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4 whitespace-pre-wrap">
-                            {{ $sop_penyewaan_alat }}
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4">
+                            <x-service-terms :text="$sop_penyewaan_alat" />
                         </div>
                         
                         <div class="flex items-center">
@@ -720,8 +720,8 @@
                             <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
                         </div>
                         
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4 whitespace-pre-wrap">
-                            {{ $sop_penyewaan_alat }}
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4">
+                            <x-service-terms :text="$sop_penyewaan_alat" />
                         </div>
                         
                         <div class="flex items-center">

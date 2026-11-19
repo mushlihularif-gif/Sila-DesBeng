@@ -101,78 +101,91 @@ class FasilitasBookingApiController extends Controller
             'butuh_gudang' => 'nullable|boolean',
             'quantity' => 'nullable|integer|min:1|max:100',
             'payment_method' => 'nullable|in:tunai,transfer',
+            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'delivery_method' => 'nullable|string',
             'dengan_supir' => 'nullable|boolean',
-        ]);
+        ], ['payment_proof.required_if'=>'Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.', 'payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
 
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
-            $fasilitas = FasilitasUmum::inCatalog()->lockForUpdate()->findOrFail($request->fasilitas_id);
+        $proofPath = null;
+        try {
+            return \Illuminate\Support\Facades\DB::transaction(function () use ($request, &$proofPath) {
+                $fasilitas = FasilitasUmum::inCatalog()->lockForUpdate()->findOrFail($request->fasilitas_id);
 
-            if ($fasilitas->stok !== null && $fasilitas->stok < ($request->quantity ?? 1)) {
+                if ($fasilitas->stok !== null && $fasilitas->stok < ($request->quantity ?? 1)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Fasilitas sedang tidak tersedia.',
+                    ], 422);
+                }
+
+                $startDate = \Carbon\Carbon::parse($request->start_date);
+                $endDate = \Carbon\Carbon::parse($request->end_date);
+                $daysCount = $startDate->diffInDays($endDate) + 1;
+
+                // Harga mengikuti katalog dan kebijakan yang sama dengan web.
+                $jenisAcara = $request->jenis_acara === 'pribadi' ? 'komersial' : ($request->jenis_acara ?? 'sosial');
+                $totalAmount = $fasilitas->status_biaya === 'berbayar' && $jenisAcara === 'komersial'
+                    ? $daysCount * $fasilitas->harga_sewa * ($request->quantity ?? 1) : 0;
+                $paymentMethod = $totalAmount > 0 ? ($request->payment_method ?? 'tunai') : null;
+
+                if ($paymentMethod === 'transfer') {
+                    $request->validate(['payment_proof'=>'required|file|mimes:jpg,jpeg,png,pdf|max:5120'], ['payment_proof.required'=>'Unggah bukti transfer untuk melanjutkan pemesanan.']);
+                    $proofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
+                }
+
+                $booking = FasilitasUmumBooking::create([
+                    'user_id' => $request->user()->id,
+                    'fasilitas_id' => $fasilitas->id,
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date,
+                    'quantity' => $request->quantity ?? 1,
+                    'rental_purpose' => $request->rental_purpose,
+                    'jenis_acara' => $jenisAcara,
+                    'payment_method' => $paymentMethod,
+                    'butuh_gudang' => $request->butuh_gudang ?? false,
+                    'total_amount' => $totalAmount,
+                    'status' => 'pending',
+                    'payment_proof' => $proofPath,
+                    'delivery_method' => $request->delivery_method,
+                    'dengan_supir' => $request->dengan_supir ?? false,
+                    'region_id' => $fasilitas->region_id,
+                ]);
+
+                if ($totalAmount > 0) {
+                    \App\Models\WalletTransaction::catatPemasukan($fasilitas->region_id, 'fasilitas', $booking->id, $totalAmount, $paymentMethod, $proofPath);
+                }
+                // Stok dialokasikan saat admin menyetujui, sama seperti pemesanan web.
+
+                // Notifikasi untuk User
+                \App\Models\Notification::create([
+                    'user_id' => $request->user()->id,
+                    'type' => 'status_berubah',
+                    'title' => 'Pemesanan Berhasil',
+                    'message' => 'Pemesanan Fasilitas (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
+                    'link' => \App\Services\NotificationService::orderLink($booking, 'fasilitas'),
+                    'icon' => 'fas fa-calendar-check text-green-500',
+                ]);
+
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Fasilitas sedang tidak tersedia.',
-                ], 422);
-            }
-
-            $startDate = \Carbon\Carbon::parse($request->start_date);
-            $endDate = \Carbon\Carbon::parse($request->end_date);
-            $daysCount = $startDate->diffInDays($endDate) + 1;
-
-            // Harga mengikuti katalog dan kebijakan yang sama dengan web.
-            $jenisAcara = $request->jenis_acara === 'pribadi' ? 'komersial' : ($request->jenis_acara ?? 'sosial');
-            $totalAmount = $fasilitas->status_biaya === 'berbayar' && $jenisAcara === 'komersial'
-                ? $daysCount * $fasilitas->harga_sewa * ($request->quantity ?? 1) : 0;
-            $paymentMethod = $totalAmount > 0 ? ($request->payment_method ?? 'tunai') : null;
-
-            $booking = FasilitasUmumBooking::create([
-                'user_id' => $request->user()->id,
-                'fasilitas_id' => $fasilitas->id,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'quantity' => $request->quantity ?? 1,
-                'rental_purpose' => $request->rental_purpose,
-                'jenis_acara' => $jenisAcara,
-                'payment_method' => $paymentMethod,
-                'butuh_gudang' => $request->butuh_gudang ?? false,
-                'total_amount' => $totalAmount,
-                'status' => 'pending',
-                'delivery_method' => $request->delivery_method,
-                'dengan_supir' => $request->dengan_supir ?? false,
-                'region_id' => $fasilitas->region_id,
-            ]);
-
-            if ($totalAmount > 0) {
-                \App\Models\WalletTransaction::catatPemasukan($fasilitas->region_id, 'fasilitas', $booking->id, $totalAmount, $paymentMethod);
-            }
-            // Stok dialokasikan saat admin menyetujui, sama seperti pemesanan web.
-
-            // Notifikasi untuk User
-            \App\Models\Notification::create([
-                'user_id' => $request->user()->id,
-                'type' => 'status_berubah',
-                'title' => 'Pemesanan Berhasil',
-                'message' => 'Pemesanan Fasilitas (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
-                'link' => \App\Services\NotificationService::orderLink($booking, 'fasilitas'),
-                'icon' => 'fas fa-calendar-check text-green-500',
-            ]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pemesanan fasilitas berhasil dibuat.',
-                'data' => [
-                    'id' => $booking->id,
-                    'order_number' => $booking->order_number,
-                    'item_name' => $fasilitas->nama_fasilitas,
-                    'days_count' => $daysCount,
-                    'jenis_acara' => $booking->jenis_acara,
-                    'total_amount' => (float) $totalAmount,
-                    'status' => $booking->status,
-                    'start_date' => $booking->start_date->format('Y-m-d'),
-                    'end_date' => $booking->end_date->format('Y-m-d'),
-                ],
-            ], 201);
-        });
+                    'status' => 'success',
+                    'message' => 'Pemesanan fasilitas berhasil dibuat.',
+                    'data' => [
+                        'id' => $booking->id,
+                        'order_number' => $booking->order_number,
+                        'item_name' => $fasilitas->nama_fasilitas,
+                        'days_count' => $daysCount,
+                        'jenis_acara' => $booking->jenis_acara,
+                        'total_amount' => (float) $totalAmount,
+                        'status' => $booking->status,
+                        'start_date' => $booking->start_date->format('Y-m-d'),
+                        'end_date' => $booking->end_date->format('Y-m-d'),
+                    ],
+                ], 201);
+            });
+        } catch (\Throwable $e) {
+            if ($proofPath) \Illuminate\Support\Facades\Storage::disk('public')->delete($proofPath);
+            throw $e;
+        }
     }
 
     /**

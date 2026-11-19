@@ -105,75 +105,87 @@ class MobilBookingApiController extends Controller
             'recipient_name' => 'required|string|max:255',
             'delivery_address' => 'nullable|string|max:500',
             'payment_method' => 'required|in:tunai,transfer',
+            'payment_proof' => 'required_if:payment_method,transfer|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'rental_purpose' => 'nullable|string|max:500',
             'delivery_method' => 'nullable|in:antar,jemput',
             'dengan_supir' => 'nullable|boolean',
             'distance_km' => 'nullable|numeric|min:0',
-        ]);
+        ], ['payment_proof.required_if'=>'Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.', 'payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
 
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
-            $mobil = Mobil::inCatalog()->lockForUpdate()->findOrFail($request->mobil_id);
+        $proofPath = null;
+        try {
+            return \Illuminate\Support\Facades\DB::transaction(function () use ($request, &$proofPath) {
+                $mobil = Mobil::inCatalog()->lockForUpdate()->findOrFail($request->mobil_id);
 
-            if (!$mobil->hasStock(1)) {
+                if (!$mobil->hasStock(1)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Kendaraan sedang tidak tersedia.',
+                    ], 422);
+                }
+
+                $startDate = \Carbon\Carbon::parse($request->start_date);
+                $endDate = \Carbon\Carbon::parse($request->end_date);
+                $daysCount = $startDate->diffInDays($endDate) + 1;
+                $totalAmount = $mobil->harga_sewa * $daysCount;
+
+                if ($request->payment_method === 'transfer') {
+                    $proofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
+                }
+
+                $booking = MobilBooking::create([
+                    'user_id' => $request->user()->id,
+                    'mobil_id' => $mobil->id,
+                    'quantity' => 1,
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date,
+                    'recipient_name' => $request->recipient_name,
+                    'delivery_address' => $request->delivery_address,
+                    'delivery_method' => $request->delivery_method ?? 'jemput',
+                    'payment_method' => $request->payment_method,
+                    'rental_purpose' => $request->rental_purpose,
+                    'dengan_supir' => $request->dengan_supir ?? false,
+                    'distance_km' => $request->distance_km,
+                    'total_amount' => $totalAmount,
+                    'status' => 'pending',
+                    'payment_proof' => $proofPath,
+                    'region_id' => $mobil->region_id,
+                ]);
+
+                \App\Models\WalletTransaction::catatPemasukan($mobil->region_id, 'mobil', $booking->id, $totalAmount, $request->payment_method, $proofPath);
+
+                // Stok dialokasikan saat admin menyetujui, sama seperti pemesanan web.
+
+                // Notifikasi untuk User
+                \App\Models\Notification::create([
+                    'user_id' => $request->user()->id,
+                    'type' => 'status_berubah',
+                    'title' => 'Pemesanan Berhasil',
+                    'message' => 'Pemesanan Mobil (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
+                    'link' => \App\Services\NotificationService::orderLink($booking, 'mobil'),
+                    'icon' => 'fas fa-car text-blue-500',
+                ]);
+
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Kendaraan sedang tidak tersedia.',
-                ], 422);
-            }
-
-            $startDate = \Carbon\Carbon::parse($request->start_date);
-            $endDate = \Carbon\Carbon::parse($request->end_date);
-            $daysCount = $startDate->diffInDays($endDate) + 1;
-            $totalAmount = $mobil->harga_sewa * $daysCount;
-
-            $booking = MobilBooking::create([
-                'user_id' => $request->user()->id,
-                'mobil_id' => $mobil->id,
-                'quantity' => 1,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'recipient_name' => $request->recipient_name,
-                'delivery_address' => $request->delivery_address,
-                'delivery_method' => $request->delivery_method ?? 'jemput',
-                'payment_method' => $request->payment_method,
-                'rental_purpose' => $request->rental_purpose,
-                'dengan_supir' => $request->dengan_supir ?? false,
-                'distance_km' => $request->distance_km,
-                'total_amount' => $totalAmount,
-                'status' => 'pending',
-                'region_id' => $mobil->region_id,
-            ]);
-
-            \App\Models\WalletTransaction::catatPemasukan($mobil->region_id, 'mobil', $booking->id, $totalAmount, $request->payment_method);
-
-            // Stok dialokasikan saat admin menyetujui, sama seperti pemesanan web.
-
-            // Notifikasi untuk User
-            \App\Models\Notification::create([
-                'user_id' => $request->user()->id,
-                'type' => 'status_berubah',
-                'title' => 'Pemesanan Berhasil',
-                'message' => 'Pemesanan Mobil (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
-                'link' => \App\Services\NotificationService::orderLink($booking, 'mobil'),
-                'icon' => 'fas fa-car text-blue-500',
-            ]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pemesanan kendaraan berhasil dibuat.',
-                'data' => [
-                    'id' => $booking->id,
-                    'order_number' => $booking->order_number,
-                    'item_name' => $mobil->nama_mobil,
-                    'days_count' => $daysCount,
-                    'total_amount' => (float) $totalAmount,
-                    'dengan_supir' => $booking->dengan_supir,
-                    'status' => $booking->status,
-                    'start_date' => $booking->start_date->format('Y-m-d'),
-                    'end_date' => $booking->end_date->format('Y-m-d'),
-                ],
-            ], 201);
-        });
+                    'status' => 'success',
+                    'message' => 'Pemesanan kendaraan berhasil dibuat.',
+                    'data' => [
+                        'id' => $booking->id,
+                        'order_number' => $booking->order_number,
+                        'item_name' => $mobil->nama_mobil,
+                        'days_count' => $daysCount,
+                        'total_amount' => (float) $totalAmount,
+                        'dengan_supir' => $booking->dengan_supir,
+                        'status' => $booking->status,
+                        'start_date' => $booking->start_date->format('Y-m-d'),
+                        'end_date' => $booking->end_date->format('Y-m-d'),
+                    ],
+                ], 201);
+            });
+        } catch (\Throwable $e) {
+            if ($proofPath) \Illuminate\Support\Facades\Storage::disk('public')->delete($proofPath);
+            throw $e;
+        }
     }
 
     /**

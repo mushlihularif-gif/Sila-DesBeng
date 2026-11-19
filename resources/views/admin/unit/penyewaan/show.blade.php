@@ -108,8 +108,8 @@
                                             <i class="bx bx-trash me-1"></i> Hapus
                                         </button>
                                     </form>
-                                    <a href="{{ route('admin.unit.penyewaan.index') }}" class="btn btn-outline-secondary px-4">
-                                        <i class="bx bx-arrow-back me-1"></i> Kembali
+                                    <a href="{{ route('admin.unit.penyewaan.index') }}" class="segi-back btn btn-outline-secondary px-4">
+                                         Kembali
                                     </a>
                                 </div>
                             </div>

@@ -58,7 +58,7 @@
                             <p class="text-sm font-semibold text-gray-700">{{ $item->billing_basis === 'per_day' ? 'Harga sewa per unit per hari' : 'Harga sewa per unit untuk sekali kegiatan' }}</p>
                         </div>
 
-                        <details class="mb-6 rounded-xl border border-blue-100 bg-blue-50 p-4"><summary class="font-bold text-[#115789] cursor-pointer">Informasi Penting dan Ketentuan Pemakaian</summary><p class="mt-3 text-sm text-gray-700 whitespace-pre-line">{{ \App\Support\ServiceTerms::forRegion($item->region, 'rental') }}</p><p class="mt-3 text-sm text-gray-600">Pastikan jadwal dan ketersediaan melalui Chat Pengelola sebelum menggunakan layanan.</p></details>
+                        <details class="mb-6 rounded-xl border border-blue-100 bg-blue-50 p-4"><summary class="font-bold text-[#115789] cursor-pointer">Informasi Penting dan Ketentuan Pemakaian</summary><x-service-terms :text="\App\Support\ServiceTerms::forRegion($item->region, 'rental')" /><p class="mt-3 text-sm text-gray-600">Pastikan jadwal dan ketersediaan melalui Chat Pengelola sebelum menggunakan layanan.</p></details>
 
                         <!-- Product Details Grid -->
                         <div class="space-y-2 mb-6">

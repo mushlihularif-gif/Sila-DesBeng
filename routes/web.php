@@ -70,6 +70,7 @@ Route::prefix('kelola-kabar')->name('content.')->middleware(['auth'])->group(fun
     Route::post('/', [\App\Http\Controllers\ContentWorkspaceController::class, 'store'])->middleware('throttle:20,1')->name('store');
     Route::post('/ai', [\App\Http\Controllers\ContentWorkspaceController::class, 'ai'])->middleware('throttle:10,1')->name('ai');
     Route::get('/{announcement}', [\App\Http\Controllers\ContentWorkspaceController::class, 'show'])->name('show');
+    Route::delete('/{announcement}', [\App\Http\Controllers\ContentWorkspaceController::class, 'destroy'])->name('destroy');
     Route::get('/{announcement}/state', [\App\Http\Controllers\ContentWorkspaceController::class, 'state'])->middleware('throttle:90,1')->name('state');
     Route::get('/{announcement}/sources', [\App\Http\Controllers\ContentWorkspaceController::class, 'sources'])->name('sources');
     Route::post('/{announcement}/claim', [\App\Http\Controllers\ContentWorkspaceController::class, 'claim'])->middleware('throttle:30,1')->name('claim');

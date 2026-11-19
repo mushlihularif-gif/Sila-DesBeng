@@ -33,6 +33,27 @@ class NotificationDeliveryService
         return hash_hmac('sha256',$digits,config('app.key'));
     }
 
+    /** Reuse successful WhatsApp OTP proof; never infer ownership from a typed phone number. */
+    public function recordVerifiedPhone(User $user, string $phone): void
+    {
+        if (!$phone || !$user->phone || !hash_equals($this->phoneHash($phone), $this->phoneHash($user->phone))
+            || !Schema::hasTable('notification_settings')) return;
+        DB::table('notification_settings')->updateOrInsert(['user_id'=>$user->id], [
+            'verified_phone_hash'=>$this->phoneHash($phone), 'updated_at'=>now(),
+        ]);
+    }
+
+    public function preferences(User $user): array
+    {
+        $settings = $this->settings($user);
+        return [
+            'settings'=>$settings,
+            'categories'=>json_decode($settings?->categories ?? '{}', true) ?: [],
+            'verified'=>(bool)($settings?->verified_phone_hash && hash_equals($settings->verified_phone_hash, $this->phoneHash($user->phone))),
+            'history'=>DB::table('notification_deliveries')->where('user_id',$user->id)->latest('id')->limit(30)->get(['category','channel','state','error_code','created_at','updated_at']),
+        ];
+    }
+
     public function settings(User $user): ?object
     {
         return DB::table('notification_settings')->where('user_id',$user->id)->first();

@@ -68,6 +68,9 @@ class Announcement extends Model
         return $this->belongsTo(User::class, 'admin_id');
     }
 
+    public function editor() { return $this->belongsTo(User::class, 'editor_id'); }
+    public function mergedInto() { return $this->belongsTo(self::class, 'merged_into_id'); }
+
     public function publisher()
     {
         return $this->belongsTo(User::class, 'publisher_id');

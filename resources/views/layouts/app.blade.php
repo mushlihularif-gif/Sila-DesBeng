@@ -118,6 +118,7 @@
 
     {{-- Page-specific styles --}}
     @stack('styles')
+<link rel="stylesheet" href="{{ asset('css/segidaerah-ui.css') }}?v={{ filemtime(public_path('css/segidaerah-ui.css')) }}">
 </head>
 <body class="antialiased text-gray-900 bg-white min-h-screen flex flex-col overflow-x-hidden">
     {{-- Global Navigation Progress Indicator --}}

@@ -1,7 +1,7 @@
 @extends('admin.layouts.admin')
 @section('content')
 <div class="container-xxl py-4">
-    <a href="{{ route('admin.unit.penjualan_gas.index') }}">← Kembali ke Gas Daerah</a>
+    <a class="segi-back" href="{{ route('admin.unit.penjualan_gas.index') }}"> Kembali ke Gas Daerah</a>
     <h3 class="mt-3">Periksa Kartu Keluarga</h3>
     <p>Periksa foto, lalu salin nomor KK dan NIK anggotanya. Foto hanya dapat dibuka selama pengajuan menunggu pemeriksaan. Jangan mengunduh atau membagikan foto warga.</p>
     @if($errors->any())<div class="alert alert-danger">{{ $errors->first() }}</div>@endif

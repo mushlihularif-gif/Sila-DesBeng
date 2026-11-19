@@ -28,8 +28,8 @@
                                     </p>
                                 </div>
                             </div>
-                            <a href="{{ route('admin.dashboard') }}" class="btn btn-light rounded-pill px-4 shadow-sm">
-                                <i class="bx bx-arrow-back me-2"></i>Kembali
+                            <a href="{{ route('admin.dashboard') }}" class="segi-back btn btn-light rounded-pill px-4 shadow-sm">
+                                Kembali
                             </a>
                         </div>
                     </div>
@@ -112,8 +112,8 @@
                                 Tidak ada hasil yang cocok dengan pencarian "<strong class="text-primary">{{ $search }}</strong>". 
                                 Coba gunakan kata kunci lain atau periksa ejaan Anda.
                             </p>
-                            <a href="{{ route('admin.dashboard') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
-                                <i class="bx bx-home me-2"></i>Kembali ke Dashboard
+                            <a href="{{ route('admin.dashboard') }}" class="segi-back btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                                Kembali ke Dashboard
                             </a>
                         </div>
                     </div>

@@ -31,8 +31,8 @@
                         <a href="{{ $bypassUrl }}" class="btn btn-primary btn-lg fw-semibold d-flex align-items-center justify-content-center shadow-sm">
                             <i class="bx bx-log-in-circle me-2"></i> Tetap Masuk dan Pantau Layanan
                         </a>
-                        <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
-                            <i class="bx bx-arrow-back me-2"></i> Kembali ke Dashboard
+                        <a href="{{ route('admin.dashboard') }}" class="segi-back btn btn-outline-secondary">
+                             Kembali ke Dashboard
                         </a>
                     </div>
                 </div>

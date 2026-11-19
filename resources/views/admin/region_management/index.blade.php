@@ -69,8 +69,8 @@
                 <span class="text-muted fw-light">Sistem /</span> Kelola Hierarki Wilayah
             </h4>
             @if(in_array(auth()->user()->role, ['admin_rw', 'admin_rt']) || $targetType == 'rt')
-                <a href="{{ route('admin.kelola-wilayah.index') }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bx bx-arrow-back me-1"></i> Kembali
+                <a href="{{ route('admin.kelola-wilayah.index') }}" class="segi-back btn btn-sm btn-outline-secondary">
+                     Kembali
                 </a>
             @endif
         </div>

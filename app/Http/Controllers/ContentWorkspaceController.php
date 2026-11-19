@@ -42,6 +42,23 @@ class ContentWorkspaceController extends Controller
         return redirect()->route('content.show', $item);
     }
 
+    public function destroy(Request $request, Announcement $announcement)
+    {
+        $data = $request->validate(['revision'=>'required|integer|min:0']);
+        DB::transaction(function () use ($request, $announcement, $data) {
+            $item = Announcement::lockForUpdate()->findOrFail($announcement->id);
+            abort_unless((int) $item->admin_id === (int) $request->user()->id, 404);
+            abort_unless($item->workflow_state === 'draft' && !$item->is_active, 422, 'Hanya draf yang belum dikirim yang dapat dihapus.');
+            abort_unless($item->revision === (int) $data['revision'], 409, 'Draf telah berubah. Muat ulang sebelum menghapus.');
+            abort_if($item->edit_expires_at?->isFuture() && $item->editor_id != $request->user()->id, 409, 'Draf sedang diedit.');
+            abort_if(DB::table('announcement_sources')->where('source_id', $item->id)->exists(), 409, 'Kiriman sudah dipakai sebagai sumber berita.');
+            $item->allImages()->delete();
+            $item->delete();
+            // The existing maintenance job removes unreferenced private media after one day.
+        });
+        return redirect()->route('content.index')->with('success', 'Draf berhasil dihapus.');
+    }
+
     private function summary(Announcement $item): array
     {
         $editor = $item->edit_expires_at?->isFuture() ? User::find($item->editor_id) : null;
@@ -50,6 +67,7 @@ class ContentWorkspaceController extends Controller
             'category' => $item->post_category, 'state' => $item->workflow_state, 'revision' => $item->revision,
             'author' => $item->admin?->name ?? 'Warga', 'editor' => $editor?->name,
             'editor_role' => $editor?->role, 'updated_at' => $item->updated_at?->toIso8601String(),
+            'editor_is_author' => $editor && (int) $editor->id === (int) $item->admin_id,
             'url' => route('content.show', $item),
         ];
     }

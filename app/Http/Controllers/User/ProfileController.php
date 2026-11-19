@@ -80,7 +80,8 @@ class ProfileController extends Controller
             : collect();
 
         $isSettings = request()->routeIs('user.settings');
-        return view('users.profile', compact('isSettings', 'user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name', 'kecamatans', 'currentDesaId'));
+        $notificationPreferences = $isSettings ? app(\App\Services\NotificationDeliveryService::class)->preferences($user) : [];
+        return view('users.profile', compact('notificationPreferences', 'isSettings', 'user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name', 'kecamatans', 'currentDesaId'));
     }
 
     /**

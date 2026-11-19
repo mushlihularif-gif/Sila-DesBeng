@@ -26,10 +26,10 @@
                 </p>
             @endif
             <!-- Menu Pilihan (Grid 3 Kolom di Mobile, Flex di Layar Lebar) -->
-            <div class="grid grid-cols-3 sm:flex sm:flex-row justify-center gap-2 sm:gap-6 mb-8 sm:mb-10 items-stretch sm:items-center">
+            <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4 mb-6 items-stretch">
                 <!-- Penyewaan Card -->
-                <div class="activity-menu-card active cursor-pointer w-full sm:w-auto" data-type="rental">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                <div class="activity-menu-card active cursor-pointer w-full" role="button" tabindex="0" data-type="rental">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
                             <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Penyewaan" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
@@ -38,8 +38,8 @@
                 </div>
 
                 <!-- Pesanan Gas Card -->
-                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="gas">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                <div class="activity-menu-card cursor-pointer w-full" role="button" tabindex="0" data-type="gas">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
                             <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Pesanan Gas" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
@@ -48,8 +48,8 @@
                 </div>
 
                 <!-- Penyewaan Transportasi Card -->
-                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="mobil">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                <div class="activity-menu-card cursor-pointer w-full" role="button" tabindex="0" data-type="mobil">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
                             <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Transportasi" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
@@ -58,8 +58,8 @@
                 </div>
 
                 <!-- Fasilitas Umum Card -->
-                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="fasilitas">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                <div class="activity-menu-card cursor-pointer w-full" role="button" tabindex="0" data-type="fasilitas">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
                             <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas Umum" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
@@ -68,6 +68,12 @@
                 </div>
 
                 
+                <div class="activity-menu-card cursor-pointer w-full" role="button" tabindex="0" data-type="berita">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                        <img src="{{ asset('Admin/img/kabardaerah/Berita.png') }}" alt="" class="w-9 h-9 sm:w-16 sm:h-16 object-contain mb-2">
+                        <p class="font-bold text-xs sm:text-lg text-gray-800">Berita Daerah</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Clear History Buttons (Moved to Top) -->
@@ -108,6 +114,10 @@
                 <button class="filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm" data-filter="cancelled">Batal</button>
             </div>
 
+            <div id="berita-section" class="activity-section space-y-4 hidden">
+                <div class="flex flex-wrap items-center justify-between gap-3"><p class="text-gray-600">Pantau kiriman berita dan berita yang mencantumkan kontribusi Anda.</p><a href="{{ route('content.index') }}" class="segi-primary">Kelola Berita Saya</a></div>
+                @include('users.partials.activity-news')
+            </div>
             <!-- Bagian Pesanan Sewa -->
             <div id="rental-section" class="activity-section space-y-6">
                 @include("users.partials.activity-rental")
@@ -232,6 +242,7 @@
             const savedTab = requestedTab || localStorage.getItem('active_activity_tab') || 'rental';
 
             menuCards.forEach(card => {
+                card.onkeydown = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); card.click(); } };
                 card.onclick = () => {
                     const type = card.dataset.type;
                     
@@ -239,8 +250,9 @@
                     localStorage.setItem('active_activity_tab', type);
                     
                     // Update active state
-                    menuCards.forEach(c => c.classList.remove('active'));
+                    menuCards.forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
                     card.classList.add('active');
+                    card.setAttribute('aria-pressed', 'true');
                     
                     // Hide all sections
                     document.querySelectorAll('.activity-section').forEach(s => s.classList.add('hidden'));
@@ -262,6 +274,7 @@
                         targetClearBtn.style.display = 'block';
                     }
                     
+                    document.getElementById('status-filters').hidden = type === 'berita';
                     // Re-apply current filter for the newly active section
                     const activeFilterBtn = document.querySelector('.filter-btn.active');
                     if (activeFilterBtn) {
@@ -588,12 +601,14 @@
                 gas: 1,
                 mobil: 1,
                 fasilitas: 1,
+                berita: 1,
 };
             let hasMorePages = {
                 rental: true,
                 gas: true,
                 mobil: true,
                 fasilitas: true,
+                berita: {{ $newsItems->hasMorePages() ? 'true' : 'false' }},
 };
 
             function loadMoreActivity() {

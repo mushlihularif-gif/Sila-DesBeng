@@ -147,6 +147,9 @@ class AuthController extends Controller
             $user->email_verified_at = now();
             $user->save();
 
+            if (($tempData['otp_method'] ?? 'email') === 'whatsapp') {
+                app(\App\Services\NotificationDeliveryService::class)->recordVerifiedPhone($user, $tempData['phone']);
+            }
             session()->forget('temp_registration');
             Auth::login($user, true);
             $request->session()->regenerate();

@@ -1,7 +1,7 @@
 @extends('admin.layouts.admin')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <a href="{{ route('admin.unit.kendaraan_operasional.index') }}" class="btn btn-outline-secondary mb-3"><i class="bx bx-arrow-back me-1"></i>Kembali ke Kendaraan Operasional</a>
+    <a href="{{ route('admin.unit.kendaraan_operasional.index') }}" class="segi-back btn btn-outline-secondary mb-3">Kembali ke Kendaraan Operasional</a>
     <h4 class="fw-bold mb-4">{{ $kendaraan->exists ? 'Ubah' : 'Tambah' }} Kendaraan Operasional</h4>
     <form method="POST" enctype="multipart/form-data" action="{{ $kendaraan->exists ? route('admin.unit.kendaraan_operasional.update', $kendaraan->id) : route('admin.unit.kendaraan_operasional.store') }}" class="card">
         @csrf

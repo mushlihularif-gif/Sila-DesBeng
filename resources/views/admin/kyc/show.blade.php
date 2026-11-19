@@ -94,8 +94,8 @@
             <p class="text-muted small mb-0 mt-1">Diajukan oleh <strong class="text-dark">{{ $kyc->user->name ?? 'Warga' }}</strong> pada {{ $kyc->created_at->format('d M Y, H:i') }} WIB ({{ $kyc->created_at->diffForHumans() }})</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <a href="{{ route('admin.kyc.index') }}" class="btn btn-outline-secondary rounded-pill px-3 shadow-none">
-                <i class="bx bx-arrow-back me-1"></i> Kembali ke Daftar
+            <a href="{{ route('admin.kyc.index') }}" class="segi-back btn btn-outline-secondary rounded-pill px-3 shadow-none">
+                 Kembali ke Daftar
             </a>
         </div>
     </div>

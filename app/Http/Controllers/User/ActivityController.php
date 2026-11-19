@@ -16,7 +16,7 @@ class ActivityController extends Controller
     {
         // Get authenticated user
         $user = Auth::user();
-        $request->validate(['tab' => 'sometimes|in:rental,gas,mobil,fasilitas']);
+        $request->validate(['tab' => 'sometimes|in:rental,gas,mobil,fasilitas,berita']);
         $focusedTab = $request->query('tab', 'rental');
         $focusedOrder = null;
         if ($request->filled('order')) {
@@ -33,7 +33,11 @@ class ActivityController extends Controller
             $html = '';
             $hasMore = false;
 
-            if ($tab === 'rental') {
+            if ($tab === 'berita') {
+                $items = $this->newsFor($user)->paginate(5);
+                $html = view('users.partials.activity-news', ['newsItems'=>$items])->render();
+                $hasMore = $items->hasMorePages();
+            } elseif ($tab === 'rental') {
                 $items = RentalBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'rental', fn ($q) => $q->whereKey($focusedOrder))
                     ->with('barang')
                     ->orderBy('created_at', 'desc')
@@ -75,13 +79,30 @@ class ActivityController extends Controller
         $mobilBookings = \App\Models\MobilBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'mobil', fn ($q) => $q->whereKey($focusedOrder))->with('mobil')->orderBy('created_at', 'desc')->paginate(5);
         $fasilitasBookings = \App\Models\FasilitasUmumBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'fasilitas', fn ($q) => $q->whereKey($focusedOrder))->with('fasilitas')->orderBy('created_at', 'desc')->paginate(5);
         
-        return view('users.activity', compact(
+        $newsItems = $this->newsFor($user)->paginate(5);
+        return view('users.activity', compact('newsItems',
             'rentalBookings', 
             'gasOrders', 
             'mobilBookings', 
             'fasilitasBookings',
             'setting', 'focusedOrder', 'focusedTab'
         ));
+    }
+
+    public function newsFor($user)
+    {
+        return \App\Models\Announcement::with('admin', 'editor', 'mergedInto')->where('post_category', 'Berita')
+            ->where(function ($query) use ($user) {
+                $query->where('admin_id', $user->id)->orWhere(function ($public) use ($user) {
+                    $public->where('is_active', true)->whereIn('workflow_state', ['published', 'archived'])
+                        ->where(function ($credits) use ($user) {
+                            $credits->whereExists(function ($source) use ($user) {
+                                $source->selectRaw('1')->from('announcement_sources')->whereColumn('announcement_id', 'announcements.id')
+                                    ->where('contributor_id', $user->id)->where('uses_text', true)->where('is_staged', false);
+                            })->orWhereHas('images', fn ($images) => $images->where('contributor_id', $user->id)->where('pending_removal', false));
+                        });
+                });
+            })->latest('updated_at');
     }
 
     public function requestCancellation(Request $request, $type, $id)

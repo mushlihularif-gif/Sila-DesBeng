@@ -46,23 +46,17 @@ function startList() {
             for (const item of data.items) {
                 const row = document.querySelector(`[data-item-id="${Number(item.id)}"]`);
                 if (!row) { newItems++; continue; }
+                const revisionField = row.querySelector('input[name="revision"]');
+                if (revisionField) { revisionField.value = item.revision; revisionField.form.hidden = item.state !== 'draft'; }
                 row.querySelector('[data-title]').textContent = item.title;
                 row.querySelector('[data-state]').textContent = states[item.state] || item.state;
-                row.querySelector('[data-editor]').textContent = item.editor ? `Sedang ditangani oleh ${item.editor}` : '';
+                row.querySelector('[data-editor]').textContent = item.editor ? (item.editor_is_author ? 'Sedang diedit oleh penulis' : `Sedang diperiksa oleh ${item.editor}`) : '';
             }
             const status = document.getElementById('list-sync');
             status.replaceChildren(document.createTextNode(newItems ? `${newItems} kiriman baru tersedia. ` : 'Status diperbarui otomatis.'));
             if (newItems) {
                 const button = document.createElement('button'); button.textContent = 'Tampilkan kiriman baru'; button.className = 'text-blue-700 underline';
-                button.onclick = () => { for (const item of data.items) {
-                    if (document.querySelector(`[data-item-id="${Number(item.id)}"]`)) continue;
-                    const link = document.createElement('a'); link.href = item.url; link.dataset.itemId = item.id;
-                    link.className = 'block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm';
-                    const title = document.createElement('h2'); title.dataset.title = ''; title.textContent = item.title; title.className = 'font-bold';
-                    const state = document.createElement('p'); state.dataset.state = ''; state.textContent = states[item.state] || item.state;
-                    const editor = document.createElement('p'); editor.dataset.editor = '';
-                    link.append(title, state, editor); document.getElementById('content-rows').prepend(link);
-                } status.textContent = 'Status diperbarui otomatis.'; };
+                button.onclick = () => window.location.reload();
                 status.append(button);
             }
         } catch { document.getElementById('list-sync').textContent = 'Koneksi terganggu. Status akan diperiksa kembali secara otomatis.'; }
@@ -308,7 +302,14 @@ function startWorkspace(root) {
     async function fetchHelp(mode) {
         aiVersion = changes;
         text('original-title',$('title').value); text('original-body',$('description').value);
+        const progress = $('ai-progress');
+        progress.hidden = false; progress.setAttribute('aria-busy', 'true');
+        text('ai-progress-label', mode === 'correct' ? 'AI sedang memeriksa ejaan…' : 'AI sedang menyusun judul dan berita…');
+        progress.scrollIntoView({behavior:'smooth',block:'center'});
+        try {
         proposal = await request('ai',{mode,category:snapshot.category,title:$('title').value,description:$('description').value,facts:$('facts').value,location:$('location').value,event_date:$('event_date').value || null});
+        } finally { progress.hidden = true; progress.setAttribute('aria-busy', 'false'); }
+        text('updated', 'Proses AI selesai. Periksa usulan tulisan sebelum menggunakannya.');
         text('suggested-title',proposal.title); text('suggested-body',proposal.description);
         $('ai-questions').replaceChildren(); for (const question of proposal.questions) { const li = document.createElement('li'); li.textContent = question; $('ai-questions').append(li); }
         $('ai-preview').hidden = false;

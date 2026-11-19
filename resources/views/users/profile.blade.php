@@ -15,7 +15,7 @@
 
         {{-- Peringatan Sukses ditangani secara global oleh AlpineJS Toast di app.blade.php --}}
 
-        <nav class="flex gap-4 mb-6" aria-label="Menu akun"><a href="{{ route('profile') }}" class="text-[#115789] font-semibold underline">Profil Saya</a><a href="{{ route('user.settings') }}" class="text-[#115789] font-semibold underline">Pengaturan Akun</a></nav>
+        <nav class="flex flex-wrap gap-4 mb-6" aria-label="Menu akun"><a href="{{ route('profile') }}" class="text-[#115789] font-semibold underline">Profil Saya</a><a href="{{ route('user.settings') }}" class="text-[#115789] font-semibold underline">Pengaturan Akun</a>@if($isSettings)<a href="#notifikasi" class="text-[#115789] font-semibold underline">Pemberitahuan</a>@endif</nav>
         <form action="{{ route($isSettings ? 'user.settings.update' : 'profile.update') }}" method="POST" enctype="multipart/form-data" data-turbo="false">
             @csrf
             @method('PUT')
@@ -292,6 +292,9 @@
                 @endif
         </form>
 
+        @if($isSettings)
+            @include('notifications.preferences', $notificationPreferences)
+        @endif
         {{-- Pengajuan Mutasi / Pindah Desa --}}
         @if($isSettings && $user->verification_status === 'verified')
         @php

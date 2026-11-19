@@ -121,8 +121,8 @@
                                             <i class="bx bx-trash me-1"></i> <span>Hapus</span>
                                         </button>
                                     </form>
-                                    <a href="{{ route('admin.unit.fasilitas_umum.index', ['tab' => 'gedung']) }}" class="btn btn-outline-secondary btn-sm rounded-pill flex-fill d-inline-flex align-items-center justify-content-center py-1.5 px-3" style="font-size: 0.82rem;">
-                                        <i class="bx bx-arrow-back me-1"></i> <span>Kembali</span>
+                                    <a href="{{ route('admin.unit.fasilitas_umum.index', ['tab' => 'gedung']) }}" class="segi-back btn btn-outline-secondary btn-sm rounded-pill flex-fill d-inline-flex align-items-center justify-content-center py-1.5 px-3" style="font-size: 0.82rem;">
+                                         <span>Kembali</span>
                                     </a>
                                 </div>
                             </div>

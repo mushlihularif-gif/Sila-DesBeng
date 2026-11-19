@@ -10,7 +10,7 @@ function page({ key = 'test-key', ready = true } = {}) {
         const n = { dataset: {}, style: {}, value: '', children: [], handlers: {}, disabled: false,
             setAttribute() {}, addEventListener(name, fn) { this.handlers[name] = fn; },
             appendChild(child) { this.children.push(child); }, before(child) { this.beforeNode = child; }, after(child) { this.afterNode = child; },
-            querySelectorAll() { return this.children.filter(c => c.type === 'button'); },
+            querySelectorAll() { return this.children.flatMap(c => [c, ...c.querySelectorAll()]).filter(c => c.type === 'button'); },
             dispatchEvent() {}, replaceChildren() { this.children = []; }, click() { return this.handlers.click?.(); } };
         nodes.push(n); return n;
     }
@@ -41,7 +41,7 @@ test('click/drag synchronize coordinates; saved address without point clears mar
     assert.equal(latitude.value,'1.5000000'); assert.equal(longitude.value,'102.2000000');
     p.marker.handlers.dragend({latLng:{lat:()=>0,lng:()=>102}});
     assert.equal(latitude.value,'0.0000000'); assert.equal(changes,2);
-    const share=element.beforeNode.children.find(n=>n.textContent==='Bagikan lokasi');
+    const share=p.nodes.find(n=>n.textContent==='Bagikan lokasi');
     await share.click(); assert.match(p.copied,/query=0%2C102/);
     latitude.value='';longitude.value='';picker.sync(); assert.equal(p.marker.map,null);
     await share.click();assert.match(element.afterNode.textContent,/Pilih titik/);
@@ -49,7 +49,7 @@ test('click/drag synchronize coordinates; saved address without point clears mar
 test('stale geocoder response cannot replace a subsequently selected saved address; denied GPS preserves it',async()=>{
     const p=page(),element=p.node(),latitude=p.node(),longitude=p.node(),address=p.node();address.value='Alamat awal';
     const picker=await p.api.picker({element,latitude,longitude,address});
-    const search=element.beforeNode.children.find(n=>n.textContent==='Tentukan dari alamat ini');
+    const search=p.nodes.find(n=>n.textContent==='Tentukan dari alamat ini');
     const pending=search.click();latitude.value='1';longitude.value='103';picker.sync();
     p.resolveGeo({results:[{geometry:{location:{lat:()=>5,lng:()=>100}},formatted_address:'Hasil lama'}]});await pending;
     assert.equal(latitude.value,'1');assert.equal(address.value,'Alamat awal');

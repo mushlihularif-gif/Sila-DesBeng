@@ -22,8 +22,8 @@
                         <i class="bx bx-trash me-1"></i> Hapus
                     </button>
                 </form>
-                <a href="{{ route('admin.unit.mobil.index') }}" class="btn btn-outline-secondary">
-                    <i class="bx bx-arrow-back me-1"></i> Kembali
+                <a href="{{ route('admin.unit.mobil.index') }}" class="segi-back btn btn-outline-secondary">
+                     Kembali
                 </a>
             </div>
         </div>

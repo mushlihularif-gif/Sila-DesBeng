@@ -82,6 +82,14 @@ class RentalAuditTest extends TestCase
         catch (ValidationException $e) { $this->assertSame($status,$e->status); }
     }
 
+    public function test_transfer_without_proof_is_rejected_before_creating_order(): void
+    {
+        Region::find(1)->update(['payment_info'=>['bank_name'=>'Bank Uji','account_number'=>'123']]);
+        foreach (['transfer','ewallet'] as $method) {
+            try { app(RentalOrdering::class)->store($this->req(['payment_method'=>$method])); $this->fail('Missing proof accepted'); }
+            catch (ValidationException $e) { $this->assertArrayHasKey('payment_proof', $e->errors()); }
+        }
+    }
     public function test_single_use_price_and_atomic_receipt_ledger_survive_price_changes_and_retries(): void
     {
         $key=(string)Str::uuid(); $a=$this->order(['idempotency_key'=>$key,'quantity'=>2,'total_amount'=>1]);
@@ -194,7 +202,10 @@ class RentalAuditTest extends TestCase
     public function test_transfer_proof_matches_ledger_and_can_be_resubmitted_only_when_returned(): void
     {
         Region::find(1)->update(['payment_info'=>['bank_name'=>'Bank Uji','account_number'=>'123']]);
-        $order=$this->order(['payment_method'=>'transfer']); $this->blocked(fn()=>$this->act($order,'confirmed'),409); $this->blocked(fn()=>$this->act($order,'verify'),422);
+        $initial = $this->req(['payment_method'=>'transfer']); $initial->files->set('payment_proof', UploadedFile::fake()->image('initial.jpg'));
+        $order = app(RentalOrdering::class)->store($initial)[0];
+        $this->act($order, 'reject-payment'); // Exercise replacement after the original proof is rejected.
+        $order->refresh(); $this->blocked(fn()=>$this->act($order,'confirmed'),409); $this->blocked(fn()=>$this->act($order,'verify'),422);
         $req=$this->req(); $req->files->set('payment_proof',UploadedFile::fake()->image('proof.jpg'));
         $controller=app(\App\Http\Controllers\User\RentalBookingController::class);
         $controller->uploadPayment($req,$order->id); $path=$order->fresh()->payment_proof;
@@ -283,7 +294,10 @@ class RentalAuditTest extends TestCase
     {
         view()->share('errors', new \Illuminate\Support\ViewErrorBag());
         Region::find(1)->update(['payment_info'=>['bank_name'=>'Bank Uji','account_number'=>'123']]);
-        $order=$this->order(['payment_method'=>'transfer']);
+        $initial = $this->req(['payment_method'=>'transfer']); $initial->files->set('payment_proof', UploadedFile::fake()->image('initial.jpg'));
+        $order = app(RentalOrdering::class)->store($initial)[0];
+        $this->act($order, 'reject-payment'); // Exercise replacement after the original proof is rejected.
+        $order->refresh();
         $this->view('users.rental-payment',['order'=>$order,'setting'=>\App\Support\ProfilPembayaranWilayah::untuk(1),'paid'=>false])
             ->assertSee('Kirim Bukti Pembayaran')->assertSee('700.000')->assertSee('Bank Uji');
         $notice=AdminNotification::first();

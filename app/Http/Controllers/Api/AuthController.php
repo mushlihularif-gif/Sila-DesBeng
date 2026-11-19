@@ -236,6 +236,7 @@ class AuthController extends Controller
 
         $otpCode = str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
         $tempData['otp_code'] = $otpCode;
+        $tempData['otp_method'] = $request->method;
         
         Cache::put($cacheKey, $tempData, now()->addMinutes(5));
 
@@ -295,6 +296,9 @@ class AuthController extends Controller
             'password' => $tempData['password'],
         ]);
 
+        if (($tempData['otp_method'] ?? 'email') === 'whatsapp') {
+            app(\App\Services\NotificationDeliveryService::class)->recordVerifiedPhone($user, $tempData['phone']);
+        }
         Cache::forget($cacheKey);
 
         $user->forceFill(['role' => 'user', 'status' => 'aktif', 'email_verified_at' => now()])->save();

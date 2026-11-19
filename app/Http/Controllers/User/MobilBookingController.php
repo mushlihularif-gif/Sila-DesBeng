@@ -81,10 +81,10 @@ class MobilBookingController extends Controller
             
             // Bukti wajib kalau warga memilih transfer - tanpa itu petugas tidak
             // punya dasar untuk memverifikasi pembayarannya.
-            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'payment_proof' => 'required_if:payment_method,transfer,ewallet|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             
             'rental_purpose' => 'required|string|max:1000',
-        ]);
+        ], ['payment_proof.required_if'=>'Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.', 'payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
 
         $item = Mobil::inCatalog()->findOrFail($validated['mobil_id']);
         $validated['recipient_name'] = ($validated['recipient_name'] ?? null) ?: Auth::user()->name;

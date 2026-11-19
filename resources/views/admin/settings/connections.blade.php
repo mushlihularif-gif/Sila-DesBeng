@@ -5,7 +5,7 @@
     <div class="card"><div class="card-body">
         <h5>Akun Google</h5>
         <p>{{ $user->google_id ? 'Akun SegiDaerah Anda terhubung dengan Google.' : 'Akun SegiDaerah Anda belum terhubung dengan Google.' }}</p>
-        <a href="{{ route('admin.profile') }}" class="btn btn-primary">Kembali ke Profil Akun</a>
+        <a href="{{ route('admin.profile') }}" class="segi-back btn btn-primary">Kembali ke Profil Akun</a>
     </div></div>
 </div>
 @endsection

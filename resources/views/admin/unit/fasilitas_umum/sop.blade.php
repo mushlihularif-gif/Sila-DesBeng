@@ -22,15 +22,15 @@
                             <style>
                                 .sop-card {
                                     transition: all 0.2s ease-in-out;
-                                    border: 2px solid #ffab00 !important;
-                                    background-color: #fff3cd !important;
+                                    border: 2px solid #dbeafe !important;
+                                    background-color: #fff !important;
                                 }
                                 .sop-card.active-sop {
-                                    border-width: 2px !important;
-                                    box-shadow: 0 0.25rem 1rem rgba(255, 171, 0, 0.4) !important;
+                                    border-color: #2f80ff !important;
+                                    box-shadow: 0 0.25rem 1rem rgba(47, 128, 255, 0.12) !important;
                                 }
                                 .sop-icon {
-                                    color: #ffab00;
+                                    color: #2f80ff;
                                     font-size: 1.25rem;
                                     vertical-align: middle;
                                 }
@@ -39,7 +39,7 @@
                             <div class="row mb-4">
                                 <!-- Opsi A: Ditanggung -->
                                 <div class="col-md-6 mb-3">
-                                    <div class="card sop-card {{ $sop_active == 'ditanggung' ? 'active-sop' : '' }} h-100">
+                                    <div class="card sop-card {{ $sop_active == 'ditanggung' ? 'active-sop' : '' }}">
                                         <div class="card-header d-flex justify-content-between align-items-center pb-2">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="sop_fasilitas_umum_active" id="sop_active_ditanggung" value="ditanggung" {{ $sop_active == 'ditanggung' ? 'checked' : '' }}>
@@ -52,7 +52,7 @@
                                             <p class="text-muted small mb-2">Kerusakan fasilitas menjadi tanggung jawab pengguna.</p>
                                             
                                             <div class="mb-3">
-                                                <textarea class="form-control" name="sop_fasilitas_ditanggung" id="sop_ditanggung_text" rows="8">{{ old('sop_fasilitas_ditanggung', $sop_ditanggung) }}</textarea>
+                                                <textarea data-terms-editor class="form-control" name="sop_fasilitas_ditanggung" id="sop_ditanggung_text" rows="8">{{ old('sop_fasilitas_ditanggung', $sop_ditanggung) }}</textarea>
                                             </div>
                                             
                                             <button type="button" class="btn btn-sm btn-outline-warning" onclick="resetSop('ditanggung')">
@@ -64,7 +64,7 @@
 
                                 <!-- Opsi B: Tidak Ditanggung -->
                                 <div class="col-md-6 mb-3">
-                                    <div class="card sop-card {{ $sop_active == 'tidak_ditanggung' ? 'active-sop' : '' }} h-100">
+                                    <div class="card sop-card {{ $sop_active == 'tidak_ditanggung' ? 'active-sop' : '' }}">
                                         <div class="card-header d-flex justify-content-between align-items-center pb-2">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="sop_fasilitas_umum_active" id="sop_active_tidak_ditanggung" value="tidak_ditanggung" {{ $sop_active == 'tidak_ditanggung' ? 'checked' : '' }}>
@@ -77,7 +77,7 @@
                                             <p class="text-muted small mb-2">Kerusakan tidak disengaja ditanggung oleh Dana Operasional.</p>
                                             
                                             <div class="mb-3">
-                                                <textarea class="form-control" name="sop_fasilitas_tidak_ditanggung" id="sop_tidak_ditanggung_text" rows="8">{{ old('sop_fasilitas_tidak_ditanggung', $sop_tidak_ditanggung) }}</textarea>
+                                                <textarea data-terms-editor class="form-control" name="sop_fasilitas_tidak_ditanggung" id="sop_tidak_ditanggung_text" rows="8">{{ old('sop_fasilitas_tidak_ditanggung', $sop_tidak_ditanggung) }}</textarea>
                                             </div>
                                             
                                             <button type="button" class="btn btn-sm btn-outline-warning" onclick="resetSop('tidak_ditanggung')">
@@ -90,7 +90,7 @@
                             
                             <div class="mt-4">
                                 <button type="submit" class="btn btn-primary me-2">Simpan Ketentuan</button>
-                                <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="btn btn-outline-secondary">Kembali</a>
+                                <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="segi-back btn btn-outline-secondary">Kembali</a>
                             </div>
                         </fieldset>
 </form>
@@ -116,7 +116,11 @@
             jenis: 'bahaya',
             tombolYa: 'Ya, Reset'
         }).then(function (setuju) {
-            if (setuju) document.getElementById('sop_' + type + '_text').value = defaultSops[type];
+            if (setuju) {
+                const source = document.getElementById('sop_' + type + '_text');
+                source.value = defaultSops[type];
+                source.dispatchEvent(new Event('change'));
+            }
         });
     }
 
@@ -136,3 +140,7 @@
 </script>
 @endpush
 
+
+@push('scripts')
+<script src="{{ asset('js/service-terms-editor.js') }}?v={{ filemtime(public_path('js/service-terms-editor.js')) }}" defer></script>
+@endpush

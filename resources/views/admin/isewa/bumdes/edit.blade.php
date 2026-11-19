@@ -14,8 +14,8 @@
                     </h4>
                     <p class="text-muted mb-0">Perbarui informasi anggota yang ditampilkan di halaman Profil Pemerintah</p>
                 </div>
-                <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="btn btn-outline-secondary w-100 w-sm-auto">
-                    <i class="bx bx-left-arrow-alt me-1"></i> Kembali
+                <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="segi-back btn btn-outline-secondary w-100 w-sm-auto">
+                     Kembali
                 </a>
             </div>
 

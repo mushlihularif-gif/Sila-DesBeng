@@ -14,12 +14,11 @@ class NotificationChannelController extends Controller
 
     public function index(Request $request)
     {
-        $settings=$this->delivery->settings($request->user());
-        $categories=json_decode($settings?->categories ?? '{}',true) ?: [];
-        $verified=$settings?->verified_phone_hash && hash_equals($settings->verified_phone_hash,$this->delivery->phoneHash($request->user()->phone));
-        $history=DB::table('notification_deliveries')->where('user_id',$request->user()->id)->latest('id')->limit(30)->get(['category','channel','state','error_code','created_at','updated_at']);
-        if ($request->wantsJson()) return response()->json(['categories'=>$categories,'push_enabled'=>$settings?->push_enabled ?? true,'phone_verified'=>(bool)$verified,'history'=>$history]);
-        return view('notifications.channels',compact('settings','categories','verified','history'));
+        $preferences = $this->delivery->preferences($request->user());
+        $settings = $preferences['settings'];
+        if ($request->wantsJson()) return response()->json(['categories'=>$preferences['categories'],'push_enabled'=>$settings?->push_enabled ?? true,'phone_verified'=>$preferences['verified'],'history'=>$preferences['history']]);
+        if ($request->user()->role === 'user') return redirect()->to(route('user.settings').'#notifikasi');
+        return view('notifications.channels',$preferences);
     }
 
     public function update(Request $request)

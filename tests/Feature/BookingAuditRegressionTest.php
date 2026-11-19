@@ -28,6 +28,7 @@ class BookingAuditRegressionTest extends TestCase
         foreach (['rental_bookings' => 'barang_id', 'mobil_bookings' => 'mobil_id', 'fasilitas_umum_bookings' => 'fasilitas_id'] as $table => $foreign) {
             Schema::create($table, function (Blueprint $t) use ($foreign) {
                 $t->id(); $t->unsignedBigInteger('user_id'); $t->unsignedBigInteger($foreign);
+                $t->string('payment_proof')->nullable();
                 $t->uuid('uuid')->unique(); $t->string('order_number')->unique();
                 $t->date('start_date'); $t->date('end_date'); $t->integer('quantity');
                 $t->integer('days_count')->nullable(); $t->unsignedBigInteger('region_id')->nullable();
@@ -137,6 +138,28 @@ class BookingAuditRegressionTest extends TestCase
         $this->assertEquals(40000, DB::table('wallet_transactions')->value('amount'));
     }
 
+
+    #[DataProvider('bookingTypes')]
+    public function test_api_transfer_requires_proof_and_keeps_it_with_the_ledger($controller, $table, $name, $bookings, $foreign, $quantity): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $row=['id'=>1,$name=>'Unit Uji','stok'=>3,'region_id'=>7,'status_biaya'=>'berbayar'];
+        DB::table($table)->insert($row);
+        $request=$this->requestFor($foreign,$quantity);
+        $request->merge(['payment_method'=>'transfer','jenis_acara'=>'komersial']);
+        try { app($controller)->store($request); $this->fail('Transfer without proof accepted'); }
+        catch (\Illuminate\Validation\ValidationException $e) { $this->assertArrayHasKey('payment_proof',$e->errors()); }
+        $this->assertSame(0,DB::table($bookings)->count());
+        $request=$this->requestFor($foreign,$quantity);
+        $request->merge(['payment_method'=>'transfer','jenis_acara'=>'komersial']);
+        $request->files->set('payment_proof',\Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'));
+        $this->assertSame(201,app($controller)->store($request)->getStatusCode());
+        $path=DB::table($bookings)->value('payment_proof');
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($path);
+        $this->assertSame($path,DB::table('wallet_transactions')->value('proof_path'));
+        $this->assertSame('pending',DB::table('wallet_transactions')->value('status'));
+    }
+
     public function test_history_routes_resolve_to_history_not_product_detail(): void
     {
         foreach (['mobil', 'fasilitas'] as $type) {
@@ -148,7 +171,7 @@ class BookingAuditRegressionTest extends TestCase
     public function test_web_mobil_booking_returns_receipt_id_without_an_invalid_receipt_insert(): void
     {
         Schema::table('mobil_bookings', function (Blueprint $t) {
-            $t->string('jenis_sewa'); $t->decimal('latitude')->nullable(); $t->decimal('longitude')->nullable(); $t->string('payment_proof')->nullable();
+            $t->string('jenis_sewa'); $t->decimal('latitude')->nullable(); $t->decimal('longitude')->nullable();
         });
         Schema::table('notifications', function (Blueprint $t) {
             $t->boolean('is_read')->default(false); $t->dateTime('sent_at')->nullable();

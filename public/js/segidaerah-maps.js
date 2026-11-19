@@ -54,11 +54,23 @@
             status.style.cssText = 'font-size:13px;color:#475569;margin:8px 0';
             status.textContent = 'Memuat Google Maps…';
             element.before(controls); element.after(status);
-            function button(label, action) {
+            const help = document.createElement('p'); help.setAttribute('role','note');
+            help.style.cssText = 'flex-basis:100%;font-size:13px;color:#115789;margin:0';
+            help.textContent = 'Cari alamat atau gunakan lokasi perangkat, lalu periksa penandanya. Titik ini akan dipakai untuk alamat yang Anda simpan.';
+            const more = document.createElement('details'); more.style.cssText = 'flex-basis:100%';
+            const summary = document.createElement('summary'); summary.textContent = 'Pilihan lokasi lainnya'; summary.style.cssText='cursor:pointer;color:#2f80ff;font-size:14px'; more.appendChild(summary);
+            const descriptions = {
+                'Cari':'Mencari tempat dari kata yang Anda ketik pada kolom pencarian.',
+                'Tentukan dari alamat ini':'Mencari titik dari alamat lengkap yang sudah Anda isi pada formulir, tanpa mengganti tulisan alamat.',
+                'Lokasi saya':'Menggunakan perkiraan lokasi perangkat saat ini. Izinkan akses lokasi, lalu geser penanda jika belum tepat.',
+                'Bagikan lokasi':'Membagikan tautan titik yang dipilih melalui aplikasi lain atau menyalinnya ke chat. Ini belum menyimpan alamat atau membuat pesanan.'
+            };
+            function button(label, action, extra = false) {
                 const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
-                b.style.cssText = 'border:1px solid #115789;border-radius:8px;padding:8px 12px;color:#115789;background:white';
+                b.style.cssText = 'border:1px solid #2f80ff;border-radius:8px;padding:8px 12px;color:#2f80ff;background:white';
                 b.disabled = true;
                 b.addEventListener('click', async () => {
+                    help.textContent = descriptions[label];
                     b.disabled = true;
                     try {
                         if (unavailable && label !== 'Bagikan lokasi') throw new Error('Google Maps tidak tersedia. Alamat tersimpan tetap dapat digunakan; hubungi pengelola.');
@@ -66,7 +78,7 @@
                     } catch (e) { if (e.name !== 'AbortError') status.textContent = e.message || 'Lokasi belum dapat ditentukan.'; }
                     finally { b.disabled = false; }
                 });
-                controls.appendChild(b); return b;
+                (extra ? more : controls).appendChild(b); return b;
             }
             let maps, map, marker, geocoder, revision = 0;
             const current = () => point(latitude.value, longitude.value);
@@ -97,7 +109,7 @@
             }
             const find = button('Cari', () => search(input.value));
             input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (!find.disabled) find.click(); } });
-            button('Tentukan dari alamat ini', () => search(address?.value, false));
+            button('Tentukan dari alamat ini', () => search(address?.value, false), true);
             address?.addEventListener('input', () => { revision++; });
             input.addEventListener('input', () => { revision++; });
             button('Lokasi saya', async () => {
@@ -117,7 +129,8 @@
                 if (navigator.share) await navigator.share({ title: 'Lokasi SegiDaerah', url: url(p) });
                 else if (navigator.clipboard?.writeText && root.isSecureContext) { await navigator.clipboard.writeText(url(p)); status.textContent = 'Tautan lokasi disalin. Tempelkan ke chat untuk membagikannya.'; }
                 else { status.replaceChildren(); const a = document.createElement('a'); a.href = url(p); a.textContent = 'Buka lokasi untuk membagikan tautannya'; a.target = '_blank'; a.rel = 'noopener noreferrer'; status.appendChild(a); }
-            });
+            }, true);
+            controls.appendChild(more); controls.appendChild(help);
             maps = await load();
             const { AdvancedMarkerElement } = await maps.importLibrary('marker');
             map = new maps.Map(element, { center: current() || initial, zoom: current() ? 17 : 13, mapId, streetViewControl: false, mapTypeControl: false, gestureHandling: 'cooperative' });

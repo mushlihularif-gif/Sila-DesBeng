@@ -8,9 +8,9 @@
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <a href="{{ route('admin.laporan.pendapatan') }}" class="btn btn-sm btn-icon btn-outline-secondary rounded-circle" title="Kembali">
-                    <i class="bx bx-arrow-back"></i>
-                </a>
+                <a href="{{ route('admin.laporan.pendapatan') }}" class="segi-back btn btn-sm btn-icon btn-outline-secondary rounded-circle" title="Kembali">
+
+                Kembali</a>
                 <h4 class="fw-bold fs-3 mb-0 text-primary">Riwayat Pendapatan</h4>
             </div>
             <p class="text-muted mb-0">Rincian seluruh transaksi pemasukan</p>

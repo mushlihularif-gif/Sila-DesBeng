@@ -1238,7 +1238,7 @@
             </div>
         </div>
         <div class="px-6 py-5 bg-gray-50 flex justify-center border-t border-gray-100">
-            <button type="button" onclick="document.getElementById('success-modal').style.display='none'" class="inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-10 py-3 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#115789] transition-colors sm:text-sm">
+            <button type="button" onclick="document.getElementById('success-modal').style.display='none'" class="segi-back inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-10 py-3 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#115789] transition-colors sm:text-sm">
                 Kembali
             </button>
         </div>

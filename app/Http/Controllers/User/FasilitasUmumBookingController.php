@@ -72,8 +72,8 @@ class FasilitasUmumBookingController extends Controller
             // Sebelumnya kolom payment_method/payment_proof ada di tabel tetapi
             // tidak pernah diisi, sehingga tagihannya tidak punya jejak bayar.
             'payment_method' => 'nullable|in:tunai,transfer,ewallet',
-            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-        ]);
+            'payment_proof' => 'required_if:payment_method,transfer,ewallet|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        ], ['payment_proof.required_if'=>'Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.', 'payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
 
         $item = FasilitasUmum::inCatalog()->findOrFail($validated['fasilitas_id']);
         

@@ -41,9 +41,9 @@ class RentalOrdering
             'rental_purpose' => 'required|string|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90', 'longitude' => 'nullable|numeric|between:-180,180',
             'payment_method' => 'required|in:tunai,transfer,ewallet',
-            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'payment_proof' => 'required_if:payment_method,transfer,ewallet|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'sop_accepted' => 'required|accepted', 'idempotency_key' => 'nullable|uuid',
-        ]);
+        ], ['payment_proof.required_if'=>'Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.', 'payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
         $days = (int) \Carbon\Carbon::parse($data['start_date'])->diffInDays(\Carbon\Carbon::parse($data['end_date'])) + 1;
         if ($days > 366) throw ValidationException::withMessages(['end_date' => 'Masa sewa maksimal 366 hari.']);
         $items = $package ? $data['items'] : [['barang_id' => $data['barang_id'], 'quantity' => $data['quantity']]];

@@ -30,7 +30,7 @@
                 <i class='bx bx-time-five text-5xl text-yellow-500 mb-3 animate-spin-slow'></i>
                 <h3 class="text-2xl font-bold text-yellow-800 mb-2">Menunggu Persetujuan</h3>
                 <p class="text-yellow-700">Data verifikasi Anda sedang diperiksa oleh Admin Desa. Proses ini biasanya memakan waktu 1x24 jam.</p>
-                <a href="{{ route('profile') }}" class="mt-4 inline-block px-6 py-2 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition">
+                <a href="{{ route('profile') }}" class="segi-back mt-4 inline-block px-6 py-2 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition">
                     Kembali ke Profil
                 </a>
             </div>

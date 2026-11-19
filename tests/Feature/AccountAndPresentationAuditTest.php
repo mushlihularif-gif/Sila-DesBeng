@@ -52,7 +52,8 @@ class AccountAndPresentationAuditTest extends TestCase
     {
         view()->share('errors', new \Illuminate\Support\ViewErrorBag());
         foreach ([false, true] as $settings) {
-            $html = view('users.profile', ['isSettings'=>$settings,'user'=>$this->user(8),'kecamatan_name'=>null,'desa_name'=>'Desa A','rw_name'=>'02','rt_name'=>'01','kecamatans'=>collect(),'currentDesaId'=>1])->render();
+            $html = view('users.profile', ['notificationPreferences'=>['settings'=>null,'categories'=>[],'verified'=>false,'history'=>collect()],'isSettings'=>$settings,'user'=>$this->user(8),'kecamatan_name'=>null,'desa_name'=>'Desa A','rw_name'=>'02','rt_name'=>'01','kecamatans'=>collect(),'currentDesaId'=>1])->render();
+            if ($dir=getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($dir.'/'.($settings ? 'settings' : 'profile').'.html',$html);
             $dom = new \DOMDocument(); @$dom->loadHTML($html); $xpath = new \DOMXPath($dom);
             $route = route($settings ? 'user.settings.update' : 'profile.update');
             $form = '//form[@action="'.$route.'"]';

@@ -89,6 +89,14 @@ class GasAuditTest extends TestCase
         return $family;
     }
 
+    public function test_transfer_without_proof_is_rejected_before_creating_order(): void
+    {
+        Region::find(1)->update(['payment_info'=>['bank_name'=>'Bank Uji','account_number'=>'123']]);
+        foreach (['transfer','ewallet'] as $method) {
+            try { app(GasOrdering::class)->store($this->req(['payment_method'=>$method])); $this->fail('Missing proof accepted'); }
+            catch (ValidationException $e) { $this->assertArrayHasKey('payment_proof', $e->errors()); }
+        }
+    }
     public function test_rt_resident_can_order_from_own_village_and_retry_without_duplicates(): void
     {
         $key=(string)Str::uuid(); $a=$this->order(['idempotency_key'=>$key]); $b=$this->order(['idempotency_key'=>$key]);
@@ -166,7 +174,9 @@ class GasAuditTest extends TestCase
     public function test_transfer_must_have_verified_proof_before_approval_and_can_resubmit(): void
     {
         Region::find(1)->update(['payment_info'=>['bank_name'=>'Bank Uji','account_number'=>'123']]);
-        $order=$this->order(['payment_method'=>'transfer']);
+        $initial = $this->req(['payment_method'=>'transfer']); $initial->files->set('payment_proof', UploadedFile::fake()->image('initial.jpg'));
+        $result = app(GasOrdering::class)->store($initial); $order = GasOrder::findOrFail($result['order_id']);
+        $this->act($order, 'reject-payment'); // Exercise replacement after the original proof is rejected.
         $this->blocked(fn()=>$this->act($order,'confirmed'),409); $this->blocked(fn()=>$this->act($order,'verify'),422);
         $upload=$this->req(); $upload->files->set('payment_proof',UploadedFile::fake()->image('proof.jpg'));
         app(\App\Http\Controllers\Api\GasBookingController::class)->uploadPayment($upload,$order->id);

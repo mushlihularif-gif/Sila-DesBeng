@@ -13,8 +13,8 @@
             </h4>
             <p class="text-muted small mb-0">Kirim pesan notifikasi ke pengguna aplikasi</p>
         </div>
-        <a href="{{ route('admin.notifications.index') }}" class="btn btn-outline-secondary">
-            <i class="bx bx-arrow-back me-1"></i> Kembali
+        <a href="{{ route('admin.notifications.index') }}" class="segi-back btn btn-outline-secondary">
+             Kembali
         </a>
     </div>
 

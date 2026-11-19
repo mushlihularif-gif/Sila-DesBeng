@@ -334,8 +334,8 @@
                             </div>
                         </div>
 
-                        <a href="{{ route('admin.announcements.index', ['category' => $category]) }}" class="btn btn-light btn-lg w-100 fw-semibold text-secondary mt-2" style="border-radius: 12px;">
-                            <i class="bx bx-arrow-back me-2"></i> Batal / Kembali
+                        <a href="{{ route('admin.announcements.index', ['category' => $category]) }}" class="segi-back btn btn-light btn-lg w-100 fw-semibold text-secondary mt-2" style="border-radius: 12px;">
+                             Batal / Kembali
                         </a>
 
                         <script>

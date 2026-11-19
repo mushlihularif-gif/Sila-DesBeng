@@ -131,8 +131,8 @@
             <h4 class="fw-bold py-2 mb-0" style="font-size: 1.25rem;">
                 <span class="text-muted fw-light">Sistem / Manajemen Pengguna /</span> Detail Profil
             </h4>
-            <a href="{{ route('admin.manajemen-pengguna.index') }}" class="btn btn-label-secondary shadow-sm">
-                <i class="bx bx-arrow-back me-1"></i> Kembali
+            <a href="{{ route('admin.manajemen-pengguna.index') }}" class="segi-back btn btn-label-secondary shadow-sm">
+                 Kembali
             </a>
         </div>
     </div>

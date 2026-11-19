@@ -725,8 +725,8 @@
                         </div>
                     </div>
 
-                    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-xs md:text-sm text-gray-700 h-36 overflow-y-auto mb-4 whitespace-pre-wrap leading-relaxed">
-                        {{ $sop_mobil }}
+                    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-xs md:text-sm text-gray-700 h-36 overflow-y-auto mb-4 leading-relaxed">
+                        <x-service-terms :text="$sop_mobil" />
                     </div>
 
                     <div class="flex items-center gap-3 bg-blue-50/50 p-3 rounded-xl border border-blue-100">

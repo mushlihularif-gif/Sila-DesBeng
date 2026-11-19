@@ -28,8 +28,8 @@
                     <h2 class="text-primary fw-bold mb-1">Detail Pengajuan</h2>
                     <p class="text-muted">Kelola status dan informasi pesanan</p>
                 </div>
-                <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
-                    <i class="bx bx-arrow-back me-2"></i> Kembali
+                <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="segi-back btn btn-outline-secondary rounded-pill px-4">
+                     Kembali
                 </a>
             </div>
 

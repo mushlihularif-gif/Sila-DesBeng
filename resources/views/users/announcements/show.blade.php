@@ -11,18 +11,18 @@
         </div>
 
         <div class="max-w-7xl mx-auto px-6 relative z-10">
-            
+
             {{-- Back Button --}}
             <div class="mb-8 animate-section">
                 <a href="{{ route('announcements.index') }}"
-                    class="inline-flex items-center gap-2 backdrop-blur-sm bg-white/70 hover:bg-white text-blue-600 hover:text-blue-700 px-6 py-2.5 rounded-full transition-all border border-white/80 shadow-md font-semibold text-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    class="segi-back inline-flex items-center gap-2 backdrop-blur-sm bg-white/70 hover:bg-white text-blue-600 hover:text-blue-700 px-6 py-2.5 rounded-full transition-all border border-white/80 shadow-md font-semibold text-sm">
+
                     <span>Kembali ke Daftar Kabar</span>
                 </a>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                
+
                 {{-- Main Content (Kiri: 2 Kolom) --}}
                 <div class="lg:col-span-2 space-y-8 animate-section">
                     <div class="backdrop-blur-sm bg-white/90 rounded-3xl overflow-hidden shadow-xl border border-white/80 p-6 md:p-8">
@@ -64,7 +64,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                
+
                                 @if($announcement->images->count() > 1)
                                     <!-- Indicators -->
                                     <div id="slider-indicators" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md pointer-events-auto">
@@ -149,7 +149,7 @@
 
                 {{-- Sidebar (Kanan: 1 Kolom) --}}
                 <div class="lg:col-span-1 space-y-6 animate-section" style="animation-delay: 0.2s;">
-                    
+
                     {{-- 1. Info Event Card (Detail Pelaksanaan) --}}
                     @if($announcement->event_date || $announcement->location)
                     <div class="backdrop-blur-sm bg-blue-50/90 rounded-3xl p-6 shadow-md border border-blue-100">
@@ -170,7 +170,7 @@
                                 </div>
                             </div>
                             @endif
-                            
+
                             @if($announcement->location)
                             <div class="flex gap-4">
                                 <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 shadow-sm">
@@ -246,7 +246,7 @@
                             <a href="{{ route('pelayanan') }}" class="bg-white/15 hover:bg-white/25 text-white p-2.5 rounded-xl flex items-center justify-between transition-all font-medium border border-white/10">
                                 <span class="flex items-center gap-2"><i class="bx bx-grid-alt"></i> Unit Pelayanan Desa</span>
                             </a>
-                            
+
                         </div>
                     </div>
 
