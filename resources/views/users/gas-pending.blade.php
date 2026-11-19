@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Push the background to fill the screen similar to Shopee's warning page -->
-<div class="min-h-screen bg-gray-50 flex flex-col">
+<div class="min-h-screen flex flex-col relative">
     <!-- Header Warning Section -->
     <div class="bg-blue-600 pt-12 pb-8 px-4 text-center">
         <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-blue-200">

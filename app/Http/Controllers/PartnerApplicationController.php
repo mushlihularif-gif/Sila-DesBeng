@@ -8,6 +8,7 @@ use App\Models\PartnerApplication;
 use App\Models\AdminNotification;
 use App\Models\User;
 use App\Services\NotificationService;
+use App\Support\VillageParticipation;
 
 class PartnerApplicationController extends Controller
 {
@@ -22,12 +23,19 @@ class PartnerApplicationController extends Controller
         // Pilihan pendaftaran kemitraan dibatasi ke Kecamatan Bengkalis.
         $kecamatans = Region::whereKey($kecamatanFokus->id)
             ->with(['children' => function($query) {
-                $query->whereIn('type', ['desa', 'kelurahan'])
+                VillageParticipation::query($query)->whereIn('type', ['desa', 'kelurahan'])
                       ->with(['services' => function($q) {
                           $q->wherePivot('is_active', true);
                       }, 'users' => fn ($q) => $q->where('role', 'admin_desa')->where('status', 'aktif')->select('id', 'region_id', 'role')])->orderBy('name');
             }])
             ->get();
+
+        foreach ($kecamatans as $kecamatan) {
+            $kecamatan->setRelation('children', $kecamatan->children->sortBy([
+                fn ($a, $b) => (int) VillageParticipation::joined($b) <=> (int) VillageParticipation::joined($a),
+                fn ($a, $b) => strnatcasecmp($a->name, $b->name),
+            ])->values());
+        }
 
         $regions = Region::whereIn('id', $wilayahIds)->get();
 
@@ -73,13 +81,13 @@ class PartnerApplicationController extends Controller
                         ->orderBy('name')
                         ->with([
                             'users' => function($q) {
-                                $q->where('role', 'admin_rw');
+                                $q->where('role', 'admin_rw')->where('status', 'aktif');
                             },
                             'children' => function($q) {
                                 $q->where('type', 'rt')->orderBy('name');
                             },
                             'children.users' => function($q) {
-                                $q->where('role', 'admin_rt');
+                                $q->where('role', 'admin_rt')->where('status', 'aktif');
                             }
                         ])
                         ->get();
@@ -142,6 +150,7 @@ class PartnerApplicationController extends Controller
         $request->validate(['region_type' => 'required|in:desa,rw,rt']);
         $user = auth()->user();
         $userDesa = null;
+        $newParentRwName = null;
 
         if ($user && $user->region_id) {
             $temp = Region::find($user->region_id);
@@ -152,6 +161,12 @@ class PartnerApplicationController extends Controller
                 }
                 $temp = $temp->parent;
             }
+        }
+
+        abort_unless($user && $user->status === 'aktif', 403);
+        $request->merge(['applicant_name' => $user->name, 'contact_email' => $user->email]);
+        if (in_array($request->region_type, ['rw', 'rt'], true) && ! $userDesa) {
+            return back()->withInput()->withErrors(['parent_region_id' => 'Lengkapi domisili desa pada akun sebelum mendaftar sebagai pengurus RT atau RW.']);
         }
 
         // Cek pengajuan yang masih pending dari pengguna ini
@@ -165,6 +180,17 @@ class PartnerApplicationController extends Controller
                     'applicant_name' => 'Anda masih memiliki pengajuan kemitraan yang sedang dalam proses peninjauan oleh Pemerintah Desa.',
                 ]);
             }
+        }
+
+        $request->validate([
+            'applicant_name' => 'required|string|max:255', 'position' => 'required|string|max:255',
+            'contact_email' => 'required|email|max:255', 'contact_phone' => 'required|string|max:20',
+            'reason' => 'required|string|max:10000', 'region_name' => 'required|string|max:255',
+            'parent_rw_name' => 'nullable|regex:/^RW\s*[0-9]{1,3}$/i',
+            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+        if ($userDesa && in_array($request->region_type, ['rw', 'rt'], true)) {
+            abort_unless($userDesa->parent?->type === 'kecamatan' && $userDesa->parent?->name === 'Kecamatan Bengkalis', 403);
         }
 
         // Normalisasi, Validasi Keberadaan Admin, dan Penguncian Wilayah Pengurus RW / RT
@@ -195,7 +221,7 @@ class PartnerApplicationController extends Controller
 
                 if ($targetRw) {
                     $existingAdmin = User::where('region_id', $targetRw->id)
-                        ->where('role', 'admin_rw')
+                        ->where('role', 'admin_rw')->where('status', 'aktif')
                         ->first();
 
                     if ($existingAdmin) {
@@ -238,11 +264,9 @@ class PartnerApplicationController extends Controller
                     $cleanParentRwNum = preg_replace('/[^0-9]/', '', $rawParentRw);
                     $formattedParentRw = $cleanParentRwNum ? 'RW ' . str_pad($cleanParentRwNum, 2, '0', STR_PAD_LEFT) : $rawParentRw;
 
-                    $parentRw = Region::firstOrCreate(
-                        ['name' => $formattedParentRw, 'type' => 'rw', 'parent_id' => $userDesa->id],
-                        ['profile_text' => 'Lingkungan ' . $formattedParentRw]
-                    );
-                    $parentRwId = $parentRw->id;
+                    $parentRw = Region::where('name', $formattedParentRw)->where('type', 'rw')->where('parent_id', $userDesa->id)->first();
+                    $newParentRwName = $parentRw ? null : $formattedParentRw;
+                    $parentRwId = $parentRw?->id ?? $userDesa->id;
                 } else {
                     $parentRw = Region::find($parentRwId);
                     if (! $parentRw || $parentRw->type !== 'rw' || $parentRw->parent_id != $userDesa->id) {
@@ -276,7 +300,7 @@ class PartnerApplicationController extends Controller
 
                 if ($targetRt) {
                     $existingAdmin = User::where('region_id', $targetRt->id)
-                        ->where('role', 'admin_rt')
+                        ->where('role', 'admin_rt')->where('status', 'aktif')
                         ->first();
 
                     if ($existingAdmin) {
@@ -349,7 +373,7 @@ class PartnerApplicationController extends Controller
             ]);
         }
 
-        if (! in_array($validated['region_type'], self::TURUNAN[$induk->type] ?? [], true)) {
+        if (! $newParentRwName && ! in_array($validated['region_type'], self::TURUNAN[$induk->type] ?? [], true)) {
             return back()->withInput()->withErrors([
                 'parent_region_id' => (self::LABEL_TINGKAT[$validated['region_type']] ?? $validated['region_type'])
                     . ' tidak dapat berada di bawah ' . $induk->name . '. Silakan pilih ulang wilayahnya.',
@@ -357,13 +381,24 @@ class PartnerApplicationController extends Controller
         }
 
         if ($request->hasFile('document')) {
-            $path = $request->file('document')->store('partner_applications', 'public');
+            $path = app(\App\Services\PartnerDocumentService::class)->store($request->file('document'));
             $validated['document_path'] = $path;
         }
 
         $validated['user_id'] = auth()->check() ? auth()->id() : null;
 
-        $application = PartnerApplication::create($validated);
+        $application = \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $newParentRwName, $userDesa) {
+            if ($newParentRwName) {
+                $parentRw = Region::firstOrCreate(
+                    ['name' => $newParentRwName, 'type' => 'rw', 'parent_id' => $userDesa->id],
+                    ['profile_text' => 'Lingkungan '.$newParentRwName]
+                );
+                $validated['parent_region_id'] = $parentRw->id;
+            }
+            return PartnerApplication::create($validated);
+        });
+        $validated['parent_region_id'] = $application->parent_region_id;
+        $induk = $application->parentRegion;
 
         if (auth()->check()) {
             NotificationService::notifyPartnerApplicationSubmitted($application);

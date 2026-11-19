@@ -1,7 +1,8 @@
 @extends('layouts.user')
 @section('title', 'Edit Konten - SegiDaerah')
 @section('page')
-<main class="max-w-3xl mx-auto px-4 py-24">
+@include('partials.abstract-bg')
+<main class="relative z-10 max-w-3xl mx-auto px-4 py-24">
     <h1 class="text-2xl font-bold mb-6">Edit {{ $announcement->post_category }}</h1>
     @if($errors->any())
         <div role="alert" class="bg-red-50 text-red-700 p-4 rounded-xl mb-4">{{ $errors->first() }}</div>

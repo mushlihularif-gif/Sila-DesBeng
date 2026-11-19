@@ -120,7 +120,7 @@
     @stack('styles')
 <link rel="stylesheet" href="{{ asset('css/segidaerah-ui.css') }}?v={{ filemtime(public_path('css/segidaerah-ui.css')) }}">
 </head>
-<body class="antialiased text-gray-900 bg-white min-h-screen flex flex-col overflow-x-hidden">
+<body class="segi-citizen antialiased text-gray-900 bg-white min-h-screen flex flex-col overflow-x-hidden">
     {{-- Global Navigation Progress Indicator --}}
     <div id="pageProgressBar" class="global-progress-bar" style="display:none;"></div>
 
@@ -319,5 +319,6 @@
     @include('components.cropper-modal')
     {{-- Dialog konfirmasi bergaya situs, pengganti window.confirm() --}}
     @include('partials.dialog-konfirmasi')
+    <script src="{{ asset('js/segidaerah-responsive.js') }}?v={{ filemtime(public_path('js/segidaerah-responsive.js')) }}" defer></script>
 </body>
 </html>

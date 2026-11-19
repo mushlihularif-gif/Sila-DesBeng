@@ -76,35 +76,7 @@ class SettingController extends Controller
      */
     public function showDeveloperProfile($name)
     {
-        $developers = [
-            'ken' => [
-                'name' => 'Rizqy Hamadi Ken',
-                'prodi' => 'D4 Information System Security',
-                'jurusan' => 'Teknik Informatika',
-                'kampus' => 'Politeknik Negeri Bengkalis',
-                'image' => 'ken.png'
-            ],
-            'mushlihul' => [
-                'name' => 'Mushlihul Arif',
-                'prodi' => 'D4 Information System Security',
-                'jurusan' => 'Teknik Informatika',
-                'kampus' => 'Politeknik Negeri Bengkalis',
-                'image' => 'mushlihul.jpg'
-            ],
-            'dicki' => [
-                'name' => 'Dicki Wahyudi',
-                'prodi' => 'D4 Information System Security',
-                'jurusan' => 'Teknik Informatika',
-                'kampus' => 'Politeknik Negeri Bengkalis',
-                'image' => 'dicki.png'
-            ]
-        ];
-
-        if (!isset($developers[$name])) {
-            abort(404, 'Pengembang tidak ditemukan.');
-        }
-
-        $currentDeveloper = $developers[$name];
-        return view('admin.isewa.developer.profile', compact('currentDeveloper', 'name'));
+        abort_unless(in_array($name, ['ken', 'mushlihul', 'dicki', 'safika'], true), 404);
+        return redirect()->to(route('admin.SiladesBeng.profile').'#tim-pengembang');
     }
 }

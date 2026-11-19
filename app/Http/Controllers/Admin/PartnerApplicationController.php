@@ -163,12 +163,11 @@ class PartnerApplicationController extends Controller
             }
         }
 
-        $path = storage_path('app/public/' . $application->document_path);
-        if (!file_exists($path)) {
-            return back()->with('error', 'Dokumen tidak ditemukan.');
-        }
-
-        return response()->file($path);
+        $path = app(\App\Services\PartnerDocumentService::class)->path($application->document_path);
+        return response()->file($path, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     public function approve(Request $request, $id)
@@ -177,6 +176,9 @@ class PartnerApplicationController extends Controller
 
         $request->validate(['reason' => 'required|string']);
         $application = PartnerApplication::findOrFail($id);
+        if ($application->status !== 'pending') {
+            return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+        }
         abort_unless($this->pengajuanDalamCakupan($application), 404);
 
         // Security check
@@ -218,6 +220,23 @@ class PartnerApplicationController extends Controller
         // desa dan memindahkan wilayahnya - Kominfo terkunci dari sistemnya
         // sendiri. Hanya akun warga biasa yang boleh diangkat.
         $existingUser = User::where('email', $application->contact_email)->first();
+        if ($application->user_id && (! $existingUser || (int) $existingUser->id !== (int) $application->user_id)) {
+            return back()->with('error', 'Email pengajuan tidak sesuai dengan akun pemohon. Minta pemohon mengajukan ulang dengan akunnya sendiri.');
+        }
+        if (! $application->user_id && $existingUser) {
+            return back()->with('error', 'Pengajuan lama belum terhubung ke pemilik akun. Minta pemohon masuk dan mengajukan ulang.');
+        }
+        if ($existingUser && in_array($application->region_type, ['rw', 'rt'], true)) {
+            $domicile = $existingUser->region;
+            while ($domicile && ! in_array($domicile->type, ['desa', 'kelurahan'], true)) {
+                $domicile = $domicile->parent;
+            }
+            $targetDesaId = $application->region_type === 'rt' ? $induk->parent_id : $induk->id;
+            if (! $domicile || (int) $domicile->id !== (int) $targetDesaId) {
+                return back()->with('error', 'Domisili pemohon berbeda dari desa pada pengajuan. Periksa domisili terlebih dahulu.');
+            }
+        }
+
 
         if ($existingUser && $existingUser->role !== 'user') {
             $sudahSesuai = $existingUser->role === $role
@@ -295,9 +314,8 @@ class PartnerApplicationController extends Controller
             $password = "(Sandi Anda Sebelumnya)"; 
             // We tell them to use their existing password
         } else {
-            // Generate password yang mudah diketik (Tidak full acak)
-            // Format: Segi + 4 angka acak (contoh: Segi1945)
-            $password = 'Segi' . rand(1000, 9999);
+            // Akun baru memakai sandi awal acak, bukan ruang tebakan empat digit.
+            $password = Str::password(20);
 
             // Create Admin User for this region
             $newAdmin = User::create([
@@ -348,6 +366,9 @@ class PartnerApplicationController extends Controller
 
         $request->validate(['reason' => 'required|string']);
         $application = PartnerApplication::findOrFail($id);
+        if ($application->status !== 'pending') {
+            return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+        }
         abort_unless($this->pengajuanDalamCakupan($application), 404);
         
         $user = auth()->user();

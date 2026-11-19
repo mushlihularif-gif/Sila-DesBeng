@@ -266,7 +266,7 @@
     </div>
 
     <!-- Struktur Pengembang SegiDaerah Section -->
-    <div class="mb-4 animate-section">
+    <div id="tim-pengembang" class="mb-4 animate-section">
         <h4 class="fw-bold mb-4 mt-2 text-center text-primary">Struktur Pengembang SegiDaerah</h4>
         <div class="row g-4 justify-content-center">
             <!-- Card 1: Rizqy Hamadi Ken -->

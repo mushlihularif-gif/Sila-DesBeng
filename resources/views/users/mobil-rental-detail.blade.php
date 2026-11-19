@@ -1,6 +1,7 @@
 @extends('layouts.user')
 
 @section('page')
+@include('partials.abstract-bg')
 <main class="flex-grow relative w-full">
     <section class="catalog-detail-section relative z-10 min-h-screen pt-32 pb-16">
 
@@ -88,7 +89,7 @@
                         </div>
 
                         <!-- Quantity Selector + Rent Button - SIDE BY SIDE -->
-                        <div class="flex items-center gap-4 mt-auto">
+                        <div class="segi-catalog-actions flex items-center gap-4 mt-auto">
                             <!-- Quantity Selector -->
                             <div class="flex items-center gap-3 border-2 border-gray-300 rounded-full px-4 py-2">
                                 <button type="button" 

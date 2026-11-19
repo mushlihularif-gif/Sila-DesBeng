@@ -203,7 +203,7 @@
                 <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultDelivery }}">
 
                 <!-- Pilihan Metode Pengiriman -->
-                <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center">
+                <div class="segi-delivery-choices grid grid-cols-2 gap-3 sm:gap-6 mb-6 sm:mb-10">
                     @if($antarActive)
                     <!-- Antar Card -->
                     <div class="delivery-method-card {{ $defaultDelivery == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
@@ -287,7 +287,7 @@
 
                 <!-- Kartu Produk -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                    <div class="flex flex-col sm:flex-row gap-6">
+                    <div class="segi-product-summary flex flex-col sm:flex-row gap-6">
                         <!-- Product Image -->
                         <img src="{{ asset('storage/' . $item->foto) }}" 
                              alt="{{ $item->jenis_gas }}" 

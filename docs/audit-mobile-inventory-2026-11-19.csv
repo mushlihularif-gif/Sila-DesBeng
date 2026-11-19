@@ -1,0 +1,128 @@
+﻿Halaman,Layout,Kompilasi,Cakupan
+admin/aktivitas/request-detail,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/aktivitas/requests,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/aktivitas/transactions,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/announcements/form,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/announcements/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/banners/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/categories/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/components/delegation-splash,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/dashboard/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/dashboard/search-results,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/dashboard/super_admin,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/gas/verifikasi_kk,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/isewa/bumdes/create,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/isewa/bumdes/edit,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/isewa/bumdes/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/isewa/profile,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/isewa/profile-bumdes,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/keuangan/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/keuangan/refunds,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/kyc/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/kyc/show,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/laporan/income,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/laporan/income_history,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/laporan/logs,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/laporan/transactions,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/laporan/wilayah,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/layouts/app,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/lokasi_layanan/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/notifications/create,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/notifications/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/partner-applications/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/profile/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+admin/region_management/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/region_settings/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/region_settings/payment,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/settings/connections,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/settings/notifications,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/staff/dashboard,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+admin/staff/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+admin/super_sistem/expenses,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/super_sistem/gateway,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/super_sistem/monitoring,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/super_sistem/penarikan_saldo,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/super_sistem/security-log,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/super_sistem/wilayah,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/supir/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/system_settings/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/system_settings/payment,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/fasilitas_umum/create,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/fasilitas_umum/edit,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/fasilitas_umum/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/fasilitas_umum/show,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+admin/unit/fasilitas_umum/sop,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+admin/unit/kendaraan_operasional/form,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/kendaraan_operasional/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/kendaraan_operasional/show,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/mobil/create,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/mobil/edit,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/mobil/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/mobil/show,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/mobil/sop,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+admin/unit/penjualan_gas/create,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/penjualan_gas/edit,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/penjualan_gas/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/penjualan_gas/show,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+admin/unit/penyewaan/create,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/penyewaan/edit,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/penyewaan/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/unit/penyewaan/show,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+admin/unit/penyewaan/sop,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+admin/user_management/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/user_management/show,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/warga/mutasi,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/warga/verifikasi,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+admin/wilayah-admins/index,admin.layouts.admin,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+auth/forgot-otp,layouts.app,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+auth/otp,layouts.app,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+auth/reset-password,layouts.app,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+beranda/index,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+content/index,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+content/show,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+errors/403,errors.layout,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+errors/404,errors.layout,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+errors/419,errors.layout,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+errors/429,errors.layout,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+errors/500,errors.layout,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+errors/503,errors.layout,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+errors/service-unavailable,layouts.app,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+help-center/index,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+kyc/index,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+kyc/pending,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+kyc/selesai,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+notifications/channels,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+pages/kemitraan/create,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+pages/validasi/transaksi,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+user/wilayah/berita,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+user/wilayah/konten-edit,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+user/wilayah/pengumuman,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+user/wilayah/warga,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/activity,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/announcements/index,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/announcements/show,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/bumdes-detail,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/bumdes-profil,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/fasilitas-umum-booking,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/fasilitas-umum-detail,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/fasilitas-umum-equipment,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/gas-booking,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/gas-detail,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/gas-payment,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/gas-pending,layouts.app,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/gas-sales,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/isewa-profile,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/mobil-rental-booking,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/mobil-rental-detail,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/mobil-rental-equipment,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/notifications,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/pelayanan,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/profile,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/region-directory-desa,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/rental-booking,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/rental-detail,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/rental-equipment,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/rental-payment,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/saldo/index,layouts.user,Ya (uji sintaks seluruh Blade),Browser sintetis 5 ukuran
+users/service-category,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh
+users/verifikasi,layouts.user,Ya (uji sintaks seluruh Blade),Sumber + layout bersama; belum uji browser halaman penuh

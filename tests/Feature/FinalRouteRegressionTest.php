@@ -35,6 +35,26 @@ class FinalRouteRegressionTest extends TestCase
         }
     }
 
+    public function test_literal_views_referenced_by_registered_actions_exist(): void
+    {
+        $checked = [];
+        foreach (Route::getRoutes() as $route) {
+            $action = $route->getActionName();
+            if (!str_starts_with($action, 'App\\Http\\Controllers\\') || isset($checked[$action])) continue;
+            $checked[$action] = true;
+            [$class,$method] = array_pad(explode('@', $action, 2), 2, '__invoke');
+            $reflection = new \ReflectionMethod($class, $method);
+            $lines = file($reflection->getFileName());
+            $source = implode('', array_slice($lines, $reflection->getStartLine()-1, $reflection->getEndLine()-$reflection->getStartLine()+1));
+            // Ignore examples in comments; inspect executable literal view calls.
+            $tokens = token_get_all('<?php '.$source);
+            $code = '';
+            foreach ($tokens as $token) $code .= is_array($token) ? (in_array($token[0],[T_COMMENT,T_DOC_COMMENT],true) ? '' : $token[1]) : $token;
+            preg_match_all('/\bview\(\s*[\'"]([^\'"]+)[\'"]\s*[,)]/', $code, $matches);
+            foreach ($matches[1] as $view) $this->assertTrue(view()->exists($view), $action.' references missing view '.$view);
+        }
+    }
+
     public function test_google_registration_resumes_only_with_callback_session(): void
     {
         $this->get('/auth/register-google')->assertRedirect(route('beranda'))->assertSessionHas('open_login_modal',true);

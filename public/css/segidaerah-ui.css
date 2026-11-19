@@ -13,3 +13,74 @@
 @keyframes segi-scan{from{transform:translateX(-100%)}to{transform:translateX(385%)}}
 @media(prefers-reduced-motion:reduce){.segi-ai-scan::after{animation:none;width:100%;opacity:.6}}
 .segi-terms ol{list-style:decimal;margin:0;padding-left:1.5rem}.segi-terms li{padding-left:.35rem;margin:.6rem 0}.segi-terms p{margin:.75rem 0;white-space:pre-line}
+
+/* Both shared layouts cover warga, RT/RW, staf, desa and super admin. */
+.segi-citizen{background:#f8fbff url('../Admin/img/elements/background1.webp') center top / cover fixed no-repeat}
+.segi-citizen main,.segi-admin .layout-page,.segi-admin .content-wrapper{min-width:0}
+.segi-citizen input,.segi-citizen select,.segi-citizen textarea{min-width:0;max-width:100%}
+.segi-delivery-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:28rem;margin-left:auto;margin-right:auto}
+.segi-delivery-choices>.delivery-method-card{width:100%;min-width:0}
+.segi-delivery-choices>.delivery-method-card:only-child{grid-column:1/-1;max-width:14rem;justify-self:center}
+.segi-role-choices{display:flex;flex-wrap:wrap;gap:.75rem}
+.segi-role-choices>button{flex:1;min-width:7rem}
+.segi-role-choices>[aria-pressed=true]{background:#eaf2ff!important;outline:2px solid var(--segi-primary);outline-offset:1px}
+.segi-partner-form-body{padding:1rem 3rem 3.5rem}
+.segi-table-scroll{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.segi-table-scroll:focus-visible{outline:2px solid var(--segi-primary);outline-offset:2px}
+@media(max-width:639px){
+ .segi-citizen main :where(.grid)>*,.segi-admin .row>*{min-width:0}
+ .segi-citizen main :where(h1,h2,h3,p,label,a),.segi-admin .content-wrapper :where(h1,h2,h3,p,label){overflow-wrap:anywhere}
+ .segi-delivery-choices{gap:.75rem}
+ .segi-delivery-choices>.delivery-method-card{padding:1rem .5rem;border-width:2px;border-radius:1rem}
+ .segi-delivery-choices>.delivery-method-card img{width:3rem;height:3rem}
+ .segi-delivery-choices>.delivery-method-card>div{margin-bottom:.5rem}
+ .segi-delivery-choices>.delivery-method-card p{font-size:.9rem;line-height:1.4}
+ .segi-citizen main :where(.p-8,.p-10,.p-12){padding:1rem}
+ .segi-citizen main :where(.px-8,.px-10,.px-12){padding-left:1rem;padding-right:1rem}
+ .segi-citizen main :where(.gap-8,.gap-10,.gap-12){gap:1.25rem}
+ .segi-citizen main :where(input:not([type=checkbox]):not([type=radio]),select,textarea){font-size:16px}
+ .segi-citizen main :where(button,.segi-primary,.segi-outline,.segi-back){max-width:100%;white-space:normal}
+ .segi-citizen :where(main,section).pt-36,.segi-citizen :where(main,section).pt-40,.segi-citizen :where(main,section).pt-48{padding-top:5.5rem!important}
+ .segi-partner-form-body{padding:1rem 1rem 2rem}
+ .segi-admin .container-p-y{padding:1rem .75rem!important}
+ .segi-admin .card-header,.segi-admin .card-body,.segi-admin .card-footer{padding:1rem}
+ .segi-admin .card-header.d-flex,.segi-admin .content-wrapper .d-flex.gap-2,.segi-admin .content-wrapper .d-flex.gap-3{flex-wrap:wrap}
+ .segi-admin .content-wrapper .btn{white-space:normal;max-width:100%}
+ .segi-admin .content-wrapper :where(input:not([type=checkbox]):not([type=radio]),select,textarea){min-width:0;max-width:100%;font-size:16px}
+ .segi-admin .modal-dialog{margin:.5rem;max-width:calc(100% - 1rem)}
+ .segi-admin .modal-body{padding:1rem}
+ .segi-admin .table td,.segi-admin .table th{padding:.65rem .75rem}
+}
+@media print{.segi-citizen{background:#fff}.segi-table-scroll{overflow:visible}}
+
+.segi-partner-heading{padding:3.5rem 3rem 1.5rem}
+@media(max-width:639px){
+ .segi-partner-heading{padding:3.75rem 1rem 1rem}
+ .segi-partner-heading>div:first-child{flex-wrap:wrap;justify-content:center;gap:.5rem}
+ .segi-partner-heading>div:first-child>div:not(.flex-1){width:3rem!important;padding:0}
+ .segi-partner-heading img{width:3rem!important;height:3rem!important}
+ .segi-partner-heading .flex-1{order:3;flex-basis:100%;padding:0}
+ .segi-partner-heading h3{font-size:1.1rem;line-height:1.4}
+ #application-modal .mx-12{margin-left:1rem;margin-right:1rem}
+ #application-modal .pt-24{padding-top:1rem}
+}
+
+body:has(#application-modal:not(.hidden)) #chatbot-fab,
+body:has(#application-modal:not(.hidden)) #chatbot-window{visibility:hidden!important}
+@media(max-width:639px){
+ .segi-delivery-choices>.delivery-method-card{transform:none!important}
+ .segi-product-summary{display:grid;grid-template-columns:4rem minmax(0,1fr);gap:1rem}
+ .segi-product-summary>img{width:4rem;height:4rem;flex-shrink:0}
+ .segi-product-summary>.text-right{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;text-align:left;gap:.5rem;border-top:1px solid #e2e8f0;padding-top:.75rem}
+ .segi-product-summary>.text-right>div{margin-top:0;text-align:right}
+ .segi-product-summary .flex.items-center{flex-wrap:wrap;gap:.5rem}
+ .segi-product-summary .flex.items-center>label{width:100%;white-space:nowrap}
+ .segi-product-summary p{overflow-wrap:normal!important}
+ .segi-admin .avatar-wrapper,.segi-admin .avatar-preview,.segi-admin .avatar-default{width:4.5rem;height:4.5rem;flex-shrink:0}
+}
+
+@media(max-width:639px){
+ .segi-catalog-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}
+ .segi-catalog-actions>div:first-child{grid-column:1/-1;justify-content:center;min-width:0}
+ .segi-catalog-actions>button,.segi-catalog-actions>a{min-width:0;width:100%;padding:.75rem .5rem;font-size:.9rem}
+}

@@ -207,9 +207,7 @@
                 $totalJoined = 0;
                 foreach($kecamatans as $kecamatan) {
                     $totalJoined += $kecamatan->children->filter(function($desa) {
-                        return $desa->users->filter(function($user) {
-                            return in_array($user->role, ['admin_desa']);
-                        })->count() > 0;
+                        return \App\Support\VillageParticipation::joined($desa);
                     })->count();
                 }
             @endphp
@@ -260,9 +258,7 @@
                         @foreach($kecamatans as $index => $kecamatan)
                             @php
                                 $joinedCount = $kecamatan->children->filter(function($desa) {
-                                    return $desa->users->filter(function($user) {
-                                        return in_array($user->role, ['admin_desa']);
-                                    })->count() > 0;
+                                    return \App\Support\VillageParticipation::joined($desa);
                                 })->count();
                             @endphp
                             <div id="kecamatan-content-{{ $kecamatan->id }}" class="kecamatan-panel transition-opacity duration-300 {{ $index === 0 ? 'block opacity-100' : 'hidden opacity-0' }}" data-joined="{{ $joinedCount }}">
@@ -270,7 +266,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                                 @foreach($kecamatan->children as $desa)
                                 @php
-    $villageJoined = $desa->users->where('role', 'admin_desa')->isNotEmpty();
+    $villageJoined = \App\Support\VillageParticipation::joined($desa);
 @endphp
                                 <div class="bg-white/40 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl p-5 hover:shadow-md transition-all animate-section">
                                     <div class="flex justify-between items-start mb-4">
@@ -380,7 +376,7 @@
                     </button>
 
                     {{-- Kop Surat: Logo Kiri - Judul Tengah - Logo Kanan --}}
-                    <div style="padding: 3.5rem 3rem 1.5rem;">
+                    <div class="segi-partner-heading">
                         <div class="flex items-center justify-between">
                             {{-- Logo Kabupaten (Kiri) --}}
                             <div class="flex-shrink-0 flex justify-center pl-4" style="width: 110px;">
@@ -420,10 +416,20 @@
                     @endif
 
                     {{-- Body Form --}}
-                    <div class="bg-white" style="padding: 1rem 3rem 3.5rem;">
+                    <div class="segi-partner-form-body bg-white">
                         <form action="{{ route('kemitraan.store') }}" method="POST" enctype="multipart/form-data" id="partner-form">
                             @csrf
                             
+                            <fieldset class="mb-6">
+                                <legend class="font-bold text-gray-900 mb-2">Daftar sebagai apa?</legend>
+                                <p class="text-sm text-gray-600 mb-3">Pilih jabatan yang Anda ajukan. Akun pengelola aktif setelah pengajuan disetujui.</p>
+                                <div class="segi-role-choices">
+                                    @foreach(($isJoined ? ['rw' => 'Pengurus RW', 'rt' => 'Pengurus RT'] : ['desa' => 'Pengelola Desa / Kelurahan']) as $kind => $label)
+                                        <button type="button" class="segi-outline" data-partner-role="{{ $kind }}" aria-pressed="false">{{ $label }}</button>
+                                    @endforeach
+                                </div>
+                                <p class="text-xs text-gray-500 mt-3">Staf layanan dibuat oleh Admin Desa melalui menu Staf Layanan.</p>
+                            </fieldset>
                             {{-- Baris 1: Data Pribadi & Jabatan (4 kolom) --}}
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                                 <div>
@@ -1162,6 +1168,18 @@
     }
 
     // Modal logic
+    document.querySelectorAll('[data-partner-role]').forEach(button => {
+        button.addEventListener('click', () => {
+            selRegionType.value = button.dataset.partnerRole;
+            selRegionType.dispatchEvent(new Event('change', {bubbles: true}));
+        });
+    });
+    selRegionType?.addEventListener('change', () => {
+        document.querySelectorAll('[data-partner-role]').forEach(button => {
+            button.setAttribute('aria-pressed', String(button.dataset.partnerRole === selRegionType.value));
+        });
+    });
+
     function openModal() {
         const modal = document.getElementById('application-modal');
         const backdrop = document.getElementById('modal-backdrop');

@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative" style="background-color: #f8fafc;">
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative" >
     
-    <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl relative z-10">
+    <div class="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-2xl shadow-xl relative z-10">
         <div class="text-center">
             <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Buat Kata Sandi Baru</h2>
             <p class="text-sm text-gray-500 mb-6">Silahkan masukkan kata sandi baru untuk akun Anda</p>

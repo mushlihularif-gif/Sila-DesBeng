@@ -188,7 +188,7 @@
                 <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultMethod }}">
 
                 <!-- Pilihan Metode Pengiriman -->
-                <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center">
+                <div class="segi-delivery-choices grid grid-cols-2 gap-3 sm:gap-6 mb-6 sm:mb-10">
                     @if($antarActive)
                     <!-- Antar Card -->
                     <div class="delivery-method-card {{ $defaultMethod == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
@@ -313,7 +313,7 @@
                             <span class="ml-auto text-sm text-gray-600">{{ str_replace('&', 'dan', $item->kategori) }}</span>
                         </div>
                         
-                        <div class="flex gap-6">
+                        <div class="segi-product-summary flex gap-6">
                             <img src="{{ asset('storage/' . $item->foto) }}" 
                                  alt="{{ $item->nama_barang }}" 
                                  class="w-32 h-32 object-cover rounded-lg">
@@ -643,7 +643,7 @@
                             <span class="ml-auto text-sm text-gray-600">{{ str_replace('&', 'dan', $item->kategori) }}</span>
                         </div>
                         
-                        <div class="flex gap-6">
+                        <div class="segi-product-summary flex gap-6">
                             <img src="{{ asset('storage/' . $item->foto) }}" 
                                  alt="{{ $item->nama_barang }}" 
                                  class="w-32 h-32 object-cover rounded-lg">

@@ -193,4 +193,28 @@ class ServiceStaffAuditTest extends TestCase
         }
     }
 
+    public function test_admin_pages_render_with_real_layout_for_desa_staff_and_super_admin(): void
+    {
+        view()->share('errors', new \Illuminate\Support\ViewErrorBag());
+        Schema::table('admin_notifications', function (Blueprint $t) { $t->boolean('is_read')->default(false); $t->timestamps(); });
+        foreach (['2026_06_15_182007_create_services_table.php','2026_06_15_182008_create_region_services_table.php','2026_06_22_151200_add_is_exclusive_to_region_services_table.php'] as $file) (require database_path('migrations/'.$file))->up();
+        $staff = $this->createStaff();
+        $super = $this->user(7); $super->role = 'super_admin';
+        foreach ([$this->user(4), $staff, $super] as $actor) {
+            $this->actingAs($actor);
+            $html = view('admin.profile.index', ['user'=>$actor])->render();
+            $this->assertStringContainsString('segidaerah-responsive.js', $html);
+            $this->assertStringContainsString('formAccountSettings', $html);
+            if ($dir = getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($dir.'/admin-profile-'.$actor->role.'.html', $html);
+        }
+        $this->actingAs($this->user(4));
+        $html = app(ServiceStaffController::class)->index()->render();
+        $this->assertStringContainsString('Tambah Petugas', $html);
+        if ($dir = getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($dir.'/admin-staff.html', $html);
+        $this->actingAs($staff);
+        $html = view('admin.staff.dashboard')->render();
+        $this->assertStringContainsString('Tugas Layanan Saya', $html);
+        if ($dir = getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($dir.'/staff-dashboard.html', $html);
+    }
+
 }

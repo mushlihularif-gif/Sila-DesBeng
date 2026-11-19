@@ -88,6 +88,7 @@ class AccountAndPresentationAuditTest extends TestCase
             $html = view('users.profile', ['isSettings' => false, 'user' => $account,
                 'kecamatan_name' => null, 'desa_name' => 'Desa A', 'rw_name' => '02', 'rt_name' => '01',
                 'kecamatans' => collect(), 'currentDesaId' => 1])->render();
+            if ($dir = getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($dir.'/profile-'.$account->role.'.html', $html);
             $dom = new \DOMDocument();
             @$dom->loadHTML($html);
             $xpath = new \DOMXPath($dom);

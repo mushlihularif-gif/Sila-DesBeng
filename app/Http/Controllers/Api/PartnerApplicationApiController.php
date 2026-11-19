@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Region;
 use App\Models\PartnerApplication;
 use App\Models\Notification;
+use App\Support\VillageParticipation;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -20,8 +21,8 @@ class PartnerApplicationApiController extends Controller
         $kecamatanFokus = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->firstOrFail();
         $kecamatans = Region::whereKey($kecamatanFokus->id)
             ->with(['children' => function($query) {
-                $query->whereIn('type', ['desa', 'kelurahan'])->with(['users' => function($u) {
-                    $u->whereIn('role', ['admin_desa']);
+                VillageParticipation::query($query)->whereIn('type', ['desa', 'kelurahan'])->with(['users' => function($u) {
+                    $u->whereIn('role', ['admin_desa'])->where('status', 'aktif');
                 }]);
             }])
             ->get();
@@ -31,7 +32,10 @@ class PartnerApplicationApiController extends Controller
                 'id' => $kecamatan->id,
                 'name' => $kecamatan->name,
                 'type' => $kecamatan->type,
-                'children' => $kecamatan->children->map(function($desa) {
+                'children' => $kecamatan->children->sortBy([
+                    fn ($a, $b) => (int) VillageParticipation::joined($b) <=> (int) VillageParticipation::joined($a),
+                    fn ($a, $b) => strnatcasecmp($a->name, $b->name),
+                ])->values()->map(function($desa) {
                     $hasAdmin = $desa->users->isNotEmpty();
                     return [
                         'id' => $desa->id,
@@ -39,6 +43,7 @@ class PartnerApplicationApiController extends Controller
                         'type' => $desa->type,
                         'parent_id' => $desa->parent_id,
                         'has_admin' => $hasAdmin,
+                        'is_joined' => VillageParticipation::joined($desa),
                         'admin_name' => $hasAdmin ? $desa->users->first()->name : null,
                     ];
                 })
@@ -60,7 +65,7 @@ class PartnerApplicationApiController extends Controller
         $desa = Region::whereIn('type', ['desa', 'kelurahan'])
             ->where('parent_id', $kecamatanFokusId)
             ->with(['users' => function($u) {
-            $u->whereIn('role', ['admin_desa']);
+            $u->whereIn('role', ['admin_desa'])->where('status', 'aktif');
         }])->find($id);
 
         if (!$desa) {
@@ -88,6 +93,12 @@ class PartnerApplicationApiController extends Controller
      */
     public function store(Request $request)
     {
+        $actor = $request->user();
+        abort_unless($actor && $actor->status === 'aktif', 403);
+        $request->merge(['applicant_name' => $actor->name, 'contact_email' => $actor->email]);
+        if (PartnerApplication::where('user_id', $actor->id)->where('status', 'pending')->exists()) {
+            return response()->json(['message' => 'Pengajuan sebelumnya masih ditinjau.'], 422);
+        }
         $validator = Validator::make($request->all(), [
             'applicant_name' => 'required|string|max:255',
             'position' => 'required|string|max:255',
@@ -136,17 +147,21 @@ class PartnerApplicationApiController extends Controller
             ], 422);
         }
 
+        if (in_array($validated['region_type'], ['rw', 'rt'], true)) {
+            $domicile = $actor->region;
+            while ($domicile && ! in_array($domicile->type, ['desa', 'kelurahan'], true)) {
+                $domicile = $domicile->parent;
+            }
+            $targetDesaId = $validated['region_type'] === 'rt' ? $parent->parent_id : $parent->id;
+            abort_unless($domicile && (int) $domicile->id === (int) $targetDesaId, 403);
+        }
+
         if ($request->hasFile('document')) {
-            $path = $request->file('document')->store('partner_applications', 'public');
+            $path = app(\App\Services\PartnerDocumentService::class)->store($request->file('document'));
             $validated['document_path'] = $path;
         }
 
-        // Handle user_id if token is provided
-        if (auth('sanctum')->check()) {
-            $validated['user_id'] = auth('sanctum')->id();
-        } else {
-            $validated['user_id'] = null;
-        }
+        $validated['user_id'] = $actor->id;
 
         $application = PartnerApplication::create($validated);
 

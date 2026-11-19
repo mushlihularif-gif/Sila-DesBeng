@@ -3,7 +3,7 @@
 @section('title', 'Layanan Tidak Tersedia')
 
 @section('content')
-<div class="min-h-screen bg-[#f8f9fa] pt-32 pb-20 relative overflow-hidden flex items-center justify-center">
+<div class="min-h-screen pt-32 pb-20 relative overflow-hidden flex items-center justify-center">
     <!-- Background Decor (similar to other pages) -->
     <div class="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#0099ff]/10 to-transparent"></div>
     <div class="absolute top-20 right-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
@@ -11,7 +11,7 @@
     <div class="absolute -bottom-8 left-20 w-72 h-72 bg-cyan-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
 
     <div class="container mx-auto px-4 relative z-10 text-center">
-        <div class="max-w-2xl mx-auto bg-white/70 backdrop-blur-md rounded-3xl p-10 shadow-2xl border border-white/50">
+        <div class="max-w-2xl mx-auto bg-white/70 backdrop-blur-md rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/50">
             <!-- Icon -->
             <div class="w-24 h-24 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-6">
                 <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

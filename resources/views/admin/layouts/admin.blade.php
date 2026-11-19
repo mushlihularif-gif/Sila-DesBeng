@@ -812,7 +812,7 @@
 <link rel="stylesheet" href="{{ asset('css/segidaerah-ui.css') }}?v={{ filemtime(public_path('css/segidaerah-ui.css')) }}">
 </head>
 
-<body>
+<body class="segi-admin">
     <!-- Preloader Overlay -->
     <div id="page-preloader" class="page-preloader">
         <div class="position-relative d-flex align-items-center justify-content-center">
@@ -2425,6 +2425,7 @@
         @endif
     @endauth
 
+    <script src="{{ asset('js/segidaerah-responsive.js') }}?v={{ filemtime(public_path('js/segidaerah-responsive.js')) }}" defer></script>
 </body>
 
 </html>
