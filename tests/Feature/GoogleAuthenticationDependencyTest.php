@@ -76,6 +76,11 @@ class GoogleAuthenticationDependencyTest extends TestCase
             $token = JWT::encode($claims, $this->privateKey, 'RS256', 'test-key');
             $this->assertSame($claims, $this->verifier()->verify($token));
         }
+
+        config(['services.google.mobile_client_id' => 'mobile-client.apps.googleusercontent.com']);
+        $mobileClaims = array_replace($this->claims(), ['aud' => 'mobile-client.apps.googleusercontent.com']);
+        $mobileToken = JWT::encode($mobileClaims, $this->privateKey, 'RS256', 'test-key');
+        $this->assertSame($mobileClaims, $this->verifier()->verify($mobileToken));
     }
 
     public function test_invalid_identity_claims_are_rejected(): void

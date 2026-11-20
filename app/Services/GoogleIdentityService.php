@@ -23,10 +23,45 @@ class GoogleIdentityService
         );
     }
 
+    /**
+     * Collect all trusted Google OAuth 2.0 client IDs (web and mobile).
+     *
+     * @return list<string>
+     */
+    protected function allowedClientIds(): array
+    {
+        $raw = [];
+        foreach ([
+            config('services.google.client_id'),
+            config('services.google.mobile_client_id'),
+        ] as $single) {
+            if (is_string($single) && trim($single) !== '') {
+                $raw[] = trim($single);
+            }
+        }
+
+        $extra = config('services.google.allowed_client_ids');
+        if (is_string($extra) && trim($extra) !== '') {
+            foreach (explode(',', $extra) as $item) {
+                if (trim($item) !== '') {
+                    $raw[] = trim($item);
+                }
+            }
+        } elseif (is_array($extra)) {
+            foreach ($extra as $item) {
+                if (is_string($item) && trim($item) !== '') {
+                    $raw[] = trim($item);
+                }
+            }
+        }
+
+        return array_values(array_unique($raw));
+    }
+
     public function verify(string $token): array
     {
-        $clientId = config('services.google.client_id');
-        abort_unless(is_string($clientId) && $clientId !== '', 503, 'Login Google belum dikonfigurasi.');
+        $allowedClientIds = $this->allowedClientIds();
+        abort_unless($allowedClientIds !== [], 503, 'Login Google belum dikonfigurasi.');
 
         try {
             $payload = (array) JWT::decode($token, $this->signingKeys());
@@ -36,7 +71,7 @@ class GoogleIdentityService
 
         abort_unless(
             is_array($payload)
-            && ($payload['aud'] ?? null) === $clientId
+            && in_array($payload['aud'] ?? null, $allowedClientIds, true)
             && in_array($payload['iss'] ?? null, ['accounts.google.com', 'https://accounts.google.com'], true)
             && ($payload['email_verified'] ?? false) === true
             && is_string($payload['sub'] ?? null) && $payload['sub'] !== ''
