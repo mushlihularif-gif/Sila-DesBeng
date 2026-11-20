@@ -23,7 +23,8 @@ class ContentWorkspaceController extends Controller
         $items = $query->latest('updated_at')->paginate(20)->withQueryString();
         $manager = $this->access->manager($request->user());
         if ($request->wantsJson()) return response()->json(['items' => $items->map(fn ($item) => $this->summary($item)), 'total' => $items->total(), 'current_page'=>$items->currentPage(), 'last_page'=>$items->lastPage()])->header('Cache-Control', 'private, no-store');
-        return view('content.index', compact('items', 'manager'));
+        $useAdminLayout = in_array($request->user()?->role, ['admin_desa', 'super_admin', 'staff'], true);
+        return view($useAdminLayout ? 'content.admin_index' : 'content.index', compact('items', 'manager'));
     }
 
     public function store(Request $request)
@@ -78,7 +79,8 @@ class ContentWorkspaceController extends Controller
         $this->editorial->activity($announcement, $request->user(), 'opened');
         $data = $this->payload($request, $announcement);
         $targets = Region::whereIn('id', $this->access->targets($request->user()))->get(['id', 'name', 'type']);
-        return view('content.show', ['item' => $announcement, 'data' => $data, 'targets' => $targets]);
+        $useAdminLayout = in_array($request->user()?->role, ['admin_desa', 'super_admin', 'staff'], true);
+        return view($useAdminLayout ? 'content.admin_show' : 'content.show', ['item' => $announcement, 'data' => $data, 'targets' => $targets]);
     }
 
     public function state(Request $request, Announcement $announcement)

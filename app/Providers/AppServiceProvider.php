@@ -155,7 +155,7 @@ class AppServiceProvider extends ServiceProvider
             // false untuk staf, sehingga blok menu Unit Layanan tidak pernah
             // dirender dan seluruh sistem izin unit jadi tidak berfungsi —
             // staf hanya melihat Dashboard dan Profil.
-            if ($user && in_array($user->role, ['super_admin', 'admin_desa'])) {
+            if ($user && in_array($user->role, ['super_admin', 'admin_desa']) && \Illuminate\Support\Facades\Schema::hasTable('services') && \Illuminate\Support\Facades\Schema::hasTable('region_services')) {
                 if ($user->role === 'super_admin' || $user->role === 'admin') {
                     // For super_admin, check if the system settings or top region has services enabled
                     $region = \App\Models\Region::with(['services' => fn($q) => $q->wherePivot('is_active', true)])->find($user->region_id);

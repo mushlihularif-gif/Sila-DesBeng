@@ -1,477 +1,388 @@
 @extends('admin.layouts.admin')
 
+@section('title', 'Unit Fasilitas Umum & Aset')
+
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y py-2 py-sm-3">
-        <!-- Page Header -->
-        <div class="row mb-2 mb-sm-3">
-            <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <h4 class="fw-bold py-1 mb-0 fs-5 fs-sm-4">
-                        <span class="text-muted fw-light">Unit Layanan /</span> Fasilitas Umum & Aset
-                    </h4>
-                    @include('admin.unit.partials.unit_officer_badge', ['unitKey' => 'fasilitas_umum'])
+<style>
+    .unit-stat-card {
+        border-radius: 16px;
+        border: 1px solid #eef1f6;
+        background: #fff;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .unit-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(67, 89, 113, 0.08) !important;
+    }
+    .unit-product-card {
+        border-radius: 16px;
+        border: 1px solid #e9edf4;
+        background: #fff;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .unit-product-card:hover {
+        transform: translateY(-3px);
+        border-color: #c7cbfd;
+        box-shadow: 0 10px 24px rgba(67, 89, 113, 0.1) !important;
+    }
+    .unit-product-img,
+    .unit-product-placeholder {
+        aspect-ratio: 4/3;
+        width: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    .sop-option-card {
+        border-radius: 16px;
+        border: 1.5px solid #e4e7ec;
+        background: #fff;
+        transition: all 0.2s ease;
+    }
+    .sop-option-card.active-sop {
+        border-color: #ffab00 !important;
+        background-color: #fffbf0 !important;
+        box-shadow: 0 6px 18px rgba(255, 171, 0, 0.18) !important;
+    }
+    @media (max-width: 575.98px) {
+        .unit-stat-card { padding: 0.65rem 0.4rem !important; }
+        .unit-stat-card span { font-size: 0.66rem !important; line-height: 1.2 !important; }
+        .unit-stat-card h4 { font-size: 1.12rem !important; margin-top: 2px; }
+        .unit-product-img,
+        .unit-product-placeholder { aspect-ratio: 1/1; }
+        .unit-product-card .card-body { padding: 0.7rem !important; }
+        .unit-product-card .card-title { font-size: 0.86rem !important; }
+    }
+</style>
+
+@php
+    $fasilitasCollection = method_exists($fasilitas, 'getCollection') ? $fasilitas->getCollection() : collect($fasilitas);
+    $totalFasilitas = method_exists($fasilitas, 'total') ? $fasilitas->total() : $fasilitasCollection->count();
+    $tersediaCount = $fasilitasCollection->filter(fn($f) => ($f->status ?? 'Tersedia') === 'Tersedia')->count();
+    $unreadChatsCount = (int) ($totalUnreadChats ?? 0);
+@endphp
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div class="min-w-0">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <h4 class="fw-bold mb-0"><span class="text-muted fw-light">Unit Layanan /</span> Fasilitas Umum &amp; Aset</h4>
+                @include('admin.unit.partials.unit_officer_badge', ['unitKey' => 'fasilitas_umum'])
+            </div>
+            <p class="text-muted small mb-0">Kelola gedung serbaguna, balai pertemuan, lapangan olahraga, pengurus kunci, serta SOP peminjaman.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2 w-100 w-md-auto justify-content-start justify-content-md-end flex-shrink-0">
+            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm w-100 w-sm-auto text-nowrap d-inline-flex align-items-center justify-content-center gap-1">
+                <i class="bx bx-plus-circle"></i>
+                <span>Tambah Gedung / Fasilitas</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Alerts -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bx bx-check-circle fs-4 me-2 flex-shrink-0"></i>
+            <div>{{ session('success') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <!-- Info Banner + 3 KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-7">
+            <div class="card bg-label-primary border-0 shadow-none rounded-4 h-100">
+                <div class="card-body p-3 p-md-4 d-flex align-items-start gap-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 44px; height: 44px;">
+                        <i class="bx bx-buildings fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-primary mb-1">Manajemen Fasilitas Publik &amp; Pemegang Kunci</h6>
+                        <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.55;">
+                            Tampilkan gedung, aula, dan ruang publik desa beserta informasi biaya (gratis/berbayar), pengurus pemegang kunci, serta aturan SOP peminjaman di tab <strong>Pengaturan &amp; SOP</strong>.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Panduan -->
-        <div class="card bg-label-secondary border-0 shadow-none mb-2 mb-sm-3" style="border-radius: 12px;">
-            <div class="card-body d-flex align-items-center p-2.5 p-sm-3">
-                <div class="me-2 me-sm-3 flex-shrink-0">
-                    <div class="bg-secondary rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm unit-icon-circle">
-                        <i class="bx bx-building fs-5 fs-sm-4"></i>
+        <div class="col-12 col-xl-5">
+            <div class="row g-2 h-100">
+                <div class="col-4">
+                    <div class="unit-stat-card p-3 h-100 d-flex flex-column justify-content-center text-center shadow-sm">
+                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Total Aset</span>
+                        <h4 class="fw-bold text-primary mb-0">{{ $totalFasilitas }}</h4>
                     </div>
                 </div>
-                <div class="min-w-0">
-                    <h6 class="fw-bold mb-0 text-secondary" style="font-size: 0.9rem;">Manajemen Fasilitas Umum dan Aset</h6>
-                    <p class="mb-0 text-secondary small d-none d-sm-block" style="opacity: 0.85; font-size: 0.78rem;">
-                        Kelola data fasilitas publik (Gedung Serbaguna, Balai Pertemuan, Lapangan Olahraga) yang dapat diakses oleh warga.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center py-2 px-3 mb-2 mb-sm-3" role="alert">
-                <i class="bx bx-check-circle fs-4 me-2"></i>
-                <div style="font-size: 0.85rem;">{{ session('success') }}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        <style>
-            .unit-icon-circle {
-                width: 34px;
-                height: 34px;
-                min-width: 34px;
-            }
-            @media (min-width: 576px) {
-                .unit-icon-circle {
-                    width: 48px;
-                    height: 48px;
-                    min-width: 48px;
-                }
-            }
-            .nav-pills-scrollable {
-                display: flex;
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                padding: 3px 4px;
-                gap: 0.3rem;
-                scrollbar-width: none;
-            }
-            .nav-pills-scrollable::-webkit-scrollbar {
-                display: none;
-            }
-            .nav-pills-scrollable .nav-item {
-                flex: 1 1 0px;
-                min-width: fit-content;
-            }
-            .nav-pills-scrollable .nav-link { 
-                width: 100%;
-                justify-content: center;
-                white-space: nowrap;
-                color: #64748b; 
-                font-weight: 600; 
-                padding: 0.4rem 0.65rem; 
-                font-size: 0.78rem;
-                transition: all 0.25s ease; 
-                border-radius: 50rem; 
-                display: inline-flex;
-                align-items: center;
-                border: 1px solid #e2e8f0;
-                background-color: #ffffff;
-            }
-            @media (min-width: 576px) {
-                .nav-pills-scrollable .nav-link {
-                    padding: 0.5rem 0.85rem; 
-                    font-size: 0.85rem;
-                }
-            }
-            .nav-pills-scrollable .nav-link:hover { 
-                background-color: #f8fafc; 
-                color: #334155; 
-                border-color: #cbd5e1;
-            }
-            .nav-pills-scrollable .nav-link.active { 
-                background-color: #696cff; 
-                color: #fff; 
-                border-color: #696cff;
-                box-shadow: 0 4px 10px rgba(105, 108, 255, 0.25); 
-            }
-            
-            /* Responsive Product Cards */
-            .product-card { 
-                transition: all 0.3s ease; 
-                border: none; 
-                box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.15); 
-                border-radius: 0.85rem; 
-                overflow: hidden;
-            }
-            .product-card:hover { 
-                transform: translateY(-3px); 
-                box-shadow: 0 0.5rem 1rem rgba(161, 172, 184, 0.15); 
-            }
-            .product-card .card-img-top,
-            .product-card .carousel-inner img {
-                aspect-ratio: 16/10;
-                object-fit: cover;
-                object-position: center;
-                width: 100%;
-            }
-            .product-card .carousel-placeholder {
-                aspect-ratio: 16/10;
-                width: 100%;
-            }
-            @media (min-width: 768px) {
-                .product-card .card-img-top,
-                .product-card .carousel-inner img,
-                .product-card .carousel-placeholder {
-                    aspect-ratio: 4/3;
-                }
-            }
-            @media (max-width: 575.98px) {
-                .product-card .card-img-top,
-                .product-card .carousel-inner img,
-                .product-card .carousel-placeholder {
-                    height: 110px !important;
-                    aspect-ratio: auto !important;
-                }
-                .product-card .card-body {
-                    padding: 0.65rem !important;
-                }
-                .product-card .card-title {
-                    font-size: 0.85rem !important;
-                    min-height: auto !important;
-                    line-height: 1.25 !important;
-                    margin-bottom: 0.25rem !important;
-                }
-                .product-card .card-badge-kategori {
-                    font-size: 0.65rem !important;
-                    padding: 2px 6px !important;
-                    line-height: 1.2 !important;
-                }
-                .product-card .card-price-badge {
-                    font-size: 0.68rem !important;
-                    padding: 2px 5px !important;
-                }
-                .product-card .card-status-badge {
-                    font-size: 0.65rem !important;
-                    padding: 2px 5px !important;
-                }
-                .product-card .card-btn-action {
-                    padding: 0.3rem 0.4rem !important;
-                    font-size: 0.72rem !important;
-                }
-            }
-        </style>
-
-        <div class="nav-align-top mb-2 mb-sm-3 w-100 overflow-hidden">
-            <div class="bg-light p-1 rounded-pill mb-2 mb-sm-3 border border-light-subtle shadow-sm w-100 overflow-hidden">
-                <ul class="nav nav-pills nav-pills-scrollable mb-0" role="tablist">
-                    <li class="nav-item">
-                        <button type="button" class="nav-link {{ ($tab == 'gedung' || $tab == 'kendaraan') ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-gedung" aria-controls="navs-top-gedung" aria-selected="{{ ($tab == 'gedung' || $tab == 'kendaraan') ? 'true' : 'false' }}">
-                            <i class="bx bx-building-house me-1"></i> Gedung & Ruang Publik
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-controls="navs-top-pengaturan" aria-selected="false">
-                            <i class="bx bx-cog me-1"></i> Pengaturan & SOP
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-controls="navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
-                            <i class="bx bx-chat me-1"></i> Layanan Pesan
-                            @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
-                                <span class="badge rounded-pill bg-danger ms-1 px-1 py-0" style="font-size: 0.7rem;">{{ $totalUnreadChats }}</span>
-                            @endif
-                        </button>
-                    </li>
-                </ul>
-            </div>
-            
-            <div class="tab-content">
-                <!-- TAB GEDUNG & RUANG PUBLIK -->
-                <div class="tab-pane fade {{ ($tab == 'gedung' || $tab == 'kendaraan') ? 'show active' : '' }}" id="navs-top-gedung" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-2 mb-sm-3 bg-white p-2.5 p-sm-3 rounded-4 shadow-sm gap-2">
-                        <div class="d-flex align-items-center min-w-0">
-                            <div class="avatar avatar-sm bg-success-subtle text-success rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 34px; height: 34px;">
-                                <i class="bx bx-building-house fs-5"></i>
-                            </div>
-                            <div class="min-w-0">
-                                <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.95rem;">Daftar Gedung dan Fasilitas</h6>
-                                <small class="text-muted d-none d-sm-block" style="font-size: 0.78rem;">Gedung Serbaguna, Balai Pertemuan, Lapangan, dll</small>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success btn-sm rounded-pill px-2.5 px-sm-3 py-1.5 shadow-sm d-inline-flex align-items-center fw-semibold text-nowrap" style="font-size: 0.8rem;">
-                                <i class="bx bx-plus me-1"></i> <span>Tambah</span><span class="d-none d-sm-inline ms-1">Gedung</span>
-                            </a>
-                        </div>
+                <div class="col-4">
+                    <div class="unit-stat-card p-3 h-100 d-flex flex-column justify-content-center text-center shadow-sm">
+                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Tersedia</span>
+                        <h4 class="fw-bold text-success mb-0">{{ $tersediaCount }}</h4>
                     </div>
-
-                    @if($fasilitas->count() > 0)
-                        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">
-                            @foreach ($fasilitas as $item)
-                                @php
-                                    $validPhotos = [];
-                                    foreach (['foto', 'foto_2', 'foto_3'] as $fCol) {
-                                        if (!empty($item->$fCol) && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->$fCol)) {
-                                            $validPhotos[] = $item->$fCol;
-                                        }
-                                    }
-                                    $fotoCount = count($validPhotos);
-                                @endphp
-                                <div class="col">
-                                    <div class="card h-100 product-card shadow-sm border-0">
-                                        <div class="position-relative">
-                                            <div id="carouselExample{{ $item->id }}" class="carousel slide" data-bs-ride="carousel">
-                                                <div class="carousel-inner">
-                                                    @if ($fotoCount > 0)
-                                                        @foreach ($validPhotos as $idx => $photo)
-                                                            <div class="carousel-item {{ $idx === 0 ? 'active' : '' }}">
-                                                                <img src="{{ asset('storage/' . $photo) }}" class="card-img-top"
-                                                                    alt="{{ $item->nama_fasilitas }}"
-                                                                    onerror="this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center bg-light text-muted w-100 carousel-placeholder\'><i class=\'bx bx-building-house\' style=\'font-size: 48px; color: #cbd5e1;\'></i></div>';">
-                                                            </div>
-                                                        @endforeach
-                                                    @else
-                                                        <div class="carousel-item active">
-                                                            <div class="d-flex align-items-center justify-content-center bg-light text-muted w-100 carousel-placeholder">
-                                                                <i class="bx bx-building-house" style="font-size: 48px; color: #cbd5e1;"></i>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                @if($fotoCount > 1)
-                                                <button class="carousel-control-prev" type="button"
-                                                    data-bs-target="#carouselExample{{ $item->id }}" data-bs-slide="prev">
-                                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">Previous</span>
-                                                </button>
-                                                <button class="carousel-control-next" type="button"
-                                                    data-bs-target="#carouselExample{{ $item->id }}" data-bs-slide="next">
-                                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">Next</span>
-                                                </button>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <div class="card-body d-flex flex-column p-2 p-sm-3">
-                                            <div class="mb-1">
-                                                <h5 class="card-title fw-bold text-capitalize mb-1 text-truncate" title="{{ $item->nama_fasilitas }}">
-                                                    {{ $item->nama_fasilitas }}
-                                                </h5>
-                                                <div class="d-flex flex-wrap gap-1 align-items-center">
-                                                    <span class="badge bg-label-success rounded-pill px-2 py-0.5 card-badge-kategori text-wrap text-start" style="line-height: 1.2; max-width: 100%; word-break: break-word;">
-                                                        {{ str_replace('&', 'dan', $item->kategori) }}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 my-1.5">
-                                                @if($item->status_biaya === 'berbayar' && $item->harga_sewa > 0)
-                                                    <span class="badge bg-primary text-white fw-semibold card-price-badge">
-                                                        Rp {{ number_format($item->harga_sewa, 0, ',', '.') }} <small class="d-none d-sm-inline" style="font-size: 0.65rem; font-weight: normal;">/ hari</small>
-                                                    </span>
-                                                @else
-                                                    <span class="badge bg-label-success fw-semibold card-price-badge">Gratis</span>
-                                                @endif
-                                                <span class="badge {{ $item->status === 'Tersedia' ? 'bg-label-info' : 'bg-label-secondary' }} card-status-badge">{{ $item->status ?? 'Tersedia' }}</span>
-                                            </div>
-
-                                            @if($item->pengurus && $item->pengurus->count() > 0)
-                                                <div class="mt-0.5 mb-1.5">
-                                                    <small class="text-muted d-block mb-0.5 fw-semibold" style="font-size: 0.7rem;"><i class="bx bx-key me-1"></i>Pengurus / Kunci:</small>
-                                                    <div class="d-flex flex-wrap gap-1">
-                                                        @foreach($item->pengurus as $p)
-                                                            <span class="badge bg-label-secondary card-status-badge text-truncate" style="max-width: 100%;" title="{{ $p->kontak }}">{{ $p->nama }}</span>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            @endif
-                                            
-                                            <div class="mt-auto pt-2 pt-sm-3 border-top d-flex gap-1 flex-nowrap justify-content-center">
-                                                <a href="{{ route('admin.unit.fasilitas_umum.show', $item->id) }}"
-                                                    class="btn btn-sm btn-outline-info flex-grow-1 card-btn-action text-nowrap d-inline-flex align-items-center justify-content-center" title="Lihat Detail">
-                                                    <i class="bx bx-info-circle"></i><span class="d-none d-sm-inline ms-1">Detail</span>
-                                                </a>
-                                                <a href="{{ route('admin.unit.fasilitas_umum.edit', $item->id) }}"
-                                                    class="btn btn-sm btn-outline-warning flex-grow-1 card-btn-action text-nowrap d-inline-flex align-items-center justify-content-center" title="Ubah">
-                                                    <i class="bx bx-edit"></i><span class="d-none d-sm-inline ms-1">Edit</span>
-                                                </a>
-                                                <form action="{{ route('admin.unit.fasilitas_umum.destroy', $item->id) }}" method="POST"
-                                                    data-konfirmasi="Apakah Anda yakin ingin menghapus gedung/fasilitas ini?" class="d-flex flex-grow-1 m-0 p-0">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 card-btn-action text-nowrap d-inline-flex align-items-center justify-content-center" title="Hapus">
-                                                        <i class="bx bx-trash"></i><span class="d-none d-sm-inline ms-1">Hapus</span>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        
-                        @if ($fasilitas->hasPages())
-                            <div class="mt-4 d-flex justify-content-center">
-                                {{ $fasilitas->links() }}
-                            </div>
-                        @endif
-                    @else
-                        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
-                            <div class="card-body">
-                                <div class="mb-4">
-                                    <i class="bx bx-building text-secondary" style="font-size: 80px; opacity: 0.5;"></i>
-                                </div>
-                                <h4 class="fw-bold">Belum Ada Fasilitas</h4>
-                                <p class="text-muted mb-4">Mulai kelola infrastruktur desa dengan menambahkan fasilitas baru.</p>
-                                <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success rounded-pill px-4">Tambah Gedung</a>
-                            </div>
-                        </div>
-                    @endif
                 </div>
-
-                <!-- TAB 3: PENGATURAN SOP -->
-                <div class="tab-pane fade" id="navs-top-pengaturan" role="tabpanel">
-                    <form action="{{ route('admin.unit.fasilitas_umum.sop.update') }}" method="POST">
-@if(auth()->user()->isStaff())<p class="alert alert-info">Ketentuan layanan ditetapkan admin desa. Staf dapat membacanya di sini.</p>@endif
-<fieldset @disabled(auth()->user()->isStaff())>
-                        @csrf
-                        
-                        <div class="row">
-                            <div class="col-xl-8">
-                                <!-- SOP Card -->
-                                <div class="card border-0 shadow-sm rounded-4 mb-4">
-                                    <div class="card-header bg-white border-bottom p-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-sm bg-label-info rounded-circle me-3 d-flex justify-content-center align-items-center"><i class="bx bx-book"></i></div>
-                                            <h5 class="mb-0 fw-bold">SOP Peminjaman Gedung dan Fasilitas Publik</h5>
-                                        </div>
-                                    </div>
-                                    <div class="card-body p-4">
-                                        <div class="alert alert-info d-flex align-items-start mb-4 shadow-sm border-0 rounded-4 p-3 text-dark">
-                                            <i class="bx bx-info-circle fs-4 me-3 mt-1"></i>
-                                            <div>
-                                                <strong class="d-block mb-1">Informasi Penting</strong>
-                                                <span>SOP ini akan ditampilkan kepada masyarakat sebagai syarat dan ketentuan sebelum mereka mengajukan peminjaman. Pilih salah satu model kebijakan di bawah ini.</span>
-                                            </div>
-                                        </div>
-
-                                        <style>
-                                            .sop-card {
-                                                transition: all 0.2s ease-in-out;
-                                                border: 2px solid #ffab00 !important;
-                                                background-color: #fff3cd !important;
-                                            }
-                                            .sop-card.active-sop {
-                                                border-width: 2px !important;
-                                                box-shadow: 0 0.25rem 1rem rgba(255, 171, 0, 0.4) !important;
-                                            }
-                                            .sop-icon {
-                                                color: #ffab00;
-                                                font-size: 1.25rem;
-                                                vertical-align: middle;
-                                            }
-                                        </style>
-
-                                        <div class="row mb-4">
-                                            <!-- Opsi A: Ditanggung -->
-                                            <div class="col-md-6 mb-3">
-                                                <div class="card sop-card {{ $sop_active == 'ditanggung' ? 'active-sop' : '' }} h-100">
-                                                    <div class="card-header d-flex justify-content-between align-items-center pb-2">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" name="sop_active" id="sop_active_ditanggung" value="ditanggung" {{ $sop_active == 'ditanggung' ? 'checked' : '' }}>
-                                                            <label class="form-check-label fw-bold text-dark" for="sop_active_ditanggung">
-                                                                <i class="bx bx-error sop-icon"></i> <span class="align-middle">PENTING: Ditanggung Penyewa</span>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <p class="text-muted small mb-2">Kerusakan fasilitas publik sepenuhnya menjadi tanggung jawab penyewa.</p>
-                                                        
-                                                        <div class="mb-3">
-                                                            <textarea class="form-control border-light-subtle shadow-sm rounded-3" name="sop_ditanggung" id="sop_ditanggung_text" rows="8">{{ $sop_ditanggung }}</textarea>
-                                                        </div>
-                                                        
-                                                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm" onclick="resetSop('ditanggung')">
-                                                            <i class="bx bx-reset"></i> Reset ke Bawaan
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Opsi B: Tidak Ditanggung -->
-                                            <div class="col-md-6 mb-3">
-                                                <div class="card sop-card {{ $sop_active == 'tidak_ditanggung' ? 'active-sop' : '' }} h-100">
-                                                    <div class="card-header d-flex justify-content-between align-items-center pb-2">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" name="sop_active" id="sop_active_tidak_ditanggung" value="tidak_ditanggung" {{ $sop_active == 'tidak_ditanggung' ? 'checked' : '' }}>
-                                                            <label class="form-check-label fw-bold text-dark" for="sop_active_tidak_ditanggung">
-                                                                <i class="bx bx-error sop-icon"></i> <span class="align-middle">PENTING: Ditanggung Dana Desa</span>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <p class="text-muted small mb-2">Kerusakan tidak disengaja ditanggung oleh Dana Operasional (Gratis).</p>
-                                                        
-                                                        <div class="mb-3">
-                                                            <textarea class="form-control border-light-subtle shadow-sm rounded-3" name="sop_tidak_ditanggung" id="sop_tidak_ditanggung_text" rows="8">{{ $sop_tidak_ditanggung }}</textarea>
-                                                        </div>
-                                                        
-                                                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm" onclick="resetSop('tidak_ditanggung')">
-                                                            <i class="bx bx-reset"></i> Reset ke Bawaan
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="d-flex justify-content-end mt-4">
-                                            <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="bx bx-save me-1"></i> Simpan Pengaturan</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-xl-4">
-                                <div class="card bg-primary text-white border-0 shadow-sm rounded-4 mb-4">
-                                    <div class="card-body p-4">
-                                        <h5 class="fw-bold text-white mb-3"><i class="bx bx-bulb me-2"></i>Tips Menulis SOP</h5>
-                                        <ul class="list-unstyled mb-0" style="opacity: 0.9">
-                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Sertakan biaya (jika ada) atau infokan jika gratis</li>
-                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Jelaskan prosedur pengembalian aset/kunci fasilitas</li>
-                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Aturan denda jika terjadi kerusakan/keterlambatan</li>
-                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Syarat dokumen yang harus dibawa warga</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset>
-</form>
-                </div>
-
-                <!-- TAB 4: CHAT WARGA FASILITAS -->
-                <div class="tab-pane fade {{ $tab == 'chat' ? 'show active' : '' }}" id="navs-top-chat" role="tabpanel">
-                    @include('admin.unit.partials.unit_chat_panel', [
-                        'serviceType' => 'fasilitas_umum',
-                        'chatServiceTitle' => 'Fasilitas Umum & Ruang Publik',
-                        'chats' => $chats
-                    ])
+                <div class="col-4">
+                    <div class="unit-stat-card p-3 h-100 d-flex flex-column justify-content-center text-center shadow-sm">
+                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Pesan Baru</span>
+                        <h4 class="fw-bold {{ $unreadChatsCount > 0 ? 'text-danger' : 'text-info' }} mb-0">{{ $unreadChatsCount }}</h4>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Tabs + Quick Search Toolbar -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-2.5 p-sm-3 d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center justify-content-between gap-2.5">
+            <ul class="nav nav-pills gap-2 flex-nowrap overflow-x-auto mb-0" role="tablist" style="scrollbar-width: none;">
+                <li class="nav-item flex-shrink-0">
+                    <button type="button" class="nav-link rounded-pill px-3 py-2 fw-semibold text-nowrap {{ ($tab == 'gedung' || $tab == 'kendaraan') ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-gedung" aria-selected="{{ ($tab == 'gedung' || $tab == 'kendaraan') ? 'true' : 'false' }}">
+                        <i class="bx bx-building-house me-1"></i>Gedung &amp; Ruang Publik
+                    </button>
+                </li>
+                <li class="nav-item flex-shrink-0">
+                    <button type="button" class="nav-link rounded-pill px-3 py-2 fw-semibold text-nowrap" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-selected="false">
+                        <i class="bx bx-book-content me-1"></i>Pengaturan &amp; SOP
+                    </button>
+                </li>
+                <li class="nav-item flex-shrink-0">
+                    <button type="button" class="nav-link rounded-pill px-3 py-2 fw-semibold text-nowrap {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
+                        <i class="bx bx-chat me-1"></i>Layanan Pesan
+                        @if($unreadChatsCount > 0)
+                            <span class="badge rounded-pill bg-danger ms-1">{{ $unreadChatsCount }}</span>
+                        @endif
+                    </button>
+                </li>
+            </ul>
+            <div class="input-group input-group-merge input-group-sm" style="max-width: 300px;">
+                <span class="input-group-text bg-light border-0"><i class="bx bx-search text-muted"></i></span>
+                <input type="text" id="searchFasilitasInput" class="form-control bg-light border-0" placeholder="Cari gedung atau fasilitas...">
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content bg-transparent p-0 border-0 shadow-none">
+        <!-- TAB 1: GEDUNG & RUANG PUBLIK -->
+        <div class="tab-pane fade {{ ($tab == 'gedung' || $tab == 'kendaraan') ? 'show active' : '' }}" id="navs-top-gedung" role="tabpanel">
+            @if($fasilitas->count() > 0)
+                <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3" id="fasilitasCatalogGrid">
+                    @foreach ($fasilitas as $item)
+                        @php
+                            $validPhotos = [];
+                            foreach (['foto', 'foto_2', 'foto_3'] as $fCol) {
+                                if (!empty($item->$fCol) && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->$fCol)) {
+                                    $validPhotos[] = $item->$fCol;
+                                }
+                            }
+                            $fotoCount = count($validPhotos);
+                        @endphp
+                        <div class="col fasilitas-product-col" data-search="{{ strtolower(($item->nama_fasilitas ?? '') . ' ' . ($item->kategori ?? '')) }}">
+                            <div class="card unit-product-card shadow-sm h-100 d-flex flex-column">
+                                <div class="position-relative">
+                                    <div id="carouselExample{{ $item->id }}" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @if ($fotoCount > 0)
+                                                @foreach ($validPhotos as $idx => $photo)
+                                                    <div class="carousel-item {{ $idx === 0 ? 'active' : '' }}">
+                                                        <img src="{{ asset('storage/' . $photo) }}" class="unit-product-img" alt="{{ $item->nama_fasilitas }}"
+                                                            onerror="this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center bg-light text-muted unit-product-placeholder\'><i class=\'bx bx-building-house\' style=\'font-size: 44px; color: #cbd5e1;\'></i></div>';">
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="carousel-item active">
+                                                    <div class="d-flex align-items-center justify-content-center bg-light text-muted unit-product-placeholder">
+                                                        <i class="bx bx-building-house" style="font-size: 44px; color: #cbd5e1;"></i>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        @if($fotoCount > 1)
+                                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample{{ $item->id }}" data-bs-slide="prev">
+                                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            </button>
+                                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExample{{ $item->id }}" data-bs-slide="next">
+                                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                    <span class="badge {{ ($item->status ?? 'Tersedia') === 'Tersedia' ? 'bg-success' : 'bg-secondary' }} rounded-pill position-absolute top-0 end-0 m-2 shadow-sm" style="font-size: 0.68rem;">
+                                        {{ $item->status ?? 'Tersedia' }}
+                                    </span>
+                                </div>
+                                <div class="card-body p-3 d-flex flex-column flex-grow-1">
+                                    <h6 class="card-title fw-bold text-dark text-capitalize mb-1 text-truncate" title="{{ $item->nama_fasilitas }}">{{ $item->nama_fasilitas }}</h6>
+                                    <div class="mb-2">
+                                        <span class="badge bg-label-success rounded-pill px-2 py-0.5 text-truncate" style="font-size: 0.68rem; max-width: 100%;">
+                                            {{ str_replace('&', 'dan', $item->kategori) }}
+                                        </span>
+                                    </div>
+                                    <div class="mb-2">
+                                        @if($item->status_biaya === 'berbayar' && $item->harga_sewa > 0)
+                                            <span class="badge bg-label-primary rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.76rem;">
+                                                Rp {{ number_format($item->harga_sewa, 0, ',', '.') }} / hari
+                                            </span>
+                                        @else
+                                            <span class="badge bg-label-success rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.76rem;">Gratis</span>
+                                        @endif
+                                    </div>
+
+                                    @if($item->pengurus && $item->pengurus->count() > 0)
+                                        <div class="mb-2">
+                                            <small class="text-muted d-block mb-0.5 fw-semibold" style="font-size: 0.7rem;"><i class="bx bx-key me-1"></i>Pengurus:</small>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach($item->pengurus as $p)
+                                                    <span class="badge bg-label-secondary text-truncate" style="font-size: 0.66rem; max-width: 100%;" title="{{ $p->kontak }}">{{ $p->nama }}</span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div class="mt-auto pt-2 border-top d-flex gap-1.5 justify-content-center">
+                                        <a href="{{ route('admin.unit.fasilitas_umum.show', $item->id) }}" class="btn btn-sm btn-outline-info rounded-pill flex-grow-1 px-2" title="Lihat Detail">
+                                            <i class="bx bx-show"></i>
+                                        </a>
+                                        <a href="{{ route('admin.unit.fasilitas_umum.edit', $item->id) }}" class="btn btn-sm btn-outline-warning rounded-pill flex-grow-1 px-2" title="Edit Fasilitas">
+                                            <i class="bx bx-edit-alt"></i>
+                                        </a>
+                                        <form action="{{ route('admin.unit.fasilitas_umum.destroy', $item->id) }}" method="POST"
+                                              data-konfirmasi="Apakah Anda yakin ingin menghapus gedung/fasilitas ini?" class="d-flex flex-grow-1 m-0">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill w-100 px-2" title="Hapus Fasilitas">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                @if ($fasilitas->hasPages())
+                    <div class="mt-4 d-flex justify-content-center">
+                        {{ $fasilitas->links() }}
+                    </div>
+                @endif
+            @else
+                <div class="card border-0 shadow-sm rounded-4 text-center py-5 px-3">
+                    <div class="card-body">
+                        <div class="avatar avatar-lg bg-label-primary text-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                            <i class="bx bx-buildings fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">Belum Ada Fasilitas Umum</h5>
+                        <p class="text-muted small mb-3">Tambahkan gedung serbaguna, balai desa, atau lapangan olahraga agar warga dapat mengajukan peminjaman.</p>
+                        <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            <i class="bx bx-plus-circle me-1"></i>Tambah Gedung Pertama
+                        </a>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <!-- TAB 2: PENGATURAN SOP -->
+        <div class="tab-pane fade" id="navs-top-pengaturan" role="tabpanel">
+            <form action="{{ route('admin.unit.fasilitas_umum.sop.update') }}" method="POST">
+                @if(auth()->user()->isStaff())
+                    <div class="alert bg-label-info border-0 rounded-4 mb-3 small">
+                        <i class="bx bx-info-circle me-1"></i>Ketentuan layanan ditetapkan oleh Admin Desa. Staf hanya dapat membacanya di sini.
+                    </div>
+                @endif
+                <fieldset @disabled(auth()->user()->isStaff())>
+                    @csrf
+                    <div class="row g-3">
+                        <div class="col-12 col-xl-8">
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-header bg-white border-bottom px-3 px-md-4 py-3 d-flex align-items-center gap-2.5">
+                                    <div class="avatar avatar-sm bg-label-info rounded-circle d-flex justify-content-center align-items-center">
+                                        <i class="bx bx-book-content fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark">SOP Peminjaman Gedung &amp; Fasilitas Publik</h6>
+                                        <small class="text-muted">Ditampilkan kepada warga sebelum mengajukan peminjaman.</small>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3 p-md-4">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <div class="card sop-option-card sop-card {{ $sop_active == 'ditanggung' ? 'active-sop' : '' }} h-100">
+                                                <div class="card-body p-3">
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="radio" name="sop_active" id="sop_active_ditanggung" value="ditanggung" {{ $sop_active == 'ditanggung' ? 'checked' : '' }}>
+                                                        <label class="form-check-label fw-bold text-dark small" for="sop_active_ditanggung">
+                                                            Ditanggung Penyewa
+                                                        </label>
+                                                    </div>
+                                                    <p class="text-muted small mb-2" style="font-size: 0.76rem;">Kerusakan fasilitas publik menjadi tanggung jawab penyewa.</p>
+                                                    <textarea class="form-control form-control-sm rounded-3 mb-2" name="sop_ditanggung" id="sop_ditanggung_text" rows="7">{{ $sop_ditanggung }}</textarea>
+                                                    <button type="button" class="btn btn-xs btn-outline-warning rounded-pill px-2.5" onclick="resetSop('ditanggung')">
+                                                        <i class="bx bx-reset me-1"></i>Reset Bawaan
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card sop-option-card sop-card {{ $sop_active == 'tidak_ditanggung' ? 'active-sop' : '' }} h-100">
+                                                <div class="card-body p-3">
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="radio" name="sop_active" id="sop_active_tidak_ditanggung" value="tidak_ditanggung" {{ $sop_active == 'tidak_ditanggung' ? 'checked' : '' }}>
+                                                        <label class="form-check-label fw-bold text-dark small" for="sop_active_tidak_ditanggung">
+                                                            Ditanggung Dana Desa
+                                                        </label>
+                                                    </div>
+                                                    <p class="text-muted small mb-2" style="font-size: 0.76rem;">Kerusakan tidak disengaja ditanggung dana operasional desa.</p>
+                                                    <textarea class="form-control form-control-sm rounded-3 mb-2" name="sop_tidak_ditanggung" id="sop_tidak_ditanggung_text" rows="7">{{ $sop_tidak_ditanggung }}</textarea>
+                                                    <button type="button" class="btn btn-xs btn-outline-warning rounded-pill px-2.5" onclick="resetSop('tidak_ditanggung')">
+                                                        <i class="bx bx-reset me-1"></i>Reset Bawaan
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-end pt-2 border-top">
+                                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm w-100 w-sm-auto">
+                                            <i class="bx bx-save me-1"></i>Simpan Pengaturan SOP
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-xl-4">
+                            <div class="card bg-label-primary border-0 shadow-none rounded-4">
+                                <div class="card-body p-3 p-md-4">
+                                    <h6 class="fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+                                        <i class="bx bx-bulb fs-5"></i>
+                                        <span>Tips Menulis SOP Fasilitas</span>
+                                    </h6>
+                                    <ul class="list-unstyled mb-0 small text-primary" style="opacity: 0.92;">
+                                        <li class="mb-2 d-flex align-items-start gap-2"><i class="bx bx-check-circle mt-0.5 flex-shrink-0"></i><span>Sertakan biaya sewa (jika ada) atau informasikan jika gratis.</span></li>
+                                        <li class="mb-2 d-flex align-items-start gap-2"><i class="bx bx-check-circle mt-0.5 flex-shrink-0"></i><span>Jelaskan prosedur serah-terima dan pengembalian kunci fasilitas.</span></li>
+                                        <li class="mb-2 d-flex align-items-start gap-2"><i class="bx bx-check-circle mt-0.5 flex-shrink-0"></i><span>Cantumkan aturan kebersihan dan denda keterlambatan/kerusakan.</span></li>
+                                        <li class="d-flex align-items-start gap-2"><i class="bx bx-check-circle mt-0.5 flex-shrink-0"></i><span>Sebutkan dokumen identitas yang perlu ditunjukkan warga.</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+
+        <!-- TAB 3: CHAT WARGA FASILITAS -->
+        <div class="tab-pane fade {{ $tab == 'chat' ? 'show active' : '' }}" id="navs-top-chat" role="tabpanel">
+            @include('admin.unit.partials.unit_chat_panel', [
+                'serviceType' => 'fasilitas_umum',
+                'chatServiceTitle' => 'Fasilitas Umum & Ruang Publik',
+                'chats' => $chats
+            ])
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
-    // SOP Teks Bawaan
     const defaultSops = {
         'ditanggung': @json($default_ditanggung ?? ''),
         'tidak_ditanggung': @json($default_tidak_ditanggung ?? '')
@@ -488,53 +399,25 @@
         });
     }
 
-    // Interactive Card selection
     document.querySelectorAll('input[name="sop_active"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
-            // Reset border dari semua card
-            document.querySelectorAll('.sop-card').forEach(function(card) {
-                card.classList.remove('active-sop');
-            });
-            // Tambahkan border orange menyala ke card yang dipilih
-            if(this.checked) {
-                this.closest('.sop-card').classList.add('active-sop');
+            document.querySelectorAll('.sop-card').forEach(card => card.classList.remove('active-sop'));
+            if (this.checked) {
+                this.closest('.sop-card')?.classList.add('active-sop');
             }
         });
     });
-</script>
-@endpush
 
-@push('styles')
-<style>
-    .card {
-        transition: transform 0.2s ease;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-    }
-    .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-    }
-    .pagination .page-link {
-        color: #495057;
-        border: 1px solid #dee2e6;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        border-radius: 0.375rem;
-        transition: all 0.2s ease;
-    }
-    .pagination .page-link:hover {
-        background-color: #f8f9fa;
-        color: #0d6efd;
-    }
-    .pagination .page-item.active .page-link {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-        color: white;
-    }
-    .pagination .page-item.disabled .page-link {
-        color: #6c757d;
-        background-color: #fff;
-    }
-</style>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchFasilitasInput');
+        if (!searchInput) return;
+        searchInput.addEventListener('input', function() {
+            const q = this.value.toLowerCase().trim();
+            document.querySelectorAll('.fasilitas-product-col').forEach(col => {
+                const hay = (col.getAttribute('data-search') || '').toLowerCase();
+                col.style.display = (!q || hay.includes(q)) ? '' : 'none';
+            });
+        });
+    });
+</script>
 @endpush

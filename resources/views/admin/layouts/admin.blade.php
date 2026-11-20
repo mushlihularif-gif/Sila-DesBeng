@@ -1227,7 +1227,7 @@
                     </li>
 
                     <!-- Dropdown 1: Unit Layanan Desa (Katalog Aktivasi dan Unit Aktif) -->
-                    <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') || request()->routeIs('admin.region-settings.index') ? 'open active show' : '' }}">
+                    <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') || request()->routeIs('content.*') || request()->routeIs('admin.region-settings.index') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center text-nowrap">
                                 <i class="menu-icon tf-icons bx bx-grid-alt text-primary"></i>
@@ -1286,7 +1286,7 @@
                             @endif
 
                             <li class="menu-item"><span class="sidebar-sub-label">Informasi Publik</span></li>
-                            <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
+                            <li class="menu-item {{ request()->routeIs('admin.announcements.*') || request()->routeIs('content.*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.announcements.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-news me-2 text-muted"></i>
                                     <div>Kabar &amp; Pengumuman</div>
@@ -1596,8 +1596,9 @@
                                         // halaman "Lihat Semua" supaya keduanya tidak pernah
                                         // berbeda pendapat lagi.
                                         $currentUser = auth()->user();
-                                        $notifQuery = \App\Models\AdminNotification::untukPengguna($currentUser);
-                                        $unreadCount = (clone $notifQuery)->where('is_read', false)->count();
+                                        $hasAdminNotifTable = \Illuminate\Support\Facades\Schema::hasTable('admin_notifications');
+                                        $notifQuery = $hasAdminNotifTable ? \App\Models\AdminNotification::untukPengguna($currentUser) : null;
+                                        $unreadCount = $notifQuery ? (clone $notifQuery)->where('is_read', false)->count() : 0;
                                     @endphp
                                     <span id="notif-badge-bell" class="badge bg-danger rounded-pill badge-notifications position-absolute {{ $unreadCount > 0 ? '' : 'd-none' }}" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                                 </a>
@@ -1638,7 +1639,7 @@
                                     <li>
                                         <div class="notif-list-container" style="max-height: 360px; overflow-y: auto;">
                                             @php
-                                                $recentNotifications = (clone $notifQuery)->latest()->take(30)->get();
+                                                $recentNotifications = $notifQuery ? (clone $notifQuery)->latest()->take(30)->get() : collect();
                                             @endphp
                                             @forelse($recentNotifications as $notif)
                                             @php
