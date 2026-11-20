@@ -177,22 +177,28 @@
         <div class="card-body p-3 p-md-4 position-relative">
             <div class="row align-items-center g-3">
                 <div class="col-12 col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
+                    @php
+                        $availableYearsList = is_array($availableYears) ? $availableYears : $availableYears->all();
+                        $hasPrevYearData = in_array((int) ($year - 1), array_map('intval', $availableYearsList), true);
+                    @endphp
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                         <span class="badge rounded-pill px-3 py-1" style="background: rgba(255,255,255,0.2); font-size: 0.75rem;">
                             <i class="bx bx-wallet me-1"></i>Total Pendapatan Tahun {{ $year }}
                         </span>
-                        @if($growth['total'] > 0)
-                            <span class="badge bg-success rounded-pill px-2 py-1" style="font-size: 0.72rem;">
-                                <i class="bx bx-trending-up me-1"></i>+{{ number_format($growth['total'], 1) }}% vs {{ $year - 1 }}
-                            </span>
-                        @elseif($growth['total'] < 0)
-                            <span class="badge bg-danger rounded-pill px-2 py-1" style="font-size: 0.72rem;">
-                                <i class="bx bx-trending-down me-1"></i>{{ number_format($growth['total'], 1) }}% vs {{ $year - 1 }}
-                            </span>
-                        @else
-                            <span class="badge rounded-pill px-2 py-1" style="background: rgba(255,255,255,0.18); font-size: 0.72rem;">
-                                0% vs {{ $year - 1 }}
-                            </span>
+                        @if($hasPrevYearData)
+                            @if($growth['total'] > 0)
+                                <span class="badge bg-success rounded-pill px-2 py-1" style="font-size: 0.72rem;">
+                                    <i class="bx bx-trending-up me-1"></i>+{{ number_format($growth['total'], 1) }}% vs {{ $year - 1 }}
+                                </span>
+                            @elseif($growth['total'] < 0)
+                                <span class="badge bg-danger rounded-pill px-2 py-1" style="font-size: 0.72rem;">
+                                    <i class="bx bx-trending-down me-1"></i>{{ number_format($growth['total'], 1) }}% vs {{ $year - 1 }}
+                                </span>
+                            @else
+                                <span class="badge rounded-pill px-2 py-1" style="background: rgba(255,255,255,0.18); font-size: 0.72rem;">
+                                    0% vs {{ $year - 1 }}
+                                </span>
+                            @endif
                         @endif
                     </div>
                     <h2 class="fw-bold text-white mb-1" style="letter-spacing: -0.5px;">
