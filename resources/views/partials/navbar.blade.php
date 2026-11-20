@@ -82,6 +82,27 @@
         
         .sd-nav-auth { display: flex; align-items: center; gap: 12px; }
         
+        /* Keep every account action consistent, including settings and logout. */
+        .sd-account-menu > :is(a, button),
+        .sd-account-menu-mobile > :is(a, button) {
+            border-left: 3px solid transparent;
+            transition: background-color .15s, border-color .15s;
+        }
+        .sd-account-menu > :is(a, button):is(:hover, :focus-visible),
+        .sd-account-menu-mobile > :is(a, button):is(:hover, :focus-visible) {
+            border-left-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .sd-account-menu > :is(a, button):focus-visible,
+        .sd-account-menu-mobile > :is(a, button):focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: -2px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .sd-account-menu > :is(a, button),
+            .sd-account-menu-mobile > :is(a, button) { transition: none; }
+        }
+
         /* Auth Buttons */
         .sd-btn-login-wrapper { position: relative; display: inline-block; }
         .sd-btn-login-wrapper::before {
@@ -257,7 +278,7 @@
                     <!-- Wrapper padding transparan untuk jembatan hover agar tidak hilang -->
                     <div class="absolute top-full right-0 pt-2 z-[60] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                         <div class="w-56 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
-                            <div class="py-1.5">
+                            <div class="py-1.5 sd-account-menu">
                                 {{-- Selalu tampil. Dulu dibungkus @if(!= 'verified'), sehingga
                                      menunya lenyap begitu warga selesai diverifikasi — padahal
                                      ia masih perlu melihat statusnya dan kapan disetujui.
@@ -271,6 +292,7 @@
                                     </span>
                                 </a>
 
+                                <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 {{-- Buku alamat warga. --}}
                                 <a href="{{ route('user.saldo.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal flex items-center justify-center gap-2 whitespace-nowrap">
@@ -281,6 +303,7 @@
                                 <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Profil</span>
                                 </a>
+                                <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <a href="{{ route('user.settings') }}" class="block px-4 py-2.5 text-center text-gray-800 hover:bg-blue-50">Pengaturan Akun</a>
                                 @if(in_array(auth()->user()->role, ['super_admin', 'admin_desa']))
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
@@ -495,7 +518,7 @@
                     <p class="text-sm text-gray-500">{{ auth()->user()->email }}</p>
                 </div>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-2 sd-account-menu-mobile">
                 {{-- Sama seperti dropdown desktop: selalu tampil, hanya warnanya
                      yang membedakan sudah atau belum terverifikasi. --}}
                 @php $sudahVerifMobile = auth()->user()->verification_status === 'verified'; @endphp
