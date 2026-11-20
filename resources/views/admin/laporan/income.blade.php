@@ -134,13 +134,6 @@
                 <span>Riwayat</span>
             </a>
 
-            @if(auth()->user()->role === 'admin_desa')
-            <a href="{{ route('admin.refunds.index') }}" class="btn btn-outline-warning shadow-sm rounded-pill px-3 d-inline-flex align-items-center gap-1">
-                <i class="bx bx-undo"></i>
-                <span>Pengembalian Dana</span>
-            </a>
-            @endif
-
             <button type="button" class="btn btn-primary shadow-sm rounded-pill px-3 d-inline-flex align-items-center gap-1" onclick="window.print()">
                 <i class="bx bx-printer"></i>
                 <span>Cetak</span>

@@ -132,35 +132,37 @@
 
     <!-- Info Banner + Ringkasan -->
     <div class="row g-3 mb-4">
-        <div class="col-12 col-lg-8">
-            <div class="staff-hero-card p-3 p-md-4 h-100 d-flex align-items-start gap-3">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 44px; height: 44px;">
-                    <i class="bx bx-shield-quarter fs-4"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold text-primary mb-1">Batasan Hak Akses Staf Layanan</h6>
-                    <p class="mb-0 text-dark small" style="opacity: 0.85; line-height: 1.5;">
-                        Staf hanya dapat mengelola produk, pesanan, verifikasi bukti pembayaran, dan chat pada unit layanan yang Anda centang.
-                        <strong>Rekening desa, verifikasi warga, akun admin, serta pengaturan wilayah tetap hanya dipegang Admin Desa.</strong>
-                    </p>
+        <div class="col-12 col-xl-7">
+            <div class="card bg-label-primary border-0 shadow-none rounded-4 h-100">
+                <div class="card-body p-3 p-md-4 d-flex align-items-start gap-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 44px; height: 44px;">
+                        <i class="bx bx-shield-quarter fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-primary mb-1">Batasan Hak Akses Staf Layanan</h6>
+                        <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.55;">
+                            Staf hanya dapat mengelola produk, pesanan, verifikasi bukti pembayaran, dan chat pada unit layanan yang Anda centang.
+                            <strong>Rekening desa, verifikasi warga, akun admin, serta pengaturan wilayah tetap hanya dipegang Admin Desa.</strong>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-lg-4">
+        <div class="col-12 col-xl-5">
             <div class="row g-2 h-100">
-                <div class="col-4 col-lg-4">
+                <div class="col-4">
                     <div class="staff-stat-pill h-100 d-flex flex-column justify-content-center text-center shadow-sm">
-                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Total</span>
+                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Total Staf</span>
                         <h4 class="fw-bold text-primary mb-0">{{ $totalStaff }}</h4>
                     </div>
                 </div>
-                <div class="col-4 col-lg-4">
+                <div class="col-4">
                     <div class="staff-stat-pill h-100 d-flex flex-column justify-content-center text-center shadow-sm">
-                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Aktif</span>
+                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Staf Aktif</span>
                         <h4 class="fw-bold text-success mb-0">{{ $activeStaff }}</h4>
                     </div>
                 </div>
-                <div class="col-4 col-lg-4">
+                <div class="col-4">
                     <div class="staff-stat-pill h-100 d-flex flex-column justify-content-center text-center shadow-sm">
                         <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Nonaktif</span>
                         <h4 class="fw-bold text-secondary mb-0">{{ $inactiveStaff }}</h4>
@@ -272,12 +274,18 @@
     </div>
 
     <!-- Daftar Petugas Terdaftar -->
-    <div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3">
         <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
             <i class="bx bx-id-card text-primary"></i>
             <span>Petugas Terdaftar</span>
             <span class="badge bg-label-primary rounded-pill">{{ $totalStaff }}</span>
         </h5>
+        @if($totalStaff > 0)
+        <div class="input-group input-group-merge input-group-sm w-100 w-sm-auto" style="min-width: 240px; max-width: 320px;">
+            <span class="input-group-text bg-white border-end-0"><i class="bx bx-search text-muted"></i></span>
+            <input type="text" id="searchStaffInput" class="form-control border-start-0" placeholder="Cari nama, username, atau unit...">
+        </div>
+        @endif
     </div>
 
     @forelse($staff as $person)
@@ -432,6 +440,18 @@
             icon.className = isPass ? 'bx bx-hide' : 'bx bx-show';
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchStaffInput');
+        if (!searchInput) return;
+        searchInput.addEventListener('input', function() {
+            const q = this.value.toLowerCase().trim();
+            document.querySelectorAll('.staff-card').forEach(card => {
+                const text = (card.textContent || '').toLowerCase();
+                card.style.display = (!q || text.includes(q)) ? '' : 'none';
+            });
+        });
+    });
 </script>
 @endpush
 @endsection

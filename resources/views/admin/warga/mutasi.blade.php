@@ -110,36 +110,75 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-            <div class="flex-grow-1">
-                <h4 class="fw-bold m-0"><span class="text-muted fw-light">Warga /</span> Mutasi Penduduk</h4>
-            </div>
-            <div class="d-flex flex-wrap gap-2 justify-content-md-end flex-shrink-0" style="position: relative; z-index: 10;">
-                <button type="button" class="btn btn-warning text-dark shadow-sm text-nowrap fw-semibold" data-bs-toggle="modal" data-bs-target="#dorongWargaModal">
-                    <i class='bx bx-export me-1'></i> Mutasi Keluar
-                </button>
-                <button type="button" class="btn btn-primary shadow-sm text-nowrap fw-semibold" data-bs-toggle="modal" data-bs-target="#tarikWargaModal">
-                    <i class='bx bx-user-plus me-1'></i> Tarik Data Warga
-                </button>
-            </div>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><span class="text-muted fw-light">Kependudukan /</span> Mutasi Penduduk</h4>
+            <p class="text-muted small mb-0">Kelola perpindahan akun digital warga antardesa di Kecamatan Bengkalis dengan persetujuan dua tahap.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2 w-100 w-md-auto justify-content-md-end flex-shrink-0">
+            <button type="button" class="btn btn-warning text-dark rounded-pill px-3 shadow-sm text-nowrap fw-semibold flex-grow-1 flex-md-grow-0 d-inline-flex align-items-center justify-content-center gap-1" data-bs-toggle="modal" data-bs-target="#dorongWargaModal">
+                <i class="bx bx-export"></i>
+                <span>Mutasi Keluar</span>
+            </button>
+            <button type="button" class="btn btn-primary rounded-pill px-3 shadow-sm text-nowrap fw-semibold flex-grow-1 flex-md-grow-0 d-inline-flex align-items-center justify-content-center gap-1" data-bs-toggle="modal" data-bs-target="#tarikWargaModal">
+                <i class="bx bx-user-plus"></i>
+                <span>Tarik Data Warga</span>
+            </button>
         </div>
     </div>
 
-    <!-- Panduan -->
-    <div class="card bg-label-info border-0 shadow-none mb-4" style="border-radius: 12px;">
-        <div class="card-body d-flex align-items-start align-items-md-center p-3 p-md-4">
-            <div class="me-3 flex-shrink-0">
-                <div class="bg-info p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 50px; height: 50px;">
-                    <i class="bx bx-transfer-alt fs-3"></i>
+    <!-- Panduan & Ringkasan KPI -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-7">
+            <div class="card bg-label-primary border-0 shadow-none rounded-4 h-100">
+                <div class="card-body d-flex align-items-start p-3 p-md-4 gap-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 44px; height: 44px;">
+                        <i class="bx bx-transfer-alt fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-primary">Sistem Mutasi Akun Lintas Desa (Persetujuan Dua Tahap)</h6>
+                        <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.55;">
+                            Khusus untuk <strong>memindahkan domisili akun warga antardesa di Kecamatan Bengkalis</strong> (bukan surat pindah fisik).
+                            Pengajuan warga wajib disetujui pelepasannya oleh <strong>Desa Asal</strong>, lalu diterima oleh <strong>Desa Tujuan</strong> sebelum akun resmi berpindah.
+                        </p>
+                    </div>
                 </div>
             </div>
-            <div>
-                <h5 class="fw-bold mb-1 text-info">Sistem Mutasi Lintas Wilayah</h5>
-                <p class="mb-0 text-info" style="opacity: 0.85; line-height: 1.5; font-size: 0.88rem;">
-                    <span class="fw-bold text-decoration-underline text-danger">PENTING:</span> Ini <b>bukan</b> fitur untuk mengurus surat pindah administrasi secara fisik. Fitur ini khusus digunakan untuk <strong class="text-dark shadow-sm" style="background-color: rgba(255, 255, 255, 0.7); padding: 3px 6px; border-radius: 4px;">memindahkan domisili akun digital warga (Mutasi Akun) antardesa di Kecamatan Bengkalis.</strong><br><br>
-                    Pemindahan akun ini menggunakan sistem <b>Persetujuan Dua Tahap Berantai</b>: Pengajuan mandiri oleh warga wajib disetujui pelepasannya oleh Pemerintah Desa Asal terlebih dahulu, kemudian diverifikasi dan disetujui penerimaannya oleh Pemerintah Desa Tujuan sebelum akun warga resmi berpindah domisili.
-                </p>
+        </div>
+        <div class="col-12 col-xl-5">
+            <div class="row g-2 h-100">
+                <div class="col-6 col-sm-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-center text-center">
+                            <span class="text-muted small fw-semibold" style="font-size: 0.7rem;">Semua Data</span>
+                            <h4 class="fw-bold text-primary mb-0">{{ $counts['semua'] ?? 0 }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-center text-center">
+                            <span class="text-muted small fw-semibold" style="font-size: 0.7rem;">Keluar</span>
+                            <h4 class="fw-bold text-danger mb-0">{{ $counts['keluar'] ?? 0 }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-center text-center">
+                            <span class="text-muted small fw-semibold" style="font-size: 0.7rem;">Masuk</span>
+                            <h4 class="fw-bold text-success mb-0">{{ $counts['masuk'] ?? 0 }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-center text-center">
+                            <span class="text-muted small fw-semibold" style="font-size: 0.7rem;">Riwayat</span>
+                            <h4 class="fw-bold text-info mb-0">{{ $counts['riwayat'] ?? 0 }}</h4>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -159,41 +198,50 @@
     </div>
     @endif
 
-    <!-- TABS BUTTONS -->
-    <ul class="nav nav-pills nav-pills-scrollable mb-4" role="tablist" style="border: none;">
-        <li class="nav-item" role="presentation">
-            <button type="button" class="nav-link filter-btn filter-btn-primary active" role="tab" data-bs-toggle="pill" data-bs-target="#navs-semua">
-                <i class="bx bx-list-ul me-1"></i> Semua Data
-                @if(($counts['semua'] ?? 0) > 0)
-                <span class="badge rounded-pill bg-label-primary ms-1">{{ $counts['semua'] }}</span>
-                @endif
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button type="button" class="nav-link filter-btn filter-btn-danger" role="tab" data-bs-toggle="pill" data-bs-target="#navs-keluar">
-                <i class="bx bx-export me-1"></i> Menunggu Pelepasan (Keluar)
-                @if(($counts['keluar'] ?? 0) > 0)
-                <span class="badge rounded-pill bg-label-danger ms-1">{{ $counts['keluar'] }}</span>
-                @endif
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button type="button" class="nav-link filter-btn filter-btn-success" role="tab" data-bs-toggle="pill" data-bs-target="#navs-masuk">
-                <i class="bx bx-import me-1"></i> Menunggu Persetujuan (Masuk)
-                @if(($counts['masuk'] ?? 0) > 0)
-                <span class="badge rounded-pill bg-label-success ms-1">{{ $counts['masuk'] }}</span>
-                @endif
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button type="button" class="nav-link filter-btn filter-btn-info" role="tab" data-bs-toggle="pill" data-bs-target="#navs-riwayat">
-                <i class="bx bx-history me-1"></i> Riwayat Mutasi
-                @if(($counts['riwayat'] ?? 0) > 0)
-                <span class="badge rounded-pill bg-label-info ms-1">{{ $counts['riwayat'] }}</span>
-                @endif
-            </button>
-        </li>
-    </ul>
+    <!-- TABS BUTTONS + SEARCH -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3 d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center justify-content-between gap-3">
+            <ul class="nav nav-pills nav-pills-scrollable mb-0 pb-1 pb-lg-0" role="tablist" style="border: none;">
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link filter-btn filter-btn-primary active" role="tab" data-bs-toggle="pill" data-bs-target="#navs-semua">
+                        <i class="bx bx-list-ul me-1"></i> Semua Data
+                        @if(($counts['semua'] ?? 0) > 0)
+                        <span class="badge rounded-pill bg-label-primary ms-1">{{ $counts['semua'] }}</span>
+                        @endif
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link filter-btn filter-btn-danger" role="tab" data-bs-toggle="pill" data-bs-target="#navs-keluar">
+                        <i class="bx bx-export me-1"></i> Menunggu Pelepasan (Keluar)
+                        @if(($counts['keluar'] ?? 0) > 0)
+                        <span class="badge rounded-pill bg-label-danger ms-1">{{ $counts['keluar'] }}</span>
+                        @endif
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link filter-btn filter-btn-success" role="tab" data-bs-toggle="pill" data-bs-target="#navs-masuk">
+                        <i class="bx bx-import me-1"></i> Menunggu Persetujuan (Masuk)
+                        @if(($counts['masuk'] ?? 0) > 0)
+                        <span class="badge rounded-pill bg-label-success ms-1">{{ $counts['masuk'] }}</span>
+                        @endif
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link filter-btn filter-btn-info" role="tab" data-bs-toggle="pill" data-bs-target="#navs-riwayat">
+                        <i class="bx bx-history me-1"></i> Riwayat Mutasi
+                        @if(($counts['riwayat'] ?? 0) > 0)
+                        <span class="badge rounded-pill bg-label-info ms-1">{{ $counts['riwayat'] }}</span>
+                        @endif
+                    </button>
+                </li>
+            </ul>
+
+            <div class="input-group input-group-merge input-group-sm" style="max-width: 320px;">
+                <span class="input-group-text bg-light border-0"><i class="bx bx-search text-muted"></i></span>
+                <input type="text" id="searchMutasiInput" class="form-control bg-light border-0" placeholder="Cari nama warga, NIK, atau desa...">
+            </div>
+        </div>
+    </div>
     
     <!-- TABS CONTENT -->
     <div class="card border-0 shadow-sm" style="border-radius: 16px;">
@@ -471,7 +519,7 @@
                                     @push('modals')
                                     <div class="modal fade" id="rejectModal{{ $p->id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content border-0 shadow">
+                                            <div class="modal-content border-0 shadow-lg rounded-4">
                                                 <div class="modal-header border-bottom">
                                                     <h5 class="modal-title fw-bold text-danger"><i class='bx bx-block me-1'></i> Tahan Warga: {{ $p->user->name }}</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -636,7 +684,7 @@
                                         @push('modals')
                                         <div class="modal fade" id="rejectModalMasuk{{ $p->id }}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content border-0 shadow">
+                                                <div class="modal-content border-0 shadow-lg rounded-4">
                                                     <div class="modal-header border-bottom">
                                                         <h5 class="modal-title fw-bold text-danger"><i class='bx bx-block me-1'></i> Tolak Masuk: {{ $p->user->name }}</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -826,7 +874,7 @@
 @push('modals')
 <div class="modal fade" id="tarikWargaModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-bottom pb-3">
                 <h5 class="modal-title fw-bold text-primary"><i class='bx bx-import me-2'></i>Tarik Data Warga (Mutasi Masuk)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -909,7 +957,7 @@
 <!-- Modal Mutasi Keluar -->
 <div class="modal fade" id="dorongWargaModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-bottom pb-3">
                 <h5 class="modal-title fw-bold text-warning"><i class='bx bx-export me-2'></i>Mutasi Keluar (Ekspor Warga)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1388,6 +1436,19 @@
                 document.execCommand('copy');
                 $temp.remove();
             }
+        });
+
+        // Pencarian Cepat di semua tab Mutasi (Tabel Desktop & Kartu Mobile)
+        $('#searchMutasiInput').on('input', function() {
+            var q = ($(this).val() || '').toLowerCase().trim();
+            $('.table-modern tbody tr, .d-md-none .card.border').each(function() {
+                var txt = ($(this).text() || '').toLowerCase();
+                if (!q || txt.indexOf(q) !== -1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
         });
     });
 </script>

@@ -230,36 +230,98 @@
 
 <div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
     <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-            <div>
-                <h4 class="fw-bold m-0"><span class="text-muted fw-light">Manajemen /</span> Wilayah dan RT/RW</h4>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><span class="text-muted fw-light">Kependudukan /</span> Wilayah dan RT/RW</h4>
+            <p class="text-muted small mb-0">Kelola struktur Rukun Warga (RW), Rukun Tetangga (RT), serta penunjukan pejabat pengurus wilayah desa.</p>
+        </div>
+        <div class="header-action-btns d-flex flex-wrap gap-2 justify-content-md-end flex-shrink-0" style="position: relative; z-index: 10;">
+            <button type="button" class="btn btn-primary rounded-pill px-3 shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
+                <i class="bx bx-plus me-1"></i> Buat Akun dan Wilayah
+            </button>
+            <button type="button" class="btn btn-outline-primary rounded-pill px-3 shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalPromosiAdmin">
+                <i class="bx bx-user-check me-1"></i> Jadikan Warga RT/RW
+            </button>
+        </div>
+    </div>
+
+    <!-- Ringkasan Statistik Wilayah (Tampil di Atas Kedua Tab) -->
+    @php
+        $activeTab = session('active_tab', request('tab', 'pejabat'));
+        $totalRw = $rwStructure->count();
+        $totalRt = $rwStructure->sum(fn($rw) => $rw->children->count());
+        $totalWarga = $rwStructure->sum(fn($rw) => $rw->citizens_count + $rw->children->sum('citizens_count'));
+        $totalUnitWilayah = $totalRw + $totalRt;
+        $unitTerisi = $rwStructure->filter(fn($rw) => $rw->users->isNotEmpty())->count() + $rwStructure->sum(fn($rw) => $rw->children->filter(fn($rt) => $rt->users->isNotEmpty())->count());
+    @endphp
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3 d-flex align-items-center gap-3">
+                    <span class="avatar avatar-md bg-label-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                        <i class="bx bx-map fs-4"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <small class="text-muted text-uppercase fw-bold d-block text-truncate" style="font-size: 0.68rem;">Total RW</small>
+                        <h4 class="fw-bold mb-0 text-primary">{{ $totalRw }}</h4>
+                    </div>
+                </div>
             </div>
-            <div class="header-action-btns d-flex flex-wrap gap-2 justify-content-md-end flex-shrink-0" style="position: relative; z-index: 10;">
-                <button type="button" class="btn btn-primary shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
-                    <i class="bx bx-plus me-1"></i> Buat Akun dan Wilayah
-                </button>
-                <button type="button" class="btn btn-outline-primary shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalPromosiAdmin">
-                    <i class="bx bx-user-check me-1"></i> Jadikan Warga RT/RW
-                </button>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3 d-flex align-items-center gap-3">
+                    <span class="avatar avatar-md bg-label-info rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                        <i class="bx bx-git-branch fs-4"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <small class="text-muted text-uppercase fw-bold d-block text-truncate" style="font-size: 0.68rem;">Total RT</small>
+                        <h4 class="fw-bold mb-0 text-info">{{ $totalRt }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3 d-flex align-items-center gap-3">
+                    <span class="avatar avatar-md bg-label-success rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                        <i class="bx bx-user-check fs-4"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <small class="text-muted text-uppercase fw-bold d-block text-truncate" style="font-size: 0.68rem;">Terisi Pejabat</small>
+                        <h4 class="fw-bold mb-0 text-success">{{ $unitTerisi }} <span class="text-muted fw-normal fs-6">/ {{ $totalUnitWilayah }}</span></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3 d-flex align-items-center gap-3">
+                    <span class="avatar avatar-md bg-label-warning rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                        <i class="bx bx-group fs-4"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <small class="text-muted text-uppercase fw-bold d-block text-truncate" style="font-size: 0.68rem;">Warga Terdata</small>
+                        <h4 class="fw-bold mb-0 text-warning">{{ $totalWarga }}</h4>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    @php
-        $activeTab = session('active_tab', request('tab', 'pejabat'));
-    @endphp
     <!-- Navigation Tabs -->
     <div class="nav-align-top mb-4 w-100" style="max-width: 100%;">
         <ul class="nav nav-pills gap-2 flex-nowrap overflow-x-auto pb-1 w-100" role="tablist" style="max-width: 100%; -webkit-overflow-scrolling: touch;">
             <li class="nav-item flex-shrink-0">
                 <button type="button" class="nav-link {{ $activeTab === 'pejabat' ? 'active' : '' }} rounded-pill shadow-sm px-3 px-sm-4 py-2" role="tab" data-bs-toggle="tab" data-bs-target="#tab-pejabat" aria-controls="tab-pejabat" aria-selected="{{ $activeTab === 'pejabat' ? 'true' : 'false' }}" style="font-size: 0.85rem; white-space: nowrap;">
                     <i class="bx bx-user-pin me-1"></i> Pejabat RT dan RW
+                    <span class="badge rounded-pill bg-white text-primary ms-1">{{ $admins->count() }}</span>
                 </button>
             </li>
             <li class="nav-item flex-shrink-0">
                 <button type="button" class="nav-link {{ $activeTab === 'struktur' ? 'active' : '' }} rounded-pill shadow-sm px-3 px-sm-4 py-2" role="tab" data-bs-toggle="tab" data-bs-target="#tab-struktur" aria-controls="tab-struktur" aria-selected="{{ $activeTab === 'struktur' ? 'true' : 'false' }}" style="font-size: 0.85rem; white-space: nowrap;">
                     <i class="bx bx-map-alt me-1"></i> Struktur Wilayah (RW dan RT)
+                    <span class="badge rounded-pill bg-white text-primary ms-1">{{ $totalUnitWilayah }}</span>
                 </button>
             </li>
         </ul>
@@ -303,12 +365,18 @@
 
     <div class="row">
         <!-- Pengajuan Warga -->
+        @if($applications->isNotEmpty())
         <div class="col-12 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
-                <div class="card-header bg-warning py-3 px-3 px-md-4">
-                    <h5 class="mb-0 text-white fw-bold d-flex align-items-center">
-                        <i class="bx bx-time-five fs-4 me-2"></i> Menunggu Persetujuan (Pengajuan Kemitraan)
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-label-warning border-bottom py-3 px-3 px-md-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h5 class="mb-0 text-dark fw-bold d-flex align-items-center fs-6">
+                        <i class="bx bx-time-five fs-4 me-2 text-warning"></i>
+                        <span>Menunggu Persetujuan (Pengajuan Kemitraan RT/RW)</span>
+                        <span class="badge bg-warning text-dark rounded-pill ms-2">{{ $applications->count() }}</span>
                     </h5>
+                    <a href="{{ route('admin.kemitraan.index') }}" class="btn btn-xs btn-outline-dark rounded-pill px-2.5">
+                        Lihat Berkas Lengkap <i class="bx bx-right-arrow-alt"></i>
+                    </a>
                 </div>
                 
                 <!-- Desktop View (>= 768px) -->
@@ -436,6 +504,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
         <!-- Daftar Admin RT/RW Aktif -->
         <div class="col-12 mb-4">
@@ -695,61 +764,6 @@
             </div>
         </div>
 
-        <!-- Stats Wilayah -->
-        @php
-            $totalRw = $rwStructure->count();
-            $totalRt = $rwStructure->sum(fn($rw) => $rw->children->count());
-            $totalWarga = $rwStructure->sum(fn($rw) => $rw->citizens_count + $rw->children->sum('citizens_count'));
-            $totalUnitWilayah = $totalRw + $totalRt;
-            $unitTerisi = $rwStructure->filter(fn($rw) => $rw->users->isNotEmpty())->count() + $rwStructure->sum(fn($rw) => $rw->children->filter(fn($rt) => $rt->users->isNotEmpty())->count());
-        @endphp
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body p-3 text-center">
-                        <span class="avatar avatar-md bg-label-primary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center">
-                            <i class="bx bx-map fs-4"></i>
-                        </span>
-                        <h4 class="fw-bold mb-0 text-primary">{{ $totalRw }}</h4>
-                        <small class="text-muted fw-semibold">Total RW</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body p-3 text-center">
-                        <span class="avatar avatar-md bg-label-info rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center">
-                            <i class="bx bx-git-branch fs-4"></i>
-                        </span>
-                        <h4 class="fw-bold mb-0 text-info">{{ $totalRt }}</h4>
-                        <small class="text-muted fw-semibold">Total RT</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body p-3 text-center">
-                        <span class="avatar avatar-md bg-label-success rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center">
-                            <i class="bx bx-user-check fs-4"></i>
-                        </span>
-                        <h4 class="fw-bold mb-0 text-success">{{ $unitTerisi }} / {{ $totalUnitWilayah }}</h4>
-                        <small class="text-muted fw-semibold">Wilayah Terisi Pejabat</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body p-3 text-center">
-                        <span class="avatar avatar-md bg-label-warning rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center">
-                            <i class="bx bx-group fs-4"></i>
-                        </span>
-                        <h4 class="fw-bold mb-0 text-warning">{{ $totalWarga }}</h4>
-                        <small class="text-muted fw-semibold">Warga Terdata di RW/RT</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Daftar Hierarki RW & RT -->
         @forelse($rwStructure as $rw)
             @php
@@ -966,7 +980,7 @@
 <!-- Modal Tambah Akun Dinas (Bypass) -->
 <div class="modal fade" id="modalTambahAdmin" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-        <form action="{{ route('admin.wilayah-admins.store') }}" method="POST" class="modal-content border-0 shadow-lg">
+        <form action="{{ route('admin.wilayah-admins.store') }}" method="POST" class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-bottom pb-3">
                 <h5 class="modal-title fw-bold text-primary" id="modalTambahAdminTitle">
                     <i class="bx bx-user-plus me-2 fs-4"></i>Buat Akun dan Wilayah (RT/RW)
@@ -1088,7 +1102,7 @@
 <!-- Modal Promosi Akun Warga -->
 <div class="modal fade" id="modalPromosiAdmin" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-        <form action="{{ route('admin.wilayah-admins.promote') }}" method="POST" class="modal-content border-0 shadow-lg">
+        <form action="{{ route('admin.wilayah-admins.promote') }}" method="POST" class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-bottom pb-3">
                 <h5 class="modal-title fw-bold text-primary" id="modalPromosiAdminTitle">
                     <i class="bx bx-user-plus me-2 fs-4"></i>Beri Akses Admin RT/RW ke Warga

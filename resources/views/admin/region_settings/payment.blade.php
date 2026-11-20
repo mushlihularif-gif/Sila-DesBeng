@@ -158,10 +158,6 @@
             </h4>
             <p class="text-muted small mb-0">Atur rekening tujuan transfer manual dan opsi pembayaran tunai untuk warga {{ $region->name }}.</p>
         </div>
-        <a href="{{ route('admin.refunds.index') }}" class="btn btn-outline-primary rounded-pill px-3 shadow-sm d-inline-flex align-items-center gap-1">
-            <i class="bx bx-undo"></i>
-            <span>Pengembalian Dana</span>
-        </a>
     </div>
 
     <!-- Flash Alerts -->

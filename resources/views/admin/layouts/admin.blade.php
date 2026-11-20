@@ -1228,14 +1228,6 @@
                         </a>
                     </li>
 
-                    {{-- Pengembalian Dana Warga (Manual Transfer/Tunai) --}}
-                    <li class="menu-item {{ request()->routeIs('admin.refunds.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.refunds.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-undo text-warning"></i>
-                            <div>Pengembalian Dana</div>
-                        </a>
-                    </li>
-
                     <!-- PILAR 3: LAPORAN & PENGATURAN -->
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Laporan &amp; Pengaturan</span>

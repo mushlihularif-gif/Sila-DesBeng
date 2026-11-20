@@ -3,57 +3,132 @@
 @section('title', 'Manajemen Supir & Petugas')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y py-2 py-sm-3">
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 gap-sm-3 mb-2 mb-sm-4 w-100">
-        <div class="min-w-0 flex-shrink-1">
-            <h4 class="fw-bold mb-0 mb-sm-1 fs-5 fs-sm-4 text-truncate"><span class="text-muted fw-light">Pengaturan /</span> Data Supir dan Pengurus</h4>
-            <p class="text-muted mb-0 small d-none d-sm-block">Kelola supir armada operasional serta petugas / pemegang kunci gedung dan ruang publik desa.</p>
+<style>
+    .supir-stat-card {
+        border-radius: 16px;
+        border: 1px solid #eef1f6;
+        background: #fff;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .supir-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(67, 89, 113, 0.08) !important;
+    }
+    .supir-table th {
+        font-size: 0.73rem;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        font-weight: 700;
+        color: #8592a3 !important;
+        background-color: #f8fafc;
+        border-bottom: 1px solid #eef1f6;
+    }
+    .supir-table td {
+        vertical-align: middle;
+        padding: 0.95rem 1.25rem;
+        border-bottom: 1px solid #f1f4f9;
+    }
+</style>
+
+@php
+    $totalSupirCount = (int) ($countSupir ?? 0);
+    $totalPengurusCount = (int) ($countPengurus ?? 0);
+    $totalAllPersonil = $totalSupirCount + $totalPengurusCount;
+@endphp
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <span class="text-muted fw-light">Layanan Desa /</span> Data Supir &amp; Petugas
+            </h4>
+            <p class="text-muted small mb-0">Kelola personil pengemudi armada transportasi serta petugas pemegang kunci gedung dan fasilitas desa.</p>
         </div>
-        <div class="d-flex gap-1.5 gap-sm-2 w-100 w-sm-auto">
-            <button type="button" class="btn btn-primary btn-sm shadow-sm rounded-pill px-2 px-sm-3 py-1.5 flex-fill text-nowrap d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#addSupirModal" style="font-size: 0.78rem;">
-                <i class="bx bx-plus-circle me-1"></i> <span class="d-none d-sm-inline">Tambah </span><span>Supir</span>
+        <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
+            <button type="button" class="btn btn-primary rounded-pill px-3 shadow-sm flex-grow-1 flex-md-grow-0 d-inline-flex align-items-center justify-content-center gap-1.5" data-bs-toggle="modal" data-bs-target="#addSupirModal">
+                <i class="bx bx-plus-circle fs-5"></i>
+                <span>Tambah Supir</span>
             </button>
             @if(auth()->user()->hasUnitPermission('fasilitas_umum'))
-<button type="button" class="btn btn-success btn-sm shadow-sm rounded-pill px-2 px-sm-3 py-1.5 flex-fill text-nowrap d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#addPengurusModal" style="font-size: 0.78rem;">
-                <i class="bx bx-building-house me-1"></i> <span class="d-none d-sm-inline">Tambah </span><span>Pengurus</span>
+            <button type="button" class="btn btn-success rounded-pill px-3 shadow-sm flex-grow-1 flex-md-grow-0 d-inline-flex align-items-center justify-content-center gap-1.5" data-bs-toggle="modal" data-bs-target="#addPengurusModal">
+                <i class="bx bx-building-house fs-5"></i>
+                <span>Tambah Pengurus</span>
             </button>
-@endif
+            @endif
         </div>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center py-2 px-3 mb-2 mb-sm-3" role="alert">
-            <i class="bx bx-check-circle fs-4 me-2"></i>
-            <div style="font-size: 0.85rem;">{{ session('success') }}</div>
+        <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bx bx-check-circle fs-4 me-2 flex-shrink-0"></i>
+            <div>{{ session('success') }}</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    <!-- Alert Penjelasan Pemisahan Sistem -->
-    <div class="alert alert-info d-flex align-items-center border-0 shadow-sm rounded-3 mb-2 mb-sm-3 p-2.5 p-sm-3 w-100" role="alert">
-        <span class="badge bg-white text-info rounded-circle p-1.5 me-2 me-sm-2.5 shadow-sm flex-shrink-0">
-            <i class="bx bx-bulb fs-5 fs-sm-4"></i>
-        </span>
-        <div class="min-w-0">
-            <h6 class="alert-heading fw-bold mb-0.5" style="font-size: 0.85rem;">Pemisahan Tugas Lapangan</h6>
-            <p class="mb-0" style="font-size: 0.75rem; line-height: 1.35;">
-                Data <strong>Supir</strong> untuk Armada, sedangkan <strong>Pengurus</strong> untuk kunci Gedung & Ruang Publik.
-            </p>
+    <!-- Info Banner & KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-7">
+            <div class="card bg-label-primary border-0 shadow-none rounded-4 h-100">
+                <div class="card-body p-3 p-md-4 d-flex align-items-start gap-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 44px; height: 44px;">
+                        <i class="bx bx-user-check fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-primary mb-1">Pemisahan Tugas Personil Lapangan</h6>
+                        <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.55;">
+                            Data <strong>Supir Kendaraan</strong> digunakan untuk penugasan armada Penyewaan Transportasi &amp; Kendaraan Operasional, sedangkan <strong>Pengurus Gedung</strong> khusus untuk penanggung jawab kunci Balai Pertemuan, Gedung Serbaguna, atau Fasilitas Publik.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-5">
+            <div class="row g-2 h-100">
+                <div class="col-4">
+                    <div class="supir-stat-card p-3 h-100 d-flex flex-column justify-content-center text-center shadow-sm">
+                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Supir Armada</span>
+                        <h4 class="fw-bold text-primary mb-0" id="stat-count-supir">{{ $totalSupirCount }}</h4>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="supir-stat-card p-3 h-100 d-flex flex-column justify-content-center text-center shadow-sm">
+                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Pengurus Gedung</span>
+                        <h4 class="fw-bold text-success mb-0" id="stat-count-pengurus">{{ $totalPengurusCount }}</h4>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="supir-stat-card p-3 h-100 d-flex flex-column justify-content-center text-center shadow-sm">
+                        <span class="text-muted small fw-semibold" style="font-size: 0.72rem;">Total Personil</span>
+                        <h4 class="fw-bold text-dark mb-0" id="stat-count-total">{{ $totalAllPersonil }}</h4>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Nav Pills Tabs AJAX (Supir vs Pengurus Gedung) -->
-    <div class="bg-light p-1 rounded-pill mb-3 mb-sm-4 border border-light-subtle shadow-sm d-flex flex-nowrap gap-1 overflow-x-auto w-100" style="max-width: 100%; -webkit-overflow-scrolling: touch;">
-        <button type="button" class="btn btn-tab-filter rounded-pill px-2 px-sm-4 py-1.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 transition-all flex-fill text-nowrap {{ ($tab ?? 'supir') === 'supir' ? 'btn-primary shadow-sm text-white' : 'btn-light text-secondary' }}" data-tab="supir" onclick="switchTab('supir')" style="font-size: 0.78rem;">
-            <i class="bx bx-car fs-5"></i>
-            <span>Supir Kendaraan</span>
-            <span class="badge rounded-pill bg-white text-primary ms-1 px-1.5 py-0.5" id="badge-count-supir" style="font-size: 0.7rem;">{{ $countSupir ?? 0 }}</span>
-        </button>
-        <button type="button" class="btn btn-tab-filter rounded-pill px-2 px-sm-4 py-1.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 transition-all flex-fill text-nowrap {{ ($tab ?? 'supir') === 'pengurus_gedung' ? 'btn-success shadow-sm text-white' : 'btn-light text-secondary' }}" data-tab="pengurus_gedung" onclick="switchTab('pengurus_gedung')" style="font-size: 0.78rem;">
-            <i class="bx bx-building-house fs-5"></i>
-            <span>Pengurus Gedung</span>
-            <span class="badge rounded-pill bg-white text-success ms-1 px-1.5 py-0.5" id="badge-count-pengurus" style="font-size: 0.7rem;">{{ $countPengurus ?? 0 }}</span>
-        </button>
+    <!-- Filter Bar: Nav Pills Tabs AJAX + Search -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3 d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-3">
+            <div class="bg-light p-1 rounded-pill border border-light-subtle d-flex flex-nowrap gap-1 overflow-x-auto" style="-webkit-overflow-scrolling: touch;">
+                <button type="button" class="btn btn-tab-filter rounded-pill px-3 px-sm-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 transition-all flex-fill text-nowrap {{ ($tab ?? 'supir') === 'supir' ? 'btn-primary shadow-sm text-white' : 'btn-light text-secondary' }}" data-tab="supir" onclick="switchTab('supir')" style="font-size: 0.84rem;">
+                    <i class="bx bx-car fs-5"></i>
+                    <span>Supir Kendaraan</span>
+                    <span class="badge rounded-pill bg-white text-primary ms-1 px-2 py-0.5" id="badge-count-supir" style="font-size: 0.72rem;">{{ $countSupir ?? 0 }}</span>
+                </button>
+                <button type="button" class="btn btn-tab-filter rounded-pill px-3 px-sm-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 transition-all flex-fill text-nowrap {{ ($tab ?? 'supir') === 'pengurus_gedung' ? 'btn-success shadow-sm text-white' : 'btn-light text-secondary' }}" data-tab="pengurus_gedung" onclick="switchTab('pengurus_gedung')" style="font-size: 0.84rem;">
+                    <i class="bx bx-building-house fs-5"></i>
+                    <span>Pengurus Gedung</span>
+                    <span class="badge rounded-pill bg-white text-success ms-1 px-2 py-0.5" id="badge-count-pengurus" style="font-size: 0.72rem;">{{ $countPengurus ?? 0 }}</span>
+                </button>
+            </div>
+
+            <div class="input-group input-group-merge input-group-sm" style="max-width: 320px;">
+                <span class="input-group-text bg-light border-0"><i class="bx bx-search text-muted"></i></span>
+                <input type="text" id="searchSupirInput" class="form-control bg-light border-0" placeholder="Cari nama, no. WA, atau status..." oninput="filterSupirItems()">
+            </div>
+        </div>
     </div>
 
     <!-- Loading Spinner AJAX -->
@@ -65,10 +140,10 @@
     </div>
 
     <!-- Tampilan Desktop (Tabel) -->
-    <div class="card border-0 shadow-sm rounded-4 d-none d-md-block" id="desktopCardWrapper">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block" id="desktopCardWrapper">
         <div class="table-responsive text-nowrap">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+            <table class="table supir-table table-hover align-middle mb-0">
+                <thead>
                     <tr>
                         <th class="ps-4" id="th-col-nama">Profil {{ ($tab ?? 'supir') === 'pengurus_gedung' ? 'Pengurus' : 'Supir' }}</th>
                         <th>Kontak dan Akun</th>
@@ -132,8 +207,8 @@
                         <div class="flex-grow-1">
                             <h6 class="fw-bold mb-1">Foto Profil Supir (Opsional)</h6>
                             <p class="text-muted mb-2" style="font-size: 0.8rem;">Gunakan rasio 1:1 (persegi). Maksimal 8MB.</p>
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="foto_upload_supir" class="btn btn-sm btn-primary cursor-pointer shadow-sm">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <label for="foto_upload_supir" class="btn btn-sm btn-primary cursor-pointer shadow-sm rounded-pill px-3">
                                     <i class="bx bx-upload me-1"></i> Pilih Foto...
                                 </label>
                                 <input type="file" name="foto" id="foto_upload_supir" class="d-none" accept="image/*" onchange="previewImage(this, 'preview_add_supir', 'filename_add_supir')">
@@ -176,17 +251,17 @@
                                 <label class="form-label text-uppercase text-muted fw-bold mb-3" style="font-size: 0.75rem;">Layanan Aktif <span class="text-danger">*</span></label>
                                 <div class="d-flex flex-column gap-3">
                                     @if(auth()->user()->hasUnitPermission('sewa_mobil'))
-<div class="form-check form-switch d-flex align-items-center">
+                                    <div class="form-check form-switch d-flex align-items-center">
                                         <input class="form-check-input mt-0 me-3 cursor-pointer" type="checkbox" name="is_sewa_mobil" value="1" id="is_rental_add" style="width: 2.5em; height: 1.25em;" checked>
                                         <label class="form-check-label cursor-pointer fw-bold text-dark" for="is_rental_add">Penyewaan Transportasi</label>
                                     </div>
-@endif
+                                    @endif
                                     @if(auth()->user()->hasUnitPermission('fasilitas_umum'))
-<div class="form-check form-switch d-flex align-items-center">
+                                    <div class="form-check form-switch d-flex align-items-center">
                                         <input class="form-check-input mt-0 me-3 cursor-pointer bg-danger border-danger" type="checkbox" name="is_fasilitas_umum" value="1" id="is_fasilitas_add" style="width: 2.5em; height: 1.25em;" checked>
                                         <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_add">Kendaraan Operasional Darurat</label>
                                     </div>
-@endif
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -203,8 +278,8 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-top px-4 py-3 rounded-bottom-4">
-                    <button type="button" class="btn btn-label-secondary fw-bold" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary fw-bold shadow-sm"><i class="bx bx-save me-2"></i>Simpan Supir</button>
+                    <button type="button" class="btn btn-label-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"><i class="bx bx-save me-2"></i>Simpan Supir</button>
                 </div>
             </form>
         </div>
@@ -246,8 +321,8 @@
                         <div class="flex-grow-1">
                             <h6 class="fw-bold mb-1">Foto Profil Petugas (Opsional)</h6>
                             <p class="text-muted mb-2" style="font-size: 0.8rem;">Gunakan rasio 1:1 (persegi). Maksimal 8MB.</p>
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="foto_upload_pengurus" class="btn btn-sm btn-success cursor-pointer shadow-sm">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <label for="foto_upload_pengurus" class="btn btn-sm btn-success cursor-pointer shadow-sm rounded-pill px-3">
                                     <i class="bx bx-upload me-1"></i> Pilih Foto...
                                 </label>
                                 <input type="file" name="foto" id="foto_upload_pengurus" class="d-none" accept="image/*" onchange="previewImage(this, 'preview_add_pengurus', 'filename_add_pengurus')">
@@ -307,8 +382,8 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-top px-4 py-3 rounded-bottom-4">
-                    <button type="button" class="btn btn-label-secondary fw-bold" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-success fw-bold shadow-sm"><i class="bx bx-save me-2"></i>Simpan Pengurus Gedung</button>
+                    <button type="button" class="btn btn-label-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm"><i class="bx bx-save me-2"></i>Simpan Pengurus Gedung</button>
                 </div>
             </form>
         </div>
@@ -320,6 +395,16 @@
 <script>
 let currentActiveTab = '{{ $tab ?? "supir" }}';
 
+function filterSupirItems() {
+    const input = document.getElementById('searchSupirInput');
+    const q = (input ? input.value : '').toLowerCase().trim();
+    document.querySelectorAll('#tableBodyContainer tr, #mobileCardsContainer > .card').forEach(el => {
+        if (el.querySelector('.empty-state')) return;
+        const text = (el.textContent || '').toLowerCase();
+        el.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
+}
+
 function switchTab(tab) {
     if (tab === currentActiveTab) return;
     currentActiveTab = tab;
@@ -329,12 +414,12 @@ function switchTab(tab) {
         const btnTab = btn.getAttribute('data-tab');
         if (btnTab === tab) {
             if (tab === 'pengurus_gedung') {
-                btn.className = 'btn btn-tab-filter rounded-pill px-3 px-sm-4 py-2 fw-semibold d-inline-flex align-items-center gap-1.5 transition-all btn-success shadow-sm text-white';
+                btn.className = 'btn btn-tab-filter rounded-pill px-3 px-sm-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 transition-all flex-fill text-nowrap btn-success shadow-sm text-white';
             } else {
-                btn.className = 'btn btn-tab-filter rounded-pill px-3 px-sm-4 py-2 fw-semibold d-inline-flex align-items-center gap-1.5 transition-all btn-primary shadow-sm text-white';
+                btn.className = 'btn btn-tab-filter rounded-pill px-3 px-sm-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 transition-all flex-fill text-nowrap btn-primary shadow-sm text-white';
             }
         } else {
-            btn.className = 'btn btn-tab-filter rounded-pill px-3 px-sm-4 py-2 fw-semibold d-inline-flex align-items-center gap-1.5 transition-all btn-light text-secondary';
+            btn.className = 'btn btn-tab-filter rounded-pill px-3 px-sm-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 transition-all flex-fill text-nowrap btn-light text-secondary';
         }
     });
 
@@ -376,8 +461,16 @@ function switchTab(tab) {
             // Update badge counts
             const bSupir = document.getElementById('badge-count-supir');
             const bPengurus = document.getElementById('badge-count-pengurus');
+            const sSupir = document.getElementById('stat-count-supir');
+            const sPengurus = document.getElementById('stat-count-pengurus');
+            const sTotal = document.getElementById('stat-count-total');
             if (bSupir) bSupir.textContent = data.count_supir;
             if (bPengurus) bPengurus.textContent = data.count_pengurus;
+            if (sSupir) sSupir.textContent = data.count_supir;
+            if (sPengurus) sPengurus.textContent = data.count_pengurus;
+            if (sTotal) sTotal.textContent = (parseInt(data.count_supir || 0) + parseInt(data.count_pengurus || 0));
+
+            filterSupirItems();
         }
     })
     .catch(err => {
@@ -400,24 +493,18 @@ function previewImage(input, previewId, filenameId) {
         if (preview.tagName.toLowerCase() !== 'img') {
             var img = document.createElement('img');
             img.id = previewId;
-            img.className = "rounded-circle object-fit-cover shadow-sm border border-2 border-white bg-white";
-            img.style.width = "85px";
-            img.style.height = "85px";
+            img.className = 'rounded-circle object-fit-cover shadow-sm border border-2 border-white';
+            img.style.width = '85px';
+            img.style.height = '85px';
             preview.parentNode.replaceChild(img, preview);
             preview = img;
         }
         
-        if (typeof initGlobalCropper === 'function') {
-            initGlobalCropper(input, previewId, NaN, true);
-        } else {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                preview.src = e.target.result;
-            }
-            reader.readAsDataURL(input.files[0]);
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
         }
-    } else {
-        filename.textContent = "Tidak ada file dipilih";
+        reader.readAsDataURL(input.files[0]);
     }
 }
 </script>
