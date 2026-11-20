@@ -279,12 +279,9 @@ class AuthController extends Controller
             \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
             \Illuminate\Support\Facades\RateLimiter::clear($accountThrottleKey);
 
-            // Otomatis remember login (default true untuk kenyamanan warga 30 hari)
-            // Kecuali jika secara eksplisit tidak dicentang (false/'0'/0)
+            // Samakan sesi login seluruh peran (user, admin_desa, super_admin, staff, rt/rw)
+            // agar bertahan 30 hari (43.200 menit) dengan remember token aktif.
             $rememberMe = true;
-            if (isset($validated['remember'])) {
-                $rememberMe = filter_var($validated['remember'], FILTER_VALIDATE_BOOLEAN);
-            }
             Auth::login($user, $rememberMe);
             $request->session()->regenerate();
 

@@ -40,7 +40,7 @@ class CheckRole
             }
 
             // Custom handle for Guest accessing Admin routes
-            $adminRoles = ['admin', 'super_admin', 'admin_desa', 'admin_rw', 'admin_rt'];
+            $adminRoles = ['admin', 'super_admin', 'admin_desa', 'staff', 'admin_rw', 'admin_rt'];
             if (count(array_intersect($adminRoles, $roles)) > 0) {
                 Log::warning('SECURITY: Unauthorized access attempt', [
                     'ip' => $request->ip(),
@@ -58,7 +58,7 @@ class CheckRole
                 }
         
                 // Handle web request
-                return redirect()->route('beranda')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+                return redirect()->route('beranda')->with('open_login_modal', true)->with('error', 'Sesi Anda telah berakhir atau Anda belum login. Silakan login kembali.');
             }
             
             // Handle AJAX request
@@ -125,9 +125,9 @@ class CheckRole
             'user_agent' => $request->userAgent(),
         ]);
 
-        // Special case: If admin tries to access user-only pages, redirect to admin dashboard
+        // Special case: If admin/staff tries to access user-only pages, redirect to admin dashboard
         // Pengecualian: rw dan rt diizinkan mengakses halaman frontend user
-        $isAdminUser = in_array($user->role, ['super_admin', 'admin_desa']);
+        $isAdminUser = in_array($user->role, ['super_admin', 'admin_desa', 'staff']);
         if ($isAdminUser && (in_array('user', $requiredRoles) || $allowGuest)) {
             // Handle AJAX request
             if ($request->expectsJson() || $request->ajax()) {

@@ -32,9 +32,12 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 43200),
+    // Pastikan masa aktif sesi minimal 30 hari (43.200 menit) untuk seluruh peran
+    // (user, admin_desa, super_admin, staff, admin_rt, admin_rw), meskipun .env
+    // di server masih berisi nilai bawaan Laravel (120 menit).
+    'lifetime' => max(43200, (int) env('SESSION_LIFETIME', 43200)),
 
-    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
+    'expire_on_close' => (bool) env('SESSION_EXPIRE_ON_CLOSE', false),
 
     /*
     |--------------------------------------------------------------------------
