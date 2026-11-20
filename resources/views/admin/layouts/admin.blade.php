@@ -641,7 +641,7 @@
             overscroll-behavior-y: contain !important;
             scrollbar-width: thin !important;
             scrollbar-color: rgba(67, 89, 113, 0.25) transparent !important;
-            padding-bottom: 320px !important;
+            padding-bottom: 1.5rem !important;
             height: calc(100% - 64px) !important;
             min-height: 0 !important;
         }
@@ -1029,7 +1029,7 @@
                     </a>
                 </div>
                 <div class="menu-inner-shadow"></div>
-                <ul class="menu-inner py-1" style="padding-bottom: 320px !important;">
+                <ul class="menu-inner py-1" style="padding-bottom: 1.5rem !important;">
                     @if(auth()->user()->isStaff())
                     @include('admin.staff.menu')
                     @else
