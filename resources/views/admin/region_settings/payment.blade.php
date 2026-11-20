@@ -4,409 +4,506 @@
 @section('page-title', 'Pengaturan Pembayaran Wilayah')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Admin /</span> Pengaturan Pembayaran Wilayah <br> <small class="text-primary fs-6">(Admin Wilayah)</small></h4>
-
-    {{-- Header banner - gaya sama dengan tab "Layanan & Metode Pengiriman" di
-         sebelahnya, supaya kedua halaman pengaturan wilayah terasa satu keluarga. --}}
-    <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
-        <div class="card-body d-flex align-items-center p-4">
-            <div class="me-3">
-                <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
-                    <i class="bx bx-credit-card-front fs-3"></i>
-                </div>
-            </div>
-            <div>
-                <h5 class="fw-bold mb-1 text-primary">Kas dan Pembayaran Wilayah</h5>
-                <p class="mb-0 text-primary" style="opacity: 0.85;">
-                    Kelola informasi rekening bank, pembayaran tunai, dan dompet elektronik wilayah Anda.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
-            <i class="bx bx-check-circle fs-4 me-2"></i>
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
-            <i class="bx bx-error-circle fs-4 me-2"></i>
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    {{-- Saldo & pencairan pindah ke Manajemen → Keuangan. Halaman ini tinggal
-         mengurus KONFIGURASI (rekening tujuan, sakelar pembayaran otomatis);
-         melihat saldo dan mencairkannya adalah pekerjaan berulang yang lebih
-         pas berdiri sendiri. Tautan ini menjaga admin yang terbiasa mencarinya
-         di sini tidak kehilangan jejak. --}}
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
-        <div class="card-body p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="d-flex align-items-center">
-                <div class="avatar avatar-sm bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center">
-                    <i class="bx bx-wallet fs-5"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0">Saldo dan Pencairan</h6>
-                    <small class="text-muted">Informasi pembayaran ini digunakan untuk pembayaran manual.</small>
-                </div>
-            </div>
-            <a href="{{ route('admin.keuangan.index') }}" class="btn btn-outline-success rounded-pill px-4">
-                <i class="bx bx-line-chart me-1"></i> Buka Halaman Keuangan
-            </a>
-        </div>
-    </div>
-
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
-        <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-3 border-bottom pb-3">
-                <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex justify-content-center align-items-center">
-                    <i class="bx bx-credit-card-front fs-5"></i>
-                </div>
-                <h6 class="fw-bold mb-0">Informasi Kas dan Pembayaran</h6>
-            </div>
-            <p class="text-muted mb-4">Kelola rekening bank utama, pembayaran tunai, dan dompet elektronik untuk pembayaran manual.</p>
-
-            <form action="{{ route('admin.region-settings.payment.update') }}" method="POST">
-                @csrf
-                @method('PUT')
-                
-                <div class="row g-4">
-                    <!-- Kolom Kiri: Transfer Bank & Preview -->
-                    <div class="col-md-6">
-                        <!-- Bank Utama -->
-                        <div class="card border-0 shadow-none bg-label-primary rounded-3 mb-3">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <h6 class="fw-bold text-primary mb-0">Rekening Bank Utama (Transfer Manual)</h6>
-                                    <div class="form-check form-switch mb-0">
-                                        <input class="form-check-input" type="checkbox" name="bank_active" id="bank_active" value="1" {{ (old('bank_active', $region->payment_info['bank_active'] ?? true)) ? 'checked' : '' }} onchange="document.getElementById('bank_fields').style.opacity = this.checked ? '1' : '0.5'">
-                                        <label class="form-check-label fw-semibold text-primary" for="bank_active">Aktifkan</label>
-                                    </div>
-                                </div>
-                                
-                                <div id="bank_fields" style="opacity: {{ (old('bank_active', $region->payment_info['bank_active'] ?? true)) ? '1' : '0.5' }}; transition: opacity 0.3s;">
-                                
-                                <!-- ATM Card Preview -->
-                                <div class="mb-4">
-                                    <div class="atm-card-preview" id="atmCardPreview">
-                                        <div class="atm-card-inner">
-                                            <div class="atm-card-front" id="atmCardFront" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
-                                                <div class="d-flex justify-content-between align-items-start mb-4">
-                                                    <i class="bx bx-chip text-warning" style="font-size: 2.5rem;"></i>
-                                                    <h5 class="text-white fw-bold mb-0" id="previewBankName" style="font-style: italic;">BSI</h5>
-                                                </div>
-                                                <h4 class="text-white text-center mb-4" id="previewAccountNumber" style="font-family: monospace; letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">0000 0000 0000 0000</h4>
-                                                <div class="d-flex justify-content-between align-items-end">
-                                                    <div>
-                                                        <small class="text-white-50 d-block" style="font-size: 0.7rem;">ATAS NAMA</small>
-                                                        <span class="text-white fw-semibold text-uppercase" id="previewAccountName">PEMILIK</span>
-                                                    </div>
-                                                    <i class="bx bx-wifi bx-rotate-90 text-white-50 fs-4"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-primary d-block">Pilih Bank</label>
-                                    <div class="row g-2">
-                                        @php $currentBank = old('bank_name', $region->payment_info['bank_name'] ?? ''); @endphp
-                                        <div class="col-4">
-                                            <label class="payment-logo-card">
-                                                <input type="radio" name="bank_name" value="BSI" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BSI' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/bsi.png') }}" alt="BSI" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="payment-logo-card">
-                                                <input type="radio" name="bank_name" value="BRK Syariah" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BRK Syariah' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/brksyariah.png') }}" alt="BRK Syariah" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="payment-logo-card">
-                                                <input type="radio" name="bank_name" value="Mandiri" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'Mandiri' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/mandiri.png') }}" alt="Mandiri" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="payment-logo-card">
-                                                <input type="radio" name="bank_name" value="BRI" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BRI' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/bri.png') }}" alt="BRI" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="payment-logo-card">
-                                                <input type="radio" name="bank_name" value="BNI" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BNI' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/bni.png') }}" alt="BNI" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="payment-logo-card">
-                                                <input type="radio" name="bank_name" value="BCA" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BCA' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/bca.jpg') }}" alt="BCA" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-primary">Nomor Rekening</label>
-                                    <input type="text" name="account_number" id="account_number" value="{{ old('account_number', $region->payment_info['account_number'] ?? '') }}" class="form-control border-primary" placeholder="0000000000" oninput="updateCardPreview()">
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-primary">Atas Nama (A/N)</label>
-                                    <input type="text" name="account_name" id="account_name" value="{{ old('account_name', $region->payment_info['account_name'] ?? '') }}" class="form-control border-primary" placeholder="BUMDes Pematang Duku" oninput="updateCardPreview()">
-                                </div>
-                                
-                                <div class="mb-1">
-                                    <label class="form-label fw-semibold text-primary">Warna Tema Kartu</label>
-                                    <select name="card_theme" id="card_theme" class="form-select border-primary" onchange="updateCardPreview()">
-                                        <option value="blue" {{ (old('card_theme', $region->payment_info['card_theme'] ?? 'blue') == 'blue') ? 'selected' : '' }}>Biru Klasik</option>
-                                        <option value="gold" {{ (old('card_theme', $region->payment_info['card_theme'] ?? '') == 'gold') ? 'selected' : '' }}>Emas Premium</option>
-                                        <option value="dark" {{ (old('card_theme', $region->payment_info['card_theme'] ?? '') == 'dark') ? 'selected' : '' }}>Hitam Elegan</option>
-                                        <option value="green" {{ (old('card_theme', $region->payment_info['card_theme'] ?? '') == 'green') ? 'selected' : '' }}>Hijau Syariah</option>
-                                    </select>
-                                </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Kolom Kanan: Pembayaran Tunai dan E-Wallet -->
-                    <div class="col-md-6">
-                        <!-- Cash Only (Bayar di Tempat) -->
-                        <div class="card border-0 shadow-none bg-label-success rounded-3 mb-3">
-                            <div class="card-body p-3">
-                                <h6 class="fw-bold text-success mb-2"><i class="bx bx-money me-1"></i>Pembayaran Di Tempat (Cash)</h6>
-                                <p class="text-success small mb-3">Aktifkan jika wilayah Anda menerima pembayaran secara tunai (bayar langsung di tempat).</p>
-                                <div class="form-check form-switch mb-0 d-flex align-items-center">
-                                    <input class="form-check-input me-2" type="checkbox" name="cash_only_active" id="cash_only_active" value="1" style="width: 2.5em; height: 1.2em; cursor: pointer;" {{ (old('cash_only_active', $region->payment_info['cash_only_active'] ?? false)) ? 'checked' : '' }}>
-                                    <label class="form-check-label fw-semibold text-success" for="cash_only_active" style="cursor: pointer;">Terima Tunai (Cash)</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- E-Wallet (Opsional) -->
-                        <div class="card border-0 shadow-none bg-label-info rounded-3 mb-3">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="fw-bold text-info mb-0">Dompet Elektronik / E-Wallet (Opsional)</h6>
-                                    <div class="form-check form-switch mb-0">
-                                        <input class="form-check-input" type="checkbox" name="ewallet_active" id="ewallet_active" value="1" {{ (old('ewallet_active', $region->payment_info['ewallet_active'] ?? false)) ? 'checked' : '' }} onchange="document.getElementById('ewallet_fields').style.display = this.checked ? 'block' : 'none'">
-                                        <label class="form-check-label fw-semibold text-info" for="ewallet_active">Aktifkan</label>
-                                    </div>
-                                </div>
-                                
-                                <div id="ewallet_fields" style="display: {{ (old('ewallet_active', $region->payment_info['ewallet_active'] ?? false)) ? 'block' : 'none' }}; border-top: 1px dashed #03c3ec; padding-top: 15px;">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-info d-block">Pilih E-Wallet</label>
-                                    <div class="row g-2">
-                                        @php $currentEwallet = old('ewallet_name', $region->payment_info['ewallet_name'] ?? ''); @endphp
-                                        <div class="col-4">
-                                            <label class="payment-logo-card border-info">
-                                                <input type="radio" name="ewallet_name" value="DANA" class="payment-radio" {{ $currentEwallet == 'DANA' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/dana.png') }}" alt="DANA" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="payment-logo-card border-info">
-                                                <input type="radio" name="ewallet_name" value="OVO" class="payment-radio" {{ $currentEwallet == 'OVO' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/ovo.png') }}" alt="OVO" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="payment-logo-card border-info">
-                                                <input type="radio" name="ewallet_name" value="GoPay" class="payment-radio" {{ $currentEwallet == 'GoPay' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/gopay.png') }}" alt="GoPay" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="payment-logo-card border-info">
-                                                <input type="radio" name="ewallet_name" value="ShopeePay" class="payment-radio" {{ $currentEwallet == 'ShopeePay' ? 'checked' : '' }}>
-                                                <div class="logo-wrapper">
-                                                    <img src="{{ asset('assets/img/payment_logos/shopeepay.png') }}" alt="ShopeePay" class="img-fluid payment-logo">
-                                                </div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-info">Nomor HP / E-Wallet</label>
-                                    <input type="text" name="ewallet_number" value="{{ old('ewallet_number', $region->payment_info['ewallet_number'] ?? '') }}" placeholder="0812345678" class="form-control border-info">
-                                </div>
-
-                                <div class="mb-1">
-                                    <label class="form-label fw-semibold text-info">Atas Nama (A/N)</label>
-                                    <input type="text" name="ewallet_account_name" value="{{ old('ewallet_account_name', $region->payment_info['ewallet_account_name'] ?? '') }}" class="form-control border-info">
-                                </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="mt-5 border-top pt-4 pb-4 mb-2 text-center">
-                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
-                        <i class="bx bx-save me-1"></i> Simpan Pengaturan Pembayaran
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <style>
-    .bg-label-primary {
-        background-color: rgba(105, 108, 255, 0.08) !important;
+    .pay-status-pill {
+        border-radius: 12px;
+        border: 1px solid #eef1f6;
+        background: #fff;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
     }
-    .bg-label-info {
-        background-color: rgba(3, 195, 236, 0.08) !important;
+    .pay-method-card {
+        border-radius: 16px;
+        border: 1.5px solid #eef1f6;
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .bg-label-warning {
-        background-color: rgba(255, 171, 0, 0.08) !important;
+    .pay-method-card:hover {
+        box-shadow: 0 6px 18px rgba(67, 89, 113, 0.06);
     }
-    .bg-label-success {
-        background-color: rgba(113, 221, 55, 0.08) !important;
-    }
-    
     .atm-card-preview {
-        perspective: 1000px;
         width: 100%;
-        max-width: 400px;
+        max-width: 390px;
         margin: 0 auto;
     }
     .atm-card-inner {
         position: relative;
         width: 100%;
-        padding-top: 56.25%; /* 16:9 Aspect Ratio */
-        transition: transform 0.6s;
-        transform-style: preserve-3d;
-        border-radius: 15px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        padding-top: 58%;
+        border-radius: 16px;
+        box-shadow: 0 10px 24px rgba(30, 60, 114, 0.2);
+        overflow: hidden;
     }
     .atm-card-front {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        backface-visibility: hidden;
-        border-radius: 15px;
-        padding: 20px;
+        inset: 0;
+        padding: 1.15rem 1.25rem;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        color: #fff;
     }
-    
+    .atm-number-text {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        letter-spacing: 2px;
+        font-size: clamp(0.95rem, 2.5vw, 1.25rem);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+        word-break: break-word;
+    }
     .theme-blue { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important; }
-    .theme-gold { background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%) !important; }
-    .theme-dark { background: linear-gradient(135deg, #232526 0%, #414345 100%) !important; }
-    .theme-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important; }
+    .theme-gold { background: linear-gradient(135deg, #9a6e1c 0%, #d4af37 50%, #8f6517 100%) !important; }
+    .theme-dark { background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important; }
+    .theme-green { background: linear-gradient(135deg, #0f766e 0%, #10b981 100%) !important; }
 
     .payment-logo-card {
         display: block;
         cursor: pointer;
-        height: 100%;
         margin-bottom: 0;
+        position: relative;
     }
     .payment-radio {
         display: none;
     }
     .logo-wrapper {
-        border: 2px solid #e7e7e7;
-        border-radius: 8px;
-        padding: 5px 10px;
+        border: 1.5px solid #e4e7ec;
+        border-radius: 10px;
+        padding: 6px 10px;
         height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s ease-in-out;
+        transition: all 0.2s ease;
         background-color: #fff;
+        position: relative;
     }
     .payment-logo-card:hover .logo-wrapper {
-        border-color: #b1b1b1;
+        border-color: #b4b9c8;
     }
     .payment-radio:checked + .logo-wrapper {
         border-color: #696cff;
-        box-shadow: 0 0 0 1px #696cff;
+        background-color: rgba(105, 108, 255, 0.05);
+        box-shadow: 0 0 0 2px rgba(105, 108, 255, 0.18);
     }
     .payment-logo-card.border-info .payment-radio:checked + .logo-wrapper {
         border-color: #03c3ec;
-        box-shadow: 0 0 0 1px #03c3ec;
+        background-color: rgba(3, 195, 236, 0.05);
+        box-shadow: 0 0 0 2px rgba(3, 195, 236, 0.18);
     }
     .payment-logo {
-        max-height: 32px;
+        max-height: 28px;
         max-width: 100%;
         object-fit: contain;
         filter: grayscale(100%);
         opacity: 0.6;
-        transition: all 0.2s ease-in-out;
+        transition: all 0.2s ease;
     }
-    .logo-wrapper span {
-        filter: grayscale(100%);
-        opacity: 0.6;
-        transition: all 0.2s ease-in-out;
-    }
-    .payment-radio:checked + .logo-wrapper .payment-logo,
-    .payment-radio:checked + .logo-wrapper span {
+    .payment-radio:checked + .logo-wrapper .payment-logo {
         filter: grayscale(0%);
         opacity: 1;
     }
+    .logo-check-dot {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #696cff;
+        color: #fff;
+        font-size: 0.7rem;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+    .payment-logo-card.border-info .logo-check-dot {
+        background: #03c3ec;
+    }
+    .payment-radio:checked + .logo-wrapper .logo-check-dot {
+        display: flex;
+    }
 </style>
+
+@php
+    $bankActive = (bool) old('bank_active', $region->payment_info['bank_active'] ?? true);
+    $cashActive = (bool) old('cash_only_active', $region->payment_info['cash_only_active'] ?? false);
+    $ewalletActive = (bool) old('ewallet_active', $region->payment_info['ewallet_active'] ?? false);
+    $currentBank = old('bank_name', $region->payment_info['bank_name'] ?? '');
+    $currentEwallet = old('ewallet_name', $region->payment_info['ewallet_name'] ?? '');
+    $currentTheme = old('card_theme', $region->payment_info['card_theme'] ?? 'blue');
+
+    $bankOptions = [
+        ['value' => 'BSI', 'logo' => 'bsi.png'],
+        ['value' => 'BRK Syariah', 'logo' => 'brksyariah.png'],
+        ['value' => 'Mandiri', 'logo' => 'mandiri.png'],
+        ['value' => 'BRI', 'logo' => 'bri.png'],
+        ['value' => 'BNI', 'logo' => 'bni.png'],
+        ['value' => 'BCA', 'logo' => 'bca.jpg'],
+    ];
+
+    $ewalletOptions = [
+        ['value' => 'DANA', 'logo' => 'dana.png'],
+        ['value' => 'OVO', 'logo' => 'ovo.png'],
+        ['value' => 'GoPay', 'logo' => 'gopay.png'],
+        ['value' => 'ShopeePay', 'logo' => 'shopeepay.png'],
+    ];
+@endphp
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <span class="text-muted fw-light">Pengaturan Desa /</span> Pembayaran Wilayah
+            </h4>
+            <p class="text-muted small mb-0">Atur rekening tujuan transfer manual dan opsi pembayaran tunai untuk warga {{ $region->name }}.</p>
+        </div>
+        <a href="{{ route('admin.refunds.index') }}" class="btn btn-outline-primary rounded-pill px-3 shadow-sm d-inline-flex align-items-center gap-1">
+            <i class="bx bx-undo"></i>
+            <span>Pengembalian Dana</span>
+        </a>
+    </div>
+
+    <!-- Flash Alerts -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bx bx-check-circle fs-4 me-2 flex-shrink-0"></i>
+            <div>{{ session('success') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bx bx-error-circle fs-4 me-2 flex-shrink-0"></i>
+            <div>{{ session('error') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible shadow-sm rounded-4 border-0 mb-4" role="alert">
+            <ul class="mb-0 ps-3 small">
+                @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <!-- Info Banner -->
+    <div class="card bg-label-primary border-0 shadow-none rounded-4 mb-4">
+        <div class="card-body p-3 p-md-4 d-flex align-items-start gap-3">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 44px; height: 44px;">
+                <i class="bx bx-credit-card-front fs-4"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold text-primary mb-1">Metode Pembayaran Langsung ke Desa</h6>
+                <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.5;">
+                    Seluruh pembayaran warga dilakukan secara langsung melalui <strong>Transfer Bank Manual</strong>, <strong>Tunai (Cash)</strong>, atau <strong>E-Wallet</strong> yang Anda aktifkan di bawah ini. Pastikan minimal satu metode aktif agar warga dapat menyelesaikan pesanan.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Status Ringkas -->
+    <div class="row g-2 g-md-3 mb-4">
+        <div class="col-12 col-sm-4">
+            <div class="pay-status-pill shadow-xs d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bx bxs-bank text-primary fs-5"></i>
+                    <span class="fw-semibold small text-dark">Transfer Bank</span>
+                </div>
+                <span id="badge-status-bank" class="badge rounded-pill {{ $bankActive ? 'bg-label-success' : 'bg-label-secondary' }}">
+                    {{ $bankActive ? 'Aktif' : 'Nonaktif' }}
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="pay-status-pill shadow-xs d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bx bx-money text-success fs-5"></i>
+                    <span class="fw-semibold small text-dark">Tunai (Cash)</span>
+                </div>
+                <span id="badge-status-cash" class="badge rounded-pill {{ $cashActive ? 'bg-label-success' : 'bg-label-secondary' }}">
+                    {{ $cashActive ? 'Aktif' : 'Nonaktif' }}
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="pay-status-pill shadow-xs d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bx bx-wallet-alt text-info fs-5"></i>
+                    <span class="fw-semibold small text-dark">E-Wallet</span>
+                </div>
+                <span id="badge-status-ewallet" class="badge rounded-pill {{ $ewalletActive ? 'bg-label-success' : 'bg-label-secondary' }}">
+                    {{ $ewalletActive ? 'Aktif' : 'Nonaktif' }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <form action="{{ route('admin.region-settings.payment.update') }}" method="POST">
+        @csrf
+        @method('PUT')
+
+        <div class="row g-4">
+            <!-- KOLOM KIRI: TRANSFER BANK MANUAL -->
+            <div class="col-12 col-lg-6">
+                <div class="card pay-method-card shadow-sm h-100">
+                    <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar avatar-sm bg-label-primary text-primary rounded-3 d-flex align-items-center justify-content-center">
+                                <i class="bx bxs-bank fs-5"></i>
+                            </span>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">Transfer Bank Manual</h6>
+                                <small class="text-muted">Rekening utama desa / BUMDes</small>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" name="bank_active" id="bank_active" value="1"
+                                   style="width: 2.6em; height: 1.3em; cursor: pointer;"
+                                   {{ $bankActive ? 'checked' : '' }}
+                                   onchange="syncPaymentToggles()">
+                        </div>
+                    </div>
+
+                    <div class="card-body p-3 p-md-4" id="bank_fields" style="opacity: {{ $bankActive ? '1' : '0.45' }}; transition: opacity 0.25s ease;">
+                        <!-- Live ATM Card Preview -->
+                        <div class="mb-4">
+                            <div class="atm-card-preview" id="atmCardPreview">
+                                <div class="atm-card-inner">
+                                    <div class="atm-card-front theme-{{ $currentTheme }}" id="atmCardFront">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <i class="bx bx-chip text-warning" style="font-size: 2.1rem;"></i>
+                                            <span class="fw-bold text-white fs-5 fst-italic" id="previewBankName">{{ $currentBank ?: 'PILIH BANK' }}</span>
+                                        </div>
+                                        <div class="text-center my-2 atm-number-text" id="previewAccountNumber">0000 0000 0000 0000</div>
+                                        <div class="d-flex justify-content-between align-items-end">
+                                            <div class="overflow-hidden pe-2">
+                                                <small class="text-white-50 d-block" style="font-size: 0.65rem; letter-spacing: 0.5px;">ATAS NAMA</small>
+                                                <span class="text-white fw-semibold text-uppercase small text-truncate d-block" id="previewAccountName">PEMILIK REKENING</span>
+                                            </div>
+                                            <i class="bx bx-wifi bx-rotate-90 text-white-50 fs-5 flex-shrink-0"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-dark d-block">Pilih Bank</label>
+                            <div class="row g-2">
+                                @foreach($bankOptions as $bank)
+                                <div class="col-4">
+                                    <label class="payment-logo-card">
+                                        <input type="radio" name="bank_name" value="{{ $bank['value'] }}" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == $bank['value'] ? 'checked' : '' }}>
+                                        <div class="logo-wrapper">
+                                            <span class="logo-check-dot"><i class="bx bx-check"></i></span>
+                                            <img src="{{ asset('assets/img/payment_logos/' . $bank['logo']) }}" alt="{{ $bank['value'] }}" class="img-fluid payment-logo">
+                                        </div>
+                                    </label>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-dark" for="account_number">Nomor Rekening</label>
+                            <div class="input-group input-group-merge">
+                                <span class="input-group-text bg-light"><i class="bx bx-hash text-muted"></i></span>
+                                <input type="text" name="account_number" id="account_number"
+                                       value="{{ old('account_number', $region->payment_info['account_number'] ?? '') }}"
+                                       class="form-control" placeholder="Contoh: 7123456789" oninput="updateCardPreview()">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-dark" for="account_name">Atas Nama (A/N)</label>
+                            <div class="input-group input-group-merge">
+                                <span class="input-group-text bg-light"><i class="bx bx-user text-muted"></i></span>
+                                <input type="text" name="account_name" id="account_name"
+                                       value="{{ old('account_name', $region->payment_info['account_name'] ?? '') }}"
+                                       class="form-control" placeholder="Contoh: BUMDes Pematang Duku" oninput="updateCardPreview()">
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold small text-dark" for="card_theme">Warna Tampilan Kartu</label>
+                            <select name="card_theme" id="card_theme" class="form-select" onchange="updateCardPreview()">
+                                <option value="blue" {{ $currentTheme == 'blue' ? 'selected' : '' }}>Biru Klasik</option>
+                                <option value="gold" {{ $currentTheme == 'gold' ? 'selected' : '' }}>Emas Premium</option>
+                                <option value="dark" {{ $currentTheme == 'dark' ? 'selected' : '' }}>Hitam Elegan</option>
+                                <option value="green" {{ $currentTheme == 'green' ? 'selected' : '' }}>Hijau Syariah</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KOLOM KANAN: TUNAI (CASH) & E-WALLET (OPSIONAL) -->
+            <div class="col-12 col-lg-6 d-flex flex-column gap-4">
+                <!-- Pembayaran Tunai (Cash) -->
+                <div class="card pay-method-card shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar avatar-sm bg-label-success text-success rounded-3 d-flex align-items-center justify-content-center">
+                                <i class="bx bx-money fs-5"></i>
+                            </span>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">Pembayaran Tunai (Cash)</h6>
+                                <small class="text-muted">Bayar langsung di kantor / tempat</small>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" name="cash_only_active" id="cash_only_active" value="1"
+                                   style="width: 2.6em; height: 1.3em; cursor: pointer;"
+                                   {{ $cashActive ? 'checked' : '' }}
+                                   onchange="syncPaymentToggles()">
+                        </div>
+                    </div>
+                    <div class="card-body p-3 p-md-4">
+                        <div class="rounded-3 p-3 bg-label-success small text-success d-flex align-items-start gap-2">
+                            <i class="bx bx-check-circle fs-5 flex-shrink-0 mt-1"></i>
+                            <div>
+                                Jika diaktifkan, warga dapat memilih opsi <strong>Bayar Tunai / Cash</strong> saat memesan layanan, lalu menyerahkan uang tunai langsung kepada petugas desa.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dompet Elektronik / E-Wallet (Opsional) -->
+                <div class="card pay-method-card shadow-sm flex-grow-1">
+                    <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar avatar-sm bg-label-info text-info rounded-3 d-flex align-items-center justify-content-center">
+                                <i class="bx bx-wallet-alt fs-5"></i>
+                            </span>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">E-Wallet <span class="badge bg-label-secondary rounded-pill ms-1" style="font-size: 0.68rem;">Opsional</span></h6>
+                                <small class="text-muted">Transfer manual ke DANA, OVO, GoPay, ShopeePay</small>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" name="ewallet_active" id="ewallet_active" value="1"
+                                   style="width: 2.6em; height: 1.3em; cursor: pointer;"
+                                   {{ $ewalletActive ? 'checked' : '' }}
+                                   onchange="syncPaymentToggles()">
+                        </div>
+                    </div>
+
+                    <div class="card-body p-3 p-md-4">
+                        <div id="ewallet_off_note" class="text-muted small {{ $ewalletActive ? 'd-none' : '' }}">
+                            <i class="bx bx-info-circle me-1"></i>
+                            Aktifkan tombol di kanan atas bila desa juga menerima transfer manual via dompet elektronik (E-Wallet).
+                        </div>
+
+                        <div id="ewallet_fields" style="display: {{ $ewalletActive ? 'block' : 'none' }};">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-dark d-block">Pilih Layanan E-Wallet</label>
+                                <div class="row g-2">
+                                    @foreach($ewalletOptions as $ew)
+                                    <div class="col-6 col-sm-3 col-lg-6 col-xl-3">
+                                        <label class="payment-logo-card border-info">
+                                            <input type="radio" name="ewallet_name" value="{{ $ew['value'] }}" class="payment-radio" {{ $currentEwallet == $ew['value'] ? 'checked' : '' }}>
+                                            <div class="logo-wrapper">
+                                                <span class="logo-check-dot"><i class="bx bx-check"></i></span>
+                                                <img src="{{ asset('assets/img/payment_logos/' . $ew['logo']) }}" alt="{{ $ew['value'] }}" class="img-fluid payment-logo">
+                                            </div>
+                                        </label>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-dark" for="ewallet_number">Nomor HP / E-Wallet</label>
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text bg-light"><i class="bx bx-phone text-muted"></i></span>
+                                    <input type="text" id="ewallet_number" name="ewallet_number"
+                                           value="{{ old('ewallet_number', $region->payment_info['ewallet_number'] ?? '') }}"
+                                           placeholder="Contoh: 081234567890" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="mb-0">
+                                <label class="form-label fw-semibold small text-dark" for="ewallet_account_name">Atas Nama (A/N)</label>
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text bg-light"><i class="bx bx-user text-muted"></i></span>
+                                    <input type="text" id="ewallet_account_name" name="ewallet_account_name"
+                                           value="{{ old('ewallet_account_name', $region->payment_info['ewallet_account_name'] ?? '') }}"
+                                           placeholder="Nama pemilik akun E-Wallet" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Footer Card -->
+        <div class="card border-0 shadow-sm rounded-4 mt-4">
+            <div class="card-body p-3 p-md-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+                <small class="text-muted">
+                    <i class="bx bx-shield-quarter text-primary me-1"></i>
+                    Perubahan akan langsung diterapkan pada halaman pembayaran warga.
+                </small>
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm w-100 w-sm-auto">
+                    <i class="bx bx-save me-1"></i> Simpan Pengaturan Pembayaran
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
 
 <script>
     function updateCardPreview() {
         const checkedBank = document.querySelector('input[name="bank_name"]:checked');
-        const bankName = checkedBank ? checkedBank.value : 'BANK / E-WALLET';
-        let accNum = document.getElementById('account_number').value || '0000 0000 0000 0000';
-        const accName = document.getElementById('account_name').value || 'PEMILIK';
-        const theme = document.getElementById('card_theme').value;
+        const bankName = checkedBank ? checkedBank.value : 'PILIH BANK';
+        let accNum = document.getElementById('account_number')?.value || '0000 0000 0000 0000';
+        const accName = document.getElementById('account_name')?.value || 'PEMILIK REKENING';
+        const theme = document.getElementById('card_theme')?.value || 'blue';
 
-        // Format account number to look like card (groups of 4)
         accNum = accNum.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
 
-        document.getElementById('previewBankName').innerText = bankName;
-        document.getElementById('previewAccountNumber').innerText = accNum;
-        document.getElementById('previewAccountName').innerText = accName;
-
-        // Update theme
+        const elBank = document.getElementById('previewBankName');
+        const elNum = document.getElementById('previewAccountNumber');
+        const elName = document.getElementById('previewAccountName');
         const cardFront = document.getElementById('atmCardFront');
-        cardFront.className = 'atm-card-front theme-' + theme;
+
+        if (elBank) elBank.innerText = bankName;
+        if (elNum) elNum.innerText = accNum;
+        if (elName) elName.innerText = accName;
+        if (cardFront) cardFront.className = 'atm-card-front theme-' + theme;
     }
 
-    // Initialize on load
+    function syncPaymentToggles() {
+        const bankChecked = document.getElementById('bank_active')?.checked ?? false;
+        const cashChecked = document.getElementById('cash_only_active')?.checked ?? false;
+        const ewChecked = document.getElementById('ewallet_active')?.checked ?? false;
+
+        const bankFields = document.getElementById('bank_fields');
+        if (bankFields) bankFields.style.opacity = bankChecked ? '1' : '0.45';
+
+        const ewFields = document.getElementById('ewallet_fields');
+        const ewNote = document.getElementById('ewallet_off_note');
+        if (ewFields) ewFields.style.display = ewChecked ? 'block' : 'none';
+        if (ewNote) ewNote.classList.toggle('d-none', ewChecked);
+
+        const setBadge = (id, active) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = active ? 'Aktif' : 'Nonaktif';
+            el.className = 'badge rounded-pill ' + (active ? 'bg-label-success' : 'bg-label-secondary');
+        };
+        setBadge('badge-status-bank', bankChecked);
+        setBadge('badge-status-cash', cashChecked);
+        setBadge('badge-status-ewallet', ewChecked);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         updateCardPreview();
+        syncPaymentToggles();
     });
 </script>
 @endsection

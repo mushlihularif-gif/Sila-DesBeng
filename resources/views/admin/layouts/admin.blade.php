@@ -785,17 +785,56 @@
 
         /* Lencana jumlah unit aktif pada toggle induk */
         .sidebar-unit-badge {
-            font-size: 0.64rem !important;
-            font-weight: 600 !important;
-            padding: 0.2rem 0.55rem !important;
+            font-size: 0.62rem !important;
+            font-weight: 700 !important;
+            padding: 0.18rem 0.48rem !important;
             border-radius: 50rem !important;
-            letter-spacing: 0.3px !important;
+            letter-spacing: 0.2px !important;
             background-color: rgba(105, 108, 255, 0.1) !important;
             color: #696cff !important;
             border: 1px solid rgba(105, 108, 255, 0.22) !important;
-            margin-right: 1.6rem !important;
+            margin-right: 1.35rem !important;
             line-height: 1.15 !important;
             white-space: nowrap !important;
+            flex-shrink: 0 !important;
+        }
+
+        .sidebar-sub-label {
+            font-size: 0.64rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.6px !important;
+            color: #9aa5b1 !important;
+            text-transform: uppercase !important;
+            padding: 0.45rem 0.85rem 0.15rem !important;
+            display: block !important;
+        }
+
+        /* Print optimization: sembunyikan navigasi dan tombol aksi saat mencetak laporan */
+        @media print {
+            #layout-menu,
+            #layout-navbar,
+            .content-footer,
+            #page-preloader,
+            .no-print,
+            .layout-overlay {
+                display: none !important;
+            }
+            .layout-page {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .content-wrapper,
+            .container-xxl {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #dee2e6 !important;
+                break-inside: avoid;
+            }
         }
     </style>
 
@@ -844,7 +883,6 @@
                     @if(auth()->user()->isStaff())
                     @include('admin.staff.menu')
                     @else
-                    @if(auth()->user()->role === 'admin_desa')<li class="menu-item"><a class="menu-link" href="{{ route('admin.staff.index') }}"><i class="menu-icon bx bx-group"></i>Staf Layanan</a></li>@endif
 
                     <!-- ========================================================================= -->
                     <!-- 1. ZONA UTAMA                                                             -->
@@ -1029,10 +1067,10 @@
                     @endif
 
                     <!-- ========================================================================= -->
-                    <!-- 3. ZONA KHUSUS ADMIN DESA (4 Pilar Terpadu: Layanan, Tata Kelola, Sistem)  -->
+                    <!-- 3. ZONA KHUSUS ADMIN DESA (Susunan Ringkas: Layanan, Tata Kelola, Laporan)-->
                     <!-- ========================================================================= -->
                     @if(auth()->user()->role === 'admin_desa')
-                    
+
                     <!-- PILAR 1: LAYANAN DESA -->
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Layanan Desa</span>
@@ -1041,27 +1079,26 @@
                     <!-- Dropdown 1: Unit Layanan Desa (Katalog Aktivasi dan Unit Aktif) -->
                     <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') || request()->routeIs('admin.region-settings.index') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center text-nowrap">
                                 <i class="menu-icon tf-icons bx bx-grid-alt text-primary"></i>
                                 <div>Unit Layanan</div>
                             </div>
-                            <span class="badge sidebar-unit-badge">{{ $activeUnitsCount ?? 2 }}/{{ $totalAvailableUnits ?? 7 }} Aktif</span>
+                            <span class="badge sidebar-unit-badge">{{ $activeUnitsCount ?? 2 }}/{{ $totalAvailableUnits ?? 5 }}</span>
                         </a>
                         <ul class="menu-sub">
-                            <!-- Pengaturan dan unit yang dikelompokkan sesuai kategori warga -->
                             <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
                                 <a href="{{ route('admin.region-settings.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-slider-alt me-2 text-primary" style="font-size: 1.05rem;"></i>
-                                    <span class="fw-semibold">Aktivasi dan Katalog Unit</span>
+                                    <span class="fw-semibold">Aktivasi &amp; Katalog</span>
                                 </a>
                             </li>
 
-                            <li class="menu-item py-1 px-2 d-flex align-items-center">
+                            <li class="menu-item py-1 px-2">
                                 <div class="border-top w-100" style="border-color: rgba(67, 89, 113, 0.08) !important;"></div>
                             </li>
 
-                            <li class="menu-item px-2 pt-2 pb-1"><span class="small fw-bold text-uppercase text-muted">Belanja dan Kebutuhan</span></li>
                             @if(in_array('Penjualan Gas', $activeServicesMenu ?? []))
+                            <li class="menu-item"><span class="sidebar-sub-label">Belanja &amp; Kebutuhan</span></li>
                             <li class="menu-item {{ request()->is('admin/unit/gas*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-gas-pump me-2 text-muted"></i>
@@ -1070,8 +1107,9 @@
                             </li>
                             @endif
 
-
-                            <li class="menu-item px-2 pt-2 pb-1"><span class="small fw-bold text-uppercase text-muted">Layanan Daerah</span></li>
+                            @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? []) || in_array('Penyewaan Alat', $activeServicesMenu ?? []) || in_array('Fasilitas Umum', $activeServicesMenu ?? []))
+                            <li class="menu-item"><span class="sidebar-sub-label">Layanan Daerah</span></li>
+                            @endif
                             @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? []))
                             <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link d-flex align-items-center">
@@ -1096,34 +1134,33 @@
                                 </a>
                             </li>
                             @endif
-                            
 
-                            <li class="menu-item px-2 pt-2 pb-1"><span class="small fw-bold text-uppercase text-muted">Kabar dan Informasi Daerah</span></li>
+                            <li class="menu-item"><span class="sidebar-sub-label">Informasi Publik</span></li>
                             <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.announcements.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-news me-2 text-muted"></i>
-                                    <div>Kabar dan Pengumuman</div>
+                                    <div>Kabar &amp; Pengumuman</div>
                                 </a>
                             </li>
                         </ul>
                     </li>
 
                     <!-- Dropdown 2: Pesanan dan Transaksi Warga -->
-                    <li class="menu-item {{ request()->is('admin/aktivitas*') || request()->is('admin/unit/supir*') || request()->routeIs('admin.kemitraan.*') ? 'open active show' : '' }}">
+                    <li class="menu-item {{ request()->is('admin/aktivitas*') || request()->is('admin/unit/supir*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-receipt text-warning"></i>
-                            <div>Pesanan dan Transaksi</div>
+                            <div>Pesanan &amp; Transaksi</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-calendar-check me-2 text-muted"></i>
-                                    <div>Permintaan dan Booking</div>
+                                    <div>Permintaan &amp; Booking</div>
                                 </a>
                             </li>
                             <li class="menu-item {{ request()->is('admin/aktivitas/bukti-transaksi*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.aktivitas.bukti-transaksi.index') }}" class="menu-link d-flex align-items-center">
-                                    <i class="bx bx-receipt me-2 text-muted"></i>
+                                    <i class="bx bx-check-shield me-2 text-muted"></i>
                                     <div>Bukti Pembayaran</div>
                                 </a>
                             </li>
@@ -1131,28 +1168,20 @@
                             <li class="menu-item {{ request()->is('admin/unit/supir*') ? 'active' : '' }}">
                                 <a href="{{ route('supir.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-user-check me-2 text-muted"></i>
-                                    <div>Data Supir dan Petugas</div>
-                                </a>
-                            </li>
-                            @endif
-                            @if(in_array(auth()->user()->role, ['super_admin', 'admin_desa']))
-                            <li class="menu-item {{ request()->routeIs('admin.kemitraan.*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.kemitraan.index') }}" class="menu-link d-flex align-items-center">
-                                    <i class="bx bx-badge-check me-2 text-muted"></i>
-                                    <div>Persetujuan Mitra</div>
+                                    <div>Data Supir &amp; Petugas</div>
                                 </a>
                             </li>
                             @endif
                         </ul>
                     </li>
 
-                    <!-- PILAR 2: TATA KELOLA PEMERINTAHAN DESA -->
+                    <!-- PILAR 2: TATA KELOLA DESA -->
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Tata Kelola Desa</span>
                     </li>
 
-                    {{-- Kependudukan (Dropdown) --}}
-                    <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.wilayah-admins.*') ? 'open active show' : '' }}">
+                    {{-- Kependudukan & Wilayah (Dropdown) --}}
+                    <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.wilayah-admins.*') || request()->routeIs('admin.kemitraan.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-group text-info"></i>
                             <div>Kependudukan</div>
@@ -1179,31 +1208,44 @@
                             <li class="menu-item {{ request()->routeIs('admin.wilayah-admins.*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.wilayah-admins.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-map-pin me-2 text-muted"></i>
-                                    <div>Wilayah dan RT/RW</div>
+                                    <div>Wilayah &amp; RT/RW</div>
+                                </a>
+                            </li>
+                            <li class="menu-item {{ request()->routeIs('admin.kemitraan.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.kemitraan.index') }}" class="menu-link d-flex align-items-center">
+                                    <i class="bx bx-badge-check me-2 text-muted"></i>
+                                    <div>Persetujuan Mitra</div>
                                 </a>
                             </li>
                         </ul>
                     </li>
 
-
-                    {{-- Keuangan Desa --}}
-                    <li class="menu-item {{ request()->routeIs('admin.keuangan.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.keuangan.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-wallet text-warning"></i>
-                            <div>Keuangan dan Kas Desa</div>
+                    {{-- Staf Layanan Desa --}}
+                    <li class="menu-item {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.staff.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-user-pin text-success"></i>
+                            <div>Staf Layanan</div>
                         </a>
                     </li>
 
-                    <!-- PILAR 3: SISTEM DAN INFORMASI -->
+                    {{-- Pengembalian Dana Warga (Manual Transfer/Tunai) --}}
+                    <li class="menu-item {{ request()->routeIs('admin.refunds.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.refunds.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-undo text-warning"></i>
+                            <div>Pengembalian Dana</div>
+                        </a>
+                    </li>
+
+                    <!-- PILAR 3: LAPORAN & PENGATURAN -->
                     <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Sistem dan Informasi</span>
+                        <span class="menu-header-text">Laporan &amp; Pengaturan</span>
                     </li>
 
                     {{-- Laporan Rekapitulasi (Dropdown) --}}
-                    <li class="menu-item {{ request()->routeIs('admin.laporan.transaksi') || (request()->routeIs('admin.laporan.pendapatan') && !request('service')) || request()->routeIs('admin.laporan.wilayah') ? 'open active show' : '' }}">
+                    <li class="menu-item {{ request()->routeIs('admin.laporan.transaksi') || request()->routeIs('admin.laporan.pendapatan*') || request()->routeIs('admin.laporan.wilayah') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-bar-chart-alt-2 text-primary"></i>
-                            <div>Laporan Terpadu</div>
+                            <div>Laporan</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->routeIs('admin.laporan.transaksi') ? 'active' : '' }}">
@@ -1212,7 +1254,7 @@
                                     <div>Laporan Transaksi</div>
                                 </a>
                             </li>
-                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') && !request('service') ? 'active' : '' }}">
+                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan*') && !request('service') ? 'active' : '' }}">
                                 <a href="{{ route('admin.laporan.pendapatan') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-line-chart me-2 text-muted"></i>
                                     <div>Laporan Pendapatan</div>
@@ -1221,47 +1263,35 @@
                             <li class="menu-item {{ request()->routeIs('admin.laporan.wilayah') ? 'active' : '' }}">
                                 <a href="{{ route('admin.laporan.wilayah') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-pie-chart-alt me-2 text-muted"></i>
-                                    <div>Laporan Wilayah</div>
+                                    <div>Evaluasi Aktivitas</div>
                                 </a>
                             </li>
                         </ul>
                     </li>
 
-                    {{-- Pengaturan dan Profil Desa (Dropdown Terpadu) --}}
-                    <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') || request()->routeIs('admin.banners.*') || request()->routeIs('admin.region-settings.payment') || request()->is('admin/SiladesBeng/profile*') || request()->is('admin/SiladesBeng/developer*') || request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'open active show' : '' }}">
+                    {{-- Pengaturan Desa (Dropdown Terpadu) --}}
+                    <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') || request()->routeIs('admin.region-settings.payment') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-cog text-secondary"></i>
-                            <div>Pengaturan dan Profil</div>
+                            <div>Pengaturan Desa</div>
                         </a>
                         <ul class="menu-sub">
-                            <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'active' : '' }}">
+                            <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-building-house me-2 text-muted"></i>
-                                    <div>Profil Desa dan BUMDes</div>
+                                    <div>Profil Desa &amp; BUMDes</div>
                                 </a>
                             </li>
                             <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.lokasi-layanan.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-map me-2 text-muted"></i>
-                                    <div>Lokasi dan Peta Layanan</div>
+                                    <div>Lokasi &amp; Peta Layanan</div>
                                 </a>
                             </li>
                             <li class="menu-item {{ request()->routeIs('admin.region-settings.payment') ? 'active' : '' }}">
                                 <a href="{{ route('admin.region-settings.payment') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-credit-card me-2 text-muted"></i>
                                     <div>Pembayaran Wilayah</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.banners.index') }}" class="menu-link d-flex align-items-center">
-                                    <i class="bx bx-image me-2 text-muted"></i>
-                                    <div>Banner Beranda</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.profile') || request()->routeIs('admin.SiladesBeng.developer.profile') ? 'active' : '' }}">
-                                <a href="{{ route('admin.SiladesBeng.profile') }}" class="menu-link d-flex align-items-center">
-                                    <i class="bx bx-info-circle me-2 text-muted"></i>
-                                    <div>Profil Aplikasi</div>
                                 </a>
                             </li>
                         </ul>

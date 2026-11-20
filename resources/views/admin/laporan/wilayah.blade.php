@@ -77,11 +77,15 @@
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
         <div>
             <h4 class="fw-bold mb-1">
-                <span class="text-muted fw-light">Laporan /</span> Kinerja Wilayah
+                <span class="text-muted fw-light">Laporan /</span> {{ auth()->user()->role === 'super_admin' ? 'Kinerja Wilayah' : 'Evaluasi Aktivitas Desa' }}
             </h4>
-            <p class="text-muted small mb-0">Pemantauan tren aktivitas 4 sektor layanan daerah dan partisipasi warga di seluruh wilayah</p>
+            <p class="text-muted small mb-0">
+                {{ auth()->user()->role === 'super_admin'
+                    ? 'Pemantauan tren aktivitas 4 sektor layanan daerah dan partisipasi warga di seluruh wilayah'
+                    : 'Pantauan tren volume aktivitas layanan desa sepanjang tahun ' . $year }}
+            </p>
         </div>
-        <div class="d-flex flex-wrap gap-2 w-100 w-sm-auto justify-content-start justify-content-sm-end">
+        <div class="d-flex flex-wrap gap-2 w-100 w-sm-auto justify-content-start justify-content-sm-end no-print">
             <button class="btn btn-primary shadow-sm rounded-pill px-4 flex-grow-1 flex-sm-grow-0" onclick="window.print()">
                 <i class="bx bx-printer me-2"></i>Cetak Laporan
             </button>
@@ -92,21 +96,25 @@
     <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 14px;">
         <div class="card-body d-flex align-items-center p-3 p-md-4">
             <div class="me-3 flex-shrink-0">
-                <div class="bg-primary p-2 p-md-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
-                    <i class="bx bx-info-circle fs-4 fs-md-3"></i>
+                <div class="bg-primary p-2 p-md-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px;">
+                    <i class="bx bx-info-circle fs-4"></i>
                 </div>
             </div>
             <div>
-                <h6 class="fw-bold mb-1 text-primary">Panduan Evaluasi Wilayah</h6>
+                <h6 class="fw-bold mb-1 text-primary">{{ auth()->user()->role === 'super_admin' ? 'Panduan Evaluasi Wilayah' : 'Ringkasan Aktivitas Layanan Desa' }}</h6>
                 <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.5;">
-                    Halaman ini merangkum indeks aktivitas dari <strong>4 sektor layanan daerah</strong> (Penyewaan Alat, Gas LPG, Transportasi, Fasilitas Umum) dalam bentuk poin tren. Nilai nominal keuangan disamarkan demi menjaga privasi antar wilayah.
+                    @if(auth()->user()->role === 'super_admin')
+                        Halaman ini merangkum indeks aktivitas dari <strong>4 sektor layanan daerah</strong> (Penyewaan Alat, Gas LPG, Transportasi, Fasilitas Umum) dalam bentuk poin tren. Nilai nominal keuangan disamarkan demi menjaga privasi antar wilayah.
+                    @else
+                        Halaman ini menampilkan jumlah aktivitas terproses dari <strong>4 sektor layanan desa</strong> (Penyewaan Alat, Gas LPG, Transportasi, Fasilitas Umum) untuk memantau tren pemakaian warga setiap bulannya.
+                    @endif
                 </p>
             </div>
         </div>
     </div>
 
     <!-- Filter Bar Card -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card border-0 shadow-sm rounded-4 mb-4 no-print">
         <div class="card-body p-3 p-md-4">
             <div id="filterForm" class="row g-3">
                 <div class="col-12 col-md-4 col-lg-3">
@@ -202,17 +210,17 @@
             </div>
         </div>
 
-        <!-- Mode Privasi Wilayah -->
+        <!-- Kartu Ketiga: Mode Privasi (Super Admin) / Total Tahunan (Admin Desa) -->
         <div class="col-12 col-md-12 col-lg-4">
+            @if(auth()->check() && auth()->user()->role === 'super_admin')
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative text-white" style="background: linear-gradient(135deg, #ff9800 0%, #f76a00 100%);">
-                <!-- Background decorative watermark -->
                 <div class="position-absolute top-0 end-0 opacity-25" style="transform: translate(15%, -15%); pointer-events: none;">
                     <i class="bx bx-shield-quarter" style="font-size: 6rem; line-height: 1;"></i>
                 </div>
                 <div class="card-body p-3 p-md-4 d-flex flex-column justify-content-center position-relative z-1">
                     <div class="d-flex align-items-center mb-2">
                         <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm flex-shrink-0" style="width: 38px; height: 38px; color: #f76a00;">
-                            <i class="bx bx-shield-check fs-4"></i>
+                            <i class="bx bx-shield-quarter fs-4"></i>
                         </div>
                         <div>
                             <h6 class="fw-bold mb-0 text-white" style="letter-spacing: 0.3px;">Mode Privasi Terproteksi</h6>
@@ -224,77 +232,96 @@
                     </p>
                 </div>
             </div>
+            @else
+            @php
+                $totalYearActivities = ($serviceTotals['rental'] ?? 0) + ($serviceTotals['gas'] ?? 0) + ($serviceTotals['mobil'] ?? 0) + ($serviceTotals['fasilitas'] ?? 0);
+            @endphp
+            <div class="card border-0 shadow-sm h-100 rounded-4 stat-card overflow-hidden">
+                <div class="card-body p-3 p-md-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar avatar-md rounded-3 p-2 me-3 d-flex align-items-center justify-content-center shadow-xs" style="background: rgba(113, 221, 55, 0.14); width: 44px; height: 44px;">
+                            <i class="bx bx-bar-chart-alt-2 fs-3 text-success"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold ls-1 d-block" style="font-size: 0.7rem;">Total Tahunan</small>
+                            <span class="fw-semibold text-dark small">Tahun {{ $year }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-1 text-dark" id="year-total-activities">{{ $totalYearActivities }}</h3>
+                        <small class="text-muted" style="font-size: 0.75rem;">Akumulasi aktivitas terproses 4 sektor layanan</small>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 
-    <!-- Aktivitas 5 Sektor Layanan Daerah -->
-    <div class="row g-2 g-md-3 mb-4">
+    <!-- Aktivitas 4 Sektor Layanan Daerah (Full 12-Column Grid) -->
+    <div class="row g-3 mb-4">
         <!-- Penyewaan Alat -->
-        <div class="col-6 col-md-4 col-xl-2">
+        <div class="col-6 col-lg-3">
             <div class="card border-0 shadow-sm h-100 unit-stat-card p-3">
                 <div class="d-flex align-items-center mb-2">
-                    <div class="avatar avatar-sm bg-label-warning rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
-                        <img src="{{ asset('User/img/elemen/F1.png') }}" style="width: 18px; height: 18px; object-fit: contain;" alt="Sewa Alat">
+                    <div class="avatar avatar-sm bg-label-warning rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+                        <img src="{{ asset('User/img/elemen/F1.png') }}" style="width: 20px; height: 20px; object-fit: contain;" alt="Sewa Alat">
                     </div>
                     <div class="overflow-hidden">
-                        <span class="text-secondary fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Sewa Alat</span>
+                        <span class="text-secondary fw-semibold d-block text-truncate small">Sewa Alat</span>
                     </div>
                 </div>
-                <h5 class="fw-bold mb-0 text-dark" id="count-rental">{{ $serviceTotals['rental'] ?? 0 }}</h5>
-                <small class="text-muted" style="font-size: 0.72rem;">Aktivitas</small>
+                <h4 class="fw-bold mb-0 text-dark" id="count-rental">{{ $serviceTotals['rental'] ?? 0 }}</h4>
+                <small class="text-muted" style="font-size: 0.75rem;">Aktivitas</small>
             </div>
         </div>
 
         <!-- Pangkalan Gas LPG -->
-        <div class="col-6 col-md-4 col-xl-2">
+        <div class="col-6 col-lg-3">
             <div class="card border-0 shadow-sm h-100 unit-stat-card p-3">
                 <div class="d-flex align-items-center mb-2">
-                    <div class="avatar avatar-sm bg-label-info rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
-                        <img src="{{ asset('User/img/elemen/F2.png') }}" style="width: 18px; height: 18px; object-fit: contain;" alt="Gas LPG">
+                    <div class="avatar avatar-sm bg-label-info rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+                        <img src="{{ asset('User/img/elemen/F2.png') }}" style="width: 20px; height: 20px; object-fit: contain;" alt="Gas LPG">
                     </div>
                     <div class="overflow-hidden">
-                        <span class="text-secondary fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Gas LPG</span>
+                        <span class="text-secondary fw-semibold d-block text-truncate small">Gas LPG</span>
                     </div>
                 </div>
-                <h5 class="fw-bold mb-0 text-dark" id="count-gas">{{ $serviceTotals['gas'] ?? 0 }}</h5>
-                <small class="text-muted" style="font-size: 0.72rem;">Pesanan Tabung</small>
+                <h4 class="fw-bold mb-0 text-dark" id="count-gas">{{ $serviceTotals['gas'] ?? 0 }}</h4>
+                <small class="text-muted" style="font-size: 0.75rem;">Pesanan Tabung</small>
             </div>
         </div>
 
         <!-- Rental Transportasi -->
-        <div class="col-6 col-md-4 col-xl-2">
+        <div class="col-6 col-lg-3">
             <div class="card border-0 shadow-sm h-100 unit-stat-card p-3">
                 <div class="d-flex align-items-center mb-2">
-                    <div class="avatar avatar-sm bg-label-danger rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
-                        <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 18px; height: 18px; object-fit: contain;" alt="Sewa Transportasi">
+                    <div class="avatar avatar-sm bg-label-danger rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+                        <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 20px; height: 20px; object-fit: contain;" alt="Sewa Transportasi">
                     </div>
                     <div class="overflow-hidden">
-                        <span class="text-secondary fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Sewa Transportasi</span>
+                        <span class="text-secondary fw-semibold d-block text-truncate small">Sewa Transportasi</span>
                     </div>
                 </div>
-                <h5 class="fw-bold mb-0 text-dark" id="count-mobil">{{ $serviceTotals['mobil'] ?? 0 }}</h5>
-                <small class="text-muted" style="font-size: 0.72rem;">Peminjaman</small>
+                <h4 class="fw-bold mb-0 text-dark" id="count-mobil">{{ $serviceTotals['mobil'] ?? 0 }}</h4>
+                <small class="text-muted" style="font-size: 0.75rem;">Peminjaman</small>
             </div>
         </div>
 
         <!-- Fasilitas Umum -->
-        <div class="col-6 col-md-4 col-xl-2">
+        <div class="col-6 col-lg-3">
             <div class="card border-0 shadow-sm h-100 unit-stat-card p-3">
                 <div class="d-flex align-items-center mb-2">
-                    <div class="avatar avatar-sm bg-label-success rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
-                        <img src="{{ asset('User/img/elemen/fasilitas.png') }}" style="width: 18px; height: 18px; object-fit: contain;" alt="Fasilitas">
+                    <div class="avatar avatar-sm bg-label-success rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+                        <img src="{{ asset('User/img/elemen/fasilitas.png') }}" style="width: 20px; height: 20px; object-fit: contain;" alt="Fasilitas">
                     </div>
                     <div class="overflow-hidden">
-                        <span class="text-secondary fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Fasilitas</span>
+                        <span class="text-secondary fw-semibold d-block text-truncate small">Fasilitas Umum</span>
                     </div>
                 </div>
-                <h5 class="fw-bold mb-0 text-dark" id="count-fasilitas">{{ $serviceTotals['fasilitas'] ?? 0 }}</h5>
-                <small class="text-muted" style="font-size: 0.72rem;">Sewa Tempat</small>
+                <h4 class="fw-bold mb-0 text-dark" id="count-fasilitas">{{ $serviceTotals['fasilitas'] ?? 0 }}</h4>
+                <small class="text-muted" style="font-size: 0.75rem;">Sewa Tempat</small>
             </div>
         </div>
-
-
-        
     </div>
 
     <!-- Chart Section -->
@@ -328,10 +355,11 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let performanceData = {!! json_encode(array_values($monthlyPerformance)) !!};
+    let performanceData = {!! json_encode(array_values($monthlyPerformance)) !!}.map(Number);
     let months = {!! json_encode(array_keys($monthlyPerformance)) !!};
-    
-    // ApexCharts Configuration with full mobile responsiveness
+    const initialMaxVal = Math.max(0, ...performanceData);
+
+    // ApexCharts Configuration with full mobile responsiveness & zero-data Infinity fix
     const chartOptions = {
         series: [{ 
             name: 'Total Aktivitas Layanan', 
@@ -390,11 +418,13 @@ document.addEventListener('DOMContentLoaded', function() {
         yaxis: {
             show: true,
             min: 0,
-            forceNiceScale: true,
+            max: initialMaxVal > 0 ? undefined : 5,
+            tickAmount: 5,
+            forceNiceScale: initialMaxVal > 0,
             labels: {
                 style: { colors: '#a1acb8', fontSize: '11px' },
                 formatter: function(val) {
-                    return Math.round(val);
+                    return Number.isFinite(val) ? Math.round(val) : '0';
                 }
             }
         },
@@ -479,9 +509,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Update grafik chart ApexCharts
             if (chart && data.performanceData) {
+                const nums = data.performanceData.map(Number);
+                const maxVal = Math.max(0, ...nums);
+                chart.updateOptions({
+                    yaxis: {
+                        min: 0,
+                        max: maxVal > 0 ? undefined : 5,
+                        tickAmount: 5,
+                        forceNiceScale: maxVal > 0,
+                        labels: {
+                            style: { colors: '#a1acb8', fontSize: '11px' },
+                            formatter: function(val) { return Number.isFinite(val) ? Math.round(val) : '0'; }
+                        }
+                    }
+                });
                 chart.updateSeries([{
                     name: 'Total Aktivitas Layanan',
-                    data: data.performanceData
+                    data: nums
                 }]);
             }
 
@@ -515,6 +559,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (countGas) countGas.textContent = data.serviceTotals.gas || 0;
                 if (countMobil) countMobil.textContent = data.serviceTotals.mobil || 0;
                 if (countFasilitas) countFasilitas.textContent = data.serviceTotals.fasilitas || 0;
+
+                const yearTotalEl = document.getElementById('year-total-activities');
+                if (yearTotalEl) {
+                    const sumAll = (Number(data.serviceTotals.rental) || 0)
+                        + (Number(data.serviceTotals.gas) || 0)
+                        + (Number(data.serviceTotals.mobil) || 0)
+                        + (Number(data.serviceTotals.fasilitas) || 0);
+                    yearTotalEl.textContent = sumAll;
+                }
             }
 
             // Update subtitle tahun

@@ -3,55 +3,129 @@
 @section('title', 'Riwayat Pendapatan')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
-    <!-- Page Header -->
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <a href="{{ route('admin.laporan.pendapatan') }}" class="segi-back btn btn-sm btn-icon btn-outline-secondary rounded-circle" title="Kembali">
+<style>
+    .hist-mobile-card {
+        border: 1px solid #eef1f6;
+        border-radius: 14px;
+        background: #fff;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+</style>
 
-                Kembali</a>
-                <h4 class="fw-bold fs-3 mb-0 text-primary">Riwayat Pendapatan</h4>
+@php
+    $filterLabels = [
+        'minggu_ini' => 'Minggu Ini',
+        'bulan_ini' => 'Bulan Ini',
+        'tahun_ini' => 'Tahun Ini',
+        'semua' => 'Semua Waktu',
+    ];
+    $totalNominal = $history->sum('amount');
+    $totalRows = $history->count();
+@endphp
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="mb-2">
+                <a href="{{ route('admin.laporan.pendapatan') }}" class="segi-back no-print">
+                    <i class="bx bx-arrow-back me-1"></i>Kembali ke Laporan Pendapatan
+                </a>
             </div>
-            <p class="text-muted mb-0">Rincian seluruh transaksi pemasukan</p>
+            <h4 class="fw-bold mb-1">
+                <span class="text-muted fw-light">Laporan Pendapatan /</span> Riwayat Pemasukan
+            </h4>
+            <p class="text-muted small mb-0">Rincian seluruh transaksi pemasukan terverifikasi dan catatan manual.</p>
         </div>
-        <div class="d-flex gap-2 w-100 w-sm-auto">
-            <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4 flex-grow-1 flex-sm-grow-0" type="button" data-bs-toggle="dropdown">
-                <i class="bx bx-filter me-2"></i>Filter: {{ str_replace('_', ' ', ucwords($filter)) }}
+        <div class="d-flex flex-wrap gap-2 w-100 w-md-auto justify-content-start justify-content-md-end no-print">
+            <div class="dropdown flex-grow-1 flex-md-grow-0">
+                <button class="btn btn-white border shadow-sm rounded-pill px-4 w-100 d-inline-flex align-items-center justify-content-center gap-2" type="button" data-bs-toggle="dropdown">
+                    <i class="bx bx-filter-alt text-primary"></i>
+                    <span>Periode: {{ $filterLabels[$filter] ?? str_replace('_', ' ', ucwords($filter)) }}</span>
+                    <i class="bx bx-chevron-down"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                    @foreach($filterLabels as $key => $label)
+                        <li>
+                            <a class="dropdown-item {{ $filter == $key ? 'active' : '' }}" href="{{ route('admin.laporan.pendapatan.riwayat', ['filter' => $key]) }}">
+                                {{ $label }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+            <button type="button" class="btn btn-primary rounded-pill px-3 shadow-sm" onclick="window.print()">
+                <i class="bx bx-printer me-1"></i>Cetak
             </button>
-            <ul class="dropdown-menu shadow border-0 rounded-4">
-                <li><a class="dropdown-item {{ $filter == 'minggu_ini' ? 'active' : '' }}" href="{{ route('admin.laporan.pendapatan.riwayat', ['filter' => 'minggu_ini']) }}">Minggu Ini</a></li>
-                <li><a class="dropdown-item {{ $filter == 'bulan_ini' ? 'active' : '' }}" href="{{ route('admin.laporan.pendapatan.riwayat', ['filter' => 'bulan_ini']) }}">Bulan Ini</a></li>
-                <li><a class="dropdown-item {{ $filter == 'tahun_ini' ? 'active' : '' }}" href="{{ route('admin.laporan.pendapatan.riwayat', ['filter' => 'tahun_ini']) }}">Tahun Ini</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item {{ $filter == 'semua' ? 'active' : '' }}" href="{{ route('admin.laporan.pendapatan.riwayat', ['filter' => 'semua']) }}">Semua Waktu</a></li>
-            </ul>
         </div>
     </div>
 
-    <!-- Data Table / Empty State -->
+    <!-- Summary Strip -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3 d-flex align-items-center gap-3">
+                    <div class="avatar bg-label-success text-success rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                        <i class="bx bx-wallet fs-4"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted fw-semibold d-block">Total Pemasukan ({{ $filterLabels[$filter] ?? 'Terpilih' }})</small>
+                        <h4 class="fw-bold text-success mb-0">Rp {{ number_format($totalNominal, 0, ',', '.') }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3 d-flex align-items-center gap-3">
+                    <div class="avatar bg-label-primary text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                        <i class="bx bx-receipt fs-4"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted fw-semibold d-block">Jumlah Transaksi Tercatat</small>
+                        <h4 class="fw-bold text-dark mb-0">{{ $totalRows }} Transaksi</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Card -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        @if(!$history->isEmpty())
+        <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2 no-print">
+            <h6 class="fw-bold mb-0">Daftar Transaksi Masuk</h6>
+            <div style="min-width: 220px;">
+                <div class="input-group input-group-sm input-group-merge rounded-pill overflow-hidden border">
+                    <span class="input-group-text bg-light border-0"><i class="bx bx-search text-muted"></i></span>
+                    <input type="text" id="hist-search-input" class="form-control bg-light border-0 ps-1" placeholder="Cari layanan, item, metode...">
+                </div>
+            </div>
+        </div>
+        @endif
+
         <div class="card-body p-0">
             @if($history->isEmpty())
                 <div class="text-center py-5 px-3">
                     <div class="avatar avatar-lg bg-light text-muted rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
                         <i class="bx bx-history fs-1 opacity-50"></i>
                     </div>
-                    <h6 class="text-muted fw-bold mb-1">Belum Ada Riwayat Pendapatan</h6>
-                    <p class="text-muted small mb-0">Belum ada riwayat transaksi pendapatan pada rentang waktu ini.</p>
+                    <h6 class="text-dark fw-bold mb-1">Belum Ada Riwayat Pendapatan</h6>
+                    <p class="text-muted small mb-0">Belum ada pemasukan tercatat pada rentang waktu {{ strtolower($filterLabels[$filter] ?? 'ini') }}.</p>
                 </div>
             @else
-                <div class="table-responsive">
+                <!-- Desktop Table -->
+                <div class="table-responsive d-none d-md-block">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr>
-                                <th class="ps-4 text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 rounded-top-start-3 py-3">Tanggal dan Waktu</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Pemesan dan Lokasi</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Unit Layanan dan Item</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Metode Bayar</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Nominal Masuk</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Status</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 rounded-top-end-3 py-3">Bukti / Struk</th>
+                                <th class="ps-4 py-3 text-uppercase text-secondary small fw-bold">Tanggal &amp; Waktu</th>
+                                <th class="py-3 text-uppercase text-secondary small fw-bold">Unit Layanan &amp; Item</th>
+                                <th class="py-3 text-uppercase text-secondary small fw-bold">Metode Bayar</th>
+                                <th class="py-3 text-uppercase text-secondary small fw-bold">Nominal Masuk</th>
+                                <th class="py-3 text-uppercase text-secondary small fw-bold">Status</th>
+                                <th class="text-center pe-4 py-3 text-uppercase text-secondary small fw-bold no-print">Bukti</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -60,102 +134,48 @@
                                 $typeColor = 'primary';
                                 $sLower = strtolower($item->type);
                                 if (str_contains($sLower, 'gas')) $typeColor = 'warning';
-                                elseif (str_contains($sLower, 'mobil')) $typeColor = 'info';
-                                elseif (str_contains($sLower, 'fasilitas')) $typeColor = 'danger';
-                                elseif (str_contains($sLower, 'pasar')) $typeColor = 'success';
+                                elseif (str_contains($sLower, 'mobil') || str_contains($sLower, 'transportasi')) $typeColor = 'info';
+                                elseif (str_contains($sLower, 'fasilitas')) $typeColor = 'success';
                                 elseif (str_contains($sLower, 'manual')) $typeColor = 'secondary';
 
-                                $payMethod = strtolower($item->payment_method ?? 'transfer');
+                                $payMethod = strtolower($item->payment_method ?? 'manual');
                                 $payBadge = 'bg-label-primary';
                                 $payIcon = 'bx-credit-card';
-                                $payLabel = ucfirst($item->payment_method ?? 'Transfer');
+                                $payLabel = ucfirst($item->payment_method ?? 'Transfer / Tunai');
                                 if (str_contains($payMethod, 'tunai') || str_contains($payMethod, 'cash')) {
                                     $payBadge = 'bg-label-success';
                                     $payIcon = 'bx-money';
-                                    $payLabel = 'Tunai / Cash';
-                                } elseif (str_contains($payMethod, 'cod')) {
-                                    $payBadge = 'bg-label-warning';
-                                    $payIcon = 'bx-package';
-                                    $payLabel = 'COD (Bayar di Tempat)';
-                                } elseif (str_contains($payMethod, 'qris')) {
-                                    $payBadge = 'bg-label-info';
-                                    $payIcon = 'bx-qr';
-                                    $payLabel = 'QRIS';
+                                    $payLabel = str_contains($payMethod, 'manual') ? 'Manual (Tunai/Transfer)' : 'Tunai / Cash';
                                 }
+                                $searchKey = strtolower($item->type . ' ' . $item->item_name . ' ' . $payLabel . ' ' . ($item->user_name ?? ''));
                             @endphp
-                            <tr>
+                            <tr class="hist-searchable" data-search="{{ $searchKey }}">
                                 <td class="ps-4">
-                                    <div class="d-flex flex-column">
-                                        <span class="text-dark fw-bold" style="font-size: 0.88rem;">{{ \Carbon\Carbon::parse($item->date)->translatedFormat('l, d M Y') }}</span>
-                                        <span class="text-muted small" style="font-size: 0.78rem;">
-                                            <i class="bx bx-time-five me-1 text-secondary"></i>{{ \Carbon\Carbon::parse($item->date)->format('H:i') }} WIB
-                                        </span>
-                                    </div>
+                                    <div class="fw-bold text-dark small">{{ \Carbon\Carbon::parse($item->date)->translatedFormat('d M Y') }}</div>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($item->date)->format('H:i') }} WIB</small>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar avatar-sm me-3 flex-shrink-0">
-                                            @if($item->user_photo)
-                                                <img src="{{ $item->user_photo }}" alt="Avatar" class="rounded-circle" style="width:36px; height:36px; object-fit:cover;">
-                                            @else
-                                                <div class="avatar-initial rounded-circle bg-label-primary text-primary fw-bold d-flex align-items-center justify-content-center shadow-xs" style="width:36px; height:36px; font-size: 0.85rem;">
-                                                    {{ strtoupper(substr($item->user_name, 0, 1)) }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <div class="d-flex flex-column overflow-hidden" style="max-width: 180px;">
-                                            <span class="text-dark fw-semibold text-truncate" style="font-size: 0.88rem;" title="{{ $item->user_name }}">{{ $item->user_name }}</span>
-                                            <span class="text-muted small text-truncate" style="font-size: 0.75rem;" title="{{ $item->location }}">
-                                                <i class="bx bx-map text-danger me-1"></i>{{ $item->location }}
-                                            </span>
-                                        </div>
-                                    </div>
+                                    <span class="badge bg-label-{{ $typeColor }} rounded-pill px-2 py-1 mb-1 fw-semibold" style="font-size: 0.72rem;">
+                                        {{ $item->type }}
+                                    </span>
+                                    <div class="text-dark small fw-medium">{{ $item->item_name }}</div>
                                 </td>
                                 <td>
-                                    <div class="d-flex flex-column">
-                                        <span class="badge bg-label-{{ $typeColor }} rounded-pill px-2.5 py-1 mb-1 d-inline-block fw-bold" style="width: max-content; font-size: 0.75rem;">
-                                            {{ $item->type }}
-                                        </span>
-                                        <span class="text-dark small fw-medium text-truncate" style="max-width: 220px; font-size: 0.8rem;" title="{{ $item->item_name }}">
-                                            {{ $item->item_name }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge {{ $payBadge }} rounded-pill px-2.5 py-1 fw-semibold" style="font-size: 0.75rem;">
+                                    <span class="badge {{ $payBadge }} rounded-pill px-2 py-1 fw-medium" style="font-size: 0.74rem;">
                                         <i class="bx {{ $payIcon }} me-1"></i>{{ $payLabel }}
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="text-success fw-bold" style="font-size: 0.95rem;">
-                                        +Rp {{ number_format($item->amount, 0, ',', '.') }}
-                                    </span>
+                                    <span class="text-success fw-bold">+Rp {{ number_format($item->amount, 0, ',', '.') }}</span>
                                 </td>
-                                <td>
-                                    @include('admin.partials.status-badge', ['status' => $item->status])
-                                </td>
-                                <td class="text-center pe-4">
-                                    @if($item->proof)
-                                        @if($item->type == 'Laporan Manual')
-                                            <a href="{{ $item->proof_route }}" target="_blank" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3 py-1 text-primary d-inline-flex align-items-center gap-1" title="Lihat Bukti Lampiran">
-                                                <i class="bx bx-image fs-6"></i>
-                                                <span class="small fw-semibold">Bukti</span>
-                                            </a>
-                                        @else
-                                            <a href="{{ $item->proof_download ?? $item->proof_route }}" target="_blank" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3 py-1 text-primary d-inline-flex align-items-center gap-1" title="Lihat Bukti Transfer">
-                                                <i class="bx bx-image fs-6"></i>
-                                                <span class="small fw-semibold">Bukti</span>
-                                            </a>
-                                        @endif
+                                <td>@include('admin.partials.status-badge', ['status' => $item->status])</td>
+                                <td class="text-center pe-4 no-print">
+                                    @if($item->proof_route)
+                                        <a href="{{ $item->proof_download ?? $item->proof_route }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="bx bx-image-alt me-1"></i>Lihat
+                                        </a>
                                     @else
-                                        @if($item->proof_route && !str_contains($item->type, 'Laporan Manual'))
-                                            <a href="{{ $item->proof_route }}" target="_blank" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3 py-1 text-info d-inline-flex align-items-center gap-1" title="Lihat Struk Sistem">
-                                                <i class="bx bx-receipt fs-6"></i>
-                                                <span class="small fw-semibold">Struk</span>
-                                            </a>
-                                        @else
-                                            <span class="text-muted small">-</span>
-                                        @endif
+                                        <span class="text-muted small">-</span>
                                     @endif
                                 </td>
                             </tr>
@@ -163,8 +183,63 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Mobile Cards -->
+                <div class="d-md-none p-3">
+                    @foreach($history as $item)
+                    @php
+                        $typeColor = 'primary';
+                        $sLower = strtolower($item->type);
+                        if (str_contains($sLower, 'gas')) $typeColor = 'warning';
+                        elseif (str_contains($sLower, 'mobil') || str_contains($sLower, 'transportasi')) $typeColor = 'info';
+                        elseif (str_contains($sLower, 'fasilitas')) $typeColor = 'success';
+                        elseif (str_contains($sLower, 'manual')) $typeColor = 'secondary';
+
+                        $payMethod = strtolower($item->payment_method ?? 'manual');
+                        $payLabel = str_contains($payMethod, 'manual') ? 'Manual (Tunai/Transfer)' : ucfirst($item->payment_method ?? 'Tunai / Transfer');
+                        $searchKey = strtolower($item->type . ' ' . $item->item_name . ' ' . $payLabel . ' ' . ($item->user_name ?? ''));
+                    @endphp
+                    <div class="hist-mobile-card shadow-xs hist-searchable" data-search="{{ $searchKey }}">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <span class="badge bg-label-{{ $typeColor }} rounded-pill px-2 py-1 fw-semibold" style="font-size: 0.72rem;">
+                                {{ $item->type }}
+                            </span>
+                            <div>@include('admin.partials.status-badge', ['status' => $item->status])</div>
+                        </div>
+                        <div class="fw-semibold text-dark mb-1">{{ $item->item_name }}</div>
+                        <div class="small text-muted mb-2">
+                            <i class="bx bx-calendar me-1"></i>{{ \Carbon\Carbon::parse($item->date)->translatedFormat('d M Y, H:i') }} WIB
+                            &bull; {{ $payLabel }}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="text-success fw-bold">+Rp {{ number_format($item->amount, 0, ',', '.') }}</span>
+                            @if($item->proof_route)
+                                <a href="{{ $item->proof_download ?? $item->proof_route }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print">
+                                    <i class="bx bx-image-alt me-1"></i>Bukti
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
             @endif
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('hist-search-input');
+    if (!input) return;
+    input.addEventListener('input', function() {
+        const kw = this.value.trim().toLowerCase();
+        document.querySelectorAll('.hist-searchable').forEach(function(el) {
+            const hay = (el.getAttribute('data-search') || el.textContent || '').toLowerCase();
+            el.style.display = kw === '' || hay.includes(kw) ? '' : 'none';
+        });
+    });
+});
+</script>
+@endpush
 @endsection

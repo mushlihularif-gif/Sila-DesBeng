@@ -169,11 +169,11 @@
             </div>
         </div>
 
-        <!-- Metode Pembayaran -->
+        <!-- Metode Pembayaran (Hanya Tunai & Transfer Manual, Tanpa Gateway) -->
         <div class="col-12 col-xl-5">
             <h6 class="fw-bold text-secondary mb-3 text-uppercase small ls-1">Berdasarkan Metode Pembayaran</h6>
             <div class="row g-3">
-                <div class="col-6 col-md-4 col-xl-6">
+                <div class="col-6">
                     <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-2">
@@ -188,7 +188,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-4 col-xl-6">
+                <div class="col-6">
                     <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-2">
@@ -196,23 +196,8 @@
                                     <i class="bx bx-transfer fs-3"></i>
                                 </div>
                                 <div>
-                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Transfer Manual</small>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Transfer / E-Wallet</small>
                                     <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['transfer_total'] }}">0</span></h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-xl-12">
-                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="avatar avatar-md bg-primary-subtle text-primary rounded-3 p-2 me-3">
-                                    <i class="bx bx-credit-card-front fs-3"></i>
-                                </div>
-                                <div>
-                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Pembayaran Digital / Gateway</small>
-                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['digital_total'] }}">0</span></h4>
                                 </div>
                             </div>
                         </div>
@@ -326,11 +311,13 @@
                                             @include('admin.partials.status-badge', ['status' => $payment->status])
                                         </td>
                                         <td class="text-end pe-4">
-                                            <div class="d-flex justify-content-end gap-2">
-                                                {{-- Action Buttons --}}
-                                                <a class="btn btn-sm btn-primary" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'rental']) }}">Periksa Pembayaran dan Sewa</a>
-                                                <span class="small">{{ $payment->paymentReceived() ? 'Uang diterima' : 'Uang belum dikonfirmasi' }}</span>
-
+                                            <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+                                                <span class="badge {{ $payment->paymentReceived() ? 'bg-label-success' : 'bg-label-warning' }} rounded-pill">
+                                                    {{ $payment->paymentReceived() ? 'Uang diterima' : 'Belum dikonfirmasi' }}
+                                                </span>
+                                                <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'rental']) }}">
+                                                    <i class="bx bx-show me-1"></i>Periksa
+                                                </a>
 
                                                 @if($payment->payment_proof)
                                                     <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'rental']) }}" 
@@ -345,7 +332,6 @@
                                                         <i class="bx bx-receipt fs-5"></i>
                                                     </a>
                                                 @endif
-                                                
                                             </div>
                                         </td>
                                     </tr>
@@ -529,7 +515,10 @@
                                             @include('admin.partials.status-badge', ['status' => $payment->status])
                                         </td>
                                         <td class="text-end pe-4">
-                                            <div class="d-flex justify-content-end gap-2">
+                                            <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+                                                <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'mobil']) }}">
+                                                    <i class="bx bx-show me-1"></i>Periksa
+                                                </a>
                                                 @if($payment->payment_proof)
                                                     <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'mobil']) }}" 
                                                        class="btn btn-sm btn-light border shadow-sm rounded-circle p-2 text-primary hover-primary" 
@@ -615,7 +604,10 @@
                                             @include('admin.partials.status-badge', ['status' => $payment->status])
                                         </td>
                                         <td class="text-end pe-4">
-                                            <div class="d-flex justify-content-end gap-2">
+                                            <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+                                                <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'fasilitas']) }}">
+                                                    <i class="bx bx-show me-1"></i>Periksa
+                                                </a>
                                                 @if($payment->payment_proof)
                                                     <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'fasilitas']) }}" 
                                                        class="btn btn-sm btn-light border shadow-sm rounded-circle p-2 text-primary hover-primary" 

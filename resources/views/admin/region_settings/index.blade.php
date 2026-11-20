@@ -343,353 +343,186 @@
                     </div>
                 </div>
                 
-                <!-- TAB 2: Pengaturan Pengiriman (Global) -->
+                <!-- TAB 2: Pengaturan Pengiriman (Hanya untuk Unit yang Memiliki Opsi Antar/Jemput di Sisi Warga: Alat & Gas) -->
                 <div class="tab-pane fade" id="navs-pengiriman" role="tabpanel">
+                    {{-- Hidden input untuk menjaga kompatibilitas validasi controller Transportasi --}}
+                    <input type="hidden" name="mobil_rental_delivery_antar_active" value="1">
+                    <input type="hidden" name="mobil_rental_delivery_jemput_active" value="1">
+
                     <div class="card border-0 shadow-sm rounded-4 mb-4">
                         <div class="card-body p-3 p-md-4">
-                            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                            <div class="d-flex align-items-center mb-3 border-bottom pb-3">
                                 <div class="avatar avatar-sm bg-label-info text-info rounded-circle me-3 d-flex justify-content-center align-items-center">
-                                    <i class="bx bx-slider-alt fs-5"></i>
+                                    <i class="bx bx-truck fs-5"></i>
                                 </div>
-                                <h6 class="fw-bold mb-0">Pengaturan Pengiriman dan Armada (Master-Detail)</h6>
+                                <div>
+                                    <h6 class="fw-bold mb-0">Pengaturan Metode Pengiriman &amp; Pengambilan</h6>
+                                    <small class="text-muted">Atur opsi pengantaran untuk layanan Penyewaan Alat dan Penjualan Gas yang tampil di aplikasi warga.</small>
+                                </div>
                             </div>
-                            
+
+                            <div class="alert bg-label-primary border-0 rounded-3 mb-4 d-flex align-items-start p-3">
+                                <i class="bx bx-info-circle fs-5 me-2 text-primary mt-1 flex-shrink-0"></i>
+                                <div class="small text-primary" style="line-height: 1.5;">
+                                    <strong>Catatan Sistem:</strong> Pengaturan antar/ambil di bawah ini berlaku untuk <strong>Penyewaan Alat</strong> dan <strong>Penjualan Gas</strong>. Untuk <strong>Penyewaan Transportasi</strong>, metode serah-terima mengikuti pilihan layanan pengemudi (<em>Lepas Kunci / Dengan Supir</em>) pada tiap unit kendaraan, sedangkan <strong>Fasilitas Umum</strong> digunakan langsung di lokasi fasilitas.
+                                </div>
+                            </div>
+
                             <div class="row g-4" id="main_delivery_section">
                                 <!-- Sidebar Navigation (Master) -->
                                 <div class="col-md-4 border-end pe-md-4">
                                     <div class="nav flex-column nav-pills gap-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                                        <button class="nav-link d-flex align-items-center text-start p-3 rounded-4 active" id="v-pills-mobil-tab" data-bs-toggle="pill" data-bs-target="#box_delivery_mobil" type="button" role="tab" aria-selected="true" style="display: none; transition: all 0.2s;">
-                                            <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-3" style="width: 24px; height: 24px; object-fit: contain;">
-                                            <div>
-                                                <span class="fw-bold d-block">Penyewaan Transportasi</span>
-                                                <small class="text-muted" style="font-size: 0.75rem;">Serah Terima, BBM dan Supir</small>
-                                            </div>
-                                        </button>
-                                        
-                                        <button class="nav-link d-flex align-items-center text-start p-3 rounded-4" id="v-pills-alat-tab" data-bs-toggle="pill" data-bs-target="#box_delivery_alat" type="button" role="tab" aria-selected="false" style="display: none; transition: all 0.2s;">
+                                        <button class="nav-link d-flex align-items-center text-start p-3 rounded-4 active" id="v-pills-alat-tab" data-bs-toggle="pill" data-bs-target="#box_delivery_alat" type="button" role="tab" aria-selected="true" style="display: none; transition: all 0.2s;">
                                             <img src="{{ asset('User/img/elemen/F1.png') }}" class="me-3" style="width: 24px; height: 24px; object-fit: contain;">
                                             <div>
                                                 <span class="fw-bold d-block">Penyewaan Alat</span>
-                                                <small class="text-muted" style="font-size: 0.75rem;">Metode Pengiriman</small>
+                                                <small class="text-muted" style="font-size: 0.75rem;">Antar ke Lokasi / Ambil Sendiri</small>
                                             </div>
                                         </button>
-                                        
+
                                         <button class="nav-link d-flex align-items-center text-start p-3 rounded-4" id="v-pills-gas-tab" data-bs-toggle="pill" data-bs-target="#box_delivery_gas" type="button" role="tab" aria-selected="false" style="display: none; transition: all 0.2s;">
                                             <img src="{{ asset('User/img/elemen/F2.png') }}" class="me-3" style="width: 24px; height: 24px; object-fit: contain;">
                                             <div>
                                                 <span class="fw-bold d-block">Penjualan Gas</span>
-                                                <small class="text-muted" style="font-size: 0.75rem;">Ambil Sendiri / Antar</small>
-                                            </div>
-                                        </button>
-                                        
-                                        <button class="nav-link d-flex align-items-center text-start p-3 rounded-4" id="v-pills-fasilitas-tab" data-bs-toggle="pill" data-bs-target="#box_delivery_fasilitas" type="button" role="tab" aria-selected="false" style="display: none; transition: all 0.2s;">
-                                            <img src="{{ asset('User/img/elemen/fasilitas.png') }}" class="me-3" style="width: 24px; height: 24px; object-fit: contain;">
-                                            <div>
-                                                <span class="fw-bold d-block">Fasilitas Umum</span>
-                                                <small class="text-muted" style="font-size: 0.75rem;">Metode Penggunaan / Serah Terima</small>
+                                                <small class="text-muted" style="font-size: 0.75rem;">Kurir Desa / Ambil di Pangkalan</small>
                                             </div>
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Content Area (Detail) -->
                                 <div class="col-md-8 ps-md-4">
                                     <div class="tab-content p-0 shadow-none bg-transparent" id="v-pills-tabContent">
-                                        
-                                        <!-- Mobil Detail -->
-                                        <div class="tab-pane fade show active" id="box_delivery_mobil" role="tabpanel" aria-labelledby="v-pills-mobil-tab">
+
+                                        <!-- Alat Detail -->
+                                        <div class="tab-pane fade show active" id="box_delivery_alat" role="tabpanel" aria-labelledby="v-pills-alat-tab">
                                             <div class="d-flex align-items-center mb-4">
-                                                <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
+                                                <img src="{{ asset('User/img/elemen/F1.png') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
                                                 <div>
-                                                    <h6 class="fw-bold mb-0 text-primary">Pengaturan Penyewaan Transportasi</h6>
-                                                    <small class="text-muted">Atur metode penyerahan armada transportasi, bahan bakar, dan ketersediaan supir.</small>
+                                                    <h6 class="fw-bold mb-0 text-primary">Pengaturan Penyewaan Alat</h6>
+                                                    <small class="text-muted">Atur cara alat diserahkan ke warga saat pemesanan.</small>
                                                 </div>
                                             </div>
-                                            <div class="d-flex flex-column gap-3 mb-4">
+                                            <div class="d-flex flex-column gap-3">
                                                 <div class="bg-light p-3 rounded-4 border">
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="flex-grow-1 pe-3">
-            <div class="d-flex align-items-center mb-2">
-                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar (Diantar Petugas)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                <div>
-                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Antar (Diantar Petugas)</span>
-                    <span class="text-muted small d-block mb-0">Kendaraan transportasi diantarkan langsung ke titik lokasi penyewa</span>
-                </div>
-            </div>
-            <div class="dynamic-keterangan mt-2" style="display: none;">
-                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                </div>
-            </div>
-        </div>
-        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_rental_delivery_antar_active" {{ isset($region->payment_info['mobil_rental_delivery_antar_active']) ? ($region->payment_info['mobil_rental_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-            <span class="status-label mt-2 small fw-bold text-center"></span>
-        </div>
-    </div>
-</div>
-                                                <div class="bg-light p-3 rounded-4 border">
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="flex-grow-1 pe-3">
-            <div class="d-flex align-items-center mb-2">
-                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Ambil / Jemput Sendiri" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                <div>
-                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Ambil / Jemput Sendiri</span>
-                    <span class="text-muted small d-block mb-0">Penyewa datang menjemput mobil di kantor atau garasi desa</span>
-                </div>
-            </div>
-            <div class="dynamic-keterangan mt-2" style="display: none;">
-                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                </div>
-            </div>
-        </div>
-        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_rental_delivery_jemput_active" {{ isset($region->payment_info['mobil_rental_delivery_jemput_active']) ? ($region->payment_info['mobil_rental_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-            <span class="status-label mt-2 small fw-bold text-center"></span>
-        </div>
-    </div>
-</div>
-
-                                                <div class="bg-light p-3 rounded-4 border mt-4">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div class="flex-grow-1 pe-3">
                                                             <div class="d-flex align-items-center mb-2">
-                                                                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Antar Khusus Lepas Kunci" style="width: 45px; height: 45px; object-fit: contain; filter: hue-rotate(180deg);" class="me-3">
+                                                                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar ke Lokasi" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
                                                                 <div>
-                                                                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Antar Khusus "Lepas Kunci"</span>
-                                                                    <span class="text-muted small d-block mb-0">Izinkan opsi mobil diantar meskipun warga menyewa tanpa supir (Lepas Kunci)</span>
+                                                                    <span class="text-dark fw-bold d-block" style="font-size: 1.02rem;">Layanan Antar ke Lokasi</span>
+                                                                    <span class="text-muted small d-block mb-0">Petugas desa mengantarkan alat ke lokasi warga</span>
                                                                 </div>
                                                             </div>
                                                             <div class="dynamic-keterangan mt-2" style="display: none;">
                                                                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                                                                     <i class="bx bx-check-circle me-2 mt-1"></i>
-                                                                    <span class="small fw-semibold">Aktif: Warga yang menyewa Lepas Kunci dapat meminta mobil diantar.</span>
+                                                                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-                                                            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_lepas_kunci_antar_active" {{ isset($region->payment_info['mobil_lepas_kunci_antar_active']) ? ($region->payment_info['mobil_lepas_kunci_antar_active'] ? 'checked' : '') : 'checked' }}>
+                                                            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="alat_delivery_antar_active" {{ isset($region->payment_info['alat_delivery_antar_active']) ? ($region->payment_info['alat_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+                                                            <span class="status-label mt-2 small fw-bold text-center"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="bg-light p-3 rounded-4 border">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="flex-grow-1 pe-3">
+                                                            <div class="d-flex align-items-center mb-2">
+                                                                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Ambil Sendiri" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                                                                <div>
+                                                                    <span class="text-dark fw-bold d-block" style="font-size: 1.02rem;">Ambil Sendiri</span>
+                                                                    <span class="text-muted small d-block mb-0">Warga mengambil alat langsung ke kantor/gudang desa</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="dynamic-keterangan mt-2" style="display: none;">
+                                                                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                                                                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                                                                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+                                                            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="alat_delivery_jemput_active" {{ isset($region->payment_info['alat_delivery_jemput_active']) ? ($region->payment_info['alat_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
                                                             <span class="status-label mt-2 small fw-bold text-center"></span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                        </div>
-                                        
-                                        <!-- Alat Berat Detail -->
-                                        <div class="tab-pane fade" id="box_delivery_alat" role="tabpanel" aria-labelledby="v-pills-alat-tab">
-                                            <div class="d-flex align-items-center mb-4">
-                                                <img src="{{ asset('User/img/elemen/F1.png') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
-                                                <div>
-                                                    <h6 class="fw-bold mb-0 text-primary">Pengaturan Penyewaan Alat</h6>
-                                                    <small class="text-muted">Atur cara alat berat diserahkan ke warga.</small>
-                                                </div>
-                                            </div>
-                                            <div class="d-flex flex-column gap-3">
-                                                <div class="bg-light p-3 rounded-4 border">
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="flex-grow-1 pe-3">
-            <div class="d-flex align-items-center mb-2">
-                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar ke Lokasi" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                <div>
-                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Antar ke Lokasi</span>
-                    <span class="text-muted small d-block mb-0">Mobil desa / petugas mengantar ke lokasi warga</span>
-                </div>
-            </div>
-            <div class="dynamic-keterangan mt-2" style="display: none;">
-                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                </div>
-            </div>
-        </div>
-        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="alat_delivery_antar_active" {{ isset($region->payment_info['alat_delivery_antar_active']) ? ($region->payment_info['alat_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-            <span class="status-label mt-2 small fw-bold text-center"></span>
-        </div>
-    </div>
-</div>
-                                                <div class="bg-light p-3 rounded-4 border">
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="flex-grow-1 pe-3">
-            <div class="d-flex align-items-center mb-2">
-                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Ambil Sendiri" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                <div>
-                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Ambil Sendiri</span>
-                    <span class="text-muted small d-block mb-0">Warga mengambil alat langsung ke kantor/gudang</span>
-                </div>
-            </div>
-            <div class="dynamic-keterangan mt-2" style="display: none;">
-                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                </div>
-            </div>
-        </div>
-        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="alat_delivery_jemput_active" {{ isset($region->payment_info['alat_delivery_jemput_active']) ? ($region->payment_info['alat_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-            <span class="status-label mt-2 small fw-bold text-center"></span>
-        </div>
-    </div>
-</div>
-                                            </div>
-                                        </div>
-                                        
                                         <!-- Gas Detail -->
                                         <div class="tab-pane fade" id="box_delivery_gas" role="tabpanel" aria-labelledby="v-pills-gas-tab">
                                             <div class="d-flex align-items-center mb-4">
                                                 <img src="{{ asset('User/img/elemen/F2.png') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
                                                 <div>
                                                     <h6 class="fw-bold mb-0 text-primary">Pengaturan Penjualan Gas</h6>
-                                                    <small class="text-muted">Metode pengambilan tabung gas oleh warga.</small>
+                                                    <small class="text-muted">Metode pengambilan atau pengantaran tabung gas oleh warga.</small>
                                                 </div>
                                             </div>
                                             <div class="d-flex flex-column gap-3">
                                                 <div class="bg-light p-3 rounded-4 border">
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="flex-grow-1 pe-3">
-            <div class="d-flex align-items-center mb-2">
-                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar (Kurir Desa)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                <div>
-                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Antar (Kurir Desa)</span>
-                    <span class="text-muted small d-block mb-0">Gas diantar ke rumah warga</span>
-                </div>
-            </div>
-            <div class="dynamic-keterangan mt-2" style="display: none;">
-                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                </div>
-            </div>
-        </div>
-        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="gas_delivery_antar_active" {{ isset($region->payment_info['gas_delivery_antar_active']) ? ($region->payment_info['gas_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-            <span class="status-label mt-2 small fw-bold text-center"></span>
-        </div>
-    </div>
-</div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="flex-grow-1 pe-3">
+                                                            <div class="d-flex align-items-center mb-2">
+                                                                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar (Kurir Desa)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                                                                <div>
+                                                                    <span class="text-dark fw-bold d-block" style="font-size: 1.02rem;">Layanan Antar (Kurir Desa)</span>
+                                                                    <span class="text-muted small d-block mb-0">Tabung gas diantarkan langsung ke rumah warga</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="dynamic-keterangan mt-2" style="display: none;">
+                                                                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                                                                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                                                                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+                                                            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="gas_delivery_antar_active" {{ isset($region->payment_info['gas_delivery_antar_active']) ? ($region->payment_info['gas_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+                                                            <span class="status-label mt-2 small fw-bold text-center"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <div class="bg-light p-3 rounded-4 border">
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="flex-grow-1 pe-3">
-            <div class="d-flex align-items-center mb-2">
-                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Beli di Pangkalan (Ambil Sendiri)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                <div>
-                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Beli di Pangkalan (Ambil Sendiri)</span>
-                    <span class="text-muted small d-block mb-0">Warga datang menukar tabung ke pangkalan</span>
-                </div>
-            </div>
-            <div class="dynamic-keterangan mt-2" style="display: none;">
-                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                </div>
-            </div>
-        </div>
-        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="gas_delivery_jemput_active" {{ isset($region->payment_info['gas_delivery_jemput_active']) ? ($region->payment_info['gas_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-            <span class="status-label mt-2 small fw-bold text-center"></span>
-        </div>
-    </div>
-</div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                        
-                                        <!-- Fasilitas Umum Detail -->
-                                        <div class="tab-pane fade" id="box_delivery_fasilitas" role="tabpanel" aria-labelledby="v-pills-fasilitas-tab">
-                                            <div class="d-flex align-items-center mb-4">
-                                                <img src="{{ asset('User/img/elemen/fasilitas.png') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
-                                                <div>
-                                                    <h6 class="fw-bold mb-0 text-primary">Pengaturan Fasilitas Umum</h6>
-                                                    <small class="text-muted">Metode penggunaan fasilitas (Gedung, Kendaraan Operasional, Lapangan, dll).</small>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="flex-grow-1 pe-3">
+                                                            <div class="d-flex align-items-center mb-2">
+                                                                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Beli di Pangkalan (Ambil Sendiri)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                                                                <div>
+                                                                    <span class="text-dark fw-bold d-block" style="font-size: 1.02rem;">Beli di Pangkalan (Ambil Sendiri)</span>
+                                                                    <span class="text-muted small d-block mb-0">Warga datang menukar tabung langsung ke pangkalan</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="dynamic-keterangan mt-2" style="display: none;">
+                                                                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                                                                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                                                                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+                                                            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="gas_delivery_jemput_active" {{ isset($region->payment_info['gas_delivery_jemput_active']) ? ($region->payment_info['gas_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+                                                            <span class="status-label mt-2 small fw-bold text-center"></span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            
-                                            <div class="d-flex flex-column gap-3 mb-4">
-                                                <div class="bg-light p-3 rounded-4 border">
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="flex-grow-1 pe-3">
-            <div class="d-flex align-items-center mb-2">
-                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Kunjungan / Antar / Panggilan" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                <div>
-                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Kunjungan / Antar / Panggilan</span>
-                    <span class="text-muted small d-block mb-0">Fasilitas (seperti kendaraan operasional, dan transportasi lain) atau petugas datang ke titik lokasi warga</span>
-                </div>
-            </div>
-            <div class="dynamic-keterangan mt-2" style="display: none;">
-                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                </div>
-            </div>
-        </div>
-        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="fasilitas_delivery_antar_active" {{ isset($region->payment_info['fasilitas_delivery_antar_active']) ? ($region->payment_info['fasilitas_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-            <span class="status-label mt-2 small fw-bold text-center"></span>
-        </div>
-    </div>
-</div>
-                                                <div class="bg-light p-3 rounded-4 border">
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="flex-grow-1 pe-3">
-            <div class="d-flex align-items-center mb-2">
-                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Gunakan di Tempat / Ambil Sendiri" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                <div>
-                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Gunakan di Tempat / Ambil Sendiri</span>
-                    <span class="text-muted small d-block mb-0">Warga mendatangi lokasi fasilitas (gedung, balai) atau mengambil sendiri barang</span>
-                </div>
-            </div>
-            <div class="dynamic-keterangan mt-2" style="display: none;">
-                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                </div>
-            </div>
-        </div>
-        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="fasilitas_delivery_jemput_active" {{ isset($region->payment_info['fasilitas_delivery_jemput_active']) ? ($region->payment_info['fasilitas_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-            <span class="status-label mt-2 small fw-bold text-center"></span>
-        </div>
-    </div>
-</div>
-                                            </div>
+                                        </div>
 
-                                            @if($hasFasilitasKendaraan)
-                                            <div class="row g-4 border-top pt-4">
-                                                <div class="col-12">
-                                                    <label class="form-label text-dark fw-bold mb-2">BBM Kendaraan Default</label>
-                                                    <select name="fasilitas_bbm" class="form-select text-dark shadow-sm rounded-3 py-2">
-                                                        <option value="Penyewa" {{ ($region->payment_info['fasilitas_bbm_default'] ?? 'Penyewa') == 'Penyewa' ? 'selected' : '' }}>Ditanggung Penyewa</option>
-                                                        <option value="Pemerintah Desa" {{ ($region->payment_info['fasilitas_bbm_default'] ?? '') == 'Pemerintah Desa' ? 'selected' : '' }}>Gratis (Ditanggung Desa)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-12">
-                                                    <label class="form-label text-dark fw-bold mb-2">Supir Kendaraan Default</label>
-                                                    <select name="fasilitas_supir" class="form-select text-dark shadow-sm rounded-3 py-2">
-                                                        <option value="Tanpa Supir (Bawa Sendiri)" {{ ($region->payment_info['fasilitas_supir_default'] ?? 'Tanpa Supir (Bawa Sendiri)') == 'Tanpa Supir (Bawa Sendiri)' || ($region->payment_info['fasilitas_supir_default'] ?? '') == 'Lepas Kunci' ? 'selected' : '' }}>Tanpa Supir</option>
-                                                        <option value="Dengan Supir" {{ ($region->payment_info['fasilitas_supir_default'] ?? '') == 'Dengan Supir' ? 'selected' : '' }}>Dengan Supir Desa</option>
-                                                        <option value="Bebas Pilih" {{ ($region->payment_info['fasilitas_supir_default'] ?? '') == 'Bebas Pilih' ? 'selected' : '' }}>Bebas Pilih</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            @endif
-                                        </div>
-                                        
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Empty State -->
                             <div id="empty_delivery_state" class="text-center py-5" style="display: none;">
                                 <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
                                     <i class="bx bx-box fs-1 text-muted"></i>
                                 </div>
-                                <h6 class="fw-bold text-muted mb-1">Belum Ada Layanan Terkait</h6>
-                                <p class="text-muted small mb-0 px-md-5">Silakan aktifkan layanan (seperti Mobil, Alat Berat, atau Pangkalan Gas) di tab <b>Layanan Wilayah</b> terlebih dahulu agar pengaturannya muncul di sini.</p>
+                                <h6 class="fw-bold text-muted mb-1">Belum Ada Unit dengan Opsi Pengiriman</h6>
+                                <p class="text-muted small mb-0 px-md-5">Aktifkan unit <b>Penyewaan Alat</b> atau <b>Penjualan Gas</b> di tab <b>Layanan Wilayah</b> terlebih dahulu untuk mengatur metode antar/ambil sendiri.</p>
                             </div>
 
                         </div>
@@ -747,62 +580,51 @@
     const checkboxes = document.querySelectorAll('input[name="services[]"]');
     
     function updateDeliveryBoxes() {
-        let showMobil = false, showAlat = false, showGas = false, showFasilitas = false;
-        
+        let showAlat = false, showGas = false;
+
         checkboxes.forEach(cb => {
-            if(cb.checked) {
-                const nameElem = cb.closest('.card-body').querySelector('span.fw-bold');
+            if (cb.checked) {
+                const cardBody = cb.closest('.card-body');
+                const nameElem = cardBody ? cardBody.querySelector('span.fw-bold') : null;
                 if (nameElem) {
                     const name = nameElem.innerText;
-                    if(name.includes('Mobil') || name.includes('Transportasi')) showMobil = true;
-                    if(name.includes('Alat')) showAlat = true;
-                    if(name.includes('Gas')) showGas = true;
-                    if(name.includes('Fasilitas Umum')) showFasilitas = true;
-                    
+                    if (name.includes('Alat')) showAlat = true;
+                    if (name.includes('Gas')) showGas = true;
                 }
             }
         });
-        
-        const tabMobil = document.getElementById('v-pills-mobil-tab');
+
         const tabAlat = document.getElementById('v-pills-alat-tab');
         const tabGas = document.getElementById('v-pills-gas-tab');
-        const tabFasilitas = document.getElementById('v-pills-fasilitas-tab');
-                const mainBox = document.getElementById('main_delivery_section');
+        const mainBox = document.getElementById('main_delivery_section');
         const emptyState = document.getElementById('empty_delivery_state');
-        
-        if(tabMobil) tabMobil.style.display = showMobil ? 'flex' : 'none';
-        if(tabAlat) tabAlat.style.display = showAlat ? 'flex' : 'none';
-        if(tabGas) tabGas.style.display = showGas ? 'flex' : 'none';
-        if(tabFasilitas) tabFasilitas.style.display = showFasilitas ? 'flex' : 'none';
-                
-        // Auto-select first visible tab
+
+        if (tabAlat) tabAlat.style.display = showAlat ? 'flex' : 'none';
+        if (tabGas) tabGas.style.display = showGas ? 'flex' : 'none';
+
         let firstVisible = null;
-        if(showMobil) firstVisible = tabMobil;
-        else if(showAlat) firstVisible = tabAlat;
-        else if(showGas) firstVisible = tabGas;
-                else if(showFasilitas) firstVisible = tabFasilitas;
-        
-        const hasAnyDelivery = (showMobil || showAlat || showGas || showFasilitas);
-        
-        if(mainBox) mainBox.style.display = hasAnyDelivery ? 'flex' : 'none';
-        if(emptyState) emptyState.style.display = hasAnyDelivery ? 'none' : 'block';
-        
-        if (firstVisible) {
-            // Activate it using Bootstrap Tab API if not already active
-            if (!firstVisible.classList.contains('active')) {
-                document.querySelectorAll('#v-pills-tab .nav-link').forEach(t => {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                document.querySelectorAll('#v-pills-tabContent .tab-pane').forEach(p => {
-                    p.classList.remove('show', 'active');
-                });
-                
-                firstVisible.classList.add('active');
-                firstVisible.setAttribute('aria-selected', 'true');
-                const targetId = firstVisible.getAttribute('data-bs-target');
-                document.querySelector(targetId).classList.add('show', 'active');
-            }
+        if (showAlat) firstVisible = tabAlat;
+        else if (showGas) firstVisible = tabGas;
+
+        const hasAnyDelivery = (showAlat || showGas);
+
+        if (mainBox) mainBox.style.display = hasAnyDelivery ? 'flex' : 'none';
+        if (emptyState) emptyState.style.display = hasAnyDelivery ? 'none' : 'block';
+
+        if (firstVisible && !firstVisible.classList.contains('active')) {
+            document.querySelectorAll('#v-pills-tab .nav-link').forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+            });
+            document.querySelectorAll('#v-pills-tabContent .tab-pane').forEach(p => {
+                p.classList.remove('show', 'active');
+            });
+
+            firstVisible.classList.add('active');
+            firstVisible.setAttribute('aria-selected', 'true');
+            const targetId = firstVisible.getAttribute('data-bs-target');
+            const pane = document.querySelector(targetId);
+            if (pane) pane.classList.add('show', 'active');
         }
     }
 
