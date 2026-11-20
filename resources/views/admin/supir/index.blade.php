@@ -198,21 +198,21 @@
                     </div>
 
                     <!-- Photo Upload -->
-                    <div class="d-flex align-items-center mb-4 p-4 bg-label-secondary rounded-4 border-0">
-                        <div class="me-4 position-relative">
-                            <div id="preview_add_supir" class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm border border-2 border-white text-primary" style="width: 85px; height: 85px;">
+                    <div class="d-flex flex-column flex-sm-row align-items-center text-center text-sm-start gap-3 mb-4 p-3 p-sm-4 bg-label-secondary rounded-4 border-0">
+                        <div class="position-relative flex-shrink-0">
+                            <div id="preview_add_supir" class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm border border-2 border-white text-primary" style="width: 80px; height: 80px;">
                                 <i class="bx bx-camera fs-1"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1">
+                        <div class="flex-grow-1 min-w-0">
                             <h6 class="fw-bold mb-1">Foto Profil Supir (Opsional)</h6>
                             <p class="text-muted mb-2" style="font-size: 0.8rem;">Gunakan rasio 1:1 (persegi). Maksimal 8MB.</p>
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 flex-wrap">
                                 <label for="foto_upload_supir" class="btn btn-sm btn-primary cursor-pointer shadow-sm rounded-pill px-3">
                                     <i class="bx bx-upload me-1"></i> Pilih Foto...
                                 </label>
                                 <input type="file" name="foto" id="foto_upload_supir" class="d-none" accept="image/*" onchange="previewImage(this, 'preview_add_supir', 'filename_add_supir')">
-                                <span id="filename_add_supir" class="text-muted small">Belum ada file dipilih</span>
+                                <span id="filename_add_supir" class="text-muted small text-truncate" style="max-width: 180px;">Belum ada file dipilih</span>
                             </div>
                         </div>
                     </div>
@@ -312,21 +312,21 @@
                     </div>
 
                     <!-- Photo Upload -->
-                    <div class="d-flex align-items-center mb-4 p-4 bg-label-secondary rounded-4 border-0">
-                        <div class="me-4 position-relative">
-                            <div id="preview_add_pengurus" class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm border border-2 border-white text-success" style="width: 85px; height: 85px;">
+                    <div class="d-flex flex-column flex-sm-row align-items-center text-center text-sm-start gap-3 mb-4 p-3 p-sm-4 bg-label-secondary rounded-4 border-0">
+                        <div class="position-relative flex-shrink-0">
+                            <div id="preview_add_pengurus" class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm border border-2 border-white text-success" style="width: 80px; height: 80px;">
                                 <i class="bx bx-camera fs-1"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1">
+                        <div class="flex-grow-1 min-w-0">
                             <h6 class="fw-bold mb-1">Foto Profil Petugas (Opsional)</h6>
                             <p class="text-muted mb-2" style="font-size: 0.8rem;">Gunakan rasio 1:1 (persegi). Maksimal 8MB.</p>
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 flex-wrap">
                                 <label for="foto_upload_pengurus" class="btn btn-sm btn-success cursor-pointer shadow-sm rounded-pill px-3">
                                     <i class="bx bx-upload me-1"></i> Pilih Foto...
                                 </label>
                                 <input type="file" name="foto" id="foto_upload_pengurus" class="d-none" accept="image/*" onchange="previewImage(this, 'preview_add_pengurus', 'filename_add_pengurus')">
-                                <span id="filename_add_pengurus" class="text-muted small">Belum ada file dipilih</span>
+                                <span id="filename_add_pengurus" class="text-muted small text-truncate" style="max-width: 180px;">Belum ada file dipilih</span>
                             </div>
                         </div>
                     </div>

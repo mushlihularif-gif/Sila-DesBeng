@@ -254,9 +254,9 @@
         $totalUnitWilayah = $totalRw + $totalRt;
         $unitTerisi = $rwStructure->filter(fn($rw) => $rw->users->isNotEmpty())->count() + $rwStructure->sum(fn($rw) => $rw->children->filter(fn($rt) => $rt->users->isNotEmpty())->count());
     @endphp
-    <div class="row g-3 mb-4">
+    <div class="row g-2 g-sm-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card wilayah-kpi-card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3 d-flex align-items-center gap-3">
                     <span class="avatar avatar-md bg-label-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bx bx-map fs-4"></i>
@@ -269,7 +269,7 @@
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card wilayah-kpi-card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3 d-flex align-items-center gap-3">
                     <span class="avatar avatar-md bg-label-info rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bx bx-git-branch fs-4"></i>
@@ -282,7 +282,7 @@
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card wilayah-kpi-card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3 d-flex align-items-center gap-3">
                     <span class="avatar avatar-md bg-label-success rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bx bx-user-check fs-4"></i>
@@ -295,7 +295,7 @@
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card wilayah-kpi-card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3 d-flex align-items-center gap-3">
                     <span class="avatar avatar-md bg-label-warning rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bx bx-group fs-4"></i>

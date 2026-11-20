@@ -809,6 +809,127 @@
             display: block !important;
         }
 
+        /* Global Mobile Chrome & Layar Kecil Guard (360px - 991px) */
+        @media (max-width: 991.98px) {
+            html, body, .layout-wrapper, .layout-container, .layout-page, .content-wrapper {
+                max-width: 100% !important;
+                overflow-x: clip !important;
+            }
+            /* Search input di toolbar selalu penuh dan rata kiri-kanan di HP/Tablet */
+            .card-header .input-group,
+            .card-body > .input-group,
+            .d-flex > .input-group[style*="max-width"] {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .container-xxl.container-p-y {
+                padding-left: 0.85rem !important;
+                padding-right: 0.85rem !important;
+            }
+            .container-xxl h4.fw-bold {
+                font-size: 1.12rem !important;
+                line-height: 1.35 !important;
+                word-break: break-word;
+            }
+            /* Kartu KPI 2 kolom (col-6): cegah teks terpotong titik-titik & sesuaikan ukuran ikon */
+            .req-stat-card,
+            .proof-stat-card,
+            .wilayah-kpi-card .card-body {
+                padding: 0.7rem 0.65rem !important;
+                gap: 0.55rem !important;
+            }
+            .req-stat-card .avatar,
+            .proof-stat-card .avatar,
+            .wilayah-kpi-card .avatar {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+            }
+            .req-stat-card .avatar img,
+            .proof-stat-card .avatar img {
+                width: 22px !important;
+                height: 22px !important;
+            }
+            .req-stat-card .avatar i,
+            .proof-stat-card .avatar i,
+            .wilayah-kpi-card .avatar i {
+                font-size: 1.1rem !important;
+            }
+            .req-stat-card small,
+            .proof-stat-card small,
+            .wilayah-kpi-card small {
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                line-height: 1.2 !important;
+                font-size: 0.65rem !important;
+            }
+            .req-stat-card h4,
+            .proof-stat-card h4,
+            .wilayah-kpi-card h4 {
+                font-size: 1.15rem !important;
+            }
+
+            /* Kartu KPI 3 kolom (col-4): proporsional & sama tinggi di layar 360px */
+            .partner-stat-card,
+            .supir-stat-card,
+            .loc-stat-card,
+            .staff-stat-pill {
+                padding: 0.65rem 0.4rem !important;
+            }
+            .partner-stat-card span,
+            .supir-stat-card span,
+            .loc-stat-card span,
+            .staff-stat-pill span {
+                font-size: 0.66rem !important;
+                line-height: 1.2 !important;
+            }
+            .partner-stat-card h4,
+            .supir-stat-card h4,
+            .loc-stat-card h4,
+            .staff-stat-pill h4 {
+                font-size: 1.15rem !important;
+                margin-top: 2px;
+            }
+
+            /* Proteksi kartu mobile agar email/alamat/teks panjang tidak pernah keluar batas kartu */
+            .order-mobile-card,
+            .proof-mobile-card,
+            .partner-mobile-card,
+            .loc-item-card,
+            .staff-card,
+            .trx-mobile-card,
+            .inc-mobile-card,
+            .user-card-box {
+                overflow: hidden !important;
+                overflow-wrap: anywhere !important;
+                word-break: break-word !important;
+            }
+            .inc-unit-card .card-body {
+                padding: 0.75rem !important;
+            }
+            .inc-unit-card h5 {
+                font-size: 0.92rem !important;
+                word-break: break-word;
+            }
+            /* Modal nyaman di layar HP */
+            .modal-header {
+                padding: 0.9rem 1rem !important;
+            }
+            .modal-body {
+                padding: 1rem !important;
+            }
+            .modal-footer {
+                padding: 0.85rem 1rem !important;
+            }
+            .modal-footer .btn {
+                flex: 1 1 auto;
+            }
+        }
+
         /* Print optimization: sembunyikan navigasi dan tombol aksi saat mencetak laporan */
         @media print {
             #layout-menu,
