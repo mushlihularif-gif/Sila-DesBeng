@@ -150,19 +150,20 @@
             transform: translateY(-3px);
         }
 
-        /* Notifikasi Dropdown Styles & Responsive Optimization */
+        /* Notifikasi Dropdown Styles & Responsive Optimization (Dashboard Admin Theme) */
         .notif-dropdown-menu {
-            max-height: 560px !important;
-            border-radius: 16px !important;
-            box-shadow: 0 12px 42px rgba(67, 89, 113, 0.16) !important;
+            max-height: 540px !important;
+            border-radius: 18px !important;
+            box-shadow: 0 18px 48px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(15, 23, 42, 0.06) !important;
             overflow: hidden !important;
-            border: 1px solid rgba(67, 89, 113, 0.12) !important;
+            border: 1px solid #e2e8f0 !important;
             background: #ffffff !important;
+            padding: 0 !important;
         }
 
         @media (min-width: 576px) {
             .notif-dropdown-menu {
-                width: 420px !important;
+                width: 410px !important;
                 max-width: 92vw !important;
                 right: 0 !important;
                 left: auto !important;
@@ -181,13 +182,18 @@
                 min-width: 0 !important;
                 margin: 0 !important;
                 transform: none !important;
-                max-height: 84vh !important;
+                max-height: 82vh !important;
                 z-index: 1090 !important;
-                border-radius: 14px !important;
+                border-radius: 16px !important;
             }
         }
 
-        /* Filter Scroll Container with Drag & Scroll */
+        .notif-header-bar {
+            background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        /* Filter Scroll Container with Soft Edge Fade */
         .notif-filter-wrapper {
             position: relative;
             display: flex;
@@ -201,8 +207,8 @@
             -ms-overflow-style: none;
             -webkit-overflow-scrolling: touch;
             display: flex;
-            gap: 7px;
-            padding: 4px 2px 6px 2px;
+            gap: 6px;
+            padding: 2px 26px 4px 2px;
             cursor: grab;
             scroll-behavior: smooth;
             user-select: none;
@@ -221,96 +227,233 @@
         .notif-scroll-arrow {
             position: absolute;
             top: 50%;
-            transform: translateY(-50%);
-            width: 26px;
-            height: 26px;
+            transform: translateY(-54%);
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: #ffffff;
-            border: 1px solid #d9dfe7;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
-            color: #566a7f;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+            color: #475569;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 10;
             padding: 0;
-            font-size: 1.15rem;
-            transition: all 0.2s ease;
+            font-size: 1rem;
+            transition: all 0.18s ease;
         }
 
         .notif-scroll-arrow:hover {
-            background: #696cff;
+            background: #0d6efd;
             color: #ffffff;
-            border-color: #696cff;
+            border-color: #0d6efd;
         }
 
         .notif-scroll-prev {
-            left: -4px;
+            left: 0;
+            box-shadow: 6px 0 12px 4px #ffffff, 0 2px 6px rgba(15, 23, 42, 0.1);
         }
 
         .notif-scroll-next {
-            right: -4px;
+            right: 0;
+            box-shadow: -6px 0 12px 4px #ffffff, 0 2px 6px rgba(15, 23, 42, 0.1);
         }
 
         .notif-filter-btn {
-            font-size: 0.76rem !important;
-            padding: 5px 13px !important;
-            border-radius: 50px !important;
+            font-size: 0.74rem !important;
+            padding: 4px 12px !important;
+            border-radius: 999px !important;
             white-space: nowrap !important;
-            transition: all 0.2s ease !important;
+            transition: all 0.18s ease !important;
             flex-shrink: 0 !important;
-            border: 1px solid transparent !important;
+            border: 1px solid #e2e8f0 !important;
             font-weight: 600 !important;
-            background-color: #f1f3f6 !important;
-            color: #566a7f !important;
+            background-color: #f8fafc !important;
+            color: #475569 !important;
+            line-height: 1.45 !important;
         }
 
         .notif-filter-btn:hover {
-            background-color: #e6e9ef !important;
-            color: #384554 !important;
+            background-color: #eff6ff !important;
+            border-color: #bfdbfe !important;
+            color: #1d4ed8 !important;
         }
 
         .notif-filter-btn.active {
-            background-color: #696cff !important;
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
             color: #ffffff !important;
-            box-shadow: 0 3px 10px rgba(105, 108, 255, 0.35) !important;
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25) !important;
         }
 
+        /* Sleek Thin Scrollbar for Notification Feed */
+        .notif-list-container {
+            max-height: 350px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 8px;
+            background: #fbfcfe;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        .notif-list-container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .notif-list-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .notif-list-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 999px;
+        }
+
+        .notif-list-container::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
+        }
+
+        .notif-list-container::-webkit-scrollbar-button {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+        /* Notification Feed Item */
         .notif-item {
-            border-bottom: 1px solid #f2f4f7;
-            transition: all 0.2s ease;
+            white-space: normal !important;
+            border-radius: 12px !important;
+            border: 1px solid transparent !important;
+            margin-bottom: 6px;
+            transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
             text-decoration: none;
-            display: flex;
+            display: flex !important;
             align-items: flex-start;
-            padding: 14px 18px;
+            padding: 11px 12px !important;
             position: relative;
+            background-color: #ffffff;
+        }
+
+        .notif-item:last-of-type {
+            margin-bottom: 0;
         }
 
         .notif-item:hover {
-            background-color: #f8fafc !important;
+            background-color: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+            color: inherit !important;
         }
 
         .notif-item.is-unread {
-            background-color: rgba(105, 108, 255, 0.035);
-            border-left: 3.5px solid #696cff;
+            background-color: #f0f7ff !important;
+            border-color: #dbeafe !important;
         }
 
-        .notif-item.is-unread.category-rental { border-left-color: #ffab00; background-color: rgba(255, 171, 0, 0.035); }
-        .notif-item.is-unread.category-mobil { border-left-color: #03c3ec; background-color: rgba(3, 195, 236, 0.035); }
-        .notif-item.is-unread.category-fasilitas { border-left-color: #71dd37; background-color: rgba(113, 221, 55, 0.035); }
-        .notif-item.is-unread.category-gas { border-left-color: #ff3e1d; background-color: rgba(255, 62, 29, 0.035); }
-        .notif-item.is-unread.category-kyc { border-left-color: #03c3ec; background-color: rgba(3, 195, 236, 0.035); }
-        .notif-item.is-unread.category-laporan { border-left-color: #ff3e1d; background-color: rgba(255, 62, 29, 0.035); }
-        .notif-item.is-unread.category-mutasi { border-left-color: #8592a3; background-color: rgba(133, 146, 163, 0.035); }
+        .notif-item.is-unread:hover {
+            background-color: #e6f2ff !important;
+            border-color: #bfdbfe !important;
+        }
+
+        .notif-item-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: opacity 0.18s ease;
+        }
+
+        .notif-item:not(.is-unread) .notif-item-icon {
+            opacity: 0.78;
+        }
+
+        .notif-item-title {
+            font-size: 0.84rem;
+            line-height: 1.3;
+            color: #0f172a;
+        }
+
+        .notif-item:not(.is-unread) .notif-item-title {
+            color: #334155;
+            font-weight: 600 !important;
+        }
 
         .notif-item-desc {
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            line-height: 1.45;
-            color: #697a8d;
+            white-space: normal !important;
+            word-break: break-word;
+            line-height: 1.42;
+            font-size: 0.78rem;
+            color: #475569;
+        }
+
+        .notif-item:not(.is-unread) .notif-item-desc {
+            color: #64748b;
+        }
+
+        .notif-meta-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 5px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .notif-cat-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 1px 7px;
+            border-radius: 999px;
+            font-size: 0.67rem;
+            font-weight: 600;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .notif-footer-link {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 11px 16px !important;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #0d6efd !important;
+            background: #ffffff;
+            transition: background-color 0.18s ease;
+        }
+
+        .notif-footer-link:hover {
+            background: #f8fbff !important;
+            color: #0a58ca !important;
+        }
+
+        .admin-user-dropdown {
+            border-radius: 14px !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.12) !important;
+            padding: 6px !important;
+            min-width: 230px !important;
+        }
+
+        .admin-user-dropdown .dropdown-item {
+            border-radius: 10px !important;
+            padding: 9px 12px !important;
+            font-size: 0.86rem;
+        }
+
+        .admin-user-dropdown .dropdown-item:hover {
+            background-color: #f1f5f9 !important;
         }
 
         .nav-link {
@@ -1587,9 +1730,9 @@
                         @endif
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
                             <!-- Notifikasi Bell Icon -->
-                            <li class="nav-item dropdown me-3 position-static position-sm-relative">
-                                <a class="nav-link dropdown-toggle hide-arrow position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-display="static" data-bs-auto-close="outside">
-                                    <i class="bx bx-bell bx-sm"></i>
+                            <li class="nav-item dropdown me-2 me-sm-3 position-static position-sm-relative">
+                                <a class="nav-link dropdown-toggle hide-arrow position-relative rounded-circle d-flex align-items-center justify-content-center" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-display="static" data-bs-auto-close="outside" style="width: 38px; height: 38px;" aria-label="Notifikasi">
+                                    <i class="bx bx-bell fs-4 text-body"></i>
                                     @php
                                         // Aturan siapa melihat notifikasi apa ada di
                                         // AdminNotification::scopeUntukPengguna(), dipakai bersama
@@ -1600,22 +1743,25 @@
                                         $notifQuery = $hasAdminNotifTable ? \App\Models\AdminNotification::untukPengguna($currentUser) : null;
                                         $unreadCount = $notifQuery ? (clone $notifQuery)->where('is_read', false)->count() : 0;
                                     @endphp
-                                    <span id="notif-badge-bell" class="badge bg-danger rounded-pill badge-notifications position-absolute {{ $unreadCount > 0 ? '' : 'd-none' }}" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                                    <span id="notif-badge-bell" class="badge bg-danger rounded-pill badge-notifications position-absolute border border-2 border-white {{ $unreadCount > 0 ? '' : 'd-none' }}" style="top: 1px; right: 0px; font-size: 9.5px; min-width: 18px; height: 18px; padding: 0 4px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end py-0 notif-dropdown-menu">
-                                    <li class="dropdown-menu-header border-bottom bg-white">
-                                        <div class="dropdown-header d-flex align-items-center justify-content-between py-3 px-3 px-sm-4">
+                                    <li class="dropdown-menu-header notif-header-bar">
+                                        <div class="d-flex align-items-center justify-content-between pt-3 pb-2 px-3">
                                             <div class="d-flex align-items-center gap-2">
-                                                <h6 class="mb-0 fw-bold text-dark fs-5">Notifikasi</h6>
-                                                <span id="notif-badge-header" class="badge bg-label-primary rounded-pill px-2.5 py-1 fw-bold fs-7 {{ $unreadCount > 0 ? '' : 'd-none' }}">{{ $unreadCount }} Baru</span>
+                                                <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-primary" style="width: 30px; height: 30px;">
+                                                    <i class="bx bx-bell text-primary fs-6"></i>
+                                                </div>
+                                                <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.96rem;">Notifikasi</h6>
+                                                <span id="notif-badge-header" class="badge bg-label-primary rounded-pill px-2 py-1 fw-semibold {{ $unreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.7rem;">{{ $unreadCount }} Baru</span>
                                             </div>
-                                            <button type="button" id="btn-mark-all-read" class="btn btn-link btn-sm text-primary text-decoration-none p-0 fw-semibold d-flex align-items-center gap-1 shadow-none notif-mark-all {{ $unreadCount > 0 ? '' : 'd-none' }}" data-url="{{ route('admin.notifications.mark-all-read') }}" style="font-size: 0.8rem;" title="Tandai semua notifikasi sudah dibaca">
+                                            <button type="button" id="btn-mark-all-read" class="btn btn-link btn-sm text-primary text-decoration-none p-0 fw-semibold d-flex align-items-center gap-1 shadow-none notif-mark-all {{ $unreadCount > 0 ? '' : 'd-none' }}" data-url="{{ route('admin.notifications.mark-all-read') }}" style="font-size: 0.76rem;" title="Tandai semua notifikasi sudah dibaca">
                                                 <i class="bx bx-check-double fs-6"></i>
-                                                <span>Tandai Semua Dibaca</span>
+                                                <span>Tandai Dibaca</span>
                                             </button>
                                         </div>
-                                        <!-- Pill Tabs untuk Semua Layanan -->
-                                        <div class="px-3 px-sm-4 pb-3">
+                                        <!-- Pill Filter Layanan -->
+                                        <div class="px-3 pb-2.5 pt-1">
                                             <div class="notif-filter-wrapper">
                                                 <button type="button" class="notif-scroll-arrow notif-scroll-prev d-none" aria-label="Geser ke kiri">
                                                     <i class="bx bx-chevron-left"></i>
@@ -1623,12 +1769,11 @@
                                                 <div class="notif-filter-scroll">
                                                     <button type="button" class="btn btn-sm notif-filter-btn active" data-filter="all">Semua</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="rental">Sewa Alat</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mobil">Sewa Transportasi</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="fasilitas">Fasilitas Umum</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="gas">Gas LPG</button>
-                                                                                                        <button type="button" class="btn btn-sm notif-filter-btn" data-filter="kyc">Verifikasi Identitas</button>
-                                                    
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mutasi">Mutasi Penduduk</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mobil">Transportasi</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="fasilitas">Fasilitas</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="kyc">Verifikasi KYC</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mutasi">Mutasi</button>
                                                 </div>
                                                 <button type="button" class="notif-scroll-arrow notif-scroll-next" aria-label="Geser ke kanan">
                                                     <i class="bx bx-chevron-right"></i>
@@ -1637,93 +1782,96 @@
                                         </div>
                                     </li>
                                     <li>
-                                        <div class="notif-list-container" style="max-height: 360px; overflow-y: auto;">
+                                        <div class="notif-list-container">
                                             @php
                                                 $recentNotifications = $notifQuery ? (clone $notifQuery)->latest()->take(30)->get() : collect();
                                             @endphp
                                             @forelse($recentNotifications as $notif)
                                             @php
-                                                // Mapping icon, category, dan link tujuan
+                                                // Mapping icon, category, label, dan link tujuan
                                                 $cat = 'lainnya';
+                                                $catLabel = 'Aktivitas';
                                                 $icon = 'bx-bell';
                                                 $color = 'primary';
 
                                                 if (in_array($notif->type, ['rental_request', 'rental_order', 'rental'])) {
-                                                    $cat = 'rental'; $icon = 'bx-wrench'; $color = 'warning';
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
+                                                    $cat = 'rental'; $catLabel = 'Sewa Alat'; $icon = 'bx-wrench'; $color = 'warning';
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => 'rental']);
                                                 } elseif (in_array($notif->type, ['cancellation_request', 'mobil_order', 'rental_mobil', 'mobil'])) {
-                                                    $cat = 'mobil'; $icon = 'bx-car'; $color = 'info';
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
+                                                    $cat = 'mobil'; $catLabel = 'Transportasi'; $icon = 'bx-car'; $color = 'info';
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => 'mobil']);
                                                 } elseif (in_array($notif->type, ['fasilitas_order', 'rental_fasilitas', 'fasilitas'])) {
-                                                    $cat = 'fasilitas'; $icon = 'bx-building-house'; $color = 'success';
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
+                                                    $cat = 'fasilitas'; $catLabel = 'Fasilitas'; $icon = 'bx-building-house'; $color = 'success';
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => 'fasilitas']);
                                                 } elseif (in_array($notif->type, ['gas_order', 'gas'])) {
-                                                    $cat = 'gas'; $icon = 'bxs-gas-pump'; $color = 'danger';
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
+                                                    $cat = 'gas'; $catLabel = 'Gas LPG'; $icon = 'bxs-gas-pump'; $color = 'danger';
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => 'gas']);
                                                 } elseif (in_array($notif->type, ['pasar_order', 'pasar', 'pasar_daerah'])) {
-                                                    $cat = 'pasar'; $icon = 'bx-store-alt'; $color = 'primary';
+                                                    $cat = 'pasar'; $catLabel = 'Layanan'; $icon = 'bx-store-alt'; $color = 'primary';
                                                     $targetUrl = route('admin.notifications.index');
                                                 } elseif (in_array($notif->type, ['kyc', 'kyc_verification'])) {
-                                                    $cat = 'kyc'; $icon = 'bx-id-card'; $color = 'info';
+                                                    $cat = 'kyc'; $catLabel = 'Verifikasi KYC'; $icon = 'bx-id-card'; $color = 'info';
                                                     $targetUrl = ($notif->reference_id && Route::has('admin.kyc.show')) ? route('admin.kyc.show', $notif->reference_id) : route('admin.kyc.index');
                                                 } elseif ($notif->type === 'mutasi') {
-                                                    $cat = 'mutasi'; $icon = 'bx-user-pin'; $color = 'secondary';
+                                                    $cat = 'mutasi'; $catLabel = 'Mutasi'; $icon = 'bx-user-pin'; $color = 'secondary';
                                                     $targetUrl = route('admin.warga.mutasi.index');
                                                 } elseif (in_array($notif->type, ['laporan', 'pengumuman'])) {
-                                                    $cat = 'laporan'; $icon = 'bx-message-square-error'; $color = 'danger';
+                                                    $cat = 'laporan'; $catLabel = 'Laporan'; $icon = 'bx-message-square-error'; $color = 'danger';
                                                     $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 } else {
                                                     $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 }
                                             @endphp
-                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}">
-                                                <div class="flex-shrink-0 mt-1">
-                                                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-xs {{ !$notif->is_read ? 'bg-label-'.$color : 'bg-light' }}" style="width: 40px; height: 40px;">
-                                                        <i class="bx {{ $icon }} fs-5 {{ !$notif->is_read ? 'text-'.$color : 'text-secondary' }}"></i>
-                                                    </div>
+                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}" data-read-url="{{ route('admin.notifications.mark-as-read', $notif->id) }}">
+                                                <div class="notif-item-icon bg-label-{{ $color }}">
+                                                    <i class="bx {{ $icon }} fs-5 text-{{ $color }}"></i>
                                                 </div>
                                                 <div class="flex-grow-1" style="min-width: 0;">
-                                                    <div class="d-flex align-items-center justify-content-between mb-1">
-                                                        <h6 class="mb-0 fw-bold {{ !$notif->is_read ? 'text-dark' : 'text-secondary' }} text-truncate" style="font-size: 0.88rem;">{{ $notif->title }}</h6>
+                                                    <div class="d-flex align-items-center justify-content-between gap-2 mb-0.5">
+                                                        <h6 class="mb-0 fw-bold notif-item-title text-truncate">{{ $notif->title }}</h6>
                                                         @if(!$notif->is_read)
-                                                            <span class="badge badge-dot bg-{{ $color }} ms-2 flex-shrink-0" style="width: 8px; height: 8px;"></span>
+                                                            <span class="badge badge-dot bg-{{ $color }} flex-shrink-0" style="width: 8px; height: 8px;"></span>
                                                         @endif
                                                     </div>
-                                                    <p class="notif-item-desc mb-1 small">{{ $notif->message }}</p>
-                                                    <small class="text-muted d-flex align-items-center fw-medium" style="font-size: 0.72rem;">
-                                                        <i class="bx bx-time-five me-1"></i> {{ $notif->created_at->diffForHumans() }}
-                                                    </small>
+                                                    <p class="notif-item-desc mb-0">{{ $notif->message }}</p>
+                                                    <div class="notif-meta-row">
+                                                        <span class="notif-cat-chip">{{ $catLabel }}</span>
+                                                        <span class="d-inline-flex align-items-center gap-1">
+                                                            <i class="bx bx-time-five"></i> {{ $notif->created_at->diffForHumans() }}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </a>
                                             @empty
-                                            <div class="text-center py-5 notif-empty-state">
-                                                <div class="mb-3">
-                                                    <i class="bx bx-bell-off text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+                                            <div class="text-center py-5 px-3 notif-empty-state">
+                                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 56px; height: 56px;">
+                                                    <i class="bx bx-bell-off text-muted fs-2"></i>
                                                 </div>
-                                                <h6 class="fw-semibold text-dark">Belum ada notifikasi</h6>
-                                                <p class="text-muted small mb-0">Saat ini tidak ada pemberitahuan baru.</p>
+                                                <h6 class="fw-semibold text-dark mb-1">Belum ada notifikasi</h6>
+                                                <p class="text-muted small mb-0">Semua pemberitahuan aktivitas terbaru akan muncul di sini.</p>
                                             </div>
                                             @endforelse
-                                            
-                                            <div class="text-center py-5 d-none notif-filtered-empty">
-                                                <div class="mb-3">
-                                                    <i class="bx bx-filter text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+
+                                            <div class="text-center py-5 px-3 d-none notif-filtered-empty">
+                                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 56px; height: 56px;">
+                                                    <i class="bx bx-filter-alt text-muted fs-2"></i>
                                                 </div>
-                                                <h6 class="fw-semibold text-dark">Tidak ada notifikasi</h6>
-                                                <p class="text-muted small mb-0">Tidak ada notifikasi untuk layanan ini.</p>
+                                                <h6 class="fw-semibold text-dark mb-1">Tidak ada notifikasi</h6>
+                                                <p class="text-muted small mb-0">Belum ada pemberitahuan pada kategori layanan ini.</p>
                                             </div>
                                         </div>
                                     </li>
                                     <li class="dropdown-menu-footer border-top bg-white">
-                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item text-center py-3 text-primary fw-bold d-flex align-items-center justify-content-center" style="font-size: 0.84rem;">
-                                            <i class="bx bx-list-ul me-2 fs-5"></i> Lihat Semua Aktivitas
+                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item notif-footer-link">
+                                            <span>Lihat Semua Aktivitas</span>
+                                            <i class="bx bx-right-arrow-alt fs-5"></i>
                                         </a>
                                     </li>
                                 </ul>
                             </li>
                             <!-- Nama Admin -->
                             <li class="nav-item lh-1 me-3 d-none d-sm-block text-end">
-                                <span class="fw-semibold d-block" style="line-height: 1.2;">{{ Auth::user()->name ?? 'Admin' }}</span>
+                                <span class="fw-semibold d-block text-dark" style="line-height: 1.25; font-size: 0.88rem;">{{ Auth::user()->name ?? 'Admin' }}</span>
                                 <small class="text-muted" style="font-size: 11px;">
                                     @php
                                         $roleLabels = [
@@ -1735,65 +1883,66 @@
                                             'staff' => 'Staf Unit',
                                             'user' => 'Pengguna',
                                         ];
+                                        $currentRoleLabel = $roleLabels[Auth::user()->role ?? ''] ?? ucfirst(Auth::user()->role ?? 'Admin');
                                     @endphp
-                                    {{ $roleLabels[Auth::user()->role] ?? ucfirst(Auth::user()->role) }}
+                                    {{ $currentRoleLabel }}
                                 </small>
                             </li>
                             <!-- Profil Admin -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
+                                <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);"
                                     data-bs-toggle="dropdown">
                                     @if(Auth::user() && Auth::user()->file)
                                         <img src="{{ route('media.avatar', ['filename' => basename(Auth::user()->file->path)]) }}" alt="Avatar"
-                                            class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                            class="rounded-circle border border-2 border-light shadow-xs" style="width: 40px; height: 40px; object-fit: cover;" />
                                     @else
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #D1D5DB;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-light" style="width: 40px; height: 40px; background-color: #cbd5e1;">
                                             <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; color: white;">
                                                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                                             </svg>
                                         </div>
                                     @endif
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
+                                <ul class="dropdown-menu dropdown-menu-end admin-user-dropdown">
                                     <li>
                                         <a class="dropdown-item" href="{{ route('admin.profile') }}">
-                                            <div class="d-flex">
-                                                <div class="flex-shrink-0 me-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0 me-2.5">
                                                     @if(Auth::user() && Auth::user()->file)
                                                         <img src="{{ route('media.avatar', ['filename' => basename(Auth::user()->file->path)]) }}" alt="Avatar"
-                                                            class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                                            class="rounded-circle" style="width: 38px; height: 38px; object-fit: cover;" />
                                                     @else
-                                                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #D1D5DB;">
-                                                            <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; color: white;">
+                                                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #cbd5e1;">
+                                                            <svg viewBox="0 0 24 24" fill="currentColor" style="width: 22px; height: 22px; color: white;">
                                                                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                                                             </svg>
                                                         </div>
                                                     @endif
                                                 </div>
-                                                <div class="flex-grow-1">
-                                                    <span class="fw-semibold d-block">{{ Auth::user()->name ?? 'Admin' }}</span>
-                                                    <small class="text-muted">{{ Auth::user()->position ?? 'Admin' }}</small>
+                                                <div class="flex-grow-1" style="min-width: 0;">
+                                                    <span class="fw-semibold d-block text-dark text-truncate" style="max-width: 165px;">{{ Auth::user()->name ?? 'Admin' }}</span>
+                                                    <small class="text-muted">{{ Auth::user()->position ?: $currentRoleLabel }}</small>
                                                 </div>
                                             </div>
                                         </a>
                                     </li>
                                     <li>
-                                        <div class="dropdown-divider"></div>
+                                        <div class="dropdown-divider my-1"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ route('admin.profile') }}">
-                                            <i class="bx bx-user me-2"></i>
-                                            <span class="align-middle">My Profile</span>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ route('admin.profile') }}">
+                                            <i class="bx bx-user-circle me-2 fs-5 text-primary"></i>
+                                            <span class="align-middle fw-medium">Profil Saya</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <div class="dropdown-divider"></div>
+                                        <div class="dropdown-divider my-1"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ route('auth.logout') }}"
+                                        <a class="dropdown-item d-flex align-items-center text-danger" href="{{ route('auth.logout') }}"
                                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                            <i class="bx bx-power-off me-2"></i>
-                                            <span class="align-middle">Log Out</span>
+                                            <i class="bx bx-power-off me-2 fs-5"></i>
+                                            <span class="align-middle fw-medium">Keluar</span>
                                         </a>
                                         <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"
                                             class="d-none">
@@ -2231,75 +2380,40 @@
                     });
 
                     // ---- Tandai notifikasi sudah dibaca ----
-                    // Badge merah dulu tidak pernah turun: tiap item cuma tautan
-                    // biasa, jadi is_read tidak pernah berubah walau notifikasinya
-                    // sudah dibuka. Akibatnya angka merah menetap selamanya dan
-                    // berhenti berarti apa-apa bagi admin.
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                    const bellBadge = document.querySelector('.badge-notifications');
-                    const headerCount = document.querySelector('.notif-header-count');
-                    const headerActions = document.querySelector('.notif-header-actions');
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+                    const bellBadge = document.getElementById('notif-badge-bell');
+                    const headerBadge = document.getElementById('notif-badge-header');
+                    const btnMarkAll = document.getElementById('btn-mark-all-read');
 
                     function bacaPenghitung() {
-                        if (!bellBadge) return 0;
+                        if (!bellBadge || bellBadge.classList.contains('d-none')) return 0;
                         const angka = parseInt(bellBadge.textContent.replace(/\D/g, ''), 10);
                         return isNaN(angka) ? 0 : angka;
                     }
 
                     function pasangPenghitung(sisa) {
                         if (sisa > 0) {
-                            if (bellBadge) bellBadge.textContent = sisa > 99 ? '99+' : sisa;
-                            if (headerCount) headerCount.textContent = sisa + ' Baru';
+                            if (bellBadge) {
+                                bellBadge.textContent = sisa > 99 ? '99+' : sisa;
+                                bellBadge.classList.remove('d-none');
+                            }
+                            if (headerBadge) {
+                                headerBadge.textContent = sisa + ' Baru';
+                                headerBadge.classList.remove('d-none');
+                            }
+                            if (btnMarkAll) btnMarkAll.classList.remove('d-none');
                             return;
                         }
-                        // Sudah bersih: hilangkan titik merahnya, jangan tampilkan '0'
-                        if (bellBadge) bellBadge.remove();
-                        if (headerActions) headerActions.remove();
+                        if (bellBadge) bellBadge.classList.add('d-none');
+                        if (headerBadge) headerBadge.classList.add('d-none');
+                        if (btnMarkAll) btnMarkAll.classList.add('d-none');
                     }
 
-                    function kirimTandaiDibaca(url) {
-                        if (!url) return;
-                        fetch(url, {
-                            method: 'PUT',
-                            headers: {
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                            },
-                            // Item notifikasi langsung berpindah halaman saat diklik;
-                            // keepalive menjaga permintaan ini tetap terkirim.
-                            keepalive: true,
-                        }).catch(function () {});
-                    }
-
-                    document.querySelectorAll('.notif-item[data-read-url]').forEach(function (item) {
-                        item.addEventListener('click', function () {
-                            if (!item.classList.contains('is-unread')) return;
-
-                            item.classList.remove('is-unread');
-                            const dot = item.querySelector('.badge-dot');
-                            if (dot) dot.remove();
-
-                            pasangPenghitung(Math.max(0, bacaPenghitung() - 1));
-                            kirimTandaiDibaca(item.getAttribute('data-read-url'));
-                        });
-                    });
-
-                    const markAllBtn = document.querySelector('.notif-mark-all');
-                    if (markAllBtn) {
-                        markAllBtn.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            document.querySelectorAll('.notif-item.is-unread').forEach(function (item) {
-                                item.classList.remove('is-unread');
-                                const dot = item.querySelector('.badge-dot');
-                                if (dot) dot.remove();
-                            });
-
-                            kirimTandaiDibaca(markAllBtn.getAttribute('data-url'));
-                            pasangPenghitung(0);
-                        });
+                    function tandaiItemSelesai(item) {
+                        item.classList.remove('is-unread', 'category-rental', 'category-mobil', 'category-fasilitas', 'category-gas', 'category-pasar', 'category-kyc', 'category-mutasi', 'category-laporan');
+                        item.setAttribute('data-unread', '0');
+                        const dot = item.querySelector('.badge-dot');
+                        if (dot) dot.remove();
                     }
 
                     // Reset posisi scroll pill filter & update panah saat notifikasi dibuka
@@ -2315,8 +2429,7 @@
                         }
                     }
 
-                    // Handler tombol "Tandai Semua Dibaca"
-                    const btnMarkAll = document.getElementById('btn-mark-all-read');
+                    // Handler tombol "Tandai Dibaca" (semua)
                     if (btnMarkAll) {
                         btnMarkAll.addEventListener('click', function(e) {
                             e.preventDefault();
@@ -2326,11 +2439,11 @@
                             const originalHtml = btnMarkAll.innerHTML;
                             btnMarkAll.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" style="width: 12px; height: 12px;"></span> Memproses...';
 
-                            fetch('{{ route("admin.notifications.mark-all-read") }}', {
+                            fetch(btnMarkAll.getAttribute('data-url') || '{{ route("admin.notifications.mark-all-read") }}', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'X-CSRF-TOKEN': csrfToken,
                                     'X-Requested-With': 'XMLHttpRequest',
                                     'Accept': 'application/json'
                                 },
@@ -2339,38 +2452,8 @@
                             .then(res => res.json())
                             .then(data => {
                                 if (data && data.success) {
-                                    const bellBadge = document.getElementById('notif-badge-bell');
-                                    if (bellBadge) bellBadge.classList.add('d-none');
-
-                                    const headerBadge = document.getElementById('notif-badge-header');
-                                    if (headerBadge) headerBadge.classList.add('d-none');
-
-                                    btnMarkAll.classList.add('d-none');
-
-                                    document.querySelectorAll('.notif-item.is-unread').forEach(item => {
-                                        item.classList.remove('is-unread', 'category-rental', 'category-mobil', 'category-fasilitas', 'category-gas', 'category-pasar', 'category-kyc', 'category-mutasi', 'category-laporan');
-                                        item.setAttribute('data-unread', '0');
-                                        const dot = item.querySelector('.badge-dot');
-                                        if (dot) dot.remove();
-
-                                        const title = item.querySelector('h6');
-                                        if (title) {
-                                            title.classList.remove('text-dark');
-                                            title.classList.add('text-secondary');
-                                        }
-
-                                        const iconWrap = item.querySelector('.flex-shrink-0 > div');
-                                        if (iconWrap) {
-                                            iconWrap.className = 'rounded-circle d-flex align-items-center justify-content-center shadow-xs bg-light';
-                                            iconWrap.style.width = '40px';
-                                            iconWrap.style.height = '40px';
-                                        }
-
-                                        const icon = item.querySelector('.flex-shrink-0 i');
-                                        if (icon) {
-                                            icon.className = icon.className.replace(/text-(primary|warning|info|success|danger|secondary)/g, 'text-secondary');
-                                        }
-                                    });
+                                    document.querySelectorAll('.notif-item.is-unread').forEach(tandaiItemSelesai);
+                                    pasangPenghitung(0);
                                 } else {
                                     btnMarkAll.disabled = false;
                                     btnMarkAll.innerHTML = originalHtml;
@@ -2385,24 +2468,26 @@
                     }
 
                     // Tandai dibaca saat item notifikasi diklik
-                    document.querySelectorAll('.notif-item').forEach(item => {
-                        item.addEventListener('click', function() {
-                            if (this.getAttribute('data-unread') === '1') {
-                                const notifId = this.getAttribute('data-id');
-                                if (notifId) {
-                                    const formData = new FormData();
-                                    formData.append('_token', '{{ csrf_token() }}');
-                                    formData.append('_method', 'PUT');
-                                    const markUrl = '{{ url("/admin/notifications") }}/' + notifId + '/read';
-                                    if (navigator.sendBeacon) {
-                                        navigator.sendBeacon(markUrl, formData);
-                                    } else {
-                                        fetch(markUrl, {
-                                            method: 'POST',
-                                            body: formData,
-                                            keepalive: true
-                                        });
-                                    }
+                    document.querySelectorAll('.notif-item').forEach(function (item) {
+                        item.addEventListener('click', function () {
+                            if (this.getAttribute('data-unread') !== '1' && !this.classList.contains('is-unread')) return;
+
+                            tandaiItemSelesai(this);
+                            pasangPenghitung(Math.max(0, bacaPenghitung() - 1));
+
+                            const markUrl = this.getAttribute('data-read-url');
+                            if (markUrl) {
+                                const formData = new FormData();
+                                formData.append('_token', csrfToken);
+                                formData.append('_method', 'PUT');
+                                if (navigator.sendBeacon) {
+                                    navigator.sendBeacon(markUrl, formData);
+                                } else {
+                                    fetch(markUrl, {
+                                        method: 'POST',
+                                        body: formData,
+                                        keepalive: true
+                                    }).catch(function () {});
                                 }
                             }
                         });
