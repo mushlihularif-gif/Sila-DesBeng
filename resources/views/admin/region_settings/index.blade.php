@@ -53,6 +53,9 @@
         border-color: #ffab00 !important;
     }
     .rs-nav-pills {
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
         scrollbar-width: none;
         -ms-overflow-style: none;
     }
@@ -63,13 +66,17 @@
         .rs-stat-card {
             padding: 0.65rem 0.4rem !important;
         }
-        .rs-stat-card span {
+        .rs-stat-card > span {
             font-size: 0.66rem !important;
             line-height: 1.2 !important;
         }
         .rs-stat-card h4 {
             font-size: 1.15rem !important;
             margin-top: 2px;
+        }
+        .rs-nav-pills .nav-link {
+            padding: 0.45rem 0.85rem !important;
+            font-size: 0.8rem !important;
         }
     }
 </style>

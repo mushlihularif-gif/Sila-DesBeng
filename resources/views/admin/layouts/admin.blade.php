@@ -1107,7 +1107,97 @@
             display: block !important;
         }
 
-        /* Responsive Width & Half-Step Spacing Utilities (Pelengkap Bootstrap 5) */
+        /* Responsive Width, Overflow & Half-Step Spacing Utilities (Pelengkap Bootstrap 5.2 -> 5.3) */
+        .overflow-x-auto {
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior-x: contain;
+            touch-action: pan-x pan-y;
+            max-width: 100%;
+        }
+        .overflow-x-hidden { overflow-x: hidden !important; }
+        .overflow-y-auto { overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; }
+        .overflow-y-hidden { overflow-y: hidden !important; }
+
+        /* Horizontal Scrollable Tab Bar Enhancer (Desktop & Mobile Chrome) */
+        .admin-scroll-tabs-wrap {
+            position: relative;
+            max-width: 100%;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+        }
+        .admin-scroll-tabs-wrap > .nav,
+        .admin-scroll-tabs-wrap > div {
+            flex: 1 1 auto;
+            min-width: 0;
+            max-width: 100%;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .admin-scroll-tabs-wrap > .nav::-webkit-scrollbar,
+        .admin-scroll-tabs-wrap > div::-webkit-scrollbar {
+            display: none;
+        }
+        .admin-scroll-tabs-wrap.can-scroll-right::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 44px;
+            background: linear-gradient(to left, rgba(255, 255, 255, 0.96) 35%, rgba(255, 255, 255, 0));
+            pointer-events: none;
+            z-index: 2;
+            border-radius: 0 12px 12px 0;
+        }
+        .admin-scroll-tabs-wrap.can-scroll-left::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 36px;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.96) 35%, rgba(255, 255, 255, 0));
+            pointer-events: none;
+            z-index: 2;
+            border-radius: 12px 0 0 12px;
+        }
+        .admin-tabs-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid #dbe2ea;
+            background: #ffffff;
+            color: #475569;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 4;
+            padding: 0;
+            font-size: 1rem;
+            transition: all 0.16s ease;
+        }
+        .admin-tabs-arrow:hover {
+            background: #0d6efd;
+            color: #ffffff;
+            border-color: #0d6efd;
+        }
+        .admin-tabs-arrow.prev { left: 2px; }
+        .admin-tabs-arrow.next { right: 2px; }
+
         .gap-1\.5 { gap: 0.375rem !important; }
         .gap-2\.5 { gap: 0.625rem !important; }
         .p-1\.5 { padding: 0.375rem !important; }
@@ -1207,10 +1297,10 @@
             .staff-stat-pill {
                 padding: 0.65rem 0.4rem !important;
             }
-            .partner-stat-card span,
-            .supir-stat-card span,
-            .loc-stat-card span,
-            .staff-stat-pill span {
+            .partner-stat-card > span,
+            .supir-stat-card > span,
+            .loc-stat-card > span,
+            .staff-stat-pill > span {
                 font-size: 0.66rem !important;
                 line-height: 1.2 !important;
             }
@@ -3014,6 +3104,117 @@
             @include('admin.partials.inbox-rail')
         @endif
     @endauth
+
+    <script>
+        // Global Scrollable Tab Bar Enhancer:
+        // Memastikan semua bar tab horizontal di halaman admin bisa digeser (swipe/drag/klik panah)
+        // di layar mobile maupun desktop, serta otomatis memusatkan tab aktif.
+        (function () {
+            const SELECTOR = 'ul.nav.overflow-x-auto, ul.nav-pills-scrollable, ul.rs-nav-pills, .flex-nowrap.overflow-x-auto';
+
+            function enhanceElement(el) {
+                if (!el || el.closest('.admin-scroll-tabs-wrap') || el.closest('.notif-filter-wrapper')) return;
+                if (!el.parentNode) return;
+
+                const wrap = document.createElement('div');
+                wrap.className = 'admin-scroll-tabs-wrap';
+
+                ['mb-1', 'mb-2', 'mb-3', 'mb-4', 'w-100'].forEach(function (cls) {
+                    if (el.classList.contains(cls)) {
+                        wrap.classList.add(cls);
+                        if (cls.startsWith('mb-')) {
+                            el.classList.remove(cls);
+                            el.classList.add('mb-0');
+                        }
+                    }
+                });
+
+                const prevBtn = document.createElement('button');
+                prevBtn.type = 'button';
+                prevBtn.className = 'admin-tabs-arrow prev d-none';
+                prevBtn.setAttribute('aria-label', 'Geser menu ke kiri');
+                prevBtn.innerHTML = '<i class="bx bx-chevron-left"></i>';
+
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = 'admin-tabs-arrow next d-none';
+                nextBtn.setAttribute('aria-label', 'Geser menu ke kanan');
+                nextBtn.innerHTML = '<i class="bx bx-chevron-right"></i>';
+
+                el.parentNode.insertBefore(wrap, el);
+                wrap.appendChild(prevBtn);
+                wrap.appendChild(el);
+                wrap.appendChild(nextBtn);
+
+                function updateArrows() {
+                    const maxScroll = el.scrollWidth - el.clientWidth;
+                    const canLeft = el.scrollLeft > 6;
+                    const canRight = maxScroll > 6 && el.scrollLeft < maxScroll - 6;
+
+                    wrap.classList.toggle('can-scroll-left', canLeft);
+                    wrap.classList.toggle('can-scroll-right', canRight);
+                    prevBtn.classList.toggle('d-none', !canLeft);
+                    nextBtn.classList.toggle('d-none', !canRight);
+                }
+
+                prevBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    el.scrollBy({ left: -180, behavior: 'smooth' });
+                    setTimeout(updateArrows, 260);
+                });
+
+                nextBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    el.scrollBy({ left: 180, behavior: 'smooth' });
+                    setTimeout(updateArrows, 260);
+                });
+
+                el.addEventListener('scroll', updateArrows, { passive: true });
+                window.addEventListener('resize', updateArrows, { passive: true });
+
+                el.addEventListener('click', function (e) {
+                    const tab = e.target.closest('.nav-link, .btn-tab-filter, button, a');
+                    if (tab && el.contains(tab) && typeof tab.scrollIntoView === 'function') {
+                        setTimeout(function () {
+                            tab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                            setTimeout(updateArrows, 260);
+                        }, 40);
+                    }
+                });
+
+                const activeTab = el.querySelector('.nav-link.active, .btn-tab-filter.btn-primary, .btn-tab-filter.btn-success');
+                if (activeTab && el.scrollWidth > el.clientWidth + 6) {
+                    try {
+                        activeTab.scrollIntoView({ behavior: 'auto', inline: 'nearest', block: 'nearest' });
+                    } catch (err) {}
+                }
+
+                updateArrows();
+                setTimeout(updateArrows, 180);
+                setTimeout(updateArrows, 600);
+            }
+
+            window.initAdminScrollTabs = function () {
+                document.querySelectorAll(SELECTOR).forEach(enhanceElement);
+            };
+
+            document.addEventListener('DOMContentLoaded', function () {
+                window.initAdminScrollTabs();
+
+                const contentWrapper = document.querySelector('.content-wrapper');
+                if (contentWrapper && typeof MutationObserver !== 'undefined') {
+                    let timer = null;
+                    const obs = new MutationObserver(function () {
+                        clearTimeout(timer);
+                        timer = setTimeout(window.initAdminScrollTabs, 120);
+                    });
+                    obs.observe(contentWrapper, { childList: true, subtree: true });
+                }
+            });
+        })();
+    </script>
 
     <script src="{{ asset('js/segidaerah-responsive.js') }}?v={{ filemtime(public_path('js/segidaerah-responsive.js')) }}" defer></script>
 </body>
