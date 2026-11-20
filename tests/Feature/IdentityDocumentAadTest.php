@@ -32,7 +32,11 @@ class IdentityDocumentAadTest extends TestCase
             ->andReturn(['nik' => '0000000000000001', 'name' => 'DATA UJI', 'address' => 'ALAMAT FIKTIF']);
         foreach ([KycController::class, ApiKycController::class] as $controllerClass) {
             $controller = app($controllerClass);
-            $response = $controller->process($this->request(['user_id' => 2, 'ktp_encryption_version' => 1], ['ktp_image' => UploadedFile::fake()->image('ktp.jpg')]));
+            $ktpUpload = UploadedFile::fake()->image('ktp.jpg');
+            $expectedKtp = $controllerClass === KycController::class
+                ? \Intervention\Image\ImageManager::gd()->read($ktpUpload->getRealPath())->encodeByExtension('jpg', 80)->toString()
+                : $ktpUpload->get();
+            $response = $controller->process($this->request(['user_id' => 2, 'ktp_encryption_version' => 1], ['ktp_image' => $ktpUpload]));
             $this->assertSame(200, $response->getStatusCode());
             $kyc = KycVerification::latest('id')->firstOrFail();
             $this->assertSame(1, (int) $kyc->user_id);
@@ -54,6 +58,7 @@ class IdentityDocumentAadTest extends TestCase
                 $bytes = Storage::disk('private')->get($kyc->$column);
                 $this->assertStringStartsWith('$chacha20:v2$', $bytes);
                 $plain = FileEncryptionService::decrypt($bytes, IdentityDocumentContext::aad($kyc, $type, $kyc->$column), 2);
+                if ($type === 'ktp') $this->assertSame($expectedKtp, $plain, $controllerClass);
                 $this->assertNotFalse(getimagesizefromstring($plain));
                 $method = $type === 'ktp' ? 'secureKtpImage' : 'secureFaceImage';
                 $this->assertSame(200, app(MediaController::class)->$method(basename($kyc->$column))->getStatusCode());
@@ -69,6 +74,21 @@ class IdentityDocumentAadTest extends TestCase
         }
         $this->assertCount(0, Storage::disk('private')->allFiles());
         $this->assertSame(0, KycVerification::count());
+    }
+
+    public function test_media_rejects_disabled_accounts_and_admin_with_district_assignment(): void
+    {
+        $kyc = $this->pending();
+        $owner = User::findOrFail(1);
+        $owner->status = 'non_aktif';
+        Auth::setUser($owner);
+        $this->deny(fn () => app(MediaController::class)->secureKtpImage(basename($kyc->ktp_image_path)), 403);
+        \Illuminate\Support\Facades\DB::table('regions')->insert(['id' => 9, 'name' => 'Kecamatan Bengkalis', 'type' => 'kecamatan']);
+        \Illuminate\Support\Facades\DB::table('regions')->where('id', 7)->update(['parent_id' => 9]);
+        $viewer = User::findOrFail(2); $viewer->role = 'admin_desa'; $viewer->region_id = 9;
+        Auth::setUser($viewer);
+        $this->deny(fn () => app(MediaController::class)->secureKtpImage(basename($kyc->ktp_image_path)), 403);
+        $this->deny(fn () => app(\App\Services\IdentityReviewService::class)->reviewKyc($kyc->id, $viewer, false, 'uji'), 403);
     }
 
     public function test_file_swaps_tampering_and_legacy_downgrade_are_rejected_by_media_endpoint(): void

@@ -90,7 +90,7 @@ class IdentityReviewService
         if ($legacy && $reviewer->role === 'super_admin') {
             return;
         }
-        abort_unless($reviewer->region_id && in_array($owner->region_id,
+        abort_unless($reviewer->region_id && in_array($reviewer->region?->type, ['desa', 'kelurahan'], true) && in_array($owner->region_id,
             array_merge([$reviewer->region_id], Region::getDescendantIds($reviewer->region_id))), 403);
     }
 

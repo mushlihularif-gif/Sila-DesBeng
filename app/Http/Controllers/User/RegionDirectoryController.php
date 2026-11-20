@@ -41,14 +41,14 @@ class RegionDirectoryController extends Controller
             
         $region = $kecamatan;
         $activeServices = $region->services->pluck('name')->toArray();
-        $villageServices = Region::where('parent_id', $kecamatan->id)
+        $villages = \App\Support\VillageParticipation::query(Region::where('parent_id', $kecamatan->id)
             ->whereIn('type', ['desa', 'kelurahan'])
-            ->with(['services' => fn ($query) => $query->where('is_active', true)])
-            ->get()
-            ->flatMap(fn ($desa) => $desa->services->pluck('name'))
-            ->all();
+            ->with(['services' => fn ($query) => $query->where('is_active', true)]))
+            ->orderBy('name')->get();
+        $joinedVillages = $villages->filter(fn ($village) => \App\Support\VillageParticipation::joined($village))->values();
+        $villageServices = $villages->flatMap(fn ($desa) => $desa->services->pluck('name'))->all();
         $activeServices = array_values(array_unique(array_merge($activeServices, $villageServices)));
 
-        return view('users.region-directory-desa', compact('kecamatan', 'region', 'activeServices'));
+        return view('users.region-directory-desa', compact('kecamatan', 'region', 'activeServices', 'joinedVillages'));
     }
 }

@@ -69,6 +69,23 @@ class PartnershipAuditTest extends TestCase
         $this->assertSame([true,false,false], array_column($data,'is_joined'));
     }
 
+    public function test_multiple_admins_and_services_count_the_village_once_and_directory_lists_providers(): void
+    {
+        DB::table('users')->where('id', 8)->update(['role' => 'admin_desa', 'region_id' => 1]);
+        DB::table('region_services')->insert(['region_id' => 1, 'service_id' => 1, 'is_active' => true]);
+        $data = app(PartnerApplicationApiController::class)->getRegions()->getData(true)['data'][0]['children'];
+        $this->assertCount(2, array_filter($data, fn ($village) => $village['is_joined']));
+        $this->assertCount(1, array_filter($data, fn ($village) => $village['id'] === 1));
+        $this->actingAs($this->user(1));
+        view()->share('errors', new ViewErrorBag());
+        $page = app(\App\Http\Controllers\User\RegionDirectoryController::class)->index(Request::create('/'));
+        $this->assertEqualsCanonicalizing([1, 5], $page->getData()['joinedVillages']->pluck('id')->all());
+        $this->assertStringContainsString(route('bumdes.detail', ['slug' => 'zamrud', 'id' => 1]), $page->render());
+        DB::table('users')->where('region_id', 1)->where('role', 'admin_desa')->update(['role' => 'super_admin']);
+        $data = app(PartnerApplicationApiController::class)->getRegions()->getData(true)['data'][0]['children'];
+        $this->assertCount(2, array_filter($data, fn ($village) => $village['is_joined']));
+    }
+
     public function test_service_directory_renders_without_district_officials_or_contact_data(): void
     {
         // These fixtures deliberately contain no organization or system-settings tables.

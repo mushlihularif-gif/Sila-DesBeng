@@ -12,7 +12,7 @@ class ServiceCategoryPageTest extends TestCase
     private function prepareRegions(): void
     {
         Schema::create('regions', function (Blueprint $table) {
-            $table->id(); $table->string('name'); $table->string('type');
+            $table->id(); $table->string('name'); $table->string('type'); $table->unsignedBigInteger('parent_id')->nullable();
         });
         Schema::create('services', function (Blueprint $table) {
             $table->id(); $table->string('name'); $table->string('slug');
@@ -22,8 +22,12 @@ class ServiceCategoryPageTest extends TestCase
             $table->boolean('is_active'); $table->boolean('is_exclusive')->default(false); $table->timestamps();
         });
         DB::table('regions')->insert([
-            ['id' => 12, 'name' => 'Desa Pilihan', 'type' => 'desa'],
-            ['id' => 13, 'name' => 'Desa Asal', 'type' => 'desa'],
+            ['id' => 10, 'name' => 'Kecamatan Bengkalis', 'type' => 'kecamatan', 'parent_id' => null],
+            ['id' => 12, 'name' => 'Desa Pilihan', 'type' => 'desa', 'parent_id' => 10],
+            ['id' => 13, 'name' => 'Desa Asal', 'type' => 'desa', 'parent_id' => 10],
+            ['id' => 14, 'name' => 'RW 01', 'type' => 'rw', 'parent_id' => 12],
+            ['id' => 15, 'name' => 'RT 01', 'type' => 'rt', 'parent_id' => 14],
+            ['id' => 16, 'name' => 'Desa di Kecamatan Lain', 'type' => 'desa', 'parent_id' => null],
         ]);
         DB::table('services')->insert([
             ['id' => 1, 'name' => 'Penjualan Gas', 'slug' => 'penjualan-gas'],
@@ -89,6 +93,18 @@ class ServiceCategoryPageTest extends TestCase
         $this->assertSame('GovernmentOrganization', $schema['@type']);
         $this->assertSame('SegiDaerah', $schema['name']);
         $this->assertStringNotContainsString('<?php', $matches[1]);
+    }
+
+    public function test_rt_resident_uses_parent_village_services_and_foreign_district_is_rejected(): void
+    {
+        $this->prepareRegions();
+        $user = new User(); $user->id = 1; $user->role = 'user'; $user->region_id = 15;
+        $this->actingAs($user);
+        $data = app(\App\Http\Controllers\User\ServiceCategoryController::class)
+            ->show(\Illuminate\Http\Request::create('/'), 'belanja-kebutuhan')->getData();
+        $this->assertSame(12, $data['region']->id);
+        $this->assertSame(route('gas.sales', ['region_id' => 12]), $data['items']->first()['url']);
+        $this->get(route('service-category.show', ['category' => 'belanja-kebutuhan', 'region_id' => 16]))->assertNotFound();
     }
 
     public function test_guest_can_open_belanja_category_and_find_its_destinations(): void

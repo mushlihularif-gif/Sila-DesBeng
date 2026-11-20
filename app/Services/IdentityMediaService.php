@@ -13,6 +13,7 @@ class IdentityMediaService
     {
         $viewer = auth()->user();
         abort_unless($viewer, 401);
+        abort_if($viewer->status === 'non_aktif', 403);
         if ((int) $viewer->id === (int) $owner->id) {
             return;
         }
@@ -23,7 +24,8 @@ class IdentityMediaService
         if ($legacy && ($viewer->role === 'super_admin')) {
             return;
         }
-        abort_unless($viewer->region_id && $owner->region_id, 403);
+        abort_unless($viewer->region_id && $owner->region_id
+            && in_array($viewer->region?->type, ['desa', 'kelurahan'], true), 403);
         $regions = array_merge([$viewer->region_id], Region::getDescendantIds($viewer->region_id));
         abort_unless(in_array($owner->region_id, $regions), 403);
     }

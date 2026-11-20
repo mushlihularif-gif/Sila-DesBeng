@@ -74,167 +74,12 @@ class RegionApiController extends Controller
             ->orderBy('order', 'asc')
             ->get();
             
-        // Fallback untuk Kabupaten jika kosong
-        if ($members->isEmpty() && ($region->type === 'kabupaten' || $regionId == 1)) {
-             $members = BumdesMember::whereNull('region_id')
-                ->orWhere('region_id', 0)
-                ->orWhere('region_id', 1)
-                ->orderBy('level', 'asc')
-                ->orderBy('order', 'asc')
-                ->get();
+        // Jangan membuat aparatur fiktif atau menghidupkan kembali struktur kecamatan.
+        if ($region->type === 'kecamatan') {
+            $members = collect();
         }
-
-        // Jika desa atau kecamatan belum ada data pengurus di DB, generate struktur cerdas standar
-        if ($members->isEmpty()) {
-            $formattedMembers = [];
-            if ($region->type === 'desa') {
-                $desaName = $region->name;
-                $formattedMembers = [
-                    [
-                        'level' => 1,
-                        'level_name' => 'Kepala Desa',
-                        'members' => [
-                            [
-                                'id' => 1000 + $region->id,
-                                'name' => 'Kepala ' . $desaName,
-                                'position' => 'Kepala Desa (Pucuk Pimpinan)',
-                                'photo_url' => '',
-                                'level' => 1,
-                                'order' => 1,
-                            ]
-                        ]
-                    ],
-                    [
-                        'level' => 2,
-                        'level_name' => 'Sekretariat Desa',
-                        'members' => [
-                            [
-                                'id' => 2000 + $region->id,
-                                'name' => 'Sekretaris Desa ' . $desaName,
-                                'position' => 'Sekretaris Desa (Sekdes)',
-                                'photo_url' => '',
-                                'level' => 2,
-                                'order' => 1,
-                            ],
-                            [
-                                'id' => 2001 + $region->id,
-                                'name' => 'Kaur Keuangan dan Perencanaan',
-                                'position' => 'Kaur Keuangan',
-                                'photo_url' => '',
-                                'level' => 2,
-                                'order' => 2,
-                            ]
-                        ]
-                    ],
-                    [
-                        'level' => 3,
-                        'level_name' => 'Badan Permusyawaratan Desa (BPD)',
-                        'members' => [
-                            [
-                                'id' => 3000 + $region->id,
-                                'name' => 'Ketua BPD ' . $desaName,
-                                'position' => 'Ketua BPD',
-                                'photo_url' => '',
-                                'level' => 3,
-                                'order' => 1,
-                            ],
-                            [
-                                'id' => 3001 + $region->id,
-                                'name' => 'Kasi Pelayanan dan Kesejahteraan',
-                                'position' => 'Kasi Pelayanan',
-                                'photo_url' => '',
-                                'level' => 3,
-                                'order' => 2,
-                            ]
-                        ]
-                    ],
-                    [
-                        'level' => 4,
-                        'level_name' => 'Pengurus BUMDes dan Kewilayahan',
-                        'members' => [
-                            [
-                                'id' => 4000 + $region->id,
-                                'name' => 'Direktur BUMDes ' . $desaName,
-                                'position' => 'Direktur BUMDes',
-                                'photo_url' => '',
-                                'level' => 4,
-                                'order' => 1,
-                            ],
-                            [
-                                'id' => 4001 + $region->id,
-                                'name' => 'Kepala Dusun I',
-                                'position' => 'Kepala Dusun',
-                                'photo_url' => '',
-                                'level' => 4,
-                                'order' => 2,
-                            ],
-                            [
-                                'id' => 4002 + $region->id,
-                                'name' => 'Kepala Dusun II',
-                                'position' => 'Kepala Dusun',
-                                'photo_url' => '',
-                                'level' => 4,
-                                'order' => 3,
-                            ]
-                        ]
-                    ]
-                ];
-            } else if ($region->type === 'kecamatan') {
-                $kecName = $region->name;
-                $formattedMembers = [
-                    [
-                        'level' => 1,
-                        'level_name' => 'Camat',
-                        'members' => [
-                            [
-                                'id' => 1000 + $region->id,
-                                'name' => 'Camat ' . $kecName,
-                                'position' => 'Camat (Pucuk Pimpinan Wilayah)',
-                                'photo_url' => '',
-                                'level' => 1,
-                                'order' => 1,
-                            ]
-                        ]
-                    ],
-                    [
-                        'level' => 2,
-                        'level_name' => 'Sekretariat Kecamatan',
-                        'members' => [
-                            [
-                                'id' => 2000 + $region->id,
-                                'name' => 'Sekretaris ' . $kecName,
-                                'position' => 'Sekretaris Camat (Sekcam)',
-                                'photo_url' => '',
-                                'level' => 2,
-                                'order' => 1,
-                            ]
-                        ]
-                    ],
-                    [
-                        'level' => 3,
-                        'level_name' => 'Seksi dan Pelayanan Terpadu',
-                        'members' => [
-                            [
-                                'id' => 3000 + $region->id,
-                                'name' => 'Kasi Pemerintahan dan Trantib',
-                                'position' => 'Kepala Seksi',
-                                'photo_url' => '',
-                                'level' => 3,
-                                'order' => 1,
-                            ],
-                            [
-                                'id' => 3001 + $region->id,
-                                'name' => 'Kasi Pelayanan Umum dan Kesra',
-                                'position' => 'Kepala Seksi',
-                                'photo_url' => '',
-                                'level' => 3,
-                                'order' => 2,
-                            ]
-                        ]
-                    ]
-                ];
-            }
-        } else {
+        $formattedMembers = [];
+        if ($members->isNotEmpty()) {
             // Pisahkan Wakil Bupati / Wakil Kades agar TIDAK sejajar di Level 1
             $hasWakilInLevel1 = false;
             foreach ($members as $m) {
@@ -264,7 +109,7 @@ class RegionApiController extends Controller
                 $firstMember = $group->first();
                 $levelLabel = 'Tingkat ' . $level;
                 if ($level == 1) {
-                    $levelLabel = ($region->type === 'kabupaten') ? 'Kepala Daerah' : (($region->type === 'desa') ? 'Kepala Desa' : 'Camat');
+                    $levelLabel = $region->type === 'desa' ? 'Kepala Desa' : ($region->type === 'kelurahan' ? 'Lurah' : 'Pimpinan');
                 } else if ($level == 2 && $hasWakilInLevel1) {
                     $levelLabel = ($region->type === 'kabupaten') ? 'Wakil Kepala Daerah' : 'Wakil Pimpinan / Sekretariat';
                 } else if (!empty($firstMember->level_short_label)) {

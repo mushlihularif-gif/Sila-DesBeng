@@ -38,7 +38,10 @@ class LokasiLayananController extends Controller
 
     private function wilayahSaya(): ?int
     {
-        return auth()->user()->region_id;
+        $user = auth()->user();
+        abort_unless($user->region_id && in_array($user->region?->type, ['desa', 'kelurahan'], true), 403,
+            'Lokasi layanan harus terhubung ke desa atau kelurahan pengelola.');
+        return $user->region_id;
     }
 
     public function index()
@@ -85,7 +88,7 @@ class LokasiLayananController extends Controller
         $this->pastikanMilikSaya($lokasiLayanan);
 
         $namaLama = $lokasiLayanan->nama;
-        $data = $this->validasi($request, $this->wilayahSaya(), $lokasiLayanan->id);
+        $data = $this->validasi($request, $lokasiLayanan->region_id, $lokasiLayanan->id);
 
         $lokasiLayanan->update($data);
 
@@ -175,7 +178,7 @@ class LokasiLayananController extends Controller
     private function pastikanMilikSaya(LokasiLayanan $lokasi): void
     {
         abort_unless(
-            $lokasi->region_id === $this->wilayahSaya() || auth()->user()->role === 'super_admin',
+            auth()->user()->role === 'super_admin' || (int) $lokasi->region_id === $this->wilayahSaya(),
             403,
             'Lokasi ini milik wilayah lain.'
         );

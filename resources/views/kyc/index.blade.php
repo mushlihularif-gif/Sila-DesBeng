@@ -511,13 +511,13 @@ function onResults(results) {
                 stateStartTime = Date.now();
             }
         } else if (livenessState === 3) {
-            instructionEl.innerText = "Wajah Terverifikasi! Mengirim Data...";
+            instructionEl.innerText = "Foto wajah siap. Menyiapkan pengajuan...";
             instructionEl.className = "bg-green-600 text-white px-5 py-2.5 rounded-full font-bold text-sm text-center shadow-lg mt-4 animate-pulse";
             
             const livenessStatus = document.getElementById('liveness-status');
             if (livenessStatus) {
                 livenessStatus.className = "bg-green-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg mb-4 flex items-center space-x-2";
-                livenessStatus.innerHTML = '<span>Verifikasi Wajah Selesai</span>';
+                livenessStatus.innerHTML = '<span>Pengambilan Foto Selesai</span>';
             }
 
             if (!faceSnapshot && !isBuildingCollage) {

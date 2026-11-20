@@ -1345,17 +1345,7 @@
                                     <div>SegiDaerah</div>
                                 </a>
                             </li>
-                            <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="menu-link">
-                                    @php
-                                        $sidebarRegionLabel = 'Pemerintah Desa';
-                                        if(in_array(auth()->user()->role, ['super_admin'])) {
-                                            $sidebarRegionLabel = 'Pemerintah Kabupaten';
-                                        }
-                                    @endphp
-                                    <div>{{ $sidebarRegionLabel }}</div>
-                                </a>
-                            </li>
+
                         </ul>
                     </li>
                     @endif

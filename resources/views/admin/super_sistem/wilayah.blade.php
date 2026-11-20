@@ -14,10 +14,10 @@
     <div class="alert alert-info d-flex align-items-start mb-4" role="alert">
         <i class="bx bx-info-circle me-2 fs-5 mt-1"></i>
         <div>
-            Susunan wilayah di sini menjadi rujukan hampir semua fitur lain: penempatan warga saat KYC,
+            Wilayah operasional dibatasi pada <strong>Kecamatan Bengkalis</strong>. Susunan wilayah di sini menjadi rujukan hampir semua fitur lain: penempatan warga saat KYC,
             jalur naik-turun laporan, pembukuan saldo tiap daerah, sampai penentuan siapa yang boleh
             melihat layanan bertanda <strong>Eksklusif Warga Lokal</strong>.
-            Karena itu halaman ini <strong>hanya untuk Super Admin Diskominfotik</strong> dan tidak
+            Karena itu halaman ini <strong>hanya untuk Super Admin</strong> dan tidak
             didelegasikan ke staf mana pun.
         </div>
     </div>
@@ -39,7 +39,6 @@
          masih kosong justru itu yang perlu terlihat, bukan disembunyikan. --}}
     <div class="row g-3 mb-4">
         @foreach([
-            'kabupaten' => ['Kabupaten', 'bx-buildings', 'primary'],
             'kecamatan' => ['Kecamatan', 'bx-building-house', 'info'],
             'desa'      => ['Desa', 'bx-home-alt', 'success'],
             'kelurahan' => ['Kelurahan', 'bx-home-smile', 'warning'],
@@ -93,8 +92,8 @@
                     </div>
                 </div>
 
-                <div class="d-flex align-items-center gap-2">
-                    <div class="input-group input-group-sm" style="width: 240px;">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <div class="input-group input-group-sm" style="width: 240px; max-width: 100%;">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bx bx-search"></i></span>
                         <input type="text" id="cariWilayah" class="form-control border-start-0"
                                placeholder="Cari nama wilayah...">
@@ -116,7 +115,7 @@
                         <i class="bx bx-map-alt fs-1 d-block mb-2 opacity-50"></i>
                         <p class="mb-3">Belum ada wilayah sama sekali.</p>
                         <button class="btn btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalTambahWilayah">
-                            <i class="bx bx-plus me-1"></i> Tambah Kabupaten
+                            <i class="bx bx-plus me-1"></i> Tambah Wilayah
                         </button>
                     </div>
                 @endforelse
@@ -163,8 +162,8 @@
             <div class="modal-body pt-4">
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="indukWilayah">Wilayah Induk</label>
-                    <select name="parent_id" id="indukWilayah" class="form-select rounded-3">
-                        <option value="">— Tanpa induk (Kabupaten baru) —</option>
+                    <select name="parent_id" id="indukWilayah" class="form-select rounded-3" required>
+                        <option value="">— Pilih wilayah induk —</option>
                         @foreach($pilihanInduk as $p)
                             <option value="{{ $p['id'] }}" data-tipe="{{ $p['tipe'] }}"
                                 {{ old('parent_id') == $p['id'] ? 'selected' : '' }}>
@@ -178,7 +177,7 @@
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="tipeWilayah">Tingkat</label>
                     <select name="type" id="tipeWilayah" class="form-select rounded-3" required>
-                        <option value="kabupaten">Kabupaten</option>
+                        <option value="">Pilih wilayah induk dahulu</option>
                     </select>
                     @error('type')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                 </div>
@@ -186,11 +185,11 @@
                 <div class="mb-1">
                     <label class="form-label fw-semibold" for="namaWilayah">Nama Wilayah</label>
                     <input type="text" name="name" id="namaWilayah" class="form-control rounded-3"
-                           value="{{ old('name') }}" placeholder="Contoh: Rupat Utara" required>
+                           value="{{ old('name') }}" placeholder="Contoh: Pematang Duku" required>
                     @error('name')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                     <small class="text-muted">
-                        Awalan tingkat ditambahkan otomatis — ketik <em>Rupat Utara</em>,
-                        tersimpan sebagai <em>Kecamatan Rupat Utara</em>.
+                        Awalan tingkat ditambahkan otomatis — ketik <em>Pematang Duku</em>,
+                        tersimpan sebagai <em>Desa Pematang Duku</em>.
                     </small>
                 </div>
             </div>
@@ -246,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function segarkanTipe() {
         const opsiInduk = induk.options[induk.selectedIndex];
         const tipeInduk = opsiInduk ? opsiInduk.dataset.tipe : null;
-        const boleh = tipeInduk ? (turunan[tipeInduk] || []) : ['kabupaten'];
+        const boleh = tipeInduk ? (turunan[tipeInduk] || []) : [];
 
         const sebelumnya = tipe.value;
         tipe.innerHTML = '';

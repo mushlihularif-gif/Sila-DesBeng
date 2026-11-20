@@ -9,18 +9,20 @@ use App\Http\Controllers\Controller;
 
 class BumdesController extends Controller
 {
+    private function manager(): \App\Models\User
+    {
+        $user = auth()->user();
+        abort_unless($user && $user->role === 'admin_desa' && $user->region_id
+            && in_array($user->region?->type, ['desa', 'kelurahan'], true), 403);
+        return $user;
+    }
+
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $user = auth()->user();
+        $user = $this->manager();
         
-        $members = BumdesMember::query()
-            ->when($user->role !== 'super_admin' && $user->role !== 'admin', function($q) use ($user) {
-                return $q->where('region_id', $user->region_id);
-            })
-            ->when(in_array($user->role, ['super_admin']), function($q) {
-                return $q->whereNull('region_id')->orWhere('region_id', 0);
-            })
+        $members = BumdesMember::where('region_id', $user->region_id)
             ->when($search, function ($query, $search) {
                 return $query->where(function($q) use ($search) {
                     $q->where('name', 'LIKE', "%{$search}%")
@@ -34,9 +36,6 @@ class BumdesController extends Controller
         $whatsapp = env('BUMDES_WHATSAPP', '+6283846078693');
         
         $region = $user->region;
-        if (!$region && in_array($user->role, ['super_admin'])) {
-            $region = \App\Models\Region::where('type', 'kabupaten')->first();
-        }
         $strukturLayout = $region->settings['struktur_layout'] ?? 'hierarki';
 
         return view('admin.isewa.profile-bumdes', compact('members', 'whatsapp', 'search', 'strukturLayout'));
@@ -48,11 +47,8 @@ class BumdesController extends Controller
             'struktur_layout' => 'required|in:hierarki,sejajar',
         ]);
 
-        $user = auth()->user();
+        $user = $this->manager();
         $region = $user->region;
-        if (!$region && in_array($user->role, ['super_admin'])) {
-            $region = \App\Models\Region::where('type', 'kabupaten')->first();
-        }
 
         if ($region) {
             $settings = $region->settings ?? [];
@@ -67,6 +63,7 @@ class BumdesController extends Controller
 
     public function create()
     {
+        $this->manager();
         return view('admin.isewa.bumdes.create');
     }
 
@@ -79,12 +76,12 @@ class BumdesController extends Controller
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:8192',
         ]);
 
-        $user = auth()->user();
+        $user = $this->manager();
         $member = new BumdesMember();
         $member->name = $request->name;
         $member->position = $request->position;
         $member->level = (int)$request->level;
-        $member->region_id = in_array($user->role, ['super_admin']) ? null : $user->region_id;
+        $member->region_id = $user->region_id;
         
         $maxOrder = BumdesMember::where('region_id', $member->region_id)
             ->where('level', $member->level)
@@ -247,17 +244,9 @@ class BumdesController extends Controller
 
     private function getScopedMember($id)
     {
-        $user = auth()->user();
-        $query = BumdesMember::where('id', $id);
-        
-        if (!in_array($user->role, ['super_admin'])) {
-            $query->where('region_id', $user->region_id);
-        } else {
-            $query->where(function($q) {
-                $q->whereNull('region_id')->orWhere('region_id', 0);
-            });
-        }
-        
+        $user = $this->manager();
+        $query = BumdesMember::where('id', $id)->where('region_id', $user->region_id);
+
         return $query->firstOrFail();
     }
 }

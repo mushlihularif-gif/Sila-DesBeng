@@ -66,6 +66,20 @@ class ServiceCategoryController extends Controller
             ? Region::with(['services' => fn ($query) => $query->wherePivot('is_active', true)])->find($regionId)
             : null;
         abort_if($regionId && !$region, 404);
+        // Akun warga dapat berada di RT/RW, sedangkan unit layanan dimiliki desa.
+        $visited = [];
+        while ($region && in_array($region->type, ['rt', 'rw'], true)) {
+            abort_if(in_array($region->id, $visited, true), 404);
+            $visited[] = $region->id;
+            $region = $region->parent;
+            abort_unless($region, 404);
+        }
+        if ($region) {
+            \App\Support\BengkalisScope::assertContains($region);
+            abort_unless(in_array($region->type, ['desa', 'kelurahan'], true), 404);
+            $regionId = $region->id;
+            $region->load(['services' => fn ($query) => $query->wherePivot('is_active', true)]);
+        }
         $activeServices = $region?->services->pluck('name')->all();
         $definition = $definitions[$category];
 

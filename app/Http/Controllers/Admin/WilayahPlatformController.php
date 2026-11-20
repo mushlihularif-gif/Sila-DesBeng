@@ -6,29 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Region;
 use App\Models\RegionService;
 use App\Models\User;
+use App\Support\BengkalisScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
-/**
- * Peta wilayah tingkat platform - hanya untuk Super Admin Diskominfotik.
- *
- * Bedanya dengan RegionManagementController (menu "Kelola Wilayah"): halaman
- * itu milik admin wilayah dan hanya menampilkan SATU tingkat di bawah wilayah
- * si admin, jadi tidak ada tempat untuk melihat susunan kabupaten secara utuh.
- * Halaman ini menampilkan seluruh pohon sekaligus, dari kabupaten sampai RT,
- * karena hanya Kominfo yang memang berkepentingan atas struktur keseluruhan.
- *
- * Sengaja dikunci role 'super_admin' saja, bukan lewat platform.permission:
- * susunan wilayah adalah rujukan bagi hampir semua fitur lain (KYC, laporan,
- * saldo, eksklusivitas layanan), sehingga menambah atau salah menempatkan satu
- * simpul berdampak ke mana-mana. Kewenangan itu tidak didelegasikan ke staf.
- */
+/** Peta struktur Kecamatan Bengkalis sampai RT; dikelola Super Admin. */
 class WilayahPlatformController extends Controller
 {
     /** Tipe wilayah yang boleh dibuat di bawah tipe induk tertentu. */
     private const TURUNAN = [
-        'kabupaten'  => ['kecamatan'],
         'kecamatan'  => ['desa', 'kelurahan'],
         'desa'       => ['rw'],
         'kelurahan'  => ['rw'],
@@ -38,26 +25,29 @@ class WilayahPlatformController extends Controller
 
     public function index()
     {
-        $semua = Region::orderBy('name')->get();
+        $root = BengkalisScope::root();
+        $ids = BengkalisScope::ids();
+        $semua = Region::whereIn('id', $ids)->orderBy('name')->get();
 
         // Semua data pendamping diambil sekali sebagai peta, bukan lewat relasi
-        // per simpul. Dengan ~155 desa ditambah RW/RT, pola N+1 di sini akan
+        // per simpul. Dengan desa ditambah RW/RT, pola N+1 di sini akan
         // berarti ribuan query untuk satu kali buka halaman.
-        $jumlahWarga = User::whereNotNull('region_id')
+        $jumlahWarga = User::whereIn('region_id', $ids)
             ->select('region_id', DB::raw('count(*) as n'))
             ->groupBy('region_id')->pluck('n', 'region_id');
 
         $pengurus = User::whereIn('role', ['admin_desa', 'admin_rw', 'admin_rt'])
-            ->whereNotNull('region_id')
+            ->whereIn('region_id', $ids)
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'role', 'region_id'])
             ->groupBy('region_id');
 
         $layananAktif = RegionService::where('is_active', true)
+            ->whereIn('region_id', $ids)
             ->select('region_id', DB::raw('count(*) as n'))
             ->groupBy('region_id')->pluck('n', 'region_id');
 
-        $perInduk = $semua->groupBy('parent_id');
+        $perInduk = $semua->groupBy(fn ($r) => $r->id === $root->id ? '' : $r->parent_id);
 
         $bangun = function ($indukId) use (&$bangun, $perInduk, $jumlahWarga, $pengurus, $layananAktif) {
             $kunci = $indukId === null ? '' : $indukId;
@@ -79,7 +69,7 @@ class WilayahPlatformController extends Controller
         // penanganan ini mereka hilang dari pohon tanpa jejak, padahal
         // wilayahnya tetap dipakai data lain.
         $idAda = $semua->pluck('id')->all();
-        $yatim = $semua->filter(fn ($r) => $r->parent_id && ! in_array($r->parent_id, $idAda))->values();
+        $yatim = $semua->filter(fn ($r) => $r->id !== $root->id && $r->parent_id && ! in_array($r->parent_id, $idAda))->values();
 
         $rekap = $semua->groupBy('type')->map->count();
 
@@ -113,20 +103,16 @@ class WilayahPlatformController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'parent_id' => 'nullable|exists:regions,id',
-            'type'      => ['required', Rule::in(array_keys(self::TURUNAN))],
+            'parent_id' => 'required|exists:regions,id',
+            'type'      => ['required', Rule::in(['desa', 'kelurahan', 'rw', 'rt'])],
             'name'      => 'required|string|max:255',
         ], [
             'name.required' => 'Nama wilayah wajib diisi.',
             'type.required' => 'Tingkat wilayah wajib dipilih.',
         ]);
 
-        $induk = $validated['parent_id'] ? Region::find($validated['parent_id']) : null;
-
-        if (! $induk && $validated['type'] !== 'kabupaten') {
-            return back()->withInput()
-                ->with('error', 'Hanya Kabupaten yang boleh berdiri tanpa induk. Pilih wilayah induknya lebih dulu.');
-        }
+        $induk = Region::findOrFail($validated['parent_id']);
+        BengkalisScope::assertContains($induk);
 
         if ($induk) {
             $boleh = self::TURUNAN[$induk->type] ?? [];

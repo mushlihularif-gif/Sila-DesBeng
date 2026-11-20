@@ -738,8 +738,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/profile', [\App\Http\Controllers\Admin\SettingController::class, 'showIsewaProfile'])->name('admin.SiladesBeng.profile');
         Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.SiladesBeng.developer.profile');
         
-        Route::get('/profil-pemerintah', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.SiladesBeng.profile-bumdes');
-        Route::prefix('profil-pemerintah')->group(function () {
+        Route::get('/profil-pemerintah', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.SiladesBeng.profile-bumdes')->middleware('role:admin_desa');
+        Route::prefix('profil-pemerintah')->middleware('role:admin_desa')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.SiladesBeng.bumdes.index');
             Route::get('/create', [\App\Http\Controllers\Admin\BumdesController::class, 'create'])->name('admin.SiladesBeng.bumdes.create');
             Route::post('/', [\App\Http\Controllers\Admin\BumdesController::class, 'store'])->name('admin.SiladesBeng.bumdes.store');

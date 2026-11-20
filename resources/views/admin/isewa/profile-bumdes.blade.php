@@ -10,11 +10,7 @@
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
                 <div>
                     <h4 class="text-primary fw-bold mb-1">Struktur <span class="text-info">
-                        @if(in_array(auth()->user()->role, ['super_admin']))
-                            Pemerintah Kabupaten Bengkalis
-                        @else
-                            Pemerintah Desa {{ str_ireplace('Desa ', '', auth()->user()->region->name ?? 'Daerah') }}
-                        @endif
+                        Pemerintah {{ auth()->user()->region->name ?? 'Desa / Kelurahan' }}
                     </span></h4>
                     <p class="text-muted mb-0 small">Daftar susunan aparatur pemerintah daerah berjenjang berdasarkan tingkatan hierarki jabatan</p>
                 </div>

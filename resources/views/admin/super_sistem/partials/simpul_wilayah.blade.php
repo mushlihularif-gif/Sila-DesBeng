@@ -14,7 +14,7 @@
     $idKolaps = 'wil-' . $simpul['id'];
     // Kabupaten & kecamatan terbuka sejak awal supaya susunan utamanya langsung
     // terbaca; desa ke bawah dibiarkan tertutup agar daftarnya tidak meledak.
-    $terbuka = $punyaAnak && in_array($simpul['tipe'], ['kabupaten'], true);
+    $terbuka = $punyaAnak && in_array($simpul['tipe'], ['kecamatan'], true);
 @endphp
 
 <div class="simpul-wilayah" data-nama="{{ mb_strtolower($simpul['nama']) }}" data-tipe="{{ $simpul['tipe'] }}">
