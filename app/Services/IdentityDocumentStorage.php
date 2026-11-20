@@ -26,7 +26,10 @@ class IdentityDocumentStorage
         try {
             $this->save($kyc, ['ktp' => $ktpBytes]);
         } catch (\Throwable $e) {
-            $kyc->delete();
+            // Keep a committed document reference if an after-commit operation failed.
+            if (! $kyc->fresh()?->ktp_image_path) {
+                $kyc->delete();
+            }
             throw $e;
         }
 
@@ -34,13 +37,20 @@ class IdentityDocumentStorage
         $oldKycs = KycVerification::where('user_id', $owner->id)
             ->where('id', '<', $kyc->id)->whereIn('status', ['draft', 'pending', 'rejected'])->get();
         foreach ($oldKycs as $old) {
-            foreach (['ktp_image_path', 'face_image_path'] as $column) {
-                if ($old->$column) {
-                    Storage::disk('private')->delete($old->$column);
+            DB::transaction(function () use ($old) {
+                $old = KycVerification::lockForUpdate()->find($old->id);
+                if (! $old || ! in_array($old->status, ['draft', 'pending', 'rejected'], true)) {
+                    return;
                 }
-            }
-            AdminNotification::where('type', 'kyc')->where('reference_id', $old->id)->delete();
-            $old->delete();
+                foreach (['ktp_image_path', 'face_image_path'] as $column) {
+                    if ($path = $old->$column) {
+                        app(IdentityFileCleanup::class)->enqueue($path);
+                        DB::afterCommit(fn () => app(IdentityFileCleanup::class)->attempt($path));
+                    }
+                }
+                AdminNotification::where('type', 'kyc')->where('reference_id', $old->id)->delete();
+                $old->delete();
+            });
         }
 
         return $kyc;
@@ -78,6 +88,7 @@ class IdentityDocumentStorage
                     }
                     if ($locked->$column) {
                         $oldPaths[] = $locked->$column;
+                        app(IdentityFileCleanup::class)->enqueue($locked->$column);
                     }
                     $updates[$column] = $path;
                     $updates[$versionColumn] = 2;
@@ -91,24 +102,29 @@ class IdentityDocumentStorage
                         'message' => 'Warga '.($owner->name ?? 'Warga').' mengajukan verifikasi data e-KTP dan foto wajah.',
                         'is_read' => false,
                     ]);
-                    DB::afterCommit(fn () => NotificationService::notifyKycSubmitted($owner));
+                    DB::afterCommit(function () use ($owner) {
+                        try {
+                            NotificationService::notifyKycSubmitted($owner);
+                        } catch (\Throwable $e) {
+                            \Log::warning('Pengajuan KYC tersimpan; pemberitahuan belum berhasil dikirim.');
+                        }
+                    });
                 }
                 DB::afterCommit(function () use ($oldPaths) {
                     foreach ($oldPaths as $oldPath) {
-                        try {
-                            if (Storage::disk('private')->delete($oldPath)) {
-                                continue;
-                            }
-                        } catch (\Throwable $e) {
-                            // Committed new files must not be deleted on cleanup failure.
-                        }
-                        \Log::warning('Berkas identitas pengganti tersimpan; pembersihan berkas lama perlu diulang.');
+                        app(IdentityFileCleanup::class)->attempt($oldPath);
                     }
                 });
             });
         } catch (\Throwable $e) {
+            $persistedAttributes = $record->fresh()?->getAttributes() ?? [];
             foreach ($written as $path) {
-                Storage::disk('private')->delete($path);
+                // An after-commit failure must never remove a committed document.
+                if (in_array($path, $persistedAttributes, true)) {
+                    continue;
+                }
+                app(IdentityFileCleanup::class)->enqueue($path);
+                app(IdentityFileCleanup::class)->attempt($path);
             }
             throw $e;
         }

@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Schema;
  */
 class SuperAdminDashboardController extends Controller
 {
-    private const CACHE_KEY = 'dashboard.super_admin';
+    private const CACHE_KEY = 'dashboard.super_admin.bengkalis';
     private const CACHE_TTL = 60; // detik
 
     public function index()
@@ -72,17 +72,18 @@ class SuperAdminDashboardController extends Controller
 
     private function wilayah(): array
     {
-        if (! Schema::hasTable('regions')) {
+        if (! Schema::hasTable('regions') || ! \App\Models\Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->exists()) {
             return ['kabupaten' => 0, 'kecamatan' => 0, 'desa' => 0, 'total' => 0];
         }
 
         $per = DB::table('regions')->select('type', DB::raw('count(*) as n'))
+            ->whereIn('id', \App\Support\BengkalisScope::ids())
             ->groupBy('type')->pluck('n', 'type');
 
         return [
             'kabupaten' => (int) ($per['kabupaten'] ?? 0),
             'kecamatan' => (int) ($per['kecamatan'] ?? 0),
-            'desa'      => (int) ($per['desa'] ?? 0),
+            'desa'      => (int) ($per['desa'] ?? 0) + (int) ($per['kelurahan'] ?? 0),
             'total'     => (int) $per->sum(),
         ];
     }

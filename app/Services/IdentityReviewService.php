@@ -46,6 +46,7 @@ class IdentityReviewService
                 'reviewed_at' => now(),
                 'face_scan_data' => null,
             ]);
+            $this->queueDocuments($kyc);
 
             return $kyc;
         });
@@ -75,6 +76,7 @@ class IdentityReviewService
             $owner->ktp_rejection_reason = $approved ? null : $notes;
             $owner->save();
 
+            $this->queueDocuments($owner);
             return $owner;
         });
 
@@ -124,16 +126,44 @@ class IdentityReviewService
 
     private function notify(User $owner, bool $approved, ?string $notes): void
     {
-        if ($approved) {
-            NotificationService::notifyKycApproved($owner);
-        } else {
-            NotificationService::notifyKycRejected($owner, $notes);
+        try {
+            if ($approved) {
+                NotificationService::notifyKycApproved($owner);
+            } else {
+                NotificationService::notifyKycRejected($owner, $notes);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Keputusan verifikasi tersimpan; pemberitahuan belum berhasil dikirim.');
+        }
+    }
+
+    private function queueDocuments(Model $record): void
+    {
+        foreach (['ktp', 'face'] as $type) {
+            if ($path = $record->{IdentityDocumentContext::pathColumn($record, $type)}) {
+                app(IdentityFileCleanup::class)->enqueue($path);
+            }
         }
     }
 
     /** Delete only after the decision commits; retain failed paths so cleanup can be retried. */
-    private function cleanup(Model $record): bool
+    public function cleanup(Model $record): bool
     {
+        $record = DB::transaction(function () use ($record) {
+            $locked = $record->newQuery()->lockForUpdate()->find($record->getKey());
+            $finished = $locked instanceof KycVerification
+                ? in_array($locked->status, ['approved', 'rejected'], true)
+                : $locked && in_array($locked->verification_status, ['verified', 'rejected'], true);
+            if (! $finished) {
+                return null;
+            }
+            $this->queueDocuments($locked);
+
+            return $locked;
+        });
+        if (! $record) {
+            return false;
+        }
         $complete = true;
         foreach (['ktp', 'face'] as $type) {
             $column = IdentityDocumentContext::pathColumn($record, $type);
@@ -142,8 +172,7 @@ class IdentityReviewService
                 continue;
             }
             try {
-                $disk = Storage::disk('private');
-                if ($disk->exists($path) && ! $disk->delete($path)) {
+                if (! app(IdentityFileCleanup::class)->attempt($path)) {
                     throw new \RuntimeException('Identity cleanup failed');
                 }
                 $record->newQuery()->whereKey($record->getKey())->where($column, $path)->update([$column => null]);

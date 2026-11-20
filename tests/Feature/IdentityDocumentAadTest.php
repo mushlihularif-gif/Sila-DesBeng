@@ -178,6 +178,7 @@ class IdentityDocumentAadTest extends TestCase
         $realDisk = Storage::disk('private');
         $disk = \Mockery::mock(FilesystemAdapter::class);
         $disk->shouldReceive('put')->once()->andReturnFalse();
+        $disk->shouldReceive('exists')->once()->andReturnTrue();
         $disk->shouldReceive('delete')->once()->andReturnTrue();
         Storage::shouldReceive('disk')->with('private')->andReturn($disk);
         try {

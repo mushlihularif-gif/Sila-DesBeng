@@ -9,7 +9,8 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('chat:clean-old --days=3')->daily(); 
-Schedule::command('kyc:clean-drafts')->hourly(); 
+Schedule::command('kyc:clean-drafts')->hourly()->withoutOverlapping();
+Schedule::command('kyc:clean-files')->everyTenMinutes()->withoutOverlapping();
 Schedule::command('content:maintain')->everyMinute()->withoutOverlapping();
 Schedule::command('content:maintain --clean-media')->dailyAt('02:30')->withoutOverlapping();
 Schedule::command('notifications:deliver --limit=30')->everyMinute()->withoutOverlapping();

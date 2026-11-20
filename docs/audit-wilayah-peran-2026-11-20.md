@@ -1,5 +1,7 @@
 # Audit wilayah, peran dan alur layanan — 20 November 2026
 
+> Catatan ini merekam paket `456c2a7`. Tindak lanjut dengan dump SQL nyata, penyelarasan ENUM, antrean cleanup dan status verifikasi terbaru ada di [audit-dump-hosting-2026-11-20.md](audit-dump-hosting-2026-11-20.md). Daftar tindak lanjut di bawah merupakan kondisi sebelum paket lanjutan tersebut.
+
 Audit ini memeriksa source code lokal dan tes sintetis. Hasil SQL hosting yang diberikan pengguna dipakai untuk memahami data akun; database hosting tidak diubah langsung oleh Codex. Ini bukan pernyataan bahwa seluruh aplikasi dan semua integrasi eksternal sudah bebas cacat.
 
 ## Perbaikan pada paket ini

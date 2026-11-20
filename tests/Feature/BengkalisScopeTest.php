@@ -76,6 +76,14 @@ class BengkalisScopeTest extends TestCase
         $this->denied(fn () => app(RegionManagementController::class)->store(Request::create('/', 'POST', ['name' => 'New', 'type' => 'kabupaten'])), 422);
     }
 
+    public function test_platform_dashboard_counts_only_operational_district_including_kelurahan(): void
+    {
+        Schema::table('users', fn (Blueprint $t) => $t->string('status')->default('aktif'));
+        DB::table('regions')->insert(['id' => 20, 'name' => 'Kelurahan Uji', 'type' => 'kelurahan', 'parent_id' => 11]);
+        $data = app(\App\Http\Controllers\Admin\SuperAdminDashboardController::class)->index()->getData();
+        $this->assertSame(['kabupaten' => 0, 'kecamatan' => 1, 'desa' => 2, 'total' => 6], $data['wilayah']);
+    }
+
     public function test_public_profiles_reject_other_districts_and_api_does_not_invent_officials(): void
     {
         Schema::create('bumdes_members', function (Blueprint $t) {

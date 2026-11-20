@@ -65,7 +65,7 @@
         <div class="row g-4 mb-4">
             @php
                 $kpi = [
-                    ['Wilayah Terdaftar', $wilayah['total'], $wilayah['desa'] . ' desa · ' . $wilayah['kecamatan'] . ' kecamatan', 'bx-map', 'primary'],
+                    ['Wilayah Bengkalis', $wilayah['total'], $wilayah['desa'] . ' desa/kelurahan · Kecamatan Bengkalis', 'bx-map', 'primary'],
                     ['Pengguna', $pengguna['total'], $pengguna['baru_7hari'] . ' baru 7 hari terakhir', 'bx-group', 'success'],
                     ['Dana Tertahan', $dompet['tertahan'], $dompet['gagal_verifikasi'] . ' gagal verifikasi', 'bx-wallet', 'warning'],
                     $biaya['terdekat']

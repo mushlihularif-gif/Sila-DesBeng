@@ -24,6 +24,7 @@ trait IdentityDatabase
         config(['app.key' => 'base64:'.base64_encode(str_repeat('k', 32))]);
         Http::preventStrayRequests();
         Storage::fake('private');
+        (require database_path('migrations/2026_11_20_000002_create_identity_cleanup_queue.php'))->up();
         $this->mock(NotificationDeliveryService::class)->shouldReceive('enqueue', 'enqueueAdmin')->andReturnNull();
         Schema::create('regions', function (Blueprint $t) {
             $t->id();

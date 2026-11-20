@@ -2,54 +2,46 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AdminNotification;
+use App\Models\KycVerification;
+use App\Services\IdentityFileCleanup;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class CleanAbandonedKycDrafts extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'kyc:clean-drafts {--hours=2 : Usia minimum draft yang dihapus (jam)}';
+    protected $description = 'Menghapus draf kedaluwarsa dan mencatat berkas untuk pembersihan yang dapat diulang';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Menghapus draf verifikasi KYC yang tidak diselesaikan oleh warga dan membersihkan file KTP terkait dari disk';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
-        $hours = (int) $this->option('hours');
-        $threshold = now()->subHours($hours);
-
-        $abandonedDrafts = \App\Models\KycVerification::where('status', 'draft')
-            ->where('created_at', '<', $threshold)
-            ->get();
-
-        $count = 0;
-        foreach ($abandonedDrafts as $draft) {
-            // Hapus file fisik KTP
-            if ($draft->ktp_image_path && \Illuminate\Support\Facades\Storage::disk('private')->exists($draft->ktp_image_path)) {
-                \Illuminate\Support\Facades\Storage::disk('private')->delete($draft->ktp_image_path);
-            }
-            // Hapus file fisik Wajah jika ada
-            if ($draft->face_image_path && \Illuminate\Support\Facades\Storage::disk('private')->exists($draft->face_image_path)) {
-                \Illuminate\Support\Facades\Storage::disk('private')->delete($draft->face_image_path);
-            }
-            // Hapus notifikasi terkait jika ada
-            \App\Models\AdminNotification::where('type', 'kyc')->where('reference_id', $draft->id)->delete();
-
-            $draft->delete();
-            $count++;
+        if (! ctype_digit((string) $this->option('hours')) || (int) $this->option('hours') < 1) {
+            $this->error('Usia draf minimal satu jam.');
+            return self::FAILURE;
         }
-
-        $this->info("Berhasil membersihkan {$count} draf verifikasi identitas yang kedaluwarsa.");
-        return 0;
+        $threshold = now()->subHours((int) $this->option('hours'));
+        $count = 0;
+        KycVerification::where('status', 'draft')->where('updated_at', '<', $threshold)
+            ->chunkById(100, function ($drafts) use ($threshold, &$count) {
+                foreach ($drafts as $draft) {
+                    DB::transaction(function () use ($draft, $threshold, &$count) {
+                        $draft = KycVerification::lockForUpdate()->find($draft->id);
+                        if (! $draft || $draft->status !== 'draft' || $draft->updated_at >= $threshold) {
+                            return;
+                        }
+                        foreach (['ktp_image_path', 'face_image_path'] as $column) {
+                            if ($path = $draft->$column) {
+                                app(IdentityFileCleanup::class)->enqueue($path);
+                                DB::afterCommit(fn () => app(IdentityFileCleanup::class)->attempt($path));
+                            }
+                        }
+                        AdminNotification::where('type', 'kyc')->where('reference_id', $draft->id)->delete();
+                        $draft->delete();
+                        $count++;
+                    });
+                }
+            });
+        $this->info("Berhasil membersihkan {$count} draf; penghapusan berkas yang tertunda akan dicoba ulang.");
+        return self::SUCCESS;
     }
 }
