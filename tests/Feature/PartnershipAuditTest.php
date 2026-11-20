@@ -94,11 +94,33 @@ class PartnershipAuditTest extends TestCase
         $page = app(\App\Http\Controllers\User\RegionDirectoryController::class)->index(Request::create('/'));
         $html = $page->render();
         $this->assertStringContainsString('Layanan di Kecamatan Bengkalis', $html);
-        $this->assertStringContainsString('unit-carousel-container', $html);
-        $this->assertStringContainsString('Lihat desa yang sudah dan belum bergabung', $html);
+        $this->assertStringNotContainsString('unit-carousel-container', $html);
+        $this->assertStringNotContainsString('Lihat desa yang sudah dan belum bergabung', $html);
+        $this->assertStringContainsString('data-village-search', $html);
+        $this->assertStringContainsString('aria-controls="village-list"  hidden', $html);
         $this->assertStringNotContainsString('Struktur Organisasi dan Tata Kerja', $html);
         $this->assertStringNotContainsString('Pemerintah Kecamatan Bengkalis', $html);
         if ($directory = getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($directory.'/service-directory.html', $html);
+    }
+
+    public function test_directory_limits_initial_rows_and_includes_only_joined_villages_and_kelurahan(): void
+    {
+        foreach (range(20, 25) as $id) {
+            DB::table('regions')->insert(['id' => $id, 'name' => ($id === 25 ? 'Kelurahan' : 'Desa').' Uji '.$id,
+                'type' => $id === 25 ? 'kelurahan' : 'desa', 'parent_id' => 10]);
+            DB::table('region_services')->insert(['region_id' => $id, 'service_id' => 1, 'is_active' => true]);
+        }
+        view()->share('errors', new ViewErrorBag());
+        $page = app(\App\Http\Controllers\User\RegionDirectoryController::class)->index(Request::create('/'));
+        $this->assertCount(8, $page->getData()['joinedVillages']);
+        $html = $page->render();
+        preg_match_all('/<article[^>]*data-village-row[^>]*>/', $html, $rows);
+        $this->assertCount(8, $rows[0]);
+        $this->assertCount(3, array_filter($rows[0], fn ($row) => str_contains($row, ' hidden')));
+        $this->assertStringContainsString(route('bumdes.detail', ['slug' => 'kelurahan-uji-25', 'id' => 25]), $html);
+        $this->assertStringNotContainsString('data-village-name="Abadi"', $html);
+        $this->assertStringNotContainsString('unit-carousel-container', $html);
+        if ($directory = getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($directory.'/service-directory-many.html', $html);
     }
 
     public function test_rt_rw_form_does_not_depend_on_an_active_village_admin(): void

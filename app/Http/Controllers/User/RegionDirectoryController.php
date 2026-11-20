@@ -33,22 +33,12 @@ class RegionDirectoryController extends Controller
             return redirect()->route('bumdes.profil', $request->query());
         }
 
-        $kecamatan = Region::where('type', 'kecamatan')
-            ->with(['services' => function($q) {
-                $q->where('is_active', true);
-            }])
-            ->findOrFail($kecamatanFokus->id);
-            
-        $region = $kecamatan;
-        $activeServices = $region->services->pluck('name')->toArray();
+        $kecamatan = $kecamatanFokus;
         $villages = \App\Support\VillageParticipation::query(Region::where('parent_id', $kecamatan->id)
-            ->whereIn('type', ['desa', 'kelurahan'])
-            ->with(['services' => fn ($query) => $query->where('is_active', true)]))
+            ->whereIn('type', ['desa', 'kelurahan']))
             ->orderBy('name')->get();
         $joinedVillages = $villages->filter(fn ($village) => \App\Support\VillageParticipation::joined($village))->values();
-        $villageServices = $villages->flatMap(fn ($desa) => $desa->services->pluck('name'))->all();
-        $activeServices = array_values(array_unique(array_merge($activeServices, $villageServices)));
 
-        return view('users.region-directory-desa', compact('kecamatan', 'region', 'activeServices', 'joinedVillages'));
+        return view('users.region-directory-desa', compact('kecamatan', 'joinedVillages'));
     }
 }
