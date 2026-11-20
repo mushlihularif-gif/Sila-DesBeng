@@ -809,6 +809,35 @@
             display: block !important;
         }
 
+        /* Responsive Width & Half-Step Spacing Utilities (Pelengkap Bootstrap 5) */
+        .gap-1\.5 { gap: 0.375rem !important; }
+        .gap-2\.5 { gap: 0.625rem !important; }
+        .p-1\.5 { padding: 0.375rem !important; }
+        .p-2\.5 { padding: 0.625rem !important; }
+        .px-2\.5 { padding-left: 0.625rem !important; padding-right: 0.625rem !important; }
+        .py-1\.5 { padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; }
+        .py-2\.5 { padding-top: 0.625rem !important; padding-bottom: 0.625rem !important; }
+        .mb-2\.5 { margin-bottom: 0.625rem !important; }
+        .mt-0\.5 { margin-top: 0.125rem !important; }
+        .mt-1\.5 { margin-top: 0.375rem !important; }
+        .me-0\.5 { margin-right: 0.125rem !important; }
+        @media (min-width: 576px) {
+            .w-sm-auto { width: auto !important; }
+            .w-sm-100 { width: 100% !important; }
+        }
+        @media (min-width: 768px) {
+            .w-md-auto { width: auto !important; }
+            .w-md-100 { width: 100% !important; }
+        }
+        @media (min-width: 992px) {
+            .w-lg-auto { width: auto !important; }
+            .w-lg-100 { width: 100% !important; }
+        }
+        @media (min-width: 1200px) {
+            .w-xl-auto { width: auto !important; }
+            .w-xl-100 { width: 100% !important; }
+        }
+
         /* Global Mobile Chrome & Layar Kecil Guard (360px - 991px) */
         @media (max-width: 991.98px) {
             html, body, .layout-wrapper, .layout-container, .layout-page, .content-wrapper {
