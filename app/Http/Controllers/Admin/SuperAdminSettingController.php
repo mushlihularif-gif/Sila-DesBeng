@@ -248,33 +248,50 @@ class SuperAdminSettingController extends Controller
     public function monitoring()
     {
         $unitModels = [
-            'Gas' => GasOrder::class,
-            'Sewa Alat' => RentalBooking::class,
-            'Sewa Mobil' => MobilBooking::class,
-            'Fasilitas Umum' => FasilitasUmumBooking::class,
+            'Penjualan Gas' => ['model' => GasOrder::class, 'icon' => 'bxs-gas-pump', 'color' => 'danger'],
+            'Penyewaan Alat' => ['model' => RentalBooking::class, 'icon' => 'bx-wrench', 'color' => 'warning'],
+            'Penyewaan Transportasi' => ['model' => MobilBooking::class, 'icon' => 'bx-car', 'color' => 'info'],
+            'Fasilitas Umum' => ['model' => FasilitasUmumBooking::class, 'icon' => 'bx-building-house', 'color' => 'success'],
         ];
 
         $stats = [];
-        foreach ($unitModels as $label => $modelClass) {
+        $totals = ['total' => 0, 'selesai' => 0, 'menunggu' => 0, 'gagal' => 0];
+        foreach ($unitModels as $label => $meta) {
+            $modelClass = $meta['model'];
+            $total = $modelClass::count();
+            $selesai = $modelClass::where('status', 'completed')->count();
+            $gagal = $modelClass::whereIn('status', ['rejected', 'cancelled'])->count();
+            $menunggu = $modelClass::where('status', 'pending')->count();
+
             $stats[$label] = [
-                'total' => $modelClass::count(),
-                'selesai' => $modelClass::where('status', 'completed')->count(),
-                'gagal' => $modelClass::whereIn('status', ['rejected', 'cancelled'])->count(),
-                'menunggu' => $modelClass::where('status', 'pending')->count(),
+                'total' => $total,
+                'selesai' => $selesai,
+                'gagal' => $gagal,
+                'menunggu' => $menunggu,
+                'icon' => $meta['icon'],
+                'color' => $meta['color'],
             ];
+
+            $totals['total'] += $total;
+            $totals['selesai'] += $selesai;
+            $totals['menunggu'] += $menunggu;
+            $totals['gagal'] += $gagal;
         }
 
+        $desaAktifLayanan = \Illuminate\Support\Facades\Schema::hasTable('region_services')
+            ? (int) \Illuminate\Support\Facades\DB::table('region_services')
+                ->where('is_active', true)
+                ->distinct()
+                ->count('region_id')
+            : 0;
+
         $walletHealth = [
-            // sum(), bukan count() - sebelumnya menghitung JUMLAH BARIS, jadi
-            // angkanya kebetulan cocok dengan rupiah hanya kalau tiap transaksi
-            // pas Rp 1. Angka ini menunjukkan dana transaksi yang masih tertahan
-            // dan perlu diselesaikan melalui proses keuangan.
             'total_tertahan' => (float) WalletTransaction::where('type', 'ditahan')->where('status', 'pending')->sum('amount'),
             'total_gagal_verifikasi' => WalletTransaction::where('status', 'rejected')->count(),
-            'jumlah_region_aktif' => WalletTransaction::distinct('region_id')->count('region_id'),
+            'jumlah_region_aktif' => $desaAktifLayanan,
         ];
 
-        return view('admin.super_sistem.monitoring', compact('stats', 'walletHealth'));
+        return view('admin.super_sistem.monitoring', compact('stats', 'walletHealth', 'totals', 'desaAktifLayanan'));
     }
 
     /**

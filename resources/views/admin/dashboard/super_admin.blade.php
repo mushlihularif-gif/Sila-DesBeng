@@ -1,393 +1,493 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Dashboard Sistem Platform')
+@section('title', 'Dashboard Super Admin')
 
 @section('content')
-<div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+@php
+    $totalPesanan = collect($unit)->sum('total');
+    $totalSelesai = collect($unit)->sum('selesai');
+    $totalMenunggu = collect($unit)->sum('menunggu');
+    $totalGagal = collect($unit)->sum('gagal');
+    $rateGlobal = $totalPesanan > 0 ? round(($totalSelesai / $totalPesanan) * 100, 1) : 0;
 
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-            <div>
-                <h4 class="fw-bold mb-1">
-                    <span class="text-muted fw-light">Sistem Platform /</span> Dashboard
-                </h4>
-                <p class="text-muted mb-0">
-                    Rangkuman seluruh modul SegiDaerah. Halaman ini melihat platform secara keseluruhan,
-                    bukan operasional per desa.
-                </p>
-            </div>
-            {{-- Aksi utama ditaruh di header, bukan di kartu kolom kanan:
-                 kolom kanan tertutup panel kotak masuk selebar 320px dan letaknya
-                 jauh di bawah lipatan, sehingga tombolnya praktis tidak ketemu. --}}
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-label-primary rounded-pill">
-                    <i class="bx bx-shield-quarter me-1"></i>{{ auth()->user()->name }}
-                </span>
+    $totalIntegrasi = count($integrasi);
+    $integrasiAktif = collect($integrasi)->where('aktif', true)->count();
+
+    $unitMeta = [
+        'Penjualan Gas'  => ['icon' => 'bxs-gas-pump', 'color' => 'danger'],
+        'Sewa Alat'      => ['icon' => 'bx-wrench', 'color' => 'warning'],
+        'Sewa Mobil'     => ['icon' => 'bx-car', 'color' => 'info'],
+        'Fasilitas Umum' => ['icon' => 'bx-building-house', 'color' => 'success'],
+    ];
+
+    $roleLabels = [
+        'super_admin' => ['label' => 'Super Admin', 'color' => 'primary'],
+        'admin_desa'  => ['label' => 'Admin Desa', 'color' => 'info'],
+        'admin_rw'    => ['label' => 'Admin RW', 'color' => 'warning'],
+        'admin_rt'    => ['label' => 'Admin RT', 'color' => 'secondary'],
+        'staff'       => ['label' => 'Staf Layanan', 'color' => 'danger'],
+        'user'        => ['label' => 'Warga', 'color' => 'success'],
+    ];
+@endphp
+
+<style>
+    .sa-kpi-card {
+        border: 1px solid #eef1f6;
+        border-radius: 16px;
+        background: #ffffff;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .sa-kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07) !important;
+        border-color: #dbeafe;
+    }
+    .sa-card {
+        border: 1px solid #eef1f6;
+        border-radius: 16px;
+        background: #ffffff;
+    }
+    .sa-shortcut-tile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 14px;
+        border-radius: 14px;
+        border: 1px solid #eef1f6;
+        background: #ffffff;
+        text-decoration: none;
+        color: #1e293b;
+        transition: all 0.18s ease;
+        height: 100%;
+    }
+    .sa-shortcut-tile:hover {
+        border-color: #bfdbfe;
+        background: #f8fbff;
+        color: #0d6efd;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(13, 110, 253, 0.08);
+    }
+    .sa-activity-row {
+        border-bottom: 1px solid #f1f5f9;
+        padding: 11px 0;
+    }
+    .sa-activity-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .sa-activity-row:first-child {
+        padding-top: 0;
+    }
+    @media (max-width: 575.98px) {
+        .sa-kpi-card .card-body {
+            padding: 0.85rem !important;
+        }
+        .sa-kpi-card h4 {
+            font-size: 1.25rem !important;
+        }
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    {{-- Page Header --}}
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div class="min-w-0">
+            <h4 class="fw-bold mb-1 text-dark">
+                <span class="text-muted fw-normal">Sistem Platform /</span> Dashboard
+            </h4>
+            <p class="text-muted mb-0 small">
+                Ringkasan menyeluruh platform SegiDaerah — cakupan wilayah Kecamatan Bengkalis, aktivitas layanan desa, dan integrasi sistem.
+            </p>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2 w-100 w-md-auto">
+            <span class="badge bg-label-primary rounded-pill px-3 py-2 fw-semibold">
+                <i class="bx bx-shield-quarter me-1"></i>{{ auth()->user()->name }}
+            </span>
+            @if(auth()->user()->hasPlatformPermission('platform_monitoring'))
+                <a href="{{ route('admin.sistem-platform.monitoring') }}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm d-inline-flex align-items-center gap-1">
+                    <i class="bx bx-line-chart"></i>
+                    <span>Monitoring Layanan</span>
+                </a>
+            @endif
+        </div>
+    </div>
+
+    {{-- 4 KPI Utama --}}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <a href="{{ auth()->user()->role === 'super_admin' ? route('admin.sistem-platform.wilayah.index') : '#' }}" class="text-decoration-none d-block h-100">
+                <div class="card sa-kpi-card shadow-sm h-100">
+                    <div class="card-body p-3 p-md-4 d-flex align-items-start justify-content-between gap-2">
+                        <div class="min-w-0">
+                            <span class="text-muted small fw-semibold d-block mb-1">Wilayah Bengkalis</span>
+                            <h4 class="fw-bold text-dark mb-1">{{ number_format($wilayah['total'] ?? 0, 0, ',', '.') }}</h4>
+                            <small class="text-muted d-block" style="font-size: 0.74rem; line-height: 1.3;">
+                                {{ $wilayah['desa'] ?? 0 }} desa/kelurahan &bull; {{ $desa_layanan_aktif ?? 0 }} aktif
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-primary flex-shrink-0" style="width: 42px; height: 42px;">
+                            <i class="bx bx-map-alt fs-4 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <a href="{{ auth()->user()->role === 'super_admin' ? route('admin.kelola-wilayah.index') : '#' }}" class="text-decoration-none d-block h-100">
+                <div class="card sa-kpi-card shadow-sm h-100">
+                    <div class="card-body p-3 p-md-4 d-flex align-items-start justify-content-between gap-2">
+                        <div class="min-w-0">
+                            <span class="text-muted small fw-semibold d-block mb-1">Total Pengguna</span>
+                            <h4 class="fw-bold text-dark mb-1">{{ number_format($pengguna['total'] ?? 0, 0, ',', '.') }}</h4>
+                            <small class="text-success fw-medium d-block" style="font-size: 0.74rem; line-height: 1.3;">
+                                +{{ $pengguna['baru_7hari'] ?? 0 }} baru (7 hari)
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-success flex-shrink-0" style="width: 42px; height: 42px;">
+                            <i class="bx bx-group fs-4 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <a href="{{ auth()->user()->hasPlatformPermission('platform_monitoring') ? route('admin.sistem-platform.monitoring') : '#' }}" class="text-decoration-none d-block h-100">
+                <div class="card sa-kpi-card shadow-sm h-100">
+                    <div class="card-body p-3 p-md-4 d-flex align-items-start justify-content-between gap-2">
+                        <div class="min-w-0">
+                            <span class="text-muted small fw-semibold d-block mb-1">Pesanan Layanan</span>
+                            <h4 class="fw-bold text-dark mb-1">{{ number_format($totalPesanan, 0, ',', '.') }}</h4>
+                            <small class="text-muted d-block" style="font-size: 0.74rem; line-height: 1.3;">
+                                {{ $totalSelesai }} selesai &bull; {{ $totalMenunggu }} menunggu
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-info flex-shrink-0" style="width: 42px; height: 42px;">
+                            <i class="bx bx-shopping-bag fs-4 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <a href="{{ auth()->user()->hasPlatformPermission('platform_integrasi') ? route('admin.sistem-platform.gateway') : '#' }}" class="text-decoration-none d-block h-100">
+                <div class="card sa-kpi-card shadow-sm h-100">
+                    <div class="card-body p-3 p-md-4 d-flex align-items-start justify-content-between gap-2">
+                        <div class="min-w-0">
+                            <span class="text-muted small fw-semibold d-block mb-1">Integrasi API</span>
+                            <h4 class="fw-bold text-dark mb-1">
+                                {{ $integrasiAktif }}<span class="text-muted fw-normal fs-6">/{{ $totalIntegrasi }}</span>
+                            </h4>
+                            <small class="text-muted d-block" style="font-size: 0.74rem; line-height: 1.3;">
+                                Dikelola aktif dari panel
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-warning flex-shrink-0" style="width: 42px; height: 42px;">
+                            <i class="bx bx-plug fs-4 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    {{-- Row 2: Ringkasan Unit Layanan & Status Integrasi --}}
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-7">
+            <div class="card sa-card shadow-sm h-100 overflow-hidden">
+                <div class="card-header bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2.5">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-primary" style="width: 36px; height: 36px;">
+                            <i class="bx bx-bar-chart-alt-2 fs-5 text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">Ringkasan Unit Layanan Usaha</h6>
+                            <small class="text-muted">Agregat lintas desa di Kecamatan Bengkalis</small>
+                        </div>
+                    </div>
+                    @if(auth()->user()->hasPlatformPermission('platform_monitoring'))
+                        <a href="{{ route('admin.sistem-platform.monitoring') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold flex-shrink-0">
+                            Detail <i class="bx bx-right-arrow-alt ms-0.5"></i>
+                        </a>
+                    @endif
+                </div>
+
+                {{-- Desktop Table --}}
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr class="text-muted text-uppercase" style="font-size: 0.7rem;">
+                                <th class="ps-4 py-2.5">Unit Layanan</th>
+                                <th class="text-end py-2.5">Total</th>
+                                <th class="text-end py-2.5">Selesai</th>
+                                <th class="text-end py-2.5">Menunggu</th>
+                                <th class="text-end py-2.5">Batal</th>
+                                <th class="pe-4 text-end py-2.5">Sukses</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($unit as $u)
+                                @php
+                                    $meta = $unitMeta[$u['label']] ?? ['icon' => 'bx-cube', 'color' => 'primary'];
+                                    $rate = $u['total'] > 0 ? round(($u['selesai'] / $u['total']) * 100) : 0;
+                                    $rateColor = $u['total'] === 0 ? 'secondary' : ($rate >= 75 ? 'success' : ($rate >= 45 ? 'warning' : 'danger'));
+                                @endphp
+                                <tr>
+                                    <td class="ps-4 py-3">
+                                        <div class="d-flex align-items-center gap-2.5">
+                                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-{{ $meta['color'] }}" style="width: 32px; height: 32px;">
+                                                <i class="bx {{ $meta['icon'] }} text-{{ $meta['color'] }}"></i>
+                                            </div>
+                                            <span class="fw-semibold text-dark small">{{ $u['label'] }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-bold text-dark small">{{ number_format($u['total'], 0, ',', '.') }}</td>
+                                    <td class="text-end text-success fw-semibold small">{{ number_format($u['selesai'], 0, ',', '.') }}</td>
+                                    <td class="text-end text-warning fw-semibold small">{{ number_format($u['menunggu'], 0, ',', '.') }}</td>
+                                    <td class="text-end text-danger small">{{ number_format($u['gagal'], 0, ',', '.') }}</td>
+                                    <td class="pe-4 text-end">
+                                        <span class="badge bg-label-{{ $rateColor }} rounded-pill px-2.5">{{ $rate }}%</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Mobile Compact Cards --}}
+                <div class="d-md-none p-3 d-flex flex-column gap-2.5">
+                    @foreach($unit as $u)
+                        @php
+                            $meta = $unitMeta[$u['label']] ?? ['icon' => 'bx-cube', 'color' => 'primary'];
+                            $rate = $u['total'] > 0 ? round(($u['selesai'] / $u['total']) * 100) : 0;
+                            $rateColor = $u['total'] === 0 ? 'secondary' : ($rate >= 75 ? 'success' : ($rate >= 45 ? 'warning' : 'danger'));
+                        @endphp
+                        <div class="p-3 rounded-3 border bg-light bg-opacity-50">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="d-inline-flex align-items-center justify-content-center rounded-2 bg-label-{{ $meta['color'] }}" style="width: 28px; height: 28px;">
+                                        <i class="bx {{ $meta['icon'] }} text-{{ $meta['color'] }}"></i>
+                                    </span>
+                                    <span class="fw-bold text-dark small">{{ $u['label'] }}</span>
+                                </div>
+                                <span class="badge bg-label-{{ $rateColor }} rounded-pill">{{ $rate }}% sukses</span>
+                            </div>
+                            <div class="row g-2 text-center small">
+                                <div class="col-3">
+                                    <small class="text-muted d-block" style="font-size: 0.68rem;">Total</small>
+                                    <strong class="text-dark">{{ $u['total'] }}</strong>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted d-block" style="font-size: 0.68rem;">Selesai</small>
+                                    <strong class="text-success">{{ $u['selesai'] }}</strong>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted d-block" style="font-size: 0.68rem;">Tunggu</small>
+                                    <strong class="text-warning">{{ $u['menunggu'] }}</strong>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted d-block" style="font-size: 0.68rem;">Batal</small>
+                                    <strong class="text-danger">{{ $u['gagal'] }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="card-footer bg-light bg-opacity-50 border-top px-4 py-2.5 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <small class="text-muted">Tingkat penyelesaian global</small>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="progress" style="width: 110px; height: 6px;">
+                            <div class="progress-bar bg-primary rounded-pill" style="width: {{ $rateGlobal }}%"></div>
+                        </div>
+                        <span class="fw-bold text-primary small">{{ $rateGlobal }}%</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        {{-- ============ Peringatan tagihan mendekati / lewat jatuh tempo ============ --}}
-        @if(auth()->user()->hasPlatformPermission('platform_biaya') && count($biaya['peringatan']))
-            @php $adaTerlambat = $biaya['jumlah_terlambat'] > 0; @endphp
-            <div class="alert {{ $adaTerlambat ? 'alert-danger' : 'alert-warning' }} d-flex align-items-start mb-4" role="alert">
-                <i class="bx {{ $adaTerlambat ? 'bx-error' : 'bx-time-five' }} fs-4 me-3 mt-1"></i>
-                <div class="flex-grow-1">
-                    <h6 class="alert-heading fw-bold mb-1">
-                        @if($adaTerlambat)
-                            {{ $biaya['jumlah_terlambat'] }} tagihan sudah LEWAT jatuh tempo
-                        @else
-                            Tagihan mendekati jatuh tempo
-                        @endif
-                    </h6>
-                    <ul class="mb-2 ps-3 small">
-                        @foreach($biaya['peringatan'] as $p)
-                            <li>
-                                <strong>{{ $p['nama'] }}</strong>
-                                &mdash; Rp {{ number_format($p['nominal'], 0, ',', '.') }},
-                                jatuh tempo {{ \Carbon\Carbon::parse($p['jatuh_tempo'])->translatedFormat('d M Y') }}
-                                @if($p['sisa_hari'] < 0)
-                                    <span class="fw-bold text-danger">(terlambat {{ abs($p['sisa_hari']) }} hari)</span>
-                                @elseif($p['sisa_hari'] === 0)
-                                    <span class="fw-bold">(jatuh tempo hari ini)</span>
-                                @else
-                                    <span class="fw-bold">({{ $p['sisa_hari'] }} hari lagi)</span>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                    <a href="{{ route('admin.sistem-platform.expenses') }}" class="btn btn-sm {{ $adaTerlambat ? 'btn-danger' : 'btn-warning' }}">
-                        <i class="bx bx-wallet me-1"></i>Kelola Tagihan
+        @if(auth()->user()->hasPlatformPermission('platform_integrasi'))
+        <div class="col-12 col-lg-5">
+            <div class="card sa-card shadow-sm h-100 d-flex flex-column">
+                <div class="card-header bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2.5">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-info" style="width: 36px; height: 36px;">
+                            <i class="bx bx-plug fs-5 text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">Integrasi Pihak Ketiga</h6>
+                            <small class="text-muted">Layanan API aktif &amp; fallback <code>.env</code></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-4 py-3 flex-grow-1">
+                    @foreach($integrasi as $i)
+                        <div class="d-flex align-items-center justify-content-between gap-2 py-2.5 {{ !$loop->last ? 'border-bottom' : '' }}">
+                            <div class="d-flex align-items-center gap-2.5 min-w-0">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-2 bg-light border flex-shrink-0" style="width: 32px; height: 32px;">
+                                    <i class="bx {{ $i['ikon'] }} text-primary"></i>
+                                </span>
+                                <span class="small fw-semibold text-dark text-truncate">{{ $i['label'] }}</span>
+                            </div>
+                            @if($i['aktif'])
+                                <span class="badge bg-label-success rounded-pill flex-shrink-0" style="font-size: 0.7rem;">
+                                    <i class="bx bx-check me-0.5"></i>Aktif
+                                </span>
+                            @else
+                                <span class="badge bg-label-secondary rounded-pill flex-shrink-0" style="font-size: 0.7rem;">
+                                    Default .env
+                                </span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+                <div class="card-footer bg-white border-top px-4 py-3">
+                    <a href="{{ route('admin.sistem-platform.gateway') }}" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-semibold">
+                        <i class="bx bx-cog me-1"></i>Kelola Integrasi &amp; API Key
                     </a>
                 </div>
             </div>
+        </div>
         @endif
-        {{-- ============ Kartu ringkas ============ --}}
-        <div class="row g-4 mb-4">
-            @php
-                $kpi = [
-                    ['Wilayah Bengkalis', $wilayah['total'], $wilayah['desa'] . ' desa/kelurahan · Kecamatan Bengkalis', 'bx-map', 'primary'],
-                    ['Pengguna', $pengguna['total'], $pengguna['baru_7hari'] . ' baru 7 hari terakhir', 'bx-group', 'success'],
-                    ['Dana Tertahan', $dompet['tertahan'], $dompet['gagal_verifikasi'] . ' gagal verifikasi', 'bx-wallet', 'warning'],
-                    $biaya['terdekat']
-                        ? ['Tagihan Terdekat', $biaya['terdekat']['sisa_hari'] . ' hari',
-                           $biaya['terdekat']['nama'], 'bx-time-five',
-                           $biaya['terdekat']['sisa_hari'] < 0 ? 'danger' : ($biaya['terdekat']['sisa_hari'] <= 14 ? 'warning' : 'info')]
-                        : ['Tagihan Terdekat', '-', 'tidak ada tagihan aktif', 'bx-time-five', 'secondary'],
-                ];
-            @endphp
+    </div>
 
-            @foreach($kpi as [$judul, $nilai, $sub, $ikon, $warna])
-                <div class="col-lg-3 col-sm-6">
-                    <div class="card h-100">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-{{ $warna }}"><i class="bx {{ $ikon }} fs-4"></i></span>
-                            </div>
-                            <div class="min-w-0">
-                                <small class="text-muted d-block">{{ $judul }}</small>
-                                <h5 class="mb-0 fw-bold">{{ is_numeric($nilai) ? number_format($nilai, 0, ',', '.') : $nilai }}</h5>
-                                <small class="text-muted" style="font-size:.72rem">{{ $sub }}</small>
-                            </div>
+    {{-- Row 3: Aktivitas Terbaru & Komposisi Pengguna --}}
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-7">
+            <div class="card sa-card shadow-sm h-100">
+                <div class="card-header bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2.5">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-secondary" style="width: 36px; height: 36px;">
+                            <i class="bx bx-history fs-5 text-secondary"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">Aktivitas Terbaru Platform</h6>
+                            <small class="text-muted">8 catatan terakhir dari log aktivitas sistem</small>
                         </div>
                     </div>
+                    @if(auth()->user()->hasPlatformPermission('platform_keamanan'))
+                        <a href="{{ route('admin.sistem-platform.security-log') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold flex-shrink-0">
+                            Log Keamanan
+                        </a>
+                    @endif
                 </div>
-            @endforeach
+                <div class="card-body px-4 py-3">
+                    @forelse($aktivitas as $log)
+                        <div class="sa-activity-row d-flex align-items-start gap-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-label-primary flex-shrink-0 mt-0.5" style="width: 34px; height: 34px;">
+                                <i class="bx bx-user text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="d-flex align-items-center flex-wrap gap-1.5 mb-0.5">
+                                    <span class="fw-semibold text-dark small">{{ $log['nama'] ?? 'Sistem' }}</span>
+                                    <span class="badge bg-label-primary rounded-pill" style="font-size: 0.66rem;">{{ $log['action'] }}</span>
+                                </div>
+                                <p class="text-muted mb-0" style="font-size: 0.78rem; line-height: 1.4; word-break: break-word;">
+                                    {{ $log['description'] }}
+                                </p>
+                            </div>
+                            <small class="text-muted flex-shrink-0" style="font-size: 0.72rem;">
+                                {{ $log['created_at'] ? \Carbon\Carbon::parse($log['created_at'])->diffForHumans(short: true) : '' }}
+                            </small>
+                        </div>
+                    @empty
+                        <div class="text-center py-4">
+                            <i class="bx bx-history fs-1 text-muted opacity-50 d-block mb-2"></i>
+                            <p class="text-muted small mb-0">Belum ada aktivitas tercatat.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
         </div>
 
-        <div class="row g-4">
-
-            {{-- ============ Tagihan server & domain, dengan hitung mundur ============ --}}
-            @if(auth()->user()->hasPlatformPermission('platform_biaya'))
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header pb-2 d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-0"><i class="bx bx-server me-2 text-danger"></i>Biaya Server dan Domain</h5>
-                            <small class="text-muted">Tagihan berlangganan yang belum lunas, diurutkan dari yang paling dekat.</small>
-                        </div>
-                        <a href="{{ route('admin.sistem-platform.expenses') }}" class="btn btn-sm btn-outline-danger">Kelola</a>
+        <div class="col-12 col-lg-5">
+            <div class="card sa-card shadow-sm h-100 d-flex flex-column">
+                <div class="card-header bg-white border-bottom px-4 py-3 d-flex align-items-center gap-2.5">
+                    <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-success" style="width: 36px; height: 36px;">
+                        <i class="bx bx-group fs-5 text-success"></i>
                     </div>
-                    <div class="card-body pt-3">
-                        @if(count($biaya['items']))
-                            <div class="row g-3">
-                                @foreach($biaya['items'] as $t)
-                                    @php
-                                        $warna = $t['sisa_hari'] < 0 ? 'danger' : ($t['sisa_hari'] <= 14 ? 'warning' : 'success');
-                                        $ikonKategori = match($t['kategori']) {
-                                            'domain' => 'bx-globe',
-                                            'hosting' => 'bx-server',
-                                            'ssl' => 'bx-lock-alt',
-                                            'api_service' => 'bx-plug',
-                                            default => 'bx-receipt',
-                                        };
-                                    @endphp
-                                    <div class="col-md-6 col-xl-4">
-                                        <div class="border rounded-3 h-100 p-3 border-{{ $warna }}" style="border-width:1px">
-                                            <div class="d-flex align-items-center mb-2">
-                                                <div class="avatar avatar-sm flex-shrink-0 me-2">
-                                                    <span class="avatar-initial rounded bg-label-{{ $warna }}"><i class="bx {{ $ikonKategori }}"></i></span>
-                                                </div>
-                                                <div class="min-w-0 flex-grow-1">
-                                                    <div class="fw-semibold small text-truncate">{{ $t['nama'] }}</div>
-                                                    <small class="text-muted" style="font-size:.7rem">
-                                                        {{ ucfirst(str_replace('_', ' ', $t['kategori'])) }} &middot; {{ ucfirst(str_replace('_', ' ', $t['siklus'])) }}
-                                                    </small>
-                                                </div>
-                                            </div>
-
-                                            <div class="d-flex justify-content-between align-items-baseline mb-2">
-                                                <span class="fw-bold">Rp {{ number_format($t['nominal'], 0, ',', '.') }}</span>
-                                                <small class="text-muted" style="font-size:.72rem">
-                                                    {{ \Carbon\Carbon::parse($t['jatuh_tempo'])->translatedFormat('d M Y') }}
-                                                </small>
-                                            </div>
-
-                                            {{-- Hitung mundur hidup; diperbarui tiap detik oleh skrip di bawah --}}
-                                            <div class="bg-label-{{ $warna }} rounded-2 text-center py-2 px-2 hitung-mundur"
-                                                 data-tenggat="{{ $t['tenggat_iso'] }}">
-                                                <div class="fw-bold" style="font-size:.95rem; line-height:1.2">
-                                                    <span class="nilai">&mdash;</span>
-                                                </div>
-                                                <small style="font-size:.65rem; opacity:.85" class="keterangan">menuju jatuh tempo</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Komposisi Pengguna</h6>
+                        @if(($pengguna['belum_aktif'] ?? 0) > 0)
+                            <small class="text-warning fw-medium">{{ $pengguna['belum_aktif'] }} akun belum aktif</small>
                         @else
-                            <p class="text-muted small text-center mb-0 py-3">
-                                Tidak ada tagihan aktif. Tambahkan lewat halaman Biaya Server dan Domain.
-                            </p>
+                            <small class="text-muted">Seluruh akun terdaftar berstatus aktif</small>
                         @endif
                     </div>
                 </div>
-            </div>
-            @endif
-            {{-- ============ Ringkasan unit layanan ============ --}}
-            <div class="col-lg-7">
-                <div class="card h-100">
-                    <div class="card-header pb-2">
-                        <h5 class="mb-0"><i class="bx bx-bar-chart-alt-2 me-2 text-primary"></i>Unit Layanan Usaha</h5>
-                        <small class="text-muted">Agregat seluruh wilayah, bukan per desa.</small>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm mb-0">
-                            <thead>
-                                <tr class="text-muted" style="font-size:.75rem">
-                                    <th>Unit</th>
-                                    <th class="text-end">Total</th>
-                                    <th class="text-end">Selesai</th>
-                                    <th class="text-end">Menunggu</th>
-                                    <th class="text-end">Gagal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($unit as $u)
-                                    <tr>
-                                        <td class="fw-semibold small">{{ $u['label'] }}</td>
-                                        <td class="text-end small">{{ number_format($u['total'], 0, ',', '.') }}</td>
-                                        <td class="text-end small text-success">{{ $u['selesai'] }}</td>
-                                        <td class="text-end small text-warning">{{ $u['menunggu'] }}</td>
-                                        <td class="text-end small text-danger">{{ $u['gagal'] }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-footer text-end py-2">
-                        @if(auth()->user()->hasPlatformPermission('platform_monitoring'))
-                        <a href="{{ route('admin.sistem-platform.monitoring') }}" class="small">
-                            Monitoring rinci <i class="bx bx-chevron-right"></i>
-                        </a>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            {{-- ============ Status integrasi ============ --}}
-            @if(auth()->user()->hasPlatformPermission('platform_integrasi'))
-            <div class="col-lg-5">
-                <div class="card h-100">
-                    <div class="card-header pb-2">
-                        <h5 class="mb-0"><i class="bx bx-plug me-2 text-info"></i>Integrasi Pihak Ketiga</h5>
-                        <small class="text-muted">Kategori yang belum diisi memakai nilai <code>.env</code>.</small>
-                    </div>
-                    <div class="card-body pt-2">
-                        @foreach($integrasi as $i)
-                            <div class="d-flex align-items-center py-2 border-bottom">
-                                <i class="bx {{ $i['ikon'] }} me-2 text-muted"></i>
-                                <span class="flex-grow-1 small">{{ $i['label'] }}</span>
-                                @if($i['aktif'])
-                                    <span class="badge bg-label-success rounded-pill">Aktif</span>
-                                @else
-                                    <span class="badge bg-label-secondary rounded-pill">Belum diisi</span>
-                                @endif
+                <div class="card-body px-4 py-3 flex-grow-1">
+                    @forelse($pengguna['per_role'] as $role => $n)
+                        @php
+                            $persen = ($pengguna['total'] ?? 0) > 0 ? round(($n / $pengguna['total']) * 100) : 0;
+                            $rInfo = $roleLabels[$role] ?? ['label' => ucfirst(str_replace('_', ' ', $role)), 'color' => 'primary'];
+                        @endphp
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center small mb-1">
+                                <span class="fw-semibold text-dark">{{ $rInfo['label'] }}</span>
+                                <span class="text-muted fw-semibold">{{ number_format($n, 0, ',', '.') }} <span class="fw-normal">({{ $persen }}%)</span></span>
                             </div>
-                        @endforeach
-                        <div class="text-end mt-3">
-                            <a href="{{ route('admin.sistem-platform.gateway') }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bx bx-cog me-1"></i>Kelola API Key
+                            <div class="progress rounded-pill" style="height: 7px;">
+                                <div class="progress-bar bg-{{ $rInfo['color'] }} rounded-pill" style="width: {{ $persen }}%"></div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-muted small mb-0 text-center py-4">Belum ada pengguna terdaftar.</p>
+                    @endforelse
+                </div>
+                @if(auth()->user()->role === 'super_admin')
+                <div class="card-footer bg-white border-top px-4 py-3">
+                    <a href="{{ route('admin.kelola-wilayah.index') }}" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-semibold">
+                        <i class="bx bx-user-check me-1"></i>Kelola Wilayah &amp; Admin
+                    </a>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Row 4: Pintasan Cepat Modul --}}
+    <div class="card sa-card shadow-sm">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bx bx-grid-alt text-primary fs-5"></i>
+                <h6 class="fw-bold text-dark mb-0">Pintasan Modul Platform</h6>
+            </div>
+            @php
+                $pintasan = [
+                    ['Peta Wilayah', 'Struktur Kecamatan hingga RT', 'admin.sistem-platform.wilayah.index', 'bx-sitemap', 'primary', null, true],
+                    ['Admin Wilayah', 'Kelola pengelola desa & RW/RT', 'admin.kelola-wilayah.index', 'bx-user-check', 'success', null, true],
+                    ['Monitoring Layanan', 'Performa unit lintas desa', 'admin.sistem-platform.monitoring', 'bx-line-chart', 'info', 'platform_monitoring', false],
+                    ['Integrasi & API Key', 'Google, Maps, WA OTP, Gemini', 'admin.sistem-platform.gateway', 'bx-plug', 'warning', 'platform_integrasi', false],
+                    ['Log Keamanan', 'Audit staf & runtime server', 'admin.sistem-platform.security-log', 'bx-shield-quarter', 'danger', 'platform_keamanan', false],
+                    ['Banner Beranda', 'Spanduk informasi aplikasi', 'admin.banners.index', 'bx-image', 'primary', 'platform_banner', false],
+                ];
+            @endphp
+            <div class="row g-2.5">
+                @foreach($pintasan as [$label, $desc, $rute, $ikon, $warna, $izin, $hanyaSuper])
+                    @php
+                        $boleh = $hanyaSuper
+                            ? auth()->user()->role === 'super_admin'
+                            : (! $izin || auth()->user()->hasPlatformPermission($izin));
+                    @endphp
+                    @if($boleh && Route::has($rute))
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <a href="{{ route($rute) }}" class="sa-shortcut-tile">
+                                <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-{{ $warna }} flex-shrink-0" style="width: 40px; height: 40px;">
+                                    <i class="bx {{ $ikon }} fs-5 text-{{ $warna }}"></i>
+                                </div>
+                                <div class="min-w-0 flex-grow-1">
+                                    <div class="fw-bold small text-truncate">{{ $label }}</div>
+                                    <small class="text-muted d-block text-truncate" style="font-size: 0.72rem;">{{ $desc }}</small>
+                                </div>
+                                <i class="bx bx-chevron-right text-muted flex-shrink-0"></i>
                             </a>
                         </div>
-                    </div>
-                </div>
+                    @endif
+                @endforeach
             </div>
-            @endif
-
-            {{-- ============ Aktivitas terbaru ============ --}}
-            <div class="col-lg-7">
-                <div class="card h-100">
-                    <div class="card-header pb-2 d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-0"><i class="bx bx-history me-2 text-secondary"></i>Aktivitas Terbaru</h5>
-                            <small class="text-muted">Delapan catatan terakhir dari log aktivitas.</small>
-                        </div>
-                        @if(auth()->user()->hasPlatformPermission('platform_keamanan'))
-                        <a href="{{ route('admin.sistem-platform.security-log') }}" class="small">Log keamanan</a>
-                        @endif
-                    </div>
-                    <div class="card-body pt-2">
-                        @forelse($aktivitas as $log)
-                            <div class="d-flex align-items-start py-2 border-bottom">
-                                <div class="avatar avatar-sm flex-shrink-0 me-3">
-                                    <span class="avatar-initial rounded-circle bg-label-secondary">
-                                        <i class="bx bx-user"></i>
-                                    </span>
-                                </div>
-                                <div class="flex-grow-1 min-w-0">
-                                    <div class="small fw-semibold text-truncate">
-                                        {{ $log['nama'] ?? 'Sistem' }}
-                                        <span class="badge bg-label-primary ms-1" style="font-size:.6rem">{{ $log['action'] }}</span>
-                                    </div>
-                                    <div class="text-muted text-truncate" style="font-size:.75rem">{{ $log['description'] }}</div>
-                                </div>
-                                <small class="text-muted flex-shrink-0 ms-2" style="font-size:.7rem">
-                                    {{ $log['created_at'] ? \Carbon\Carbon::parse($log['created_at'])->diffForHumans(short: true) : '' }}
-                                </small>
-                            </div>
-                        @empty
-                            <p class="text-muted text-center small mb-0 py-3">Belum ada aktivitas tercatat.</p>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-
-            {{-- ============ Komposisi pengguna ============ --}}
-            <div class="col-lg-5">
-                <div class="card h-100">
-                    <div class="card-header pb-2">
-                        <h5 class="mb-0"><i class="bx bx-group me-2 text-success"></i>Komposisi Pengguna</h5>
-                        @if($pengguna['belum_aktif'] > 0)
-                            <small class="text-warning">{{ $pengguna['belum_aktif'] }} akun belum aktif.</small>
-                        @else
-                            <small class="text-muted">Semua akun berstatus aktif.</small>
-                        @endif
-                    </div>
-                    <div class="card-body pt-2">
-                        @forelse($pengguna['per_role'] as $role => $n)
-                            @php $persen = $pengguna['total'] ? round($n / $pengguna['total'] * 100) : 0; @endphp
-                            <div class="mb-2">
-                                <div class="d-flex justify-content-between small">
-                                    <span>{{ str_replace('_', ' ', ucfirst($role)) }}</span>
-                                    <span class="text-muted">{{ $n }}</span>
-                                </div>
-                                <div class="progress" style="height:5px">
-                                    <div class="progress-bar" style="width: {{ $persen }}%"></div>
-                                </div>
-                            </div>
-                        @empty
-                            <p class="text-muted small mb-0">Belum ada pengguna.</p>
-                        @endforelse
-                        {{-- Mendaftarkan akun staf: dibuatkan admin, orangnya
-                             langsung bisa login memakai email & sandi itu. --}}
-                        <div class="d-flex gap-2 mt-3">
-                            {{-- Menuju Kelola Staf, bukan Manajemen Pengguna: yang terakhir
-                                 itu data warga per wilayah dan tidak ada di sidebar super admin. --}}
-                            <a href="{{ route('admin.kelola-wilayah.index') }}" class="btn btn-outline-primary">Kelola Wilayah dan Admin</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- ============ Biaya operasional + pintasan ============ --}}
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row g-4 align-items-center">
-                            <div class="col-12">
-                                <h6 class="fw-bold mb-2"><i class="bx bx-grid-alt me-2 text-primary"></i>Pintasan Modul</h6>
-                                <div class="d-flex flex-wrap gap-2">
-                                    @php
-                                        // Elemen keempat = izin platform yang diperlukan.
-                                        // Tanpa penyaringan ini, akun staf platform akan
-                                        // melihat tombol yang pasti berujung ditolak 403.
-                                        $pintasan = [
-                                            ['Monitoring Transaksi', 'admin.sistem-platform.monitoring', 'bx-line-chart', 'platform_monitoring'],
-                                            ['Integrasi & API Key', 'admin.sistem-platform.gateway', 'bx-plug', 'platform_integrasi'],
-                                            ['Log Keamanan', 'admin.sistem-platform.security-log', 'bx-shield', 'platform_keamanan'],
-                                            ['Biaya Server & Domain', 'admin.sistem-platform.expenses', 'bx-server', 'platform_biaya'],
-                                            ['Banner', 'admin.banners.index', 'bx-image', 'platform_banner'],
-                                            ['Log Aktivitas', 'admin.laporan.log', 'bx-history', 'platform_aktivitas'],
-                                        ];
-                                    @endphp
-                                    @foreach($pintasan as $p)
-                                        @php
-                                            [$label, $rute, $ikon] = $p;
-                                            $izin = $p[3] ?? null;
-                                            $boleh = ! $izin || auth()->user()->hasPlatformPermission($izin);
-                                        @endphp
-                                        @if($boleh && Route::has($rute))
-                                            <a href="{{ route($rute) }}" class="btn btn-sm btn-label-secondary">
-                                                <i class="bx {{ $ikon }} me-1"></i>{{ $label }}
-                                            </a>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 </div>
-
-{{-- Hitung mundur dijalankan di browser supaya angkanya bergerak tanpa reload.
-     Sumber kebenarannya tetap tanggal dari server (data-tenggat, ISO 8601). --}}
-<script>
-(function () {
-    const kotak = document.querySelectorAll('.hitung-mundur');
-    if (!kotak.length) return;
-
-    function perbarui() {
-        const sekarang = Date.now();
-
-        kotak.forEach(function (el) {
-            const tenggat = new Date(el.dataset.tenggat).getTime();
-            if (isNaN(tenggat)) return;
-
-            const nilai = el.querySelector('.nilai');
-            const ket = el.querySelector('.keterangan');
-            let selisih = tenggat - sekarang;
-            const lewat = selisih < 0;
-            selisih = Math.abs(selisih);
-
-            const hari = Math.floor(selisih / 86400000);
-            const jam = Math.floor((selisih % 86400000) / 3600000);
-            const menit = Math.floor((selisih % 3600000) / 60000);
-            const detik = Math.floor((selisih % 60000) / 1000);
-
-            nilai.textContent = hari > 0
-                ? hari + ' hari ' + jam + ' jam'
-                : jam + ':' + String(menit).padStart(2, '0') + ':' + String(detik).padStart(2, '0');
-
-            ket.textContent = lewat ? 'TERLAMBAT sejak jatuh tempo' : 'menuju jatuh tempo';
-        });
-    }
-
-    perbarui();
-    setInterval(perbarui, 1000);
-})();
-</script>
 @endsection

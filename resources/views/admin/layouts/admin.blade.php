@@ -1832,65 +1832,75 @@
                     <!-- 7. SISTEM PLATFORM (Khusus Super Admin Sistem dan Staf Platform)           -->
                     <!-- ========================================================================= -->
                     @if(auth()->user()->bolehAksesPlatform())
+                    <!-- PILAR 1: WILAYAH & MONITORING -->
                     <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Sistem Platform</span>
+                        <span class="menu-header-text">Wilayah &amp; Monitoring</span>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('admin.sistem-platform.*') ? 'open active show' : '' }}">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-server"></i>
-                            <div data-i18n="Sistem Platform">Sistem Platform</div>
+                    @if(auth()->user()->role === 'super_admin')
+                    <li class="menu-item {{ request()->routeIs('admin.sistem-platform.wilayah.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.sistem-platform.wilayah.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-sitemap text-primary"></i>
+                            <div>Peta Wilayah</div>
                         </a>
-                        <ul class="menu-sub">
-                            @if(auth()->user()->hasPlatformPermission('platform_integrasi'))
-                            <li class="menu-item {{ request()->routeIs('admin.sistem-platform.gateway') ? 'active' : '' }}">
-                                <a href="{{ route('admin.sistem-platform.gateway') }}" class="menu-link">
-                                    <div>Integrasi Payment Gateway</div>
-                                </a>
-                            </li>
-                            @endif
-                            @if(auth()->user()->hasPlatformPermission('platform_penarikan'))
-                            <li class="menu-item {{ request()->routeIs('admin.sistem-platform.penarikan.*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.sistem-platform.penarikan.index') }}" class="menu-link">
-                                    <div>Penarikan Saldo Wilayah</div>
-                                </a>
-                            </li>
-                            @endif
-                            @if(auth()->user()->role === 'super_admin')
-                            <li class="menu-item {{ request()->routeIs('admin.sistem-platform.wilayah.*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.sistem-platform.wilayah.index') }}" class="menu-link">
-                                    <div>Peta Wilayah</div>
-                                </a>
-                            </li>
-                            @endif
-                            @if(auth()->user()->hasPlatformPermission('platform_monitoring'))
-                            <li class="menu-item {{ request()->routeIs('admin.sistem-platform.monitoring') ? 'active' : '' }}">
-                                <a href="{{ route('admin.sistem-platform.monitoring') }}" class="menu-link">
-                                    <div>Monitoring Transaksi</div>
-                                </a>
-                            </li>
-                            @endif
-                            @if(auth()->user()->hasPlatformPermission('platform_keamanan'))
-                            <li class="menu-item {{ request()->routeIs('admin.sistem-platform.security-log') ? 'active' : '' }}">
-                                <a href="{{ route('admin.sistem-platform.security-log') }}" class="menu-link">
-                                    <div>Log Keamanan dan Audit</div>
-                                </a>
-                            </li>
-                            @endif
-                            @if(auth()->user()->hasPlatformPermission('platform_biaya'))
-                            <li class="menu-item {{ request()->routeIs('admin.sistem-platform.expenses') ? 'active' : '' }}">
-                                <a href="{{ route('admin.sistem-platform.expenses') }}" class="menu-link">
-                                    <div>Biaya Server dan Domain</div>
-                                </a>
-                            </li>
-                            @endif
-                        </ul>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('admin.kelola-wilayah.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.kelola-wilayah.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-user-check text-success"></i>
+                            <div>Admin Wilayah</div>
+                        </a>
+                    </li>
+                    @endif
+                    @if(auth()->user()->hasPlatformPermission('platform_monitoring'))
+                    <li class="menu-item {{ request()->routeIs('admin.sistem-platform.monitoring') ? 'active' : '' }}">
+                        <a href="{{ route('admin.sistem-platform.monitoring') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-line-chart text-info"></i>
+                            <div>Monitoring Layanan</div>
+                        </a>
                     </li>
                     @endif
 
+                    <!-- PILAR 2: SISTEM & KEAMANAN -->
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Sistem &amp; Keamanan</span>
+                    </li>
+                    @if(auth()->user()->hasPlatformPermission('platform_integrasi'))
+                    <li class="menu-item {{ request()->routeIs('admin.sistem-platform.gateway') ? 'active' : '' }}">
+                        <a href="{{ route('admin.sistem-platform.gateway') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-plug text-warning"></i>
+                            <div>Integrasi &amp; API Key</div>
+                        </a>
+                    </li>
+                    @endif
+                    @if(auth()->user()->hasPlatformPermission('platform_keamanan'))
+                    <li class="menu-item {{ request()->routeIs('admin.sistem-platform.security-log') ? 'active' : '' }}">
+                        <a href="{{ route('admin.sistem-platform.security-log') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-shield-quarter text-danger"></i>
+                            <div>Log Keamanan &amp; Audit</div>
+                        </a>
+                    </li>
+                    @endif
+                    @if(auth()->user()->hasPlatformPermission('platform_banner'))
+                    <li class="menu-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.banners.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-image text-primary"></i>
+                            <div>Banner Beranda</div>
+                        </a>
+                    </li>
+                    @endif
+                    @if(auth()->user()->hasPlatformPermission('platform_aktivitas'))
+                    <li class="menu-item {{ request()->routeIs('admin.laporan.log') ? 'active' : '' }}">
+                        <a href="{{ route('admin.laporan.log') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-history text-secondary"></i>
+                            <div>Log Aktivitas</div>
+                        </a>
+                    </li>
+                    @endif
+                    @endif
+
                     <!-- ========================================================================= -->
-                    <!-- 8. PROFIL DAN INFORMASI DAERAH (Khusus Pengguna Non-Admin Desa)            -->
+                    <!-- 8. PROFIL DAN INFORMASI DAERAH (Hanya jika bukan Admin Desa & Super Admin) -->
                     <!-- ========================================================================= -->
-                    @if(auth()->user()->role !== 'admin_desa')
+                    @if(auth()->user()->role !== 'admin_desa' && !auth()->user()->bolehAksesPlatform())
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Tentang Aplikasi</span>
                     </li>
@@ -1905,7 +1915,6 @@
                                     <div>SegiDaerah</div>
                                 </a>
                             </li>
-
                         </ul>
                     </li>
                     @endif

@@ -39,13 +39,32 @@ class SuperAdminDashboardController extends Controller
     private function kumpulkan(): array
     {
         return [
-            'wilayah'    => $this->wilayah(),
-            'pengguna'   => $this->pengguna(),
-            'unit'       => $this->unit(),
-            'dompet'     => $this->dompet(),
-            'integrasi'  => $this->integrasi(),
-            'biaya'      => $this->biaya(),
+            'wilayah'            => $this->wilayah(),
+            'pengguna'           => $this->pengguna(),
+            'unit'               => $this->unit(),
+            'dompet'             => $this->dompet(),
+            'integrasi'          => $this->integrasi(),
+            'biaya'              => $this->biaya(),
+            'desa_layanan_aktif' => $this->desaLayananAktif(),
         ];
+    }
+
+    private function desaLayananAktif(): int
+    {
+        if (! Schema::hasTable('region_services') || ! Schema::hasTable('regions')) {
+            return 0;
+        }
+
+        $scopeIds = \App\Models\Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->exists()
+            ? \App\Support\BengkalisScope::ids()
+            : [];
+
+        $query = DB::table('region_services')->where('is_active', true);
+        if (! empty($scopeIds)) {
+            $query->whereIn('region_id', $scopeIds);
+        }
+
+        return (int) $query->distinct()->count('region_id');
     }
 
     /**
