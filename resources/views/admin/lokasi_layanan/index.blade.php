@@ -27,8 +27,9 @@
 </style>
 
 @php
+    $daftarLokasi = $lokasi ?? collect();
     $totalLokasi = $daftarLokasi->count();
-    $denganKoordinat = $daftarLokasi->filter(fn($l) => $l->punyaKoordinat())->count();
+    $denganKoordinat = $daftarLokasi->filter(fn($item) => method_exists($item, 'punyaTitik') ? $item->punyaTitik() : ($item->latitude !== null && $item->longitude !== null))->count();
     $aktifCount = $daftarLokasi->where('is_aktif', true)->count();
 @endphp
 
@@ -37,7 +38,7 @@
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
         <div>
             <h4 class="fw-bold mb-1">
-                <span class="text-muted fw-light">Pengaturan Desa /</span> Lokasi Layanan Desa
+                <span class="text-muted fw-light">Pengaturan Desa /</span> Lokasi Layanan{{ isset($wilayah) && $wilayah ? ' — ' . $wilayah->name : ' Desa' }}
             </h4>
             <p class="text-muted small mb-0">
                 Simpan alamat kantor desa, gudang alat, agen gas, atau titik jemput kendaraan agar warga mendapatkan rute peta yang akurat.
@@ -56,6 +57,14 @@
         <div class="alert alert-success alert-dismissible border-0 shadow-sm rounded-4 d-flex align-items-center mb-4" role="alert">
             <i class="bx bx-check-circle fs-4 me-2 flex-shrink-0"></i>
             <div>{{ session('success') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible border-0 shadow-sm rounded-4 d-flex align-items-center mb-4" role="alert">
+            <i class="bx bx-error-circle fs-4 me-2 flex-shrink-0"></i>
+            <div>{{ session('error') }}</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -129,10 +138,11 @@
 
     <!-- Grid Lokasi -->
     <div class="row g-3" id="lokasiGridContainer">
-        @forelse($daftarLokasi as $lokasi)
+        @forelse($daftarLokasi as $item)
             @php
-                $hasCoord = $lokasi->punyaKoordinat();
-                $searchText = strtolower(($lokasi->nama ?? '') . ' ' . ($lokasi->alamat ?? '') . ' ' . ($lokasi->catatan ?? ''));
+                $hasCoord = method_exists($item, 'punyaTitik') ? $item->punyaTitik() : ($item->latitude !== null && $item->longitude !== null);
+                $jumlahPakai = (int) ($item->jumlah_pakai ?? 0);
+                $searchText = strtolower(($item->nama ?? '') . ' ' . ($item->alamat ?? '') . ' ' . ($item->catatan ?? ''));
             @endphp
             <div class="col-12 col-md-6 col-xl-4 lokasi-card-col" data-search="{{ $searchText }}">
                 <div class="card loc-item-card h-100 shadow-sm">
@@ -143,12 +153,15 @@
                                     <i class="bx {{ $hasCoord ? 'bx-map-pin' : 'bx-map-alt' }} fs-4"></i>
                                 </div>
                                 <div class="min-w-0">
-                                    <h6 class="fw-bold text-dark mb-0 text-truncate" title="{{ $lokasi->nama }}">{{ $lokasi->nama }}</h6>
+                                    <h6 class="fw-bold text-dark mb-0 text-truncate" title="{{ $item->nama }}">{{ $item->nama }}</h6>
                                     <small class="text-muted">
-                                        @if($lokasi->is_aktif)
+                                        @if($item->is_aktif)
                                             <span class="text-success fw-semibold"><i class="bx bxs-circle me-1" style="font-size: 0.5rem;"></i>Aktif</span>
                                         @else
                                             <span class="text-secondary fw-semibold"><i class="bx bxs-circle me-1" style="font-size: 0.5rem;"></i>Nonaktif</span>
+                                        @endif
+                                        @if($jumlahPakai > 0)
+                                            &bull; <span class="text-primary fw-semibold">Dipakai {{ $jumlahPakai }} produk</span>
                                         @endif
                                     </small>
                                 </div>
@@ -162,22 +175,22 @@
                         <div class="bg-light rounded-3 p-3 mb-3 flex-grow-1">
                             <div class="d-flex align-items-start gap-2 mb-2">
                                 <i class="bx bx-home-alt text-primary mt-0.5 flex-shrink-0"></i>
-                                <p class="text-dark small mb-0" style="line-height: 1.5;">{{ $lokasi->alamat }}</p>
+                                <p class="text-dark small mb-0" style="line-height: 1.5;">{{ $item->alamat ?: 'Alamat belum dilengkapi' }}</p>
                             </div>
 
-                            @if($lokasi->catatan)
+                            @if($item->catatan)
                                 <div class="d-flex align-items-start gap-2 pt-2 border-top border-white">
                                     <i class="bx bx-info-circle text-info mt-0.5 flex-shrink-0"></i>
-                                    <small class="text-muted" style="line-height: 1.45;">Patokan: {{ $lokasi->catatan }}</small>
+                                    <small class="text-muted" style="line-height: 1.45;">Patokan: {{ $item->catatan }}</small>
                                 </div>
                             @endif
 
                             @if($hasCoord)
                                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2 mt-2 border-top border-white">
                                     <span class="badge bg-white text-secondary border font-monospace" style="font-size: 0.68rem;">
-                                        {{ number_format((float) $lokasi->latitude, 5) }}, {{ number_format((float) $lokasi->longitude, 5) }}
+                                        {{ number_format((float) $item->latitude, 5) }}, {{ number_format((float) $item->longitude, 5) }}
                                     </span>
-                                    <a href="https://www.google.com/maps?q={{ $lokasi->latitude }},{{ $lokasi->longitude }}" target="_blank" rel="noopener" class="small fw-semibold text-primary text-decoration-none d-inline-flex align-items-center gap-1">
+                                    <a href="https://www.google.com/maps?q={{ $item->latitude }},{{ $item->longitude }}" target="_blank" rel="noopener" class="small fw-semibold text-primary text-decoration-none d-inline-flex align-items-center gap-1">
                                         <i class="bx bx-navigation"></i>
                                         <span>Buka Maps</span>
                                     </a>
@@ -188,13 +201,13 @@
                         <div class="d-flex align-items-center gap-2 pt-2 border-top mt-auto">
                             <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-grow-1 d-inline-flex align-items-center justify-content-center gap-1"
                                 data-bs-toggle="modal" data-bs-target="#modalLokasi"
-                                data-lokasi='@json($lokasi)'
+                                data-lokasi='@json($item)'
                                 onclick="siapkanFormulir(JSON.parse(this.dataset.lokasi))">
                                 <i class="bx bx-edit-alt"></i>
                                 <span>Ubah Lokasi</span>
                             </button>
-                            <form action="{{ route('admin.lokasi-layanan.destroy', $lokasi) }}" method="POST"
-                                onsubmit="return confirm('Hapus lokasi {{ $lokasi->nama }}?')">
+                            <form action="{{ route('admin.lokasi-layanan.destroy', $item) }}" method="POST"
+                                onsubmit="return confirm('Hapus lokasi {{ addslashes($item->nama) }}?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 d-inline-flex align-items-center justify-content-center gap-1" title="Hapus Lokasi">
