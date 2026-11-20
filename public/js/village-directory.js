@@ -31,6 +31,11 @@
         }
     }
     input.addEventListener('input', () => { expanded = false; render(); });
+    root.querySelector('[data-village-search-form]').addEventListener('submit', event => {
+        event.preventDefault();
+        expanded = false;
+        render();
+    });
     toggle.addEventListener('click', () => { expanded = !expanded; render(true); });
     render();
 })();
