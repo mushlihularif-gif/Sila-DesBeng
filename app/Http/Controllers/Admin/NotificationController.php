@@ -123,29 +123,73 @@ class NotificationController extends Controller
     }
 
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        abort_if(auth()->user()?->isStaff(), 403, 'Staf tidak memiliki izin menghapus notifikasi.');
+
         try {
-            // Satu-satunya pemanggil yang masih tanpa untukPengguna(), padahal
-            // ini yang paling merusak: menghapus notifikasi wilayah lain
-            // menghilangkannya untuk selamanya, bukan sekadar menandainya.
+            // Dibatasi untukPengguna() agar admin hanya dapat menghapus notifikasi
+            // milik wilayahnya sendiri.
             $notification = \App\Models\AdminNotification::untukPengguna(auth()->user())
                 ->findOrFail($id);
             $notification->delete();
 
+            if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Notifikasi berhasil dihapus.',
+                ]);
+            }
+
             return redirect()->back()->with('success', 'Notifikasi berhasil dihapus.');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Notifikasi tidak ditemukan.',
+                ], 404);
+            }
+
+            return redirect()->back()->with('error', 'Notifikasi tidak ditemukan.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Notifikasi belum berhasil dihapus. Silakan coba kembali.',
+                ], 500);
+            }
+
             return redirect()->back()->with('error', 'Notifikasi belum berhasil dihapus. Silakan coba kembali.');
         }
     }
 
-    public function deleteAll()
+    public function deleteAll(Request $request)
     {
+        abort_if(auth()->user()?->isStaff(), 403, 'Staf tidak memiliki izin menghapus notifikasi.');
+
         try {
-            // Hard delete dinonaktifkan demi keamanan audit log (Log Wiping Defense)
-            return redirect()->back()->with('error', 'Penghapusan massal dinonaktifkan untuk menjaga integritas Audit Trail.');
+            // Hanya bersihkan notifikasi yang memang menjadi hak akses pengguna saat ini
+            // (sesuai wilayah admin desa / platform super admin).
+            $deleted = \App\Models\AdminNotification::untukPengguna(auth()->user())->delete();
+
+            if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'deleted' => $deleted,
+                    'message' => 'Semua notifikasi berhasil dibersihkan.',
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Semua notifikasi berhasil dibersihkan.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Notifikasi belum berhasil dihapus. Silakan coba kembali.');
+            if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Notifikasi belum berhasil dibersihkan. Silakan coba kembali.',
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Notifikasi belum berhasil dibersihkan. Silakan coba kembali.');
         }
     }
 }

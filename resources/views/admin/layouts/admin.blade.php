@@ -159,15 +159,38 @@
             border: 1px solid #e2e8f0 !important;
             background: #ffffff !important;
             padding: 0 !important;
+            transition: width 0.22s ease, max-height 0.22s ease;
+        }
+
+        .notif-dropdown-menu.show {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .notif-dropdown-menu > li {
+            flex-shrink: 0;
+        }
+
+        .notif-dropdown-menu > li.notif-body-li {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         @media (min-width: 576px) {
             .notif-dropdown-menu {
-                width: 410px !important;
+                width: 420px !important;
                 max-width: 92vw !important;
                 right: 0 !important;
                 left: auto !important;
                 transform: none !important;
+            }
+
+            .notif-dropdown-menu.is-expanded {
+                width: min(680px, calc(100vw - 2rem)) !important;
+                max-width: calc(100vw - 2rem) !important;
+                max-height: min(84vh, 760px) !important;
             }
         }
 
@@ -182,15 +205,81 @@
                 min-width: 0 !important;
                 margin: 0 !important;
                 transform: none !important;
-                max-height: 82vh !important;
+                max-height: 78vh !important;
                 z-index: 1090 !important;
                 border-radius: 16px !important;
+            }
+
+            .notif-dropdown-menu.is-expanded {
+                top: 10px !important;
+                bottom: 10px !important;
+                left: 8px !important;
+                right: 8px !important;
+                max-height: calc(100vh - 20px) !important;
+                height: calc(100vh - 20px) !important;
             }
         }
 
         .notif-header-bar {
             background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
             border-bottom: 1px solid #eef2f6;
+        }
+
+        .notif-action-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.16s ease;
+            line-height: 1.3;
+        }
+
+        .notif-action-pill:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .notif-action-pill.notif-action-primary {
+            color: #0d6efd;
+            border-color: #dbeafe;
+            background: #eff6ff;
+        }
+
+        .notif-action-pill.notif-action-primary:hover {
+            background: #dbeafe;
+            border-color: #bfdbfe;
+            color: #0a58ca;
+        }
+
+        .notif-action-pill.notif-action-danger {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .notif-action-pill.notif-action-danger:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #b91c1c;
+        }
+
+        .notif-confirm-bar {
+            background: #fef2f2;
+            border-top: 1px solid #fecaca;
+            padding: 9px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         /* Filter Scroll Container with Soft Edge Fade */
@@ -288,15 +377,32 @@
             box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25) !important;
         }
 
-        /* Sleek Thin Scrollbar for Notification Feed */
+        /* Sleek Thin Scrollbar without Windows Up/Down Arrows */
         .notif-list-container {
             max-height: 350px;
             overflow-y: auto;
             overflow-x: hidden;
             padding: 8px;
             background: #fbfcfe;
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 transparent;
+            flex: 1 1 auto;
+        }
+
+        .notif-dropdown-menu.is-expanded .notif-list-container {
+            max-height: calc(min(84vh, 760px) - 150px);
+            padding: 10px 12px;
+        }
+
+        @media (max-width: 575.98px) {
+            .notif-dropdown-menu.is-expanded .notif-list-container {
+                max-height: none;
+            }
+        }
+
+        @supports not selector(::-webkit-scrollbar) {
+            .notif-list-container {
+                scrollbar-width: thin;
+                scrollbar-color: #cbd5e1 transparent;
+            }
         }
 
         .notif-list-container::-webkit-scrollbar {
@@ -322,28 +428,43 @@
             height: 0;
         }
 
-        /* Notification Feed Item */
+        /* Notification Feed Row & Single Delete Action */
+        .notif-row {
+            position: relative;
+            margin-bottom: 6px;
+            transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.22s ease, margin 0.22s ease;
+        }
+
+        .notif-row:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .notif-row.is-removing {
+            opacity: 0;
+            transform: translateX(16px);
+            pointer-events: none;
+        }
+
         .notif-item {
             white-space: normal !important;
             border-radius: 12px !important;
-            border: 1px solid transparent !important;
-            margin-bottom: 6px;
-            transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+            border: 1px solid #eef2f6 !important;
+            transition: background-color 0.18s ease, border-color 0.18s ease;
             text-decoration: none;
             display: flex !important;
             align-items: flex-start;
-            padding: 11px 12px !important;
+            padding: 11px 40px 11px 12px !important;
             position: relative;
             background-color: #ffffff;
         }
 
-        .notif-item:last-of-type {
-            margin-bottom: 0;
+        .notif-row.no-delete .notif-item {
+            padding-right: 12px !important;
         }
 
         .notif-item:hover {
-            background-color: #f1f5f9 !important;
-            border-color: #e2e8f0 !important;
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
             color: inherit !important;
         }
 
@@ -355,6 +476,31 @@
         .notif-item.is-unread:hover {
             background-color: #e6f2ff !important;
             border-color: #bfdbfe !important;
+        }
+
+        .notif-delete-btn {
+            position: absolute;
+            top: 9px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 4;
+            transition: all 0.16s ease;
+            padding: 0;
+            font-size: 0.95rem;
+        }
+
+        .notif-delete-btn:hover {
+            background: #fee2e2;
+            color: #dc2626;
         }
 
         .notif-item-icon {
@@ -390,9 +536,18 @@
             overflow: hidden;
             white-space: normal !important;
             word-break: break-word;
-            line-height: 1.42;
+            line-height: 1.45;
             font-size: 0.78rem;
             color: #475569;
+        }
+
+        .notif-dropdown-menu.is-expanded .notif-item-desc {
+            -webkit-line-clamp: 5;
+            font-size: 0.83rem;
+        }
+
+        .notif-dropdown-menu.is-expanded .notif-item-title {
+            font-size: 0.9rem;
         }
 
         .notif-item:not(.is-unread) .notif-item-desc {
@@ -1739,15 +1894,17 @@
                                         // halaman "Lihat Semua" supaya keduanya tidak pernah
                                         // berbeda pendapat lagi.
                                         $currentUser = auth()->user();
+                                        $canDeleteNotifs = $currentUser && !$currentUser->isStaff();
                                         $hasAdminNotifTable = \Illuminate\Support\Facades\Schema::hasTable('admin_notifications');
                                         $notifQuery = $hasAdminNotifTable ? \App\Models\AdminNotification::untukPengguna($currentUser) : null;
                                         $unreadCount = $notifQuery ? (clone $notifQuery)->where('is_read', false)->count() : 0;
+                                        $recentNotifications = $notifQuery ? (clone $notifQuery)->latest()->take(30)->get() : collect();
                                     @endphp
                                     <span id="notif-badge-bell" class="badge bg-danger rounded-pill badge-notifications position-absolute border border-2 border-white {{ $unreadCount > 0 ? '' : 'd-none' }}" style="top: 1px; right: 0px; font-size: 9.5px; min-width: 18px; height: 18px; padding: 0 4px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end py-0 notif-dropdown-menu">
+                                <ul class="dropdown-menu dropdown-menu-end py-0 notif-dropdown-menu" id="notifDropdownMenu">
                                     <li class="dropdown-menu-header notif-header-bar">
-                                        <div class="d-flex align-items-center justify-content-between pt-3 pb-2 px-3">
+                                        <div class="d-flex align-items-center justify-content-between gap-2 pt-3 pb-2 px-3 flex-wrap">
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-primary" style="width: 30px; height: 30px;">
                                                     <i class="bx bx-bell text-primary fs-6"></i>
@@ -1755,11 +1912,37 @@
                                                 <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.96rem;">Notifikasi</h6>
                                                 <span id="notif-badge-header" class="badge bg-label-primary rounded-pill px-2 py-1 fw-semibold {{ $unreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.7rem;">{{ $unreadCount }} Baru</span>
                                             </div>
-                                            <button type="button" id="btn-mark-all-read" class="btn btn-link btn-sm text-primary text-decoration-none p-0 fw-semibold d-flex align-items-center gap-1 shadow-none notif-mark-all {{ $unreadCount > 0 ? '' : 'd-none' }}" data-url="{{ route('admin.notifications.mark-all-read') }}" style="font-size: 0.76rem;" title="Tandai semua notifikasi sudah dibaca">
-                                                <i class="bx bx-check-double fs-6"></i>
-                                                <span>Tandai Dibaca</span>
-                                            </button>
+                                            <div class="d-flex align-items-center gap-1.5">
+                                                <button type="button" id="btn-mark-all-read" class="notif-action-pill notif-action-primary notif-mark-all {{ $unreadCount > 0 ? '' : 'd-none' }}" data-url="{{ route('admin.notifications.mark-all-read') }}" title="Tandai semua notifikasi sudah dibaca">
+                                                    <i class="bx bx-check-double"></i>
+                                                    <span class="d-none d-sm-inline">Dibaca</span>
+                                                </button>
+                                                @if($canDeleteNotifs)
+                                                    <button type="button" id="btn-delete-all-notifs" class="notif-action-pill notif-action-danger {{ $recentNotifications->isNotEmpty() ? '' : 'd-none' }}" data-url="{{ route('admin.notifications.deleteAll') }}" title="Bersihkan semua notifikasi">
+                                                        <i class="bx bx-trash"></i>
+                                                        <span>Bersihkan</span>
+                                                    </button>
+                                                @endif
+                                                <button type="button" id="btn-toggle-notif-expand" class="notif-action-pill" title="Perbesar panel notifikasi" aria-expanded="false">
+                                                    <i class="bx bx-expand-alt" id="notif-expand-icon"></i>
+                                                    <span id="notif-expand-label">Perbesar</span>
+                                                </button>
+                                            </div>
                                         </div>
+
+                                        @if($canDeleteNotifs)
+                                            <!-- Bar Konfirmasi Hapus Semua (Inline) -->
+                                            <div id="notif-delete-all-confirm" class="notif-confirm-bar d-none">
+                                                <span class="text-danger fw-semibold" style="font-size: 0.76rem;">
+                                                    <i class="bx bx-error-circle me-1"></i>Bersihkan semua notifikasi?
+                                                </span>
+                                                <div class="d-flex align-items-center gap-1.5">
+                                                    <button type="button" id="btn-cancel-delete-all" class="btn btn-xs btn-light border rounded-pill px-2.5 fw-semibold">Batal</button>
+                                                    <button type="button" id="btn-confirm-delete-all" class="btn btn-xs btn-danger rounded-pill px-2.5 fw-semibold">Ya, Hapus Semua</button>
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <!-- Pill Filter Layanan -->
                                         <div class="px-3 pb-2.5 pt-1">
                                             <div class="notif-filter-wrapper">
@@ -1781,12 +1964,9 @@
                                             </div>
                                         </div>
                                     </li>
-                                    <li>
-                                        <div class="notif-list-container">
-                                            @php
-                                                $recentNotifications = $notifQuery ? (clone $notifQuery)->latest()->take(30)->get() : collect();
-                                            @endphp
-                                            @forelse($recentNotifications as $notif)
+                                    <li class="notif-body-li">
+                                        <div class="notif-list-container" id="notifListContainer">
+                                            @foreach($recentNotifications as $notif)
                                             @php
                                                 // Mapping icon, category, label, dan link tujuan
                                                 $cat = 'lainnya';
@@ -1822,37 +2002,44 @@
                                                     $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 }
                                             @endphp
-                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}" data-read-url="{{ route('admin.notifications.mark-as-read', $notif->id) }}">
-                                                <div class="notif-item-icon bg-label-{{ $color }}">
-                                                    <i class="bx {{ $icon }} fs-5 text-{{ $color }}"></i>
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 0;">
-                                                    <div class="d-flex align-items-center justify-content-between gap-2 mb-0.5">
-                                                        <h6 class="mb-0 fw-bold notif-item-title text-truncate">{{ $notif->title }}</h6>
-                                                        @if(!$notif->is_read)
-                                                            <span class="badge badge-dot bg-{{ $color }} flex-shrink-0" style="width: 8px; height: 8px;"></span>
-                                                        @endif
+                                            <div class="notif-row {{ $canDeleteNotifs ? '' : 'no-delete' }}" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}">
+                                                <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}" data-read-url="{{ route('admin.notifications.mark-as-read', $notif->id) }}">
+                                                    <div class="notif-item-icon bg-label-{{ $color }}">
+                                                        <i class="bx {{ $icon }} fs-5 text-{{ $color }}"></i>
                                                     </div>
-                                                    <p class="notif-item-desc mb-0">{{ $notif->message }}</p>
-                                                    <div class="notif-meta-row">
-                                                        <span class="notif-cat-chip">{{ $catLabel }}</span>
-                                                        <span class="d-inline-flex align-items-center gap-1">
-                                                            <i class="bx bx-time-five"></i> {{ $notif->created_at->diffForHumans() }}
-                                                        </span>
+                                                    <div class="flex-grow-1" style="min-width: 0;">
+                                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-0.5">
+                                                            <h6 class="mb-0 fw-bold notif-item-title text-truncate">{{ $notif->title }}</h6>
+                                                            @if(!$notif->is_read)
+                                                                <span class="badge badge-dot bg-{{ $color }} flex-shrink-0" style="width: 8px; height: 8px;"></span>
+                                                            @endif
+                                                        </div>
+                                                        <p class="notif-item-desc mb-0">{{ $notif->message }}</p>
+                                                        <div class="notif-meta-row">
+                                                            <span class="notif-cat-chip">{{ $catLabel }}</span>
+                                                            <span class="d-inline-flex align-items-center gap-1">
+                                                                <i class="bx bx-time-five"></i> {{ $notif->created_at->diffForHumans() }}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </a>
-                                            @empty
-                                            <div class="text-center py-5 px-3 notif-empty-state">
+                                                </a>
+                                                @if($canDeleteNotifs)
+                                                    <button type="button" class="notif-delete-btn" data-delete-url="{{ route('admin.notifications.destroy', $notif->id) }}" title="Hapus notifikasi ini" aria-label="Hapus notifikasi ini">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                @endif
+                                            </div>
+                                            @endforeach
+
+                                            <div class="text-center py-5 px-3 notif-empty-state {{ $recentNotifications->isEmpty() ? '' : 'd-none' }}" id="notifEmptyState">
                                                 <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 56px; height: 56px;">
                                                     <i class="bx bx-bell-off text-muted fs-2"></i>
                                                 </div>
                                                 <h6 class="fw-semibold text-dark mb-1">Belum ada notifikasi</h6>
                                                 <p class="text-muted small mb-0">Semua pemberitahuan aktivitas terbaru akan muncul di sini.</p>
                                             </div>
-                                            @endforelse
 
-                                            <div class="text-center py-5 px-3 d-none notif-filtered-empty">
+                                            <div class="text-center py-5 px-3 d-none notif-filtered-empty" id="notifFilteredEmpty">
                                                 <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 56px; height: 56px;">
                                                     <i class="bx bx-filter-alt text-muted fs-2"></i>
                                                 </div>
@@ -2338,6 +2525,45 @@
                         }
                     }
 
+                    let activeNotifFilter = 'all';
+                    const emptyStateEl = document.getElementById('notifEmptyState');
+                    const filteredEmptyEl = document.getElementById('notifFilteredEmpty');
+                    const btnDeleteAll = document.getElementById('btn-delete-all-notifs');
+                    const confirmDeleteAllBar = document.getElementById('notif-delete-all-confirm');
+                    const btnCancelDeleteAll = document.getElementById('btn-cancel-delete-all');
+                    const btnConfirmDeleteAll = document.getElementById('btn-confirm-delete-all');
+                    const btnToggleExpand = document.getElementById('btn-toggle-notif-expand');
+                    const expandIcon = document.getElementById('notif-expand-icon');
+                    const expandLabel = document.getElementById('notif-expand-label');
+
+                    function applyNotifFilterAndEmptyState() {
+                        const rows = document.querySelectorAll('.notif-row');
+                        let visibleCount = 0;
+
+                        rows.forEach(function(row) {
+                            const cat = row.getAttribute('data-category');
+                            if (activeNotifFilter === 'all' || cat === activeNotifFilter) {
+                                row.style.display = '';
+                                visibleCount++;
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+
+                        if (rows.length === 0) {
+                            if (emptyStateEl) emptyStateEl.classList.remove('d-none');
+                            if (filteredEmptyEl) filteredEmptyEl.classList.add('d-none');
+                            if (btnDeleteAll) btnDeleteAll.classList.add('d-none');
+                            if (confirmDeleteAllBar) confirmDeleteAllBar.classList.add('d-none');
+                        } else {
+                            if (emptyStateEl) emptyStateEl.classList.add('d-none');
+                            if (btnDeleteAll) btnDeleteAll.classList.remove('d-none');
+                            if (filteredEmptyEl) {
+                                filteredEmptyEl.classList.toggle('d-none', visibleCount > 0);
+                            }
+                        }
+                    }
+
                     document.querySelectorAll('.notif-filter-btn').forEach(function(btn) {
                         btn.addEventListener('click', function(e) {
                             e.stopPropagation();
@@ -2354,32 +2580,39 @@
                             });
                             this.classList.add('active');
 
-                            const filter = this.getAttribute('data-filter');
-                            const items = document.querySelectorAll('.notif-item');
-                            const filteredEmpty = document.querySelector('.notif-filtered-empty');
-                            let visibleCount = 0;
-
-                            items.forEach(function(item) {
-                                const cat = item.getAttribute('data-category');
-                                if (filter === 'all' || cat === filter) {
-                                    item.style.setProperty('display', 'flex', 'important');
-                                    visibleCount++;
-                                } else {
-                                    item.style.setProperty('display', 'none', 'important');
-                                }
-                            });
-
-                            if (filteredEmpty) {
-                                if (visibleCount === 0 && items.length > 0) {
-                                    filteredEmpty.classList.remove('d-none');
-                                } else {
-                                    filteredEmpty.classList.add('d-none');
-                                }
-                            }
+                            activeNotifFilter = this.getAttribute('data-filter') || 'all';
+                            applyNotifFilterAndEmptyState();
                         });
                     });
 
-                    // ---- Tandai notifikasi sudah dibaca ----
+                    // ---- Perbesar / Kecilkan Panel Notifikasi ----
+                    function setNotifExpanded(expanded) {
+                        if (!notifDropdownEl) return;
+                        notifDropdownEl.classList.toggle('is-expanded', expanded);
+                        if (btnToggleExpand) {
+                            btnToggleExpand.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                            btnToggleExpand.setAttribute('title', expanded ? 'Kecilkan panel notifikasi' : 'Perbesar panel notifikasi');
+                        }
+                        if (expandIcon) {
+                            expandIcon.classList.toggle('bx-expand-alt', !expanded);
+                            expandIcon.classList.toggle('bx-collapse-alt', expanded);
+                        }
+                        if (expandLabel) {
+                            expandLabel.textContent = expanded ? 'Kecilkan' : 'Perbesar';
+                        }
+                        setTimeout(updateScrollArrows, 240);
+                    }
+
+                    if (btnToggleExpand) {
+                        btnToggleExpand.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const isExpanded = notifDropdownEl && notifDropdownEl.classList.contains('is-expanded');
+                            setNotifExpanded(!isExpanded);
+                        });
+                    }
+
+                    // ---- Tandai notifikasi sudah dibaca & hapus notifikasi ----
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
                     const bellBadge = document.getElementById('notif-badge-bell');
                     const headerBadge = document.getElementById('notif-badge-header');
@@ -2412,6 +2645,8 @@
                     function tandaiItemSelesai(item) {
                         item.classList.remove('is-unread', 'category-rental', 'category-mobil', 'category-fasilitas', 'category-gas', 'category-pasar', 'category-kyc', 'category-mutasi', 'category-laporan');
                         item.setAttribute('data-unread', '0');
+                        const row = item.closest('.notif-row');
+                        if (row) row.setAttribute('data-unread', '0');
                         const dot = item.querySelector('.badge-dot');
                         if (dot) dot.remove();
                     }
@@ -2426,6 +2661,9 @@
                                     updateScrollArrows();
                                 }
                             });
+                            parentDrop.addEventListener('hidden.bs.dropdown', function() {
+                                if (confirmDeleteAllBar) confirmDeleteAllBar.classList.add('d-none');
+                            });
                         }
                     }
 
@@ -2437,7 +2675,7 @@
 
                             btnMarkAll.disabled = true;
                             const originalHtml = btnMarkAll.innerHTML;
-                            btnMarkAll.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" style="width: 12px; height: 12px;"></span> Memproses...';
+                            btnMarkAll.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 11px; height: 11px;"></span>';
 
                             fetch(btnMarkAll.getAttribute('data-url') || '{{ route("admin.notifications.mark-all-read") }}', {
                                 method: 'POST',
@@ -2454,15 +2692,122 @@
                                 if (data && data.success) {
                                     document.querySelectorAll('.notif-item.is-unread').forEach(tandaiItemSelesai);
                                     pasangPenghitung(0);
-                                } else {
-                                    btnMarkAll.disabled = false;
-                                    btnMarkAll.innerHTML = originalHtml;
                                 }
+                                btnMarkAll.disabled = false;
+                                btnMarkAll.innerHTML = originalHtml;
                             })
                             .catch(err => {
                                 console.error('Gagal menandai semua notifikasi:', err);
                                 btnMarkAll.disabled = false;
                                 btnMarkAll.innerHTML = originalHtml;
+                            });
+                        });
+                    }
+
+                    // Handler hapus notifikasi satu per satu
+                    document.querySelectorAll('.notif-delete-btn').forEach(function (btn) {
+                        btn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            const row = this.closest('.notif-row');
+                            const deleteUrl = this.getAttribute('data-delete-url');
+                            if (!row || !deleteUrl) return;
+
+                            const wasUnread = row.getAttribute('data-unread') === '1';
+                            this.disabled = true;
+                            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 12px; height: 12px;"></span>';
+
+                            fetch(deleteUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({ _method: 'DELETE' })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.success) {
+                                    row.classList.add('is-removing');
+                                    if (wasUnread) {
+                                        pasangPenghitung(Math.max(0, bacaPenghitung() - 1));
+                                    }
+                                    setTimeout(function () {
+                                        row.remove();
+                                        applyNotifFilterAndEmptyState();
+                                    }, 200);
+                                } else {
+                                    this.disabled = false;
+                                    this.innerHTML = '<i class="bx bx-trash"></i>';
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Gagal menghapus notifikasi:', err);
+                                this.disabled = false;
+                                this.innerHTML = '<i class="bx bx-trash"></i>';
+                            });
+                        });
+                    });
+
+                    // Handler tombol "Bersihkan" (Hapus Semua dengan konfirmasi inline)
+                    if (btnDeleteAll && confirmDeleteAllBar) {
+                        btnDeleteAll.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            confirmDeleteAllBar.classList.toggle('d-none');
+                        });
+                    }
+
+                    if (btnCancelDeleteAll && confirmDeleteAllBar) {
+                        btnCancelDeleteAll.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            confirmDeleteAllBar.classList.add('d-none');
+                        });
+                    }
+
+                    if (btnConfirmDeleteAll && btnDeleteAll) {
+                        btnConfirmDeleteAll.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            const deleteAllUrl = btnDeleteAll.getAttribute('data-url');
+                            if (!deleteAllUrl) return;
+
+                            const originalText = this.innerHTML;
+                            this.disabled = true;
+                            this.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" style="width: 11px; height: 11px;"></span>Menghapus...';
+
+                            fetch(deleteAllUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({ _method: 'DELETE' })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.success) {
+                                    document.querySelectorAll('.notif-row').forEach(function (r) {
+                                        r.remove();
+                                    });
+                                    pasangPenghitung(0);
+                                    if (confirmDeleteAllBar) confirmDeleteAllBar.classList.add('d-none');
+                                    applyNotifFilterAndEmptyState();
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Gagal membersihkan notifikasi:', err);
+                            })
+                            .finally(() => {
+                                this.disabled = false;
+                                this.innerHTML = originalText;
                             });
                         });
                     }
