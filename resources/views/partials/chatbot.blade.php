@@ -100,10 +100,12 @@
 
     .chatbot-window {
         position: fixed;
-        bottom: 110px;
-        right: 30px;
+        bottom: 104px;
+        right: 28px;
         width: 350px;
-        height: 500px;
+        max-width: calc(100vw - 24px);
+        height: 480px;
+        max-height: calc(100vh - 130px);
         background: #fff;
         border-radius: 20px;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
@@ -114,8 +116,15 @@
         transform: scale(0.9);
         opacity: 0;
         pointer-events: none;
-        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, width 0.22s ease, height 0.22s ease, max-height 0.22s ease;
         transform-origin: bottom right;
+    }
+
+    .chatbot-window.is-expanded {
+        width: min(660px, calc(100vw - 2rem));
+        max-width: calc(100vw - 2rem);
+        height: min(82vh, 720px);
+        max-height: calc(100vh - 96px);
     }
 
     .chatbot-window.active {
@@ -127,10 +136,38 @@
     .chatbot-header {
         background: linear-gradient(135deg, #1e3a8a, #2563eb);
         color: white;
-        padding: 15px 20px;
+        padding: 13px 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 8px;
+    }
+
+    .chatbot-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .chatbot-expand-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        color: #ffffff;
+        border-radius: 999px;
+        padding: 4px 9px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+
+    .chatbot-expand-btn:hover {
+        background: rgba(255, 255, 255, 0.28);
     }
 
     .chatbot-header-info {
@@ -245,13 +282,16 @@
         background: #f1f5f9;
         border: none;
         border-radius: 20px;
-        padding: 10px 15px;
+        padding: 9px 15px;
         font-size: 14px;
+        line-height: 1.4;
         resize: none;
+        overflow-y: hidden;
         max-height: 100px;
         min-height: 40px;
         outline: none;
         font-family: inherit;
+        box-sizing: border-box;
     }
     
     .chatbot-input-area textarea:focus {
@@ -314,8 +354,15 @@
             width: calc(100% - 24px) !important;
             right: 12px !important;
             bottom: 84px !important;
-            height: calc(100vh - 120px) !important;
-            max-height: 520px !important;
+            height: calc(100vh - 140px) !important;
+            max-height: 480px !important;
+        }
+        .chatbot-window.is-expanded {
+            width: calc(100vw - 16px) !important;
+            right: 8px !important;
+            bottom: 78px !important;
+            height: calc(100vh - 94px) !important;
+            max-height: calc(100vh - 94px) !important;
         }
         
         .chatbot-fab {
@@ -355,18 +402,24 @@
                 <div class="chatbot-subtitle"><span class="online-dot"></span> Online - Siap Membantu</div>
             </div>
         </div>
-        <button class="chatbot-close" id="chatbot-close">&times;</button>
+        <div class="chatbot-header-actions">
+            <button type="button" class="chatbot-expand-btn" id="chatbot-expand" title="Perbesar panel assistant" aria-expanded="false">
+                <svg id="chatbot-expand-icon" width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
+                <span id="chatbot-expand-label">Perbesar</span>
+            </button>
+            <button class="chatbot-close" id="chatbot-close" title="Tutup">&times;</button>
+        </div>
     </div>
     
     <div class="chatbot-messages" id="chatbot-messages">
         <!-- Default Welcome Message -->
         <div class="msg-bubble msg-bot">
-            Halo! Saya SegiDaerah Assistant.<br><br>Ada yang bisa saya bantu hari ini seputar layanan di Kecamatan Bengkalis?
+            Halo! Saya <strong>SegiDaerah Assistant</strong>.<br><br>Silakan tanya seputar layanan dan cara penggunaan aplikasi SegiDaerah, maupun pertanyaan umum lainnya!
         </div>
     </div>
     
     <div class="chatbot-input-area">
-        <textarea id="chatbot-input" placeholder="Ketik pesan Anda..." rows="1" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+        <textarea id="chatbot-input" placeholder="Ketik pesan Anda..." rows="1" oninput="this.style.height = '40px'; const h = Math.min(this.scrollHeight, 100); this.style.height = h + 'px'; this.style.overflowY = this.scrollHeight > 100 ? 'auto' : 'hidden';"></textarea>
         <button class="chatbot-send-btn" id="chatbot-send" aria-label="Send Message">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
         </button>
@@ -379,6 +432,9 @@
     const fab = document.getElementById('chatbot-fab');
     const windowEl = document.getElementById('chatbot-window');
     const closeBtn = document.getElementById('chatbot-close');
+    const expandBtn = document.getElementById('chatbot-expand');
+    const expandIcon = document.getElementById('chatbot-expand-icon');
+    const expandLabel = document.getElementById('chatbot-expand-label');
     const input = document.getElementById('chatbot-input');
     const sendBtn = document.getElementById('chatbot-send');
     const messagesContainer = document.getElementById('chatbot-messages');
@@ -388,6 +444,20 @@
     let chatHistory = [];
     let isDragging = false;
     let startX, startY, initialX, initialY;
+
+    function formatAssistantReply(rawText) {
+        const escaped = String(rawText ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        return escaped
+            .replace(/`([^`]+)`/g, '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px;">$1</code>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>');
+    }
     
     function saveHistory() {
         sessionStorage.setItem('SiladesBeng_chat_history', JSON.stringify(chatHistory));
@@ -402,11 +472,7 @@
                 if (msg.role === 'user') {
                     appendMessage(msg.text, 'user');
                 } else if (msg.role === 'model') {
-                    let formattedReply = msg.text
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/\n/g, '<br>');
-                    appendMessage(formattedReply, 'bot', true);
+                    appendMessage(formatAssistantReply(msg.text), 'bot', true);
                 }
             });
         } catch(e) {}
@@ -573,6 +639,20 @@
         sessionStorage.setItem('SiladesBeng_chat_open', windowEl.classList.contains('active'));
     });
 
+    if (expandBtn) {
+        expandBtn.addEventListener('click', () => {
+            const expanded = windowEl.classList.toggle('is-expanded');
+            expandBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            expandBtn.setAttribute('title', expanded ? 'Kecilkan panel assistant' : 'Perbesar panel assistant');
+            if (expandLabel) expandLabel.textContent = expanded ? 'Kecilkan' : 'Perbesar';
+            if (expandIcon) {
+                expandIcon.innerHTML = expanded
+                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"></path>'
+                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>';
+            }
+        });
+    }
+
     closeBtn.addEventListener('click', () => {
         windowEl.classList.remove('active');
         sessionStorage.setItem('SiladesBeng_chat_open', 'false');
@@ -586,14 +666,15 @@
         appendMessage(text, 'user');
         chatHistory.push({role: 'user', text: text});
         saveHistory();
-        
+
         input.value = '';
-        input.style.height = '40px'; 
+        input.style.height = '40px';
+        input.style.overflowY = 'hidden';
         input.focus();
-        
+
         input.disabled = true;
         sendBtn.disabled = true;
-        
+
         const loadingId = appendLoading();
         scrollToBottom();
 
@@ -601,11 +682,12 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({
                 message: text,
-                history: chatHistory.slice(-10) // Only send last 10 messages for context
+                history: chatHistory.slice(-10)
             })
         })
         .then(response => response.json())
@@ -614,19 +696,13 @@
             input.disabled = false;
             sendBtn.disabled = false;
             input.focus();
-            
+
             if (data.reply) {
-                // Parse markdown-like bold (**) and newlines to HTML
-                let formattedReply = data.reply
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    .replace(/\n/g, '<br>');
-                
-                appendMessage(formattedReply, 'bot', true);
+                appendMessage(formatAssistantReply(data.reply), 'bot', true);
                 chatHistory.push({role: 'model', text: data.reply});
                 saveHistory();
-            } else if (data.error) {
-                appendMessage("âŒ Error: " + data.error, 'bot');
+            } else if (data.error || data.message) {
+                appendMessage('Maaf, terjadi kendala: ' + (data.error || data.message), 'bot');
             }
         })
         .catch(error => {
@@ -634,7 +710,7 @@
             removeLoading(loadingId);
             input.disabled = false;
             sendBtn.disabled = false;
-            appendMessage("âŒ Maaf, koneksi terputus. Silakan periksa jaringan internet Anda.", 'bot');
+            appendMessage('Maaf, koneksi terputus. Silakan periksa jaringan internet Anda lalu coba lagi.', 'bot');
         });
     }
 
