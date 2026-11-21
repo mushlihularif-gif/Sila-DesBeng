@@ -164,7 +164,25 @@ class RegionSettingController extends Controller
             }
         }
 
+        $previousActiveServiceIds = $region->services()
+            ->wherePivot('is_active', true)
+            ->pluck('services.id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
         $region->services()->sync($syncData);
+
+        // Broadcast notifikasi layanan baru ke warga/RT/RW & Super Admin hanya untuk layanan yang baru saja diaktifkan
+        $newlyActivatedIds = array_values(array_diff(
+            array_map('intval', array_keys($syncData)),
+            $previousActiveServiceIds
+        ));
+        if (! empty($newlyActivatedIds)) {
+            Service::whereIn('id', $newlyActivatedIds)
+                ->where('slug', '!=', 'pengumuman')
+                ->get()
+                ->each(fn (Service $svc) => \App\Services\NotificationService::broadcastServiceActivated($region, $svc));
+        }
 
         return redirect()->back()->with('success', 'Pengaturan Wilayah berhasil diperbarui.');
     }

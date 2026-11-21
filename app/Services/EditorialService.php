@@ -171,6 +171,28 @@ class EditorialService
             ->each(function (User $recipient) use ($item, $title, $message) {
                 if ($this->access->canManage($recipient, $item)) $this->notify($item, $recipient->id, $title, $message);
             });
+
+        // Kirim juga ke lonceng Admin Desa & Staf Kabar Informasi Daerah (admin_notifications)
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('admin_notifications') && ! empty($line)) {
+                $villageId = Region::whereIn('id', $line)
+                    ->whereIn('type', ['desa', 'kelurahan'])
+                    ->value('id') ?? $region;
+
+                if ($villageId) {
+                    \App\Models\AdminNotification::create([
+                        'type' => 'announcement_submission',
+                        'reference_id' => $item->id,
+                        'region_id' => $villageId,
+                        'title' => $title . ': ' . \Illuminate\Support\Str::limit((string) ($item->title ?? 'Kabar Baru'), 80),
+                        'message' => $message,
+                        'is_read' => false,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal membuat AdminNotification untuk kiriman kabar: ' . $e->getMessage());
+        }
     }
 
     public function notifyAuthor(Announcement $item, string $title, string $message, bool $published = false): void

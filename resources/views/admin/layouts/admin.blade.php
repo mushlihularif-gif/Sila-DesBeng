@@ -2110,20 +2110,47 @@
                                             </div>
                                         @endif
 
-                                        <!-- Pill Filter Layanan -->
+                                        <!-- Pill Filter Layanan (Dinamis Sesuai Peran & Hak Akses) -->
+                                        @php
+                                            $bellFilters = [['key' => 'all', 'label' => 'Semua']];
+                                            if ($currentUser && $currentUser->bolehAksesPlatform()) {
+                                                $bellFilters[] = ['key' => 'kemitraan', 'label' => 'Kemitraan'];
+                                                $bellFilters[] = ['key' => 'keuangan', 'label' => 'Penarikan Saldo'];
+                                                $bellFilters[] = ['key' => 'lainnya', 'label' => 'Layanan & Sistem'];
+                                            } elseif ($currentUser && $currentUser->isStaff()) {
+                                                $hasChatUnit = $currentUser->hasUnitPermission('gas')
+                                                    || $currentUser->hasUnitPermission('sewa_alat')
+                                                    || $currentUser->hasUnitPermission('sewa_mobil')
+                                                    || $currentUser->hasUnitPermission('fasilitas_umum');
+                                                if ($hasChatUnit) $bellFilters[] = ['key' => 'chat', 'label' => 'Chat Warga'];
+                                                if ($currentUser->hasUnitPermission('sewa_alat')) $bellFilters[] = ['key' => 'rental', 'label' => 'Sewa Alat'];
+                                                if ($currentUser->hasUnitPermission('gas')) $bellFilters[] = ['key' => 'gas', 'label' => 'Gas LPG'];
+                                                if ($currentUser->hasUnitPermission('sewa_mobil')) $bellFilters[] = ['key' => 'mobil', 'label' => 'Transportasi'];
+                                                if ($currentUser->hasUnitPermission('fasilitas_umum')) $bellFilters[] = ['key' => 'fasilitas', 'label' => 'Fasilitas'];
+                                                if ($currentUser->hasUnitPermission('kabar_informasi')) $bellFilters[] = ['key' => 'kabar', 'label' => 'Kabar'];
+                                            } else {
+                                                $bellFilters[] = ['key' => 'chat', 'label' => 'Chat Warga'];
+                                                $bellFilters[] = ['key' => 'gas', 'label' => 'Gas LPG'];
+                                                $bellFilters[] = ['key' => 'rental', 'label' => 'Sewa Alat'];
+                                                $bellFilters[] = ['key' => 'mobil', 'label' => 'Transportasi'];
+                                                $bellFilters[] = ['key' => 'fasilitas', 'label' => 'Fasilitas'];
+                                                $bellFilters[] = ['key' => 'kabar', 'label' => 'Kabar'];
+                                                $bellFilters[] = ['key' => 'kyc', 'label' => 'KYC'];
+                                                $bellFilters[] = ['key' => 'mutasi', 'label' => 'Mutasi'];
+                                                $bellFilters[] = ['key' => 'kemitraan', 'label' => 'Kemitraan'];
+                                                $bellFilters[] = ['key' => 'keuangan', 'label' => 'Keuangan'];
+                                                $bellFilters[] = ['key' => 'akun', 'label' => 'Akun'];
+                                            }
+                                        @endphp
                                         <div class="px-3 pb-2.5 pt-1">
                                             <div class="notif-filter-wrapper">
                                                 <button type="button" class="notif-scroll-arrow notif-scroll-prev d-none" aria-label="Geser ke kiri">
                                                     <i class="bx bx-chevron-left"></i>
                                                 </button>
                                                 <div class="notif-filter-scroll">
-                                                    <button type="button" class="btn btn-sm notif-filter-btn active" data-filter="all">Semua</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="rental">Sewa Alat</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="gas">Gas LPG</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mobil">Transportasi</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="fasilitas">Fasilitas</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="kyc">Verifikasi KYC</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mutasi">Mutasi</button>
+                                                    @foreach($bellFilters as $fIdx => $fItem)
+                                                        <button type="button" class="btn btn-sm notif-filter-btn {{ $fIdx === 0 ? 'active' : '' }}" data-filter="{{ $fItem['key'] }}">{{ $fItem['label'] }}</button>
+                                                    @endforeach
                                                 </div>
                                                 <button type="button" class="notif-scroll-arrow notif-scroll-next" aria-label="Geser ke kanan">
                                                     <i class="bx bx-chevron-right"></i>
@@ -2135,39 +2162,12 @@
                                         <div class="notif-list-container" id="notifListContainer">
                                             @foreach($recentNotifications as $notif)
                                             @php
-                                                // Mapping icon, category, label, dan link tujuan
-                                                $cat = 'lainnya';
-                                                $catLabel = 'Aktivitas';
-                                                $icon = 'bx-bell';
-                                                $color = 'primary';
-
-                                                if (in_array($notif->type, ['rental_request', 'rental_order', 'rental'])) {
-                                                    $cat = 'rental'; $catLabel = 'Sewa Alat'; $icon = 'bx-wrench'; $color = 'warning';
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => 'rental']);
-                                                } elseif (in_array($notif->type, ['cancellation_request', 'mobil_order', 'rental_mobil', 'mobil'])) {
-                                                    $cat = 'mobil'; $catLabel = 'Transportasi'; $icon = 'bx-car'; $color = 'info';
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => 'mobil']);
-                                                } elseif (in_array($notif->type, ['fasilitas_order', 'rental_fasilitas', 'fasilitas'])) {
-                                                    $cat = 'fasilitas'; $catLabel = 'Fasilitas'; $icon = 'bx-building-house'; $color = 'success';
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => 'fasilitas']);
-                                                } elseif (in_array($notif->type, ['gas_order', 'gas'])) {
-                                                    $cat = 'gas'; $catLabel = 'Gas LPG'; $icon = 'bxs-gas-pump'; $color = 'danger';
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => 'gas']);
-                                                } elseif (in_array($notif->type, ['pasar_order', 'pasar', 'pasar_daerah'])) {
-                                                    $cat = 'pasar'; $catLabel = 'Layanan'; $icon = 'bx-store-alt'; $color = 'primary';
-                                                    $targetUrl = route('admin.notifications.index');
-                                                } elseif (in_array($notif->type, ['kyc', 'kyc_verification'])) {
-                                                    $cat = 'kyc'; $catLabel = 'Verifikasi KYC'; $icon = 'bx-id-card'; $color = 'info';
-                                                    $targetUrl = ($notif->reference_id && Route::has('admin.kyc.show')) ? route('admin.kyc.show', $notif->reference_id) : route('admin.kyc.index');
-                                                } elseif ($notif->type === 'mutasi') {
-                                                    $cat = 'mutasi'; $catLabel = 'Mutasi'; $icon = 'bx-user-pin'; $color = 'secondary';
-                                                    $targetUrl = route('admin.warga.mutasi.index');
-                                                } elseif (in_array($notif->type, ['laporan', 'pengumuman'])) {
-                                                    $cat = 'laporan'; $catLabel = 'Laporan'; $icon = 'bx-message-square-error'; $color = 'danger';
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
-                                                } else {
-                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
-                                                }
+                                                $meta = $notif->resolvePresentation($currentUser);
+                                                $cat = $meta['category'];
+                                                $catLabel = $meta['label'];
+                                                $icon = $meta['icon'];
+                                                $color = $meta['color'];
+                                                $targetUrl = $meta['url'];
                                             @endphp
                                             <div class="notif-row {{ $canDeleteNotifs ? '' : 'no-delete' }}" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}">
                                                 <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}" data-read-url="{{ route('admin.notifications.mark-as-read', $notif->id) }}">
@@ -2216,8 +2216,8 @@
                                         </div>
                                     </li>
                                     <li class="dropdown-menu-footer border-top bg-white">
-                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item notif-footer-link">
-                                            <span>Lihat Semua Aktivitas</span>
+                                        <a href="{{ route('admin.notifications.index') }}" class="dropdown-item notif-footer-link">
+                                            <span>Lihat Semua Notifikasi</span>
                                             <i class="bx bx-right-arrow-alt fs-5"></i>
                                         </a>
                                     </li>

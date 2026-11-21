@@ -150,6 +150,33 @@ class AuthController extends Controller
             if (($tempData['otp_method'] ?? 'email') === 'whatsapp') {
                 app(\App\Services\NotificationDeliveryService::class)->recordVerifiedPhone($user, $tempData['phone']);
             }
+
+            // Notifikasi sambutan untuk warga baru & pemberitahuan untuk Admin Desa
+            try {
+                \App\Models\Notification::create([
+                    'user_id' => $user->id,
+                    'type' => 'akun_baru',
+                    'title' => 'Selamat Datang di SegiDaerah!',
+                    'message' => 'Akun Anda berhasil didaftarkan. Silakan lengkapi verifikasi identitas (KYC e-KTP) untuk menikmati seluruh layanan desa.',
+                    'link' => route('kyc.index'),
+                    'icon' => 'bx bx-user-check',
+                    'is_read' => false,
+                    'sent_at' => now(),
+                ]);
+                if ($user->region_id && \Illuminate\Support\Facades\Schema::hasTable('admin_notifications')) {
+                    \App\Models\AdminNotification::create([
+                        'type' => 'warga_baru',
+                        'reference_id' => $user->id,
+                        'region_id' => $user->region_id,
+                        'title' => 'Warga Baru Terdaftar',
+                        'message' => ($user->name ?: $user->username) . ' baru saja mendaftar akun warga di wilayah Anda.',
+                        'is_read' => false,
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Gagal mengirim notifikasi registrasi akun baru: ' . $e->getMessage());
+            }
+
             session()->forget('temp_registration');
             Auth::login($user, true);
             $request->session()->regenerate();

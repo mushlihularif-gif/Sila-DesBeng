@@ -153,11 +153,26 @@ class ActivityController extends Controller
             $regionId = $order->fasilitas->region_id ?? null;
         }
 
-        // Create notification for admin
+        $cancelType = match ($type) {
+            'gas' => 'cancellation_gas',
+            'rental' => 'cancellation_rental',
+            'mobil' => 'cancellation_mobil',
+            'fasilitas' => 'cancellation_fasilitas',
+            default => 'cancellation_request',
+        };
+        $unitLabel = match ($type) {
+            'gas' => 'Gas LPG',
+            'rental' => 'Sewa Alat',
+            'mobil' => 'Sewa Transportasi',
+            'fasilitas' => 'Fasilitas Umum',
+            default => 'Layanan',
+        };
+
+        // Create notification for admin desa & staff unit terkait
         \App\Models\AdminNotification::create([
-            'title' => 'Permintaan Pembatalan Pesanan',
-            'message' => "User " . Auth::user()->name . " mengajukan pembatalan pesanan #{$order->order_number}. Alasan: {$request->reason}",
-            'type' => 'cancellation_request',
+            'title' => "Permintaan Pembatalan {$unitLabel}",
+            'message' => "Warga " . Auth::user()->name . " mengajukan pembatalan pesanan #{$order->order_number}. Alasan: {$request->reason}",
+            'type' => $cancelType,
             'reference_id' => $order->id,
             'region_id' => $regionId,
             'is_read' => false,

@@ -61,8 +61,26 @@
                                         
                                         switch($notification->type) {
                                             case 'pesan_admin':
-                                                $bgClass = 'bg-gradient-to-br from-purple-100 to-purple-200';
-                                                $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z" fill="url(#grad1)"/><path d="M8 12H8.01M12 12H12.01M16 12H16.01" stroke="white" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="grad1" x1="2" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#9333EA"/><stop offset="100%" stop-color="#C084FC"/></linearGradient></defs></svg>';
+                                            case 'chat_reply':
+                                                $bgClass = 'bg-gradient-to-br from-sky-100 to-blue-200';
+                                                $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z" fill="url(#grad1)"/><path d="M8 12H8.01M12 12H12.01M16 12H16.01" stroke="white" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="grad1" x1="2" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#0284C7"/><stop offset="100%" stop-color="#38BDF8"/></linearGradient></defs></svg>';
+                                                break;
+                                            case 'produk_baru':
+                                            case 'stok_update':
+                                            case 'layanan_baru':
+                                                $bgClass = 'bg-gradient-to-br from-indigo-100 to-blue-200';
+                                                $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 8L12 3L3 8V16L12 21L21 16V8Z" fill="url(#grad_prod)"/><path d="M3 8L12 13L21 8M12 13V21" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="grad_prod" x1="3" y1="3" x2="21" y2="21"><stop offset="0%" stop-color="#2563EB"/><stop offset="100%" stop-color="#60A5FA"/></linearGradient></defs></svg>';
+                                                break;
+                                            case 'berita':
+                                            case 'pengumuman':
+                                            case 'kabar_status':
+                                                $bgClass = 'bg-gradient-to-br from-teal-100 to-cyan-200';
+                                                $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="16" rx="3" fill="url(#grad_news)"/><path d="M7 9H17M7 13H14M7 17H11" stroke="white" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="grad_news" x1="3" y1="4" x2="21" y2="20"><stop offset="0%" stop-color="#0D9488"/><stop offset="100%" stop-color="#2DD4BF"/></linearGradient></defs></svg>';
+                                                break;
+                                            case 'akun_baru':
+                                            case 'kemitraan_submitted':
+                                                $bgClass = 'bg-gradient-to-br from-violet-100 to-indigo-200';
+                                                $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="url(#grad_acc)"/><path d="M4 20C4 16.6863 7.58172 14 12 14C16.4183 14 20 16.6863 20 20" stroke="url(#grad_acc)" stroke-width="2.5" stroke-linecap="round"/><defs><linearGradient id="grad_acc" x1="4" y1="4" x2="20" y2="20"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#8B5CF6"/></linearGradient></defs></svg>';
                                                 break;
                                             case 'kyc_submission':
                                                 $bgClass = 'bg-gradient-to-br from-amber-100 to-amber-200';

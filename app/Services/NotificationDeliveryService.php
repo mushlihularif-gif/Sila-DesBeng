@@ -17,11 +17,11 @@ class NotificationDeliveryService
     {
         return match (true) {
             $type === 'berita' => 'news', $type === 'pengumuman' => 'announcements',
-            str_contains($type,'kabar') => 'review',
-            preg_match('/kyc|mutasi|role_|kemitraan/', $type) === 1 => 'account',
-            preg_match('/produk|product|stok_update/', $type) === 1 => 'market',
+            str_contains($type,'kabar') || $type === 'announcement_submission' => 'review',
+            preg_match('/kyc|mutasi|role_|kemitraan|akun_baru|warga_baru/', $type) === 1 => 'account',
+            preg_match('/produk|product|stok_update|layanan_baru/', $type) === 1 => 'market',
             preg_match('/laporan/', $type) === 1 => 'reports',
-            preg_match('/order|pesanan|rental|approval|rejection|stock|payment|status_update|status_berubah|cancellation|delivery_proof/', $type) === 1 => 'orders',
+            preg_match('/order|pesanan|rental|approval|rejection|stock|payment|status_update|status_berubah|cancellation|delivery_proof|unit_chat|chat_reply/', $type) === 1 => 'orders',
             default => 'other',
         };
     }
@@ -79,7 +79,7 @@ class NotificationDeliveryService
     public function enqueueAdmin(AdminNotification $notification): void
     {
         if (!$this->available() || $this->isRetiredMarketNotice($notification)) return;
-        User::whereIn('role',['super_admin', 'admin_desa', 'admin_rw', 'admin_rt'])
+        User::whereIn('role',['super_admin', 'admin_desa', 'admin_rw', 'admin_rt', 'staff'])
             ->chunkById(100,function ($users) use ($notification) {
                 foreach ($users as $user) {
                     if (AdminNotification::untukPengguna($user)->whereKey($notification->id)->exists())
@@ -215,7 +215,7 @@ class NotificationDeliveryService
         if ($source instanceof AdminNotification) {
             $type = $this->adminOrderType($source);
             if ($type) return route('admin.aktivitas.permintaan-pengajuan.show',['id'=>$source->reference_id,'type'=>$type]);
-            return route('admin.notifications.index');
+            return $source->resolvePresentation()['url'] ?? route('admin.notifications.index');
         }
         $link = $source->link;
         if ($link) {

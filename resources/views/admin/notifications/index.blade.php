@@ -109,6 +109,7 @@
                         </thead>
                         <tbody>
                             @foreach($notifications as $notification)
+                                @php $meta = $notification->resolvePresentation(auth()->user()); @endphp
                                 <tr class="{{ !$notification->is_read ? 'bg-primary bg-opacity-10' : '' }}">
                                     <td class="ps-4 py-3" style="width: 130px;">
                                         @if(!$notification->is_read)
@@ -122,17 +123,20 @@
                                         @endif
                                     </td>
                                     <td class="py-3">
-                                        <div class="fw-bold text-dark mb-0.5">{{ $notification->title }}</div>
-                                        <p class="text-muted mb-1 small">{{ Str::limit($notification->message, 120) }}</p>
-                                        <span class="badge bg-light text-secondary border fw-medium" style="font-size: 0.7rem;">
-                                            {{ ucfirst(str_replace('_', ' ', (string) $notification->type)) }}
+                                        <a href="{{ $meta['url'] }}" class="fw-bold text-dark text-decoration-none d-inline-block mb-0.5">{{ $notification->title }}</a>
+                                        <p class="text-muted mb-1 small">{{ Str::limit($notification->message, 140) }}</p>
+                                        <span class="badge bg-label-{{ $meta['color'] }} rounded-pill fw-medium" style="font-size: 0.7rem;">
+                                            <i class="bx {{ $meta['icon'] }} me-1"></i>{{ $meta['label'] }}
                                         </span>
                                     </td>
                                     <td class="py-3 text-nowrap" style="width: 160px;">
                                         <div class="fw-semibold text-dark small">{{ $notification->created_at->locale('id')->isoFormat('D MMM Y') }}</div>
                                         <small class="text-muted">{{ $notification->created_at->format('H:i') }} WIB</small>
                                     </td>
-                                    <td class="text-end pe-4 py-3 text-nowrap" style="width: 120px;">
+                                    <td class="text-end pe-4 py-3 text-nowrap" style="width: 170px;">
+                                        <a href="{{ $meta['url'] }}" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 me-1" title="Buka halaman terkait">
+                                            <i class="bx bx-link-external me-0.5"></i>Buka
+                                        </a>
                                         @if(!$notification->is_read)
                                             <form action="{{ route('admin.notifications.mark-as-read', $notification->id) }}" method="POST" class="d-inline">
                                                 @csrf
@@ -161,9 +165,15 @@
                 {{-- Mobile Cards --}}
                 <div class="d-md-none p-3 d-flex flex-column gap-2.5">
                     @foreach($notifications as $notification)
+                        @php $meta = $notification->resolvePresentation(auth()->user()); @endphp
                         <div class="p-3 rounded-4 border {{ !$notification->is_read ? 'bg-primary bg-opacity-10 border-primary border-opacity-25' : 'bg-white' }}">
                             <div class="d-flex justify-content-between align-items-start gap-2 mb-1.5">
-                                <span class="fw-bold text-dark small">{{ $notification->title }}</span>
+                                <div class="min-w-0">
+                                    <span class="badge bg-label-{{ $meta['color'] }} rounded-pill mb-1" style="font-size: 0.66rem;">
+                                        <i class="bx {{ $meta['icon'] }} me-0.5"></i>{{ $meta['label'] }}
+                                    </span>
+                                    <div class="fw-bold text-dark small">{{ $notification->title }}</div>
+                                </div>
                                 @if(!$notification->is_read)
                                     <span class="badge bg-label-danger rounded-pill flex-shrink-0" style="font-size: 0.68rem;">Baru</span>
                                 @else
@@ -171,11 +181,14 @@
                                 @endif
                             </div>
                             <p class="text-muted small mb-2" style="word-break: break-word;">{{ $notification->message }}</p>
-                            <div class="d-flex justify-content-between align-items-center gap-2 pt-2 border-top">
+                            <div class="d-flex justify-content-between align-items-center gap-2 pt-2 border-top flex-wrap">
                                 <small class="text-muted" style="font-size: 0.72rem;">
                                     <i class="bx bx-time-five me-1"></i>{{ $notification->created_at->diffForHumans() }}
                                 </small>
                                 <div class="d-flex gap-1.5">
+                                    <a href="{{ $meta['url'] }}" class="btn btn-xs btn-outline-primary rounded-pill px-2.5">
+                                        <i class="bx bx-link-external me-0.5"></i>Buka
+                                    </a>
                                     @if(!$notification->is_read)
                                         <form action="{{ route('admin.notifications.mark-as-read', $notification->id) }}" method="POST" class="d-inline">
                                             @csrf

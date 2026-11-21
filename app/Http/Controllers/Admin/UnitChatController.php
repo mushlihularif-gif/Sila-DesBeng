@@ -133,9 +133,27 @@ class UnitChatController extends Controller
             ], 404);
         }
 
-        // Reset unread count for admin when opened
+        // Reset unread count for admin when opened & tandai notifikasi chat terkait sebagai dibaca
         if ((int) $session->unread_admin_count > 0) {
             $session->update(['unread_admin_count' => 0]);
+        }
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('admin_notifications')) {
+                $chatNotifType = [
+                    'gas' => 'unit_chat_gas',
+                    'penyewaan' => 'unit_chat_penyewaan',
+                    'mobil' => 'unit_chat_mobil',
+                    'fasilitas_umum' => 'unit_chat_fasilitas',
+                ][$service] ?? ('unit_chat_' . $service);
+
+                \App\Models\AdminNotification::where('type', $chatNotifType)
+                    ->where('reference_id', $session->id)
+                    ->where('region_id', $session->region_id)
+                    ->where('is_read', false)
+                    ->update(['is_read' => true]);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal menandai notifikasi chat sebagai dibaca: ' . $e->getMessage());
         }
 
         $session->load('user:id,name,avatar');
@@ -322,6 +340,14 @@ class UnitChatController extends Controller
             'unread_user_count' => $session->unread_user_count + 1,
             'status' => 'escalated',
         ]);
+
+        // Kirim notifikasi balasan chat ke akun warga / RT / RW jika sedang login
+        \App\Services\NotificationService::notifyUserChatReply(
+            (string) $service,
+            $session,
+            (string) ($admin->name ?? 'Petugas Layanan'),
+            (string) $request->message
+        );
 
         return response()->json([
             'status' => 'success',

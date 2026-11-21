@@ -329,20 +329,184 @@ class NotificationService
     }
 
     // ==========================================
-    // 6. BROADCAST (PRODUK BARU, RESTOCK GAS, PENGUMUMAN/BERITA)
+    // 6. BROADCAST (PRODUK BARU, RESTOCK GAS, PENGUMUMAN/BERITA, LAYANAN BARU, CHAT)
     // ==========================================
+
+    private static function citizenRecipientsForRegion(int $regionId)
+    {
+        $descendantIds = Region::getDescendantIds($regionId);
+        $descendantIds[] = $regionId;
+
+        return User::whereIn('role', ['user', 'admin_rt', 'admin_rw'])
+            ->where(function ($q) {
+                $q->where('status', 'aktif')->orWhereNull('status');
+            })
+            ->whereIn('region_id', $descendantIds)
+            ->get();
+    }
+
+    public static function notifyAdminUnitChat(string $service, \App\Models\UnitChatSession $session, string $senderName, string $message, bool $isEscalation = false): void
+    {
+        try {
+            if (! \Illuminate\Support\Facades\Schema::hasTable('admin_notifications') || ! $session->region_id) {
+                return;
+            }
+
+            $typeMap = [
+                'gas' => ['unit_chat_gas', 'Penjualan Gas'],
+                'penyewaan' => ['unit_chat_penyewaan', 'Sewa Alat'],
+                'mobil' => ['unit_chat_mobil', 'Sewa Transportasi'],
+                'fasilitas_umum' => ['unit_chat_fasilitas', 'Fasilitas Umum'],
+            ];
+            [$notifType, $unitLabel] = $typeMap[$service] ?? ['unit_chat_' . $service, ucfirst($service)];
+
+            $snippet = \Illuminate\Support\Str::limit(trim(strip_tags($message)), 110);
+            $title = $isEscalation
+                ? "Permintaan Chat Petugas ({$unitLabel})"
+                : "Pesan Chat Baru ({$unitLabel})";
+            $body = "{$senderName}: \"{$snippet}\"";
+
+            // Anti-spam: gabungkan ke notifikasi chat belum dibaca milik sesi yang sama dalam 5 menit terakhir
+            $recentUnread = AdminNotification::where('type', $notifType)
+                ->where('reference_id', $session->id)
+                ->where('region_id', $session->region_id)
+                ->where('is_read', false)
+                ->where('updated_at', '>=', now()->subMinutes(5))
+                ->latest('id')
+                ->first();
+
+            if ($recentUnread) {
+                $recentUnread->update([
+                    'title' => $title,
+                    'message' => $body,
+                    'updated_at' => now(),
+                ]);
+
+                return;
+            }
+
+            AdminNotification::create([
+                'type' => $notifType,
+                'reference_id' => $session->id,
+                'region_id' => $session->region_id,
+                'title' => $title,
+                'message' => $body,
+                'is_read' => false,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('NotificationService error [notifyAdminUnitChat]: ' . $e->getMessage());
+        }
+    }
+
+    public static function notifyUserChatReply(string $service, \App\Models\UnitChatSession $session, string $responderName, string $message): void
+    {
+        try {
+            if (! $session->user_id || ! \Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+                return;
+            }
+
+            $unitMeta = [
+                'gas' => ['Layanan Gas', 'gas.sales'],
+                'penyewaan' => ['Layanan Sewa Alat', 'rental.equipment'],
+                'mobil' => ['Layanan Transportasi', 'mobil.rental.equipment'],
+                'fasilitas_umum' => ['Layanan Fasilitas Umum', 'user.fasilitas-umum.equipment'],
+            ];
+            [$unitLabel, $routeName] = $unitMeta[$service] ?? ['Layanan Daerah', 'beranda'];
+
+            $link = \Illuminate\Support\Facades\Route::has($routeName)
+                ? route($routeName, $session->region_id ? ['region_id' => $session->region_id] : [])
+                : route('user.notifications');
+
+            $snippet = \Illuminate\Support\Str::limit(trim(strip_tags($message)), 120);
+            $title = "Balasan Chat {$unitLabel}";
+            $body = "{$responderName} membalas: \"{$snippet}\"";
+
+            $recentUnread = Notification::where('user_id', $session->user_id)
+                ->where('type', 'chat_reply')
+                ->where('link', $link)
+                ->where('is_read', false)
+                ->where('updated_at', '>=', now()->subMinutes(3))
+                ->latest('id')
+                ->first();
+
+            if ($recentUnread) {
+                $recentUnread->update([
+                    'title' => $title,
+                    'message' => $body,
+                    'sent_at' => now(),
+                ]);
+
+                return;
+            }
+
+            Notification::create([
+                'user_id' => $session->user_id,
+                'type' => 'chat_reply',
+                'title' => $title,
+                'message' => $body,
+                'link' => $link,
+                'icon' => 'bx bx-chat',
+                'is_read' => false,
+                'sent_at' => now(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('NotificationService error [notifyUserChatReply]: ' . $e->getMessage());
+        }
+    }
+
+    public static function broadcastServiceActivated(Region $region, \App\Models\Service $service): void
+    {
+        try {
+            $slug = (string) ($service->slug ?? '');
+            if ($slug === 'pengumuman') {
+                return;
+            }
+
+            $routeMap = [
+                'penjualan-gas' => 'gas.sales',
+                'penyewaan-alat' => 'rental.equipment',
+                'penyewaan-mobil' => 'mobil.rental.equipment',
+                'fasilitas-umum' => 'user.fasilitas-umum.equipment',
+            ];
+            $routeName = $routeMap[$slug] ?? 'pelayanan';
+            $link = \Illuminate\Support\Facades\Route::has($routeName)
+                ? route($routeName, $routeName === 'pelayanan' ? [] : ['region_id' => $region->id])
+                : null;
+
+            $targetUsers = self::citizenRecipientsForRegion((int) $region->id);
+            foreach ($targetUsers as $targetUser) {
+                Notification::create([
+                    'user_id' => $targetUser->id,
+                    'type' => 'layanan_baru',
+                    'title' => 'Layanan Baru Tersedia: ' . $service->name,
+                    'message' => $region->name . ' kini mengaktifkan layanan ' . $service->name . '. Anda sudah dapat melihat dan memesan layanan ini melalui SegiDaerah.',
+                    'link' => $link,
+                    'icon' => 'bx bx-grid-alt',
+                    'is_read' => false,
+                    'sent_at' => now(),
+                ]);
+            }
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('admin_notifications')) {
+                AdminNotification::create([
+                    'type' => 'layanan_baru',
+                    'reference_id' => $region->id,
+                    'region_id' => null,
+                    'title' => 'Desa Mengaktifkan Layanan Baru',
+                    'message' => $region->name . ' baru saja mengaktifkan unit layanan ' . $service->name . '.',
+                    'is_read' => false,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('NotificationService error [broadcastServiceActivated]: ' . $e->getMessage());
+        }
+    }
 
     public static function broadcastNewProduct($unitName, $productName, $regionId = null, $link = null)
     {
         if (!$regionId) return;
         try {
-            $query = User::where('role', 'user');
-            if ($regionId) {
-                $descendantIds = Region::getDescendantIds($regionId);
-                $descendantIds[] = $regionId;
-                $query->whereIn('region_id', $descendantIds);
-            }
-            $targetUsers = $query->get();
+            $targetUsers = self::citizenRecipientsForRegion((int) $regionId);
 
             $title = 'Produk Baru Tersedia: ' . $productName;
             $message = 'Unit Layanan ' . $unitName . ' kini menyediakan "' . $productName . '". Silakan cek detail dan ketersediaannya.';
@@ -368,13 +532,7 @@ class NotificationService
     {
         if (!$regionId) return;
         try {
-            $query = User::where('role', 'user');
-            if ($regionId) {
-                $descendantIds = Region::getDescendantIds($regionId);
-                $descendantIds[] = $regionId;
-                $query->whereIn('region_id', $descendantIds);
-            }
-            $targetUsers = $query->get();
+            $targetUsers = self::citizenRecipientsForRegion((int) $regionId);
 
             $title = 'Pembaruan Stok: ' . $productName;
             $message = 'Ketersediaan stok untuk ' . $productName . ' telah diperbarui. Tersedia ' . $stock . ' ' . $satuan . '. Silakan pesan jika Anda membutuhkan.';
@@ -407,7 +565,10 @@ class NotificationService
             $icon = $isBerita ? 'bx bx-news' : 'bx bx-broadcast';
             $link = route('announcements.show', $announcement->id);
 
-            $query = User::where('role', 'user');
+            $query = User::whereIn('role', ['user', 'admin_rt', 'admin_rw'])
+                ->where(function ($q) {
+                    $q->where('status', 'aktif')->orWhereNull('status');
+                });
             if (!$isBerita && !$announcement->target_audience_id) return;
             if ($isBerita) {
                 $village = Region::whereIn('id',Region::garisLayananUntukWarga($announcement->region_id))->whereIn('type',['desa','kelurahan'])->value('id');
@@ -586,11 +747,19 @@ class NotificationService
             $regionId = $order->gas->region_id ?? null;
         } elseif ($type === 'rental') {
             $regionId = $order->barang->region_id ?? null;
+        } elseif ($type === 'mobil') {
+            $regionId = $order->mobil->region_id ?? null;
+        } elseif ($type === 'fasilitas') {
+            $regionId = $order->fasilitas->region_id ?? null;
         }
 
-        // Notify admin
+        $alertType = in_array($type, ['gas', 'rental', 'mobil', 'fasilitas'], true)
+            ? 'stock_alert_' . $type
+            : 'stock_alert';
+
+        // Notify admin & staff unit terkait
         AdminNotification::create([
-            'type' => 'stock_alert',
+            'type' => $alertType,
             'reference_id' => $order->id,
             'region_id' => $regionId,
             'title' => 'Gagal Approve - Stok Tidak Cukup',
@@ -623,9 +792,12 @@ class NotificationService
     {
         $itemName = $type === 'gas' ? $item->jenis_gas : $item->nama_barang;
         $satuan = $item->satuan ?? 'unit';
+        $notifType = in_array($type, ['gas', 'rental', 'mobil', 'fasilitas'], true)
+            ? 'stock_low_' . $type
+            : 'stock_low';
         
         AdminNotification::create([
-            'type' => 'stock_low',
+            'type' => $notifType,
             'reference_id' => $item->id,
             'region_id' => $item->region_id ?? null,
             'title' => 'Stok Menipis',
@@ -640,9 +812,12 @@ class NotificationService
     public function notifyStockDepleted($item, $type)
     {
         $itemName = $type === 'gas' ? $item->jenis_gas : $item->nama_barang;
+        $notifType = in_array($type, ['gas', 'rental', 'mobil', 'fasilitas'], true)
+            ? 'stock_depleted_' . $type
+            : 'stock_depleted';
         
         AdminNotification::create([
-            'type' => 'stock_depleted',
+            'type' => $notifType,
             'reference_id' => $item->id,
             'region_id' => $item->region_id ?? null,
             'title' => 'Stok Habis',

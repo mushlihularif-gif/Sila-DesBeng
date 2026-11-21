@@ -179,6 +179,15 @@ class UnitChatApiController extends Controller
         $lowerMsg = strtolower($request->message);
         $isEscalateRequest = Str::contains($lowerMsg, ['chat admin', 'petugas', 'pengelola', 'hubungi admin', 'bicara dengan admin', 'manusia']);
 
+        // Kirim notifikasi lonceng ke Admin Desa & Staf unit layanan terkait
+        \App\Services\NotificationService::notifyAdminUnitChat(
+            (string) $service,
+            $session,
+            $session->displayUserName(),
+            (string) $request->message,
+            $isEscalateRequest
+        );
+
         // Jika user minta eskalasi
         if ($isEscalateRequest && $session->status !== 'escalated') {
             $session->update(['status' => 'escalated']);
@@ -283,6 +292,15 @@ class UnitChatApiController extends Controller
             'message' => 'Terhubung dengan Petugas Layanan. Silakan tulis pertanyaan Anda, petugas akan segera membalas di sini.',
             'is_read' => true,
         ]);
+
+        // Kirim notifikasi lonceng ke Admin Desa & Staf unit layanan terkait
+        \App\Services\NotificationService::notifyAdminUnitChat(
+            (string) $service,
+            $session,
+            $session->displayUserName(),
+            'Warga meminta terhubung langsung dengan Petugas Layanan.',
+            true
+        );
 
         return response()->json([
             'status' => 'success',

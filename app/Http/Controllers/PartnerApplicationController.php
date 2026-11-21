@@ -410,25 +410,57 @@ class PartnerApplicationController extends Controller
 
         if ($validated['parent_region_id']) {
             $namaTingkat = self::LABEL_TINGKAT[$validated['region_type']] ?? ucfirst($validated['region_type']);
-            AdminNotification::create([
-                'type' => 'kemitraan',
-                'reference_id' => $application->id,
-                'region_id' => $validated['parent_region_id'],
-                'title' => "Pengajuan Kemitraan {$namaTingkat} Baru",
-                'message' => "Pemohon {$validated['applicant_name']} mengajukan pendaftaran {$namaTingkat} {$validated['region_name']} ({$validated['position']}).",
-                'is_read' => false,
-            ]);
 
-            // Jika pengajuan RT di bawah RW, beri tahu juga Admin Desa induknya
-            if ($induk && $induk->type === 'rw' && $induk->parent_id) {
+            if ($validated['region_type'] === 'desa') {
+                // Pengajuan Admin Desa/Kelurahan diproses Super Admin (notifikasi platform: region_id = null)
                 AdminNotification::create([
                     'type' => 'kemitraan',
                     'reference_id' => $application->id,
-                    'region_id' => $induk->parent_id,
-                    'title' => 'Pengajuan Pengurus RT Baru',
-                    'message' => "Warga {$validated['applicant_name']} mengajukan pendaftaran pengurus {$validated['region_name']} ({$validated['position']}) di lingkungan {$induk->name}.",
+                    'region_id' => null,
+                    'title' => "Pengajuan Kemitraan {$namaTingkat} Baru",
+                    'message' => "Pemohon {$validated['applicant_name']} mengajukan pendaftaran Admin {$namaTingkat} {$validated['region_name']} ({$validated['position']}).",
                     'is_read' => false,
                 ]);
+            } else {
+                AdminNotification::create([
+                    'type' => 'kemitraan',
+                    'reference_id' => $application->id,
+                    'region_id' => $validated['parent_region_id'],
+                    'title' => "Pengajuan Kemitraan {$namaTingkat} Baru",
+                    'message' => "Pemohon {$validated['applicant_name']} mengajukan pendaftaran {$namaTingkat} {$validated['region_name']} ({$validated['position']}).",
+                    'is_read' => false,
+                ]);
+            }
+
+            // Jika pengajuan RT di bawah RW, beri tahu Admin Desa induknya & Admin RW aktif
+            if ($induk && $induk->type === 'rw') {
+                if ($induk->parent_id) {
+                    AdminNotification::create([
+                        'type' => 'kemitraan',
+                        'reference_id' => $application->id,
+                        'region_id' => $induk->parent_id,
+                        'title' => 'Pengajuan Pengurus RT Baru',
+                        'message' => "Warga {$validated['applicant_name']} mengajukan pendaftaran pengurus {$validated['region_name']} ({$validated['position']}) di lingkungan {$induk->name}.",
+                        'is_read' => false,
+                    ]);
+                }
+
+                User::where('role', 'admin_rw')
+                    ->where('status', 'aktif')
+                    ->where('region_id', $induk->id)
+                    ->get()
+                    ->each(function (User $rwAdmin) use ($validated, $induk) {
+                        \App\Models\Notification::create([
+                            'user_id' => $rwAdmin->id,
+                            'type' => 'kemitraan_submitted',
+                            'title' => 'Pengajuan Pengurus RT Baru di Wilayah Anda',
+                            'message' => "Warga {$validated['applicant_name']} mengajukan diri sebagai pengurus {$validated['region_name']} ({$validated['position']}) di lingkungan {$induk->name}.",
+                            'link' => route('user.wilayah.warga'),
+                            'icon' => 'bx bx-user-plus',
+                            'is_read' => false,
+                            'sent_at' => now(),
+                        ]);
+                    });
             }
         }
 
