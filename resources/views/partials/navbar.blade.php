@@ -85,6 +85,9 @@
         /* Keep every account action consistent, including settings and logout. */
         .sd-account-menu > :is(a, button),
         .sd-account-menu-mobile > :is(a, button) {
+            border-top: 0;
+            border-right: 0;
+            border-bottom: 0;
             border-left: 3px solid transparent;
             transition: background-color .15s, border-color .15s;
         }
@@ -97,6 +100,34 @@
         .sd-account-menu-mobile > :is(a, button):focus-visible {
             outline: 2px solid #3b82f6;
             outline-offset: -2px;
+        }
+        /* Warna aksen khusus mengikuti warna font Status Verifikasi (hijau/amber) & Keluar (merah) */
+        .sd-account-menu > :is(a, button).sd-account-item-verified:is(:hover, :focus-visible),
+        .sd-account-menu-mobile > :is(a, button).sd-account-item-verified:is(:hover, :focus-visible) {
+            border-left-color: #16a34a;
+            background-color: #f0fdf4;
+        }
+        .sd-account-menu > :is(a, button).sd-account-item-verified:focus-visible,
+        .sd-account-menu-mobile > :is(a, button).sd-account-item-verified:focus-visible {
+            outline-color: #16a34a;
+        }
+        .sd-account-menu > :is(a, button).sd-account-item-pending:is(:hover, :focus-visible),
+        .sd-account-menu-mobile > :is(a, button).sd-account-item-pending:is(:hover, :focus-visible) {
+            border-left-color: #d97706;
+            background-color: #fffbeb;
+        }
+        .sd-account-menu > :is(a, button).sd-account-item-pending:focus-visible,
+        .sd-account-menu-mobile > :is(a, button).sd-account-item-pending:focus-visible {
+            outline-color: #d97706;
+        }
+        .sd-account-menu > :is(a, button).sd-account-item-danger:is(:hover, :focus-visible),
+        .sd-account-menu-mobile > :is(a, button).sd-account-item-danger:is(:hover, :focus-visible) {
+            border-left-color: #dc2626;
+            background-color: #fef2f2;
+        }
+        .sd-account-menu > :is(a, button).sd-account-item-danger:focus-visible,
+        .sd-account-menu-mobile > :is(a, button).sd-account-item-danger:focus-visible {
+            outline-color: #dc2626;
         }
         @media (prefers-reduced-motion: reduce) {
             .sd-account-menu > :is(a, button),
@@ -285,7 +316,7 @@
                                      Yang berubah kini hanya warna dan sebutannya. --}}
                                 @php $sudahVerif = auth()->user()->verification_status === 'verified'; @endphp
                                 <a href="{{ route('kyc.index') }}"
-                                   class="block px-4 py-2.5 transition-all duration-150 border-l-[3px] border-l-transparent {{ $sudahVerif ? 'text-green-600 hover:bg-green-50 hover:border-l-green-500' : 'text-amber-600 hover:bg-amber-50 hover:border-l-amber-500 bg-amber-50/50' }}">
+                                   class="block px-4 py-2.5 transition-all duration-150 border-l-[3px] border-l-transparent {{ $sudahVerif ? 'sd-account-item-verified text-green-600 hover:bg-green-50 hover:border-l-green-600' : 'sd-account-item-pending text-amber-600 hover:bg-amber-50 hover:border-l-amber-600 bg-amber-50/50' }}">
                                     <span class="text-[15px] font-medium flex items-center justify-center gap-2 whitespace-nowrap">
                                         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                         {{ $sudahVerif ? 'Status Verifikasi' : 'Verifikasi Akun' }}
@@ -328,7 +359,7 @@
                                     </span>
                                 </a>
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
-                                <button type="button" id="btn-open-logout" class="block w-full px-4 py-2.5 text-red-600 hover:bg-red-50 hover:border-l-[3px] hover:border-l-red-500 transition-all duration-150 bg-transparent border-none outline-none cursor-pointer border-l-[3px] border-l-transparent">
+                                <button type="button" id="btn-open-logout" class="sd-account-item-danger block w-full px-4 py-2.5 text-red-600 hover:bg-red-50 hover:border-l-red-600 transition-all duration-150 bg-transparent outline-none cursor-pointer border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Keluar</span>
                                 </button>
                             </div>
@@ -522,7 +553,7 @@
                 {{-- Sama seperti dropdown desktop: selalu tampil, hanya warnanya
                      yang membedakan sudah atau belum terverifikasi. --}}
                 @php $sudahVerifMobile = auth()->user()->verification_status === 'verified'; @endphp
-                <a href="{{ route('kyc.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2 {{ $sudahVerifMobile ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700 hover:bg-amber-200' }}">
+                <a href="{{ route('kyc.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2 {{ $sudahVerifMobile ? 'sd-account-item-verified bg-green-100 text-green-700 hover:bg-green-200' : 'sd-account-item-pending bg-amber-100 text-amber-700 hover:bg-amber-200' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     {{ $sudahVerifMobile ? 'Status Verifikasi' : 'Verifikasi Akun' }}
                 </a>
@@ -542,7 +573,7 @@
                         <span class="sd-notif-circle" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-width: 20px; max-height: 20px; border-radius: 50%; background-color: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"><span>{{ $navUnreadNotifs > 9 ? '9+' : $navUnreadNotifs }}</span></span>
                     @endif
                 </a>
-                <button type="button" id="btn-open-logout-mobile" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-red-50 text-red-600 hover:bg-red-100 transition border-none outline-none cursor-pointer">
+                <button type="button" id="btn-open-logout-mobile" class="sd-account-item-danger block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-red-50 text-red-600 hover:bg-red-100 transition outline-none cursor-pointer">
                     Keluar
                 </button>
             </div>
