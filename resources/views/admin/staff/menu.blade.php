@@ -1,13 +1,94 @@
-<li class="menu-item"><a class="menu-link" href="{{ route('admin.dashboard') }}"><i class="menu-icon bx bx-home"></i>Tugas Saya</a></li>
 @php
-    $staffLinks = ['gas'=>'admin.unit.penjualan_gas.index','sewa_alat'=>'admin.unit.penyewaan.index','sewa_mobil'=>'admin.unit.mobil.index','fasilitas_umum'=>'admin.unit.fasilitas_umum.index'];
+    $staffUser = auth()->user();
+    $staffUnitsMeta = [
+        'gas' => [
+            'route' => 'admin.unit.penjualan_gas.index',
+            'icon'  => 'bxs-gas-pump',
+            'color' => 'text-danger',
+            'match' => 'admin/unit/gas*',
+        ],
+        'sewa_alat' => [
+            'route' => 'admin.unit.penyewaan.index',
+            'icon'  => 'bx-wrench',
+            'color' => 'text-warning',
+            'match' => 'admin/unit/penyewaan*',
+        ],
+        'sewa_mobil' => [
+            'route' => 'admin.unit.mobil.index',
+            'icon'  => 'bx-car',
+            'color' => 'text-info',
+            'match' => 'admin/unit/mobil*',
+        ],
+        'fasilitas_umum' => [
+            'route' => 'admin.unit.fasilitas_umum.index',
+            'icon'  => 'bx-building-house',
+            'color' => 'text-success',
+            'match' => 'admin/unit/fasilitas_umum*',
+        ],
+    ];
+    $assignedStaffUnits = collect(\App\Support\StaffAccess::UNITS)
+        ->filter(fn ($label, $key) => $staffUser && $staffUser->hasUnitPermission($key));
 @endphp
-@foreach(\App\Support\StaffAccess::UNITS as $key=>$label)@if(auth()->user()->hasUnitPermission($key))<li class="menu-item"><a class="menu-link" href="{{ route($staffLinks[$key]) }}"><i class="menu-icon bx bx-grid-alt"></i>{{ $label }}</a></li>@endif
-@endforeach
-<li class="menu-item"><a class="menu-link" href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}"><i class="menu-icon bx bx-receipt"></i>Pesanan Saya</a></li>
-<li class="menu-item"><a class="menu-link" href="{{ route('admin.aktivitas.bukti-transaksi.index') }}"><i class="menu-icon bx bx-wallet"></i>Bukti Pembayaran</a></li>
-<li class="menu-item"><a class="menu-link" href="{{ route('admin.profile') }}"><i class="menu-icon bx bx-user"></i>Profil Saya</a></li>
 
-@if(auth()->user()->hasUnitPermission('sewa_mobil') || auth()->user()->hasUnitPermission('fasilitas_umum'))
-<li class="menu-item"><a class="menu-link" href="{{ route('supir.index') }}"><i class="menu-icon bx bx-user-check"></i>Sopir dan Pengurus</a></li>
+<!-- UTAMA -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Utama</span>
+</li>
+<li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+    <a class="menu-link" href="{{ route('admin.dashboard') }}">
+        <i class="menu-icon tf-icons bx bx-home-circle text-primary"></i>
+        <div>Tugas Saya</div>
+    </a>
+</li>
+
+<!-- UNIT LAYANAN DITUGASKAN -->
+@if($assignedStaffUnits->isNotEmpty())
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Unit Layanan Anda</span>
+</li>
+@foreach($assignedStaffUnits as $key => $label)
+    @php $meta = $staffUnitsMeta[$key]; @endphp
+    <li class="menu-item {{ request()->is($meta['match']) ? 'active' : '' }}">
+        <a class="menu-link" href="{{ route($meta['route']) }}">
+            <i class="menu-icon tf-icons bx {{ $meta['icon'] }} {{ $meta['color'] }}"></i>
+            <div>{{ $label }}</div>
+        </a>
+    </li>
+@endforeach
 @endif
+
+<!-- OPERASIONAL HARIAN -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Operasional Harian</span>
+</li>
+<li class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') ? 'active' : '' }}">
+    <a class="menu-link" href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}">
+        <i class="menu-icon tf-icons bx bx-calendar-check text-warning"></i>
+        <div>Pesanan &amp; Booking</div>
+    </a>
+</li>
+<li class="menu-item {{ request()->is('admin/aktivitas/bukti-transaksi*') ? 'active' : '' }}">
+    <a class="menu-link" href="{{ route('admin.aktivitas.bukti-transaksi.index') }}">
+        <i class="menu-icon tf-icons bx bx-check-shield text-success"></i>
+        <div>Bukti Pembayaran</div>
+    </a>
+</li>
+@if($staffUser && ($staffUser->hasUnitPermission('sewa_mobil') || $staffUser->hasUnitPermission('fasilitas_umum')))
+<li class="menu-item {{ request()->is('admin/unit/supir*') ? 'active' : '' }}">
+    <a class="menu-link" href="{{ route('supir.index') }}">
+        <i class="menu-icon tf-icons bx bx-user-check text-info"></i>
+        <div>Sopir &amp; Pengurus</div>
+    </a>
+</li>
+@endif
+
+<!-- AKUN -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Akun</span>
+</li>
+<li class="menu-item {{ request()->routeIs('admin.profile*') ? 'active' : '' }}">
+    <a class="menu-link" href="{{ route('admin.profile') }}">
+        <i class="menu-icon tf-icons bx bx-user-circle text-secondary"></i>
+        <div>Profil Saya</div>
+    </a>
+</li>

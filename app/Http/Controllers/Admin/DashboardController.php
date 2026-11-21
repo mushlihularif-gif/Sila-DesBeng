@@ -25,7 +25,9 @@ class DashboardController extends Controller
 public function index(Request $request)
 {
     // Super Admin memakai dashboard platform; staf memakai dashboard layanan yang ditugaskan.
-    if (auth()->user()->isStaff()) return view('admin.staff.dashboard');
+    if (auth()->user()->isStaff()) {
+        return view('admin.staff.dashboard', $this->buildStaffDashboardData(auth()->user()));
+    }
     if (auth()->user()->bolehAksesPlatform()) {
         return app(SuperAdminDashboardController::class)->index();
     }
@@ -838,5 +840,84 @@ public function index(Request $request)
         ];
 
         return $months[$month] ?? 'Unknown';
+    }
+
+    /**
+     * Kumpulkan statistik operasional khusus untuk unit layanan yang ditugaskan kepada Staf.
+     */
+    private function buildStaffDashboardData(User $staff): array
+    {
+        $unitStats = [];
+        $totals = ['pending' => 0, 'total' => 0];
+        $regionId = $staff->region_id;
+
+        $map = [
+            'gas' => [
+                'catalog_table' => 'gas',
+                'catalog_model' => Gas::class,
+                'order_table'   => 'gas_orders',
+                'order_model'   => GasOrder::class,
+                'relation'      => 'gas',
+            ],
+            'sewa_alat' => [
+                'catalog_table' => 'barang',
+                'catalog_model' => Barang::class,
+                'order_table'   => 'rental_bookings',
+                'order_model'   => RentalBooking::class,
+                'relation'      => 'barang',
+            ],
+            'sewa_mobil' => [
+                'catalog_table' => 'mobils',
+                'catalog_model' => Mobil::class,
+                'order_table'   => 'mobil_bookings',
+                'order_model'   => \App\Models\MobilBooking::class,
+                'relation'      => 'mobil',
+            ],
+            'fasilitas_umum' => [
+                'catalog_table' => 'fasilitas_umums',
+                'catalog_model' => FasilitasUmum::class,
+                'order_table'   => 'fasilitas_umum_bookings',
+                'order_model'   => \App\Models\FasilitasUmumBooking::class,
+                'relation'      => 'fasilitas',
+            ],
+        ];
+
+        foreach ($map as $key => $cfg) {
+            if (! $staff->hasUnitPermission($key)) {
+                continue;
+            }
+
+            $catalogCount = 0;
+            $orderTotal = 0;
+            $orderPending = 0;
+
+            if ($regionId && \Illuminate\Support\Facades\Schema::hasTable($cfg['catalog_table'])) {
+                $catalogCount = (int) $cfg['catalog_model']::where('region_id', $regionId)->count();
+            }
+
+            if ($regionId && \Illuminate\Support\Facades\Schema::hasTable($cfg['order_table']) && \Illuminate\Support\Facades\Schema::hasTable($cfg['catalog_table'])) {
+                $base = $this->applyRegionFilter($cfg['order_model']::query(), $cfg['relation'], true);
+                $orderTotal = (int) (clone $base)->count();
+                $orderPending = (int) (clone $base)->where(function ($q) use ($cfg) {
+                    $q->where('status', 'pending');
+                    if (\Illuminate\Support\Facades\Schema::hasColumn($cfg['order_table'], 'cancellation_status')) {
+                        $q->orWhere('cancellation_status', 'pending');
+                    }
+                })->count();
+            }
+
+            $unitStats[$key] = [
+                'catalog' => $catalogCount,
+                'total'   => $orderTotal,
+                'pending' => $orderPending,
+            ];
+            $totals['total'] += $orderTotal;
+            $totals['pending'] += $orderPending;
+        }
+
+        return [
+            'staffUnitStats' => $unitStats,
+            'staffTotals'    => $totals,
+        ];
     }
 }
