@@ -124,6 +124,9 @@
             </div>
         </div>
         <div class="service-chat-header-actions">
+            <button type="button" class="service-chat-clear-btn" onclick="clearServiceChat('{{ $serviceType }}')" title="Bersihkan chat di tampilan Anda (tidak menghapus riwayat petugas)">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
             <button type="button" id="serviceChatExpandBtn_{{ $serviceType }}" class="service-chat-expand-btn" onclick="toggleServiceChatExpand('{{ $serviceType }}')" title="Perbesar panel obrolan" aria-expanded="false">
                 <svg id="serviceChatExpandIcon_{{ $serviceType }}" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
                 <span id="serviceChatExpandLabel_{{ $serviceType }}">Perbesar</span>
@@ -319,6 +322,26 @@
         align-items: center;
         gap: 6px;
         flex-shrink: 0;
+    }
+    .service-chat-clear-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        flex-shrink: 0;
+    }
+    .service-chat-clear-btn:hover {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
     }
     .service-chat-expand-btn {
         display: inline-flex;
@@ -679,6 +702,45 @@
             startServiceChatPolling(service);
             setTimeout(() => document.getElementById(`serviceChatInput_${service}`)?.focus(), 120);
         }
+    }
+
+    function clearServiceChat(service) {
+        if (!confirm('Bersihkan riwayat obrolan ini di tampilan Anda?\nRiwayat di sisi petugas layanan tidak ikut terhapus.')) return;
+        const state = getServiceChatConfig(service);
+        const tokenKey = getServiceChatTokenKey(service, state.regionId);
+        const sessionToken = localStorage.getItem(tokenKey) || '';
+        showServiceChatError(service, '');
+
+        fetch(`{{ url('unit-chat') }}/${service}/clear`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getServiceChatCsrf(),
+                'X-Chat-Session-Token': sessionToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                region_id: state.regionId || null,
+                session_token: sessionToken
+            })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(res => {
+            if (res.status === 'success') {
+                state.lastFingerprint = '';
+                loadServiceChatHistory(service, false);
+            } else {
+                throw new Error(res.message || 'Gagal membersihkan chat');
+            }
+        })
+        .catch(err => {
+            console.error('Gagal membersihkan chat:', err);
+            showServiceChatError(service, 'Gagal membersihkan obrolan. Silakan coba lagi.');
+        });
     }
 
     function toggleServiceChatExpand(service) {

@@ -122,7 +122,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
             <!-- Order Tabs Nav -->
-            <ul class="nav nav-pills card-header-pills d-flex flex-nowrap overflow-x-auto no-scrollbar gap-2 mb-0 pb-1 pb-md-0" id="orderTabs" role="tablist" style="-webkit-overflow-scrolling: touch;">
+            <ul class="nav nav-pills d-flex flex-nowrap overflow-x-auto no-scrollbar gap-2 mb-0 pb-1 pb-md-0" id="orderTabs" role="tablist" style="-webkit-overflow-scrolling: touch;">
                 @if($isRentalActive)
                 <li class="nav-item flex-shrink-0" role="presentation">
                     <button class="nav-link {{ $activeTab == 'rental' || (!$isRentalActive && $totalActive > 0) ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center text-nowrap" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">

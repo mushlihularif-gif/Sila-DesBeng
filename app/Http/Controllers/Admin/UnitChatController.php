@@ -66,7 +66,7 @@ class UnitChatController extends Controller
             ->with(['user', 'latestMessage'])
             ->get();
 
-        $payload = $sessions->map(function (UnitChatSession $chat) {
+        $payload = $sessions->map(function (UnitChatSession $chat) use ($admin) {
             $displayName = $chat->displayUserName();
             $userPhoto = null;
             if ($chat->user) {
@@ -77,9 +77,13 @@ class UnitChatController extends Controller
                 }
             }
 
-            $lastSenderType = $chat->latestMessage?->sender_type;
-            $unread = (int) $chat->unread_admin_count;
-            $needsReply = $chat->status !== 'resolved' && (
+            $clearedBeforeId = $chat->adminClearedBeforeId((int) $admin->id);
+            $latestMsg = $chat->latestMessage;
+            $hasVisibleAfterClear = !$clearedBeforeId || ($latestMsg && (int) $latestMsg->id > $clearedBeforeId);
+
+            $lastSenderType = $hasVisibleAfterClear ? $latestMsg?->sender_type : null;
+            $unread = $hasVisibleAfterClear ? (int) $chat->unread_admin_count : 0;
+            $needsReply = $hasVisibleAfterClear && $chat->status !== 'resolved' && (
                 $unread > 0 || ($chat->status === 'escalated' && $lastSenderType !== 'admin')
             );
 
@@ -90,22 +94,27 @@ class UnitChatController extends Controller
                 'user_photo' => $userPhoto,
                 'status' => $chat->status,
                 'item_label' => !empty($chat->item_reference) ? $chat->item_label : null,
-                'last_message' => $chat->last_message ?: 'Memulai percakapan...',
+                'last_message' => $hasVisibleAfterClear
+                    ? ($chat->last_message ?: 'Memulai percakapan...')
+                    : 'Obrolan dibersihkan (tampilan Anda)',
                 'last_message_time' => $chat->last_message_at
                     ? $chat->last_message_at->format('H:i')
                     : ($chat->updated_at ? $chat->updated_at->format('H:i') : ''),
                 'unread_admin_count' => $unread,
                 'last_sender_type' => $lastSenderType,
                 'needs_reply' => $needsReply,
+                'cleared_for_me' => !$hasVisibleAfterClear,
             ];
         })->values()->all();
+
+        $totalUnread = array_sum(array_column($payload, 'unread_admin_count'));
 
         return response()->json([
             'status' => 'success',
             'data' => [
                 'sessions' => $payload,
                 'total_sessions' => count($payload),
-                'total_unread' => (int) $sessions->sum('unread_admin_count'),
+                'total_unread' => (int) $totalUnread,
             ],
         ]);
     }
@@ -115,8 +124,9 @@ class UnitChatController extends Controller
      */
     public function getMessages($service, $sessionId)
     {
+        $admin = Auth::user();
         $session = $this->findSession($service, $sessionId);
-        if (!$session) {
+        if (!$session || !$admin) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Sesi percakapan tidak ditemukan atau Anda tidak memiliki akses.',
@@ -129,7 +139,13 @@ class UnitChatController extends Controller
         }
 
         $session->load('user:id,name,avatar');
-        $messages = $session->messages()->with('sender:id,name,role')->get()->map(function ($msg) {
+        $clearedBeforeId = $session->adminClearedBeforeId((int) $admin->id);
+        $messagesQuery = $session->messages()->with('sender:id,name,role');
+        if ($clearedBeforeId > 0) {
+            $messagesQuery->where('id', '>', $clearedBeforeId);
+        }
+
+        $messages = $messagesQuery->get()->map(function ($msg) {
             return [
                 'id' => $msg->id,
                 'session_id' => $msg->session_id,
@@ -355,6 +371,36 @@ class UnitChatController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Sesi obrolan berhasil ditandai selesai.',
+        ]);
+    }
+
+    /**
+     * Bersihkan isi chat hanya di tampilan akun Admin Desa / Staf ini
+     * (tidak menghapus riwayat di sisi warga maupun pengelola lain).
+     */
+    public function clearChat($service, $sessionId)
+    {
+        $admin = $this->authorizeUnitAdmin($service);
+        if (!$admin) {
+            return response()->json(['status' => 'error', 'message' => 'Anda tidak memiliki izin membersihkan obrolan ini.'], 403);
+        }
+
+        $session = $this->findSession($service, $sessionId);
+        if (!$session) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Sesi percakapan tidak ditemukan.',
+            ], 404);
+        }
+
+        $clearedBeforeId = $session->clearForAdmin((int) $admin->id);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Obrolan di tampilan Anda berhasil dibersihkan.',
+            'data' => [
+                'cleared_before_id' => $clearedBeforeId,
+            ],
         ]);
     }
 }

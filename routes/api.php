@@ -145,6 +145,7 @@ Route::prefix('unit-chat')->group(function () {
     Route::get('/{service}/history', [\App\Http\Controllers\Api\UnitChatApiController::class, 'getChatHistory']);
     Route::post('/{service}/send', [\App\Http\Controllers\Api\UnitChatApiController::class, 'sendChatMessage'])->middleware('throttle:chat-write');
     Route::post('/{service}/escalate', [\App\Http\Controllers\Api\UnitChatApiController::class, 'escalateChat'])->middleware('throttle:chat-write');
+    Route::post('/{service}/clear', [\App\Http\Controllers\Api\UnitChatApiController::class, 'clearChat'])->middleware('throttle:chat-write');
 });
 
 Route::get('/ping', function() { return 'pong'; });

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class UnitChatSession extends Model
 {
@@ -23,10 +24,21 @@ class UnitChatSession extends Model
         'last_message_at',
         'unread_admin_count',
         'unread_user_count',
+        'user_cleared_before_id',
+        'admin_cleared_before_id',
+        'cleared_by_admins',
+    ];
+
+    protected $hidden = [
+        'admin_cleared_before_id',
+        'cleared_by_admins',
     ];
 
     protected $casts = [
         'last_message_at' => 'datetime',
+        'user_cleared_before_id' => 'integer',
+        'admin_cleared_before_id' => 'integer',
+        'cleared_by_admins' => 'array',
     ];
 
     public function getItemLabelAttribute(): string
@@ -51,7 +63,7 @@ class UnitChatSession extends Model
 
     public function messages()
     {
-        return $this->hasMany(UnitChatMessage::class, 'session_id')->orderBy('created_at', 'asc');
+        return $this->hasMany(UnitChatMessage::class, 'session_id')->orderBy('created_at', 'asc')->orderBy('id', 'asc');
     }
 
     public function scopeForService($query, $serviceType)
@@ -87,5 +99,54 @@ class UnitChatSession extends Model
         $stored = trim((string) ($this->user_name ?? ''));
 
         return $stored !== '' ? $stored : 'Warga';
+    }
+
+    public function userClearedBeforeId(): int
+    {
+        return (int) ($this->user_cleared_before_id ?? 0);
+    }
+
+    public function adminClearedBeforeId(int $adminUserId): int
+    {
+        $map = is_array($this->cleared_by_admins) ? $this->cleared_by_admins : [];
+        if (isset($map[(string) $adminUserId])) {
+            return (int) $map[(string) $adminUserId];
+        }
+
+        return (int) ($this->admin_cleared_before_id ?? 0);
+    }
+
+    /**
+     * Bersihkan tampilan chat khusus sisi warga (riwayat di Admin Desa & Staf tetap utuh).
+     */
+    public function clearForUser(): int
+    {
+        $maxId = (int) ($this->messages()->max('id') ?? 0);
+        $updates = ['unread_user_count' => 0];
+        if (Schema::hasColumn($this->getTable(), 'user_cleared_before_id')) {
+            $updates['user_cleared_before_id'] = $maxId;
+        }
+        $this->update($updates);
+
+        return $maxId;
+    }
+
+    /**
+     * Bersihkan tampilan chat khusus akun pengelola/staf ini (riwayat di warga & pengelola lain tetap utuh).
+     */
+    public function clearForAdmin(int $adminUserId): int
+    {
+        $maxId = (int) ($this->messages()->max('id') ?? 0);
+        $updates = ['unread_admin_count' => 0];
+        if (Schema::hasColumn($this->getTable(), 'cleared_by_admins')) {
+            $map = is_array($this->cleared_by_admins) ? $this->cleared_by_admins : [];
+            $map[(string) $adminUserId] = $maxId;
+            $updates['cleared_by_admins'] = $map;
+        } elseif (Schema::hasColumn($this->getTable(), 'admin_cleared_before_id')) {
+            $updates['admin_cleared_before_id'] = $maxId;
+        }
+        $this->update($updates);
+
+        return $maxId;
     }
 }

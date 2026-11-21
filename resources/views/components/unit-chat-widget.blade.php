@@ -35,6 +35,9 @@
             </div>
         </div>
         <div class="toko-chat-header-actions">
+            <button type="button" onclick="clearUnitChat()" class="toko-chat-clear-btn" title="Bersihkan chat di tampilan Anda (tidak menghapus riwayat petugas)">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
             <button type="button" id="unitChatExpandBtn" onclick="toggleUnitChatExpand()" class="toko-chat-expand-btn" title="Perbesar panel obrolan" aria-expanded="false">
                 <svg id="unitChatExpandIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
                 <span id="unitChatExpandLabel">Perbesar</span>
@@ -145,6 +148,12 @@
     }
     .toko-chat-header-info { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
     .toko-chat-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .toko-chat-clear-btn {
+        display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.16);
+        border: 1px solid rgba(255,255,255,0.28); color: #ffffff; border-radius: 50%; width: 28px; height: 28px;
+        padding: 0; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+    }
+    .toko-chat-clear-btn:hover { background: rgba(239,68,68,0.85); border-color: rgba(254,202,202,0.8); }
     .toko-chat-expand-btn {
         display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28);
         color: #ffffff; border-radius: 999px; padding: 4px 9px; font-size: 11px; font-weight: 600; cursor: pointer; transition: background 0.2s;
@@ -349,6 +358,42 @@
             if (!document.hidden) loadUnitChatHistory(true);
         }, 4500);
         return p;
+    };
+
+    window.clearUnitChat = function() {
+        if (!confirm('Bersihkan riwayat obrolan ini di tampilan Anda?\nRiwayat di sisi petugas layanan tidak ikut terhapus.')) return;
+        showUnitError('');
+
+        fetch(`{{ url('unit-chat') }}/${unitServiceCode}/clear`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Chat-Session-Token': unitChatSessionToken,
+                'X-CSRF-TOKEN': getCsrfToken()
+            },
+            body: JSON.stringify({
+                region_id: unitRegionId,
+                session_token: unitChatSessionToken
+            })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                unitChatLastFingerprint = '';
+                loadUnitChatHistory(false);
+            } else {
+                throw new Error(data.message || 'Gagal membersihkan chat');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showUnitError('Gagal membersihkan obrolan. Silakan coba lagi.');
+        });
     };
 
     window.toggleUnitChatExpand = function() {

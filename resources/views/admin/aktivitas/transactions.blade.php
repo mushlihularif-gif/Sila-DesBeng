@@ -205,7 +205,7 @@
         <!-- Main Content Card -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center justify-content-between gap-3">
-                <ul class="nav nav-pills card-header-pills gap-2 flex-nowrap overflow-x-auto pb-1 pb-lg-0" id="proofTabs" role="tablist" style="-webkit-overflow-scrolling: touch;">
+                <ul class="nav nav-pills gap-2 flex-nowrap overflow-x-auto pb-1 pb-lg-0 mb-0" id="proofTabs" role="tablist" style="-webkit-overflow-scrolling: touch;">
                     @if($isRentalActive)
                     <li class="nav-item flex-shrink-0" role="presentation">
                         <button class="nav-link {{ $category == 'rental' || $category == 'all' || (!$isRentalActive && $totalActive > 0) ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center text-nowrap" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">

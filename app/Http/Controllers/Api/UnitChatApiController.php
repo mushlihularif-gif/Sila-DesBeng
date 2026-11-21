@@ -60,21 +60,42 @@ class UnitChatApiController extends Controller
             $session->update($updates);
         }
 
-        $messages = $session->messages()->with('sender:id,name,avatar')->get()->map(function ($msg) {
+        $clearBeforeId = $session->userClearedBeforeId();
+        $messagesQuery = $session->messages()->with('sender:id,name,avatar');
+        if ($clearBeforeId > 0) {
+            $messagesQuery->where('id', '>', $clearBeforeId);
+        }
+
+        $messages = $messagesQuery->get()->map(function ($msg) {
             $msg->message = str_replace(
                 ['BUMDes', 'BUMDES', 'bumdes', 'Petugas Desa', 'petugas desa'],
                 ['Layanan Daerah', 'Layanan Daerah', 'layanan daerah', 'Petugas Layanan', 'petugas layanan'],
                 $msg->message
             );
             return $msg;
-        });
+        })->values();
+
+        $sessionPayload = clone $session;
+        if ($messages->isEmpty() && $clearBeforeId > 0) {
+            $sessionPayload->last_message = null;
+            $messages = collect([[
+                'id' => 'cleared_' . $clearBeforeId,
+                'session_id' => $session->id,
+                'sender_type' => 'bot',
+                'sender_id' => null,
+                'message' => 'Riwayat obrolan di tampilan Anda sudah dibersihkan. Silakan kirim pesan baru jika ada yang ingin ditanyakan.',
+                'item_data' => null,
+                'is_read' => true,
+                'created_at' => now()->toISOString(),
+            ]]);
+        }
 
         $region = Region::find($regionId);
 
         return response()->json([
             'status' => 'success',
             'data' => [
-                'session' => $session,
+                'session' => $sessionPayload,
                 'session_token' => $session->session_token,
                 'region_id' => $regionId,
                 'region_name' => $region ? $region->name : null,
@@ -272,6 +293,33 @@ class UnitChatApiController extends Controller
                 'region_id' => $regionId,
                 'bot_message' => $botMsg,
                 'is_escalated' => true,
+            ],
+        ]);
+    }
+
+    /**
+     * Bersihkan isi chat hanya di sisi warga (seperti WhatsApp: tidak menghapus riwayat Admin Desa / Staf).
+     */
+    public function clearChat(Request $request, $service)
+    {
+        $this->validateChat($request, $service);
+        $user = $this->resolveAuthenticatedUser();
+        $sessionToken = ChatSessionToken::read($request);
+        $regionId = $this->resolveRegionId($request, $user);
+
+        $session = $this->findExistingSession($service, $regionId, $user, $sessionToken);
+        $clearedBeforeId = 0;
+
+        if ($session) {
+            $clearedBeforeId = $session->clearForUser();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Obrolan di tampilan Anda berhasil dibersihkan.',
+            'data' => [
+                'cleared_before_id' => $clearedBeforeId,
+                'session_token' => $session?->session_token,
             ],
         ]);
     }

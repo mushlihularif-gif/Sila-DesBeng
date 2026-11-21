@@ -114,6 +114,8 @@ class UnitChatEndToEndTest extends TestCase
             $t->timestamps();
         });
 
+        (require database_path('migrations/2026_11_21_000001_add_clear_watermarks_to_unit_chat_sessions_table.php'))->up();
+
         $this->kabupaten = Region::create(['name' => 'Kabupaten Bengkalis', 'type' => 'kabupaten']);
         $this->kecamatan = Region::create(['name' => 'Kecamatan Bengkalis', 'type' => 'kecamatan', 'parent_id' => $this->kabupaten->id]);
         $this->desaA = Region::create(['name' => 'Desa Pematang Duku Timur', 'type' => 'desa', 'parent_id' => $this->kecamatan->id]);
@@ -395,5 +397,95 @@ class UnitChatEndToEndTest extends TestCase
             ->getJson("/unit-chat/gas/history?region_id={$this->desaA->id}");
         $historyRes->assertOk();
         $this->assertStringContainsString('Halo, stok gas 3 kg tersedia.', $historyRes->getContent());
+    }
+
+    public function test_clear_chat_is_independent_for_citizen_staff_and_admin_desa_like_whatsapp(): void
+    {
+        // 1. Warga kirim pesan & Staf Gas membalas
+        $this->actingAs($this->citizenRtA)->postJson('/unit-chat/gas/send', [
+            'region_id' => $this->desaA->id,
+            'message' => 'Pesan awal warga',
+        ])->assertOk();
+
+        $session = UnitChatSession::where('service_type', 'gas')->firstOrFail();
+
+        $this->actingAs($this->staffGasA)->postJson("/admin/unit/chat-service/gas/{$session->id}/reply", [
+            'message' => 'Balasan awal staf',
+        ])->assertOk();
+
+        // 2. Warga klik Bersihkan Chat -> hanya sisi warga yang bersih; Staf & Admin Desa tetap melihat lengkap
+        $this->actingAs($this->citizenRtA)->postJson('/unit-chat/gas/clear', [
+            'region_id' => $this->desaA->id,
+        ])->assertOk()->assertJsonPath('status', 'success');
+
+        $citizenHistoryAfterClear = $this->actingAs($this->citizenRtA)
+            ->getJson("/unit-chat/gas/history?region_id={$this->desaA->id}")
+            ->assertOk()
+            ->getContent();
+        $this->assertStringNotContainsString('Pesan awal warga', $citizenHistoryAfterClear);
+        $this->assertStringNotContainsString('Balasan awal staf', $citizenHistoryAfterClear);
+        $this->assertStringContainsString('sudah dibersihkan', $citizenHistoryAfterClear);
+
+        $staffViewAfterUserClear = $this->actingAs($this->staffGasA)
+            ->getJson("/admin/unit/chat-service/gas/{$session->id}/messages")
+            ->assertOk()
+            ->getContent();
+        $this->assertStringContainsString('Pesan awal warga', $staffViewAfterUserClear);
+        $this->assertStringContainsString('Balasan awal staf', $staffViewAfterUserClear);
+
+        $adminDesaViewAfterUserClear = $this->actingAs($this->adminDesaA)
+            ->getJson("/admin/unit/chat-service/gas/{$session->id}/messages")
+            ->assertOk()
+            ->getContent();
+        $this->assertStringContainsString('Pesan awal warga', $adminDesaViewAfterUserClear);
+        $this->assertStringContainsString('Balasan awal staf', $adminDesaViewAfterUserClear);
+
+        // 3. Staf klik Bersihkan Chat -> sisi Staf bersih, namun Admin Desa tetap melihat riwayat penuh
+        $this->actingAs($this->staffGasA)
+            ->postJson("/admin/unit/chat-service/gas/{$session->id}/clear")
+            ->assertOk()
+            ->assertJsonPath('status', 'success');
+
+        $this->actingAs($this->staffGasA)
+            ->getJson("/admin/unit/chat-service/gas/{$session->id}/messages")
+            ->assertOk()
+            ->assertJsonCount(0, 'data.messages');
+
+        $this->actingAs($this->staffGasA)
+            ->getJson('/admin/unit/chat-service/gas/sessions')
+            ->assertOk()
+            ->assertJsonPath('data.sessions.0.last_message', 'Obrolan dibersihkan (tampilan Anda)');
+
+        $adminDesaStillSeesAll = $this->actingAs($this->adminDesaA)
+            ->getJson("/admin/unit/chat-service/gas/{$session->id}/messages")
+            ->assertOk()
+            ->getContent();
+        $this->assertStringContainsString('Pesan awal warga', $adminDesaStillSeesAll);
+        $this->assertStringContainsString('Balasan awal staf', $adminDesaStillSeesAll);
+
+        // 4. Warga mengirim pesan baru setelah masing-masing membersihkan -> pesan baru langsung muncul di semua sisi
+        $this->actingAs($this->citizenRtA)->postJson('/unit-chat/gas/send', [
+            'region_id' => $this->desaA->id,
+            'message' => 'Pesan baru setelah bersih',
+        ])->assertOk();
+
+        $citizenAfterNew = $this->actingAs($this->citizenRtA)
+            ->getJson("/unit-chat/gas/history?region_id={$this->desaA->id}")
+            ->assertOk()
+            ->getContent();
+        $this->assertStringNotContainsString('Pesan awal warga', $citizenAfterNew);
+        $this->assertStringContainsString('Pesan baru setelah bersih', $citizenAfterNew);
+
+        $staffAfterNew = $this->actingAs($this->staffGasA)
+            ->getJson("/admin/unit/chat-service/gas/{$session->id}/messages")
+            ->assertOk()
+            ->getContent();
+        $this->assertStringNotContainsString('Pesan awal warga', $staffAfterNew);
+        $this->assertStringContainsString('Pesan baru setelah bersih', $staffAfterNew);
+
+        // 5. Staf tanpa izin unit penyewaan tetap ditolak (403) saat mencoba clear unit lain
+        $this->actingAs($this->staffGasA)
+            ->postJson("/admin/unit/chat-service/penyewaan/{$session->id}/clear")
+            ->assertStatus(403);
     }
 }

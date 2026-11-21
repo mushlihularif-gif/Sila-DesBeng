@@ -676,6 +676,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages'])->name('admin.unit.chat.messages');
             Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat'])->name('admin.unit.chat.reply');
             Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat'])->name('admin.unit.chat.resolve');
+            Route::post('{service}/{id}/clear', [\App\Http\Controllers\Admin\UnitChatController::class, 'clearChat'])->name('admin.unit.chat.clear');
         });
     });
 
@@ -685,6 +686,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages'])->name('admin.unit.chat.alias.messages');
         Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat'])->name('admin.unit.chat.alias.reply');
         Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat'])->name('admin.unit.chat.alias.resolve');
+        Route::post('{service}/{id}/clear', [\App\Http\Controllers\Admin\UnitChatController::class, 'clearChat'])->name('admin.unit.chat.alias.clear');
     });
     
     // Route Aktivitas
@@ -837,6 +839,7 @@ Route::prefix('unit-chat')->name('unit-chat.')->group(function () {
     Route::get('/{service}/history', [\App\Http\Controllers\Api\UnitChatApiController::class, 'getChatHistory'])->name('history');
     Route::post('/{service}/send', [\App\Http\Controllers\Api\UnitChatApiController::class, 'sendChatMessage'])->middleware('throttle:chat-write')->name('send');
     Route::post('/{service}/escalate', [\App\Http\Controllers\Api\UnitChatApiController::class, 'escalateChat'])->middleware('throttle:chat-write')->name('escalate');
+    Route::post('/{service}/clear', [\App\Http\Controllers\Api\UnitChatApiController::class, 'clearChat'])->middleware('throttle:chat-write')->name('clear');
 });
 
 // Fallback Route untuk aset Storage jika symlink dinonaktifkan oleh shared hosting

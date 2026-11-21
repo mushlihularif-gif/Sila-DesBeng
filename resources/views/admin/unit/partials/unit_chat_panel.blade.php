@@ -71,8 +71,14 @@
                                 : ($chat->user_name ?? ($chat->user->name ?? 'Warga'));
                             $userPhoto = ($chat->user && $chat->user->profile_photo_url) ? $chat->user->profile_photo_url : null;
                             $firstChar = strtoupper(mb_substr($displayName, 0, 1) ?: 'W');
-                            $lastSender = $chat->relationLoaded('latestMessage') ? $chat->latestMessage?->sender_type : null;
-                            $needsReply = $chat->status !== 'resolved' && ((int) $chat->unread_admin_count > 0 || ($chat->status === 'escalated' && $lastSender !== 'admin'));
+                            $adminClearedId = (auth()->check() && method_exists($chat, 'adminClearedBeforeId'))
+                                ? $chat->adminClearedBeforeId((int) auth()->id())
+                                : 0;
+                            $latestMsgObj = $chat->relationLoaded('latestMessage') ? $chat->latestMessage : null;
+                            $hasVisibleAfterClear = !$adminClearedId || ($latestMsgObj && (int) $latestMsgObj->id > $adminClearedId);
+                            $lastSender = $hasVisibleAfterClear ? $latestMsgObj?->sender_type : null;
+                            $displayUnread = $hasVisibleAfterClear ? (int) $chat->unread_admin_count : 0;
+                            $needsReply = $hasVisibleAfterClear && $chat->status !== 'resolved' && ($displayUnread > 0 || ($chat->status === 'escalated' && $lastSender !== 'admin'));
                         @endphp
                         <div class="admin-unit-chat-item-{{ $serviceType }} p-3 border-bottom d-flex align-items-center gap-3 cursor-pointer transition-all wa-chat-item"
                              id="unitChatItem_{{ $serviceType }}_{{ $chat->id }}"
@@ -112,7 +118,7 @@
                                 @endif
 
                                 <p class="mb-0 text-muted small text-truncate" style="max-width: 180px; font-size: 0.8rem;" id="unitChatPreview_{{ $serviceType }}_{{ $chat->id }}">
-                                    {{ $chat->last_message ?? 'Memulai percakapan...' }}
+                                    {{ $hasVisibleAfterClear ? ($chat->last_message ?? 'Memulai percakapan...') : 'Obrolan dibersihkan (tampilan Anda)' }}
                                 </p>
 
                                 <div class="d-flex align-items-center gap-1 mt-1.5">
@@ -126,9 +132,9 @@
                                         <span class="badge bg-label-secondary py-0.5 px-2" style="font-size: 9.5px;" id="unitChatBadge_{{ $serviceType }}_{{ $chat->id }}">Aktif</span>
                                     @endif
 
-                                    @if((int) $chat->unread_admin_count > 0)
+                                    @if($displayUnread > 0)
                                         <span class="badge bg-success rounded-pill ms-auto py-0.5 px-2" style="font-size: 10px;" id="unitChatUnread_{{ $serviceType }}_{{ $chat->id }}">
-                                            {{ $chat->unread_admin_count }}
+                                            {{ $displayUnread }}
                                         </span>
                                     @else
                                         <span class="badge bg-success rounded-pill ms-auto py-0.5 px-2 d-none" style="font-size: 10px;" id="unitChatUnread_{{ $serviceType }}_{{ $chat->id }}"></span>
@@ -188,7 +194,11 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="adminUnitChatActions_{{ $serviceType }}">
+                        <div id="adminUnitChatActions_{{ $serviceType }}" class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 shadow-2xs d-inline-flex align-items-center gap-1 fw-semibold" onclick="clearAdminUnitActiveChat('{{ $serviceType }}')" title="Bersihkan chat hanya di tampilan Anda (tidak menghapus riwayat warga)">
+                                <i class="bx bx-trash fs-6"></i>
+                                <span class="d-none d-sm-inline">Bersihkan</span>
+                            </button>
                             <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1.5 shadow-2xs d-inline-flex align-items-center gap-1.5 fw-semibold" onclick="resolveAdminUnitActiveChat('{{ $serviceType }}')">
                                 <i class="bx bx-check-double fs-6"></i>
                                 <span>Tandai Selesai</span>
@@ -558,7 +568,7 @@
                         stream.innerHTML = '';
 
                         if (messages.length === 0) {
-                            stream.innerHTML = '<div class="text-center text-muted my-auto py-5"><i class="bx bx-chat fs-1 opacity-50 mb-2"></i><p class="small">Belum ada pesan dalam sesi ini.</p></div>';
+                            stream.innerHTML = '<div class="text-center text-muted my-auto py-5"><i class="bx bx-chat fs-1 opacity-50 mb-2"></i><p class="small mb-0">Obrolan kosong atau sudah dibersihkan di tampilan Anda.<br>Pesan baru dari warga akan muncul otomatis di sini.</p></div>';
                         } else {
                             let firstUserMsgRendered = false;
                             messages.forEach(msg => {
@@ -798,6 +808,46 @@
             state.isSending = false;
             if (sendBtn) sendBtn.disabled = false;
             input?.focus();
+        });
+    }
+
+    function clearAdminUnitActiveChat(service) {
+        const state = window.unitChatStates[service];
+        if (!state || !state.activeSessionId) return;
+
+        if (!confirm('Bersihkan isi obrolan ini hanya di tampilan Anda?\nRiwayat di sisi warga dan pengelola lain tidak ikut terhapus.')) return;
+
+        const appBase = '{{ request()->getBaseUrl() }}';
+        const clearUrl = `${appBase}/admin/unit/chat-service/${service}/${state.activeSessionId}/clear`;
+
+        fetch(clearUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'X-CSRF-TOKEN': getAdminUnitCsrf(),
+                'Accept': 'application/json'
+            }
+        })
+        .then(async res => {
+            const payload = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(payload.message || ('HTTP ' + res.status));
+            return payload;
+        })
+        .then(res => {
+            if (res.status === 'success') {
+                showAdminUnitError(service, '');
+                const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
+                if (stream) {
+                    stream.innerHTML = '<div class="text-center text-muted my-auto py-5"><i class="bx bx-check-circle text-success fs-1 opacity-75 mb-2"></i><p class="small mb-0">Obrolan di tampilan Anda telah dibersihkan.<br>Pesan baru dari warga akan langsung muncul di sini.</p></div>';
+                }
+                const preview = document.getElementById(`unitChatPreview_${service}_${state.activeSessionId}`);
+                if (preview) preview.innerText = 'Obrolan dibersihkan (tampilan Anda)';
+                refreshAdminUnitSessions(service, false);
+            }
+        })
+        .catch(err => {
+            console.error('Error clearing chat:', err);
+            showAdminUnitError(service, err.message || 'Gagal membersihkan obrolan.');
         });
     }
 

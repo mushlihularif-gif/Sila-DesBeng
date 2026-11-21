@@ -1133,6 +1133,9 @@
             flex: 1 1 auto;
             min-width: 0;
             max-width: 100%;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            padding: 2px;
             display: flex !important;
             flex-wrap: nowrap !important;
             overflow-x: auto !important;
@@ -3156,9 +3159,11 @@
                 wrap.appendChild(nextBtn);
 
                 function updateArrows() {
-                    const maxScroll = el.scrollWidth - el.clientWidth;
-                    const canLeft = el.scrollLeft > 6;
-                    const canRight = maxScroll > 6 && el.scrollLeft < maxScroll - 6;
+                    const itemCount = el.querySelectorAll(':scope > li, :scope > a, :scope > button').length;
+                    const maxScroll = Math.ceil(el.scrollWidth - el.clientWidth);
+                    const hasOverflow = itemCount > 1 && maxScroll > 12;
+                    const canLeft = hasOverflow && el.scrollLeft > 6;
+                    const canRight = hasOverflow && el.scrollLeft < maxScroll - 6;
 
                     wrap.classList.toggle('can-scroll-left', canLeft);
                     wrap.classList.toggle('can-scroll-right', canRight);
