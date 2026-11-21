@@ -24,7 +24,7 @@
             if (strlen($rawNik) >= 8) {
                 $maskedNik = substr($rawNik, 0, 4) . str_repeat('*', max(0, strlen($rawNik) - 8)) . substr($rawNik, -4);
             } else {
-                $maskedNik = '1403********3597';
+                $maskedNik = '-';
             }
 
             // Masking Nama: M. M*******L A**F
@@ -118,7 +118,7 @@
                         <div class="flex items-start justify-between gap-4 px-4 py-3 bg-white">
                             <span class="text-sm text-gray-500 flex-shrink-0">Wilayah</span>
                             <span class="text-sm font-medium text-gray-800 text-right">
-                                {{ $user->region->name ?? 'Desa Pematang Duku Timur' }}
+                                {{ $user->region->name ?? '-' }}
                             </span>
                         </div>
 
@@ -200,19 +200,19 @@
 
                             {{-- Kolom Kiri: Data Kependudukan (Ukuran Font Sama & Seragam 100%) --}}
                             <div class="flex-1 flex flex-col justify-center" style="min-width: 0;">
-                                <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: clamp(9px, 2.1vw, 14.5px); line-height: 1.5;">
+                                <table data-no-table-scroll="true" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: clamp(9px, 2.1vw, 14.5px); line-height: 1.5;">
                                     <tbody>
                                         {{-- NIK --}}
                                         <tr>
-                                            <td style="width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">NIK</td>
-                                            <td style="width: 14px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
-                                            <td style="font-family: monospace; font-weight: 800; color: #0c2842; vertical-align: middle; padding: 3.5px 0; white-space: nowrap; letter-spacing: 0.05em;">{{ $maskedNik }}</td>
+                                            <td style="width: 24%; max-width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">NIK</td>
+                                            <td style="width: 10px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
+                                            <td style="font-family: monospace; font-weight: 800; color: #0c2842; vertical-align: middle; padding: 3.5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.05em;">{{ $maskedNik }}</td>
                                         </tr>
 
                                         {{-- NAMA --}}
                                         <tr>
-                                            <td style="width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">NAMA</td>
-                                            <td style="width: 14px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
+                                            <td style="width: 24%; max-width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">NAMA</td>
+                                            <td style="width: 10px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
                                             <td style="font-weight: 800; text-transform: uppercase; color: #0c2842; vertical-align: middle; padding: 3.5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                                 <span style="display: inline-flex; align-items: center; gap: 5px;">
                                                     <span>{!! $maskedName !!}</span>
@@ -223,27 +223,27 @@
 
                                         {{-- ALAMAT --}}
                                         <tr>
-                                            <td style="width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">ALAMAT</td>
-                                            <td style="width: 14px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
+                                            <td style="width: 24%; max-width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">ALAMAT</td>
+                                            <td style="width: 10px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
                                             <td style="font-weight: 700; text-transform: uppercase; color: #0c2842; vertical-align: middle; padding: 3.5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                RT {{ $user->rt ?? '002' }} / RW {{ $user->rw ?? '001' }}
+                                                {{ ($user->rt || $user->rw) ? ('RT ' . ($user->rt ?: '-') . ' / RW ' . ($user->rw ?: '-')) : '-' }}
                                             </td>
                                         </tr>
 
                                         {{-- DESA --}}
                                         <tr>
-                                            <td style="width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">DESA</td>
-                                            <td style="width: 14px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
+                                            <td style="width: 24%; max-width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">DESA</td>
+                                            <td style="width: 10px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
                                             <td style="font-weight: 700; text-transform: uppercase; color: #0c2842; vertical-align: middle; padding: 3.5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                {{ $user->region->name ?? 'PEMATANG DUKU TIMUR' }}
+                                                {{ $user->region->name ?? '-' }}
                                             </td>
                                         </tr>
 
                                         {{-- STATUS --}}
                                         <tr>
-                                            <td style="width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">STATUS</td>
-                                            <td style="width: 14px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
-                                            <td style="font-weight: 800; text-transform: uppercase; color: #047857; vertical-align: middle; padding: 3.5px 0; letter-spacing: 0.04em; white-space: nowrap;">
+                                            <td style="width: 24%; max-width: 78px; font-weight: 800; text-transform: uppercase; color: #12385c; vertical-align: middle; white-space: nowrap; padding: 3.5px 0;">STATUS</td>
+                                            <td style="width: 10px; text-align: center; font-weight: 800; color: #12385c; vertical-align: middle; padding: 3.5px 0;">:</td>
+                                            <td style="font-weight: 800; text-transform: uppercase; color: #047857; vertical-align: middle; padding: 3.5px 0; letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                                 WARGA TERVERIFIKASI
                                             </td>
                                         </tr>

@@ -78,7 +78,7 @@ class RegionManagementController extends Controller
             'parent_id' => 'nullable|exists:regions,id',
             'admin_name' => 'required_with:admin_email|nullable|string|max:255',
             'admin_email' => 'nullable|string|email|max:255|unique:users,email',
-            'admin_password' => 'required_with:admin_email|string|min:8',
+            'admin_password' => 'required_with:admin_email|nullable|string|min:8',
         ]);
 
         $user = $this->manager();
@@ -150,14 +150,6 @@ class RegionManagementController extends Controller
 
         $region = Region::findOrFail($id);
         $this->assertRegionScope($region);
-        
-        $user = $this->manager();
-        $isSuperAdmin = $user->isSuperAdmin();
-
-        // Verifikasi bahwa region ini benar anak dari region admin
-        if (!$isSuperAdmin && $region->parent_id !== $user->region_id) {
-            return back()->with('error', 'Akses ditolak.');
-        }
 
         $region->update([
             'name' => $request->name
@@ -173,13 +165,6 @@ class RegionManagementController extends Controller
     {
         $region = Region::findOrFail($id);
         $this->assertRegionScope($region);
-        
-        $user = $this->manager();
-        $isSuperAdmin = $user->isSuperAdmin();
-        
-        if (!$isSuperAdmin && $region->parent_id !== $user->region_id) {
-            return back()->with('error', 'Akses ditolak.');
-        }
 
         // Cek jika sudah ada user
         if ($region->users()->count() > 0) {
@@ -209,13 +194,6 @@ class RegionManagementController extends Controller
 
         $region = Region::findOrFail($region_id);
         $this->assertRegionScope($region);
-        
-        $user = $this->manager();
-        $isSuperAdmin = $user->isSuperAdmin();
-        
-        if (!$isSuperAdmin && $region->parent_id !== $user->region_id) {
-            return back()->with('error', 'Akses ditolak.');
-        }
 
         // Tentukan Role
         $roleMapping = User::REGION_ROLES;

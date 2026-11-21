@@ -59,14 +59,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile Tambahan (Saldo & Alamat)
     Route::get('/profile/saldo', [\App\Http\Controllers\Api\ProfileSaldoApiController::class, 'index']);
     Route::post('/profile/saldo/tarik', [\App\Http\Controllers\Api\ProfileSaldoApiController::class, 'tarik']);
-    Route::post('/profile/saldo/tarik/{id}/batal', [\App\Http\Controllers\Api\ProfileSaldoApiController::class, 'batal']);
+    Route::post('/profile/saldo/tarik/{id}/batal', [\App\Http\Controllers\Api\ProfileSaldoApiController::class, 'batal'])->whereNumber('id');
 
     Route::get('/profile/alamat', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'index']);
     Route::post('/profile/alamat', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'store']);
-    Route::get('/profile/alamat/{id}', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'show']);
-    Route::put('/profile/alamat/{id}', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'update']);
-    Route::post('/profile/alamat/{id}/utama', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'utama']);
-    Route::delete('/profile/alamat/{id}', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'destroy']);
+    Route::get('/profile/alamat/{id}', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'show'])->whereNumber('id');
+    Route::put('/profile/alamat/{id}', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'update'])->whereNumber('id');
+    Route::post('/profile/alamat/{id}/utama', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'utama'])->whereNumber('id');
+    Route::delete('/profile/alamat/{id}', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'destroy'])->whereNumber('id');
     
     // Kemitraan
     Route::post('/kemitraan/gabung', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'store']);
@@ -79,14 +79,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/gas', [\App\Http\Controllers\Api\GasController::class, 'index']);
     Route::get('/gas/{id}', [\App\Http\Controllers\Api\GasController::class, 'show'])->whereNumber('id');
     Route::post('/gas/booking', [\App\Http\Controllers\Api\GasBookingController::class, 'store']);
-    Route::post('/gas/payment/{id}', [\App\Http\Controllers\Api\GasBookingController::class, 'uploadPayment']);
-    Route::get('/gas/receipt/{id}', [\App\Http\Controllers\Api\GasBookingController::class, 'getReceipt']);
+    Route::post('/gas/payment/{id}', [\App\Http\Controllers\Api\GasBookingController::class, 'uploadPayment'])->whereNumber('id');
+    Route::get('/gas/receipt/{id}', [\App\Http\Controllers\Api\GasBookingController::class, 'getReceipt'])->whereNumber('id');
 
     Route::get('/history', [\App\Http\Controllers\Api\HistoryController::class, 'index']);
 
     // Notifikasi
     Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
-    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead'])->whereNumber('id');
     Route::post('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
     Route::delete('/notifications/delete-all', [\App\Http\Controllers\Api\NotificationController::class, 'deleteAll']);
     
@@ -97,45 +97,45 @@ Route::middleware('auth:sanctum')->group(function () {
     // Mutasi Domisili
     Route::get('/mutasi', [\App\Http\Controllers\Api\DomicileTransferApiController::class, 'index']);
     Route::post('/mutasi', [\App\Http\Controllers\Api\DomicileTransferApiController::class, 'store']);
-    Route::delete('/mutasi/{id}', [\App\Http\Controllers\Api\DomicileTransferApiController::class, 'cancel']);
+    Route::delete('/mutasi/{id}', [\App\Http\Controllers\Api\DomicileTransferApiController::class, 'cancel'])->whereNumber('id');
 
     // Event Gotong Royong
     Route::get('/events', [\App\Http\Controllers\Api\CommunityEventApiController::class, 'index']);
     Route::post('/events', [\App\Http\Controllers\Api\CommunityEventApiController::class, 'store']);
-    Route::post('/events/{id}/join', [\App\Http\Controllers\Api\CommunityEventApiController::class, 'toggleJoin']);
+    Route::post('/events/{id}/join', [\App\Http\Controllers\Api\CommunityEventApiController::class, 'toggleJoin'])->whereNumber('id');
 
     // Wilayah Admin Dashboard (RT/RW)
-    Route::prefix('wilayah')->middleware('role:admin_rt,admin_rw,rt,rw')->group(function () {
+    Route::prefix('wilayah')->middleware('role:admin_rt,admin_rw')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\WilayahAdminApiController::class, 'getDashboardStats']);
         Route::post('/berita', [\App\Http\Controllers\Api\WilayahAdminApiController::class, 'storeBerita']);
         Route::get('/warga', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'index']);
-        Route::get('/warga/{id}', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'show']);
-        Route::post('/warga/{id}/approve-kyc', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'approveKyc']);
-        Route::post('/warga/{id}/reject-kyc', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'rejectKyc']);
+        Route::get('/warga/{id}', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'show'])->whereNumber('id');
+        Route::post('/warga/{id}/approve-kyc', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'approveKyc'])->whereNumber('id');
+        Route::post('/warga/{id}/reject-kyc', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'rejectKyc'])->whereNumber('id');
     });
 
     // Sewa Alat (Tenda, Kursi, Sound System, dll)
     Route::get('/rental/items', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'index']);
-    Route::get('/rental/items/{id}', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'show']);
-    Route::post('/rental/payment/{id}/proof', [\App\Http\Controllers\User\RentalBookingController::class, 'uploadPayment']);
+    Route::get('/rental/items/{id}', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'show'])->whereNumber('id');
+    Route::post('/rental/payment/{id}/proof', [\App\Http\Controllers\User\RentalBookingController::class, 'uploadPayment'])->whereNumber('id');
     Route::post('/rental/booking', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'store']);
     Route::post('/rental/booking-package', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'storePackage']);
     Route::get('/rental/my-bookings', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'myBookings']);
-    Route::delete('/rental/booking/{id}/cancel', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'cancel']);
+    Route::delete('/rental/booking/{id}/cancel', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'cancel'])->whereNumber('id');
 
     // Sewa Kendaraan (Mobil, Pick-Up)
     Route::get('/mobil', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'index']);
     Route::get('/mobil/{id}', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'show'])->whereNumber('id');
     Route::post('/mobil/booking', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'store']);
     Route::get('/mobil/my-bookings', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'myBookings']);
-    Route::delete('/mobil/booking/{id}/cancel', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'cancel']);
+    Route::delete('/mobil/booking/{id}/cancel', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'cancel'])->whereNumber('id');
 
     // Sewa Fasilitas Umum (Gedung, Lapangan, Kendaraan Operasional)
     Route::get('/fasilitas', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'index']);
     Route::get('/fasilitas/{id}', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'show'])->whereNumber('id');
     Route::post('/fasilitas/booking', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'store']);
     Route::get('/fasilitas/my-bookings', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'myBookings']);
-    Route::delete('/fasilitas/booking/{id}/cancel', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'cancel']);
+    Route::delete('/fasilitas/booking/{id}/cancel', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'cancel'])->whereNumber('id');
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });

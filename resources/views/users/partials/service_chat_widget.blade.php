@@ -257,6 +257,7 @@
     }
     .service-chat-widget.active {
         display: flex;
+        z-index: 100001;
         animation: chatSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @keyframes chatSlideUp {
@@ -291,21 +292,21 @@
             text-overflow: ellipsis;
         }
         .service-chat-widget {
-            bottom: 72px;
+            bottom: 84px;
             left: 50%;
             transform: translateX(-50%);
             width: calc(100vw - 20px);
             max-width: 360px;
             height: 420px;
-            max-height: calc(100vh - 96px);
+            max-height: calc(100vh - 104px);
             border-radius: 1rem;
         }
         .service-chat-widget.is-expanded {
-            bottom: 64px;
+            bottom: 72px;
             width: calc(100vw - 16px);
             max-width: calc(100vw - 16px);
-            height: calc(100vh - 80px);
-            max-height: calc(100vh - 80px);
+            height: calc(100vh - 88px);
+            max-height: calc(100vh - 88px);
         }
     }
     @media (max-width: 420px) {

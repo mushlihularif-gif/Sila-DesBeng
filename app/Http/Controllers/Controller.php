@@ -74,7 +74,7 @@ abstract class Controller
             return \App\Models\Service::available()->pluck('name')->toArray();
         }
 
-        $region = \App\Models\Region::with('services')->find($currentUser->region_id);
+        $region = \App\Models\Region::with(['services' => fn ($q) => $q->wherePivot('is_active', true)])->find($currentUser->region_id);
 
         if (! $region) {
             return [];

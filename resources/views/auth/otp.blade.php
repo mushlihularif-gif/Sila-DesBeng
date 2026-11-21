@@ -6,7 +6,7 @@
     <!-- Glassmorphism Overlay -->
     <div class="absolute inset-0 bg-white/30 backdrop-blur-md"></div>
     
-    <div class="max-w-md w-full bg-white p-10 rounded-3xl shadow-2xl relative z-10 text-center">
+    <div class="max-w-md w-full bg-white p-6 sm:p-10 rounded-3xl shadow-2xl relative z-10 text-center">
         <h2 class="text-2xl font-bold text-gray-900 mb-6">Verifikasi Kode</h2>
         
         <div class="flex justify-center mb-6">
@@ -32,11 +32,11 @@
                 </div>
             @endif
 
-            <div class="flex justify-center gap-4 mb-8">
-                <input type="text" class="otp-input w-14 h-14 text-center text-2xl font-bold rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" maxlength="1" data-index="0">
-                <input type="text" class="otp-input w-14 h-14 text-center text-2xl font-bold rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" maxlength="1" data-index="1">
-                <input type="text" class="otp-input w-14 h-14 text-center text-2xl font-bold rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" maxlength="1" data-index="2">
-                <input type="text" class="otp-input w-14 h-14 text-center text-2xl font-bold rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" maxlength="1" data-index="3">
+            <div class="flex justify-center gap-2 sm:gap-4 mb-8">
+                <input type="text" class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" maxlength="1" data-index="0">
+                <input type="text" class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" maxlength="1" data-index="1">
+                <input type="text" class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" maxlength="1" data-index="2">
+                <input type="text" class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" maxlength="1" data-index="3">
             </div>
             <input type="hidden" name="otp_code" id="real_otp_code">
 

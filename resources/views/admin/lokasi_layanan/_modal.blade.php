@@ -119,13 +119,13 @@
             f.latitude.value   = data.latitude ?? '';
             f.longitude.value  = data.longitude ?? '';
             f.catatan.value    = data.catatan || '';
-            f.is_aktif.checked = !!data.is_aktif;
+            document.getElementById('is_aktif').checked = !!data.is_aktif;
         } else {
             document.getElementById('judulModal').textContent = 'Tambah Lokasi';
             f.action = RUTE_SIMPAN;
             document.getElementById('metodeLokasi').value = 'POST';
             f.reset();
-            f.is_aktif.checked = true;
+            document.getElementById('is_aktif').checked = true;
         }
 
         setTimeout(pasangPeta, 350);

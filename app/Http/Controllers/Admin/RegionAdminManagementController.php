@@ -99,12 +99,11 @@ class RegionAdminManagementController extends Controller
             ];
         }
 
-        // Daftar Warga untuk form promosi (Warga desa ini, RT/RW binaan, atau belum berwilayah)
+        // Daftar Warga untuk form promosi (Warga desa ini & RT/RW binaan)
         $wargaList = User::where('role', 'user')
             ->where(function ($q) use ($desaId, $regionIds) {
                 $q->where('region_id', $desaId)
-                  ->orWhereIn('region_id', $regionIds)
-                  ->orWhereNull('region_id');
+                  ->orWhereIn('region_id', $regionIds);
             })
             ->with('file')
             ->get(['id', 'name', 'email', 'phone', 'nik', 'avatar', 'ktp_photo_path']);
@@ -178,13 +177,17 @@ class RegionAdminManagementController extends Controller
             }
 
             $rwName = $this->formatRegionName('RW', $request->rw_number);
+            $rwRawNum = preg_replace('/[^0-9]/', '', (string) $request->rw_number);
 
-            // Cek apakah RW ini sudah ada di database desa
+            // Cek apakah RW ini sudah ada di database desa (pencocokan persis, bukan substring LIKE)
             $targetRegion = Region::where('parent_id', $desaId)
                 ->where('type', 'rw')
-                ->where(function ($q) use ($rwName, $request) {
-                    $q->where('name', $rwName)
-                      ->orWhere('name', 'LIKE', '%' . trim($request->rw_number) . '%');
+                ->where(function ($q) use ($rwName, $rwRawNum) {
+                    $q->where('name', $rwName);
+                    if ($rwRawNum !== '') {
+                        $q->orWhere('name', 'RW ' . (int) $rwRawNum)
+                          ->orWhere('name', 'RW ' . str_pad($rwRawNum, 2, '0', STR_PAD_LEFT));
+                    }
                 })
                 ->first();
 
@@ -233,12 +236,16 @@ class RegionAdminManagementController extends Controller
             }
 
             $rtName = $this->formatRegionName('RT', $request->rt_number);
+            $rtRawNum = preg_replace('/[^0-9]/', '', (string) $request->rt_number);
 
             $targetRegion = Region::where('parent_id', $parentRw->id)
                 ->where('type', 'rt')
-                ->where(function ($q) use ($rtName, $request) {
-                    $q->where('name', $rtName)
-                      ->orWhere('name', 'LIKE', '%' . trim($request->rt_number) . '%');
+                ->where(function ($q) use ($rtName, $rtRawNum) {
+                    $q->where('name', $rtName);
+                    if ($rtRawNum !== '') {
+                        $q->orWhere('name', 'RT ' . (int) $rtRawNum)
+                          ->orWhere('name', 'RT ' . str_pad($rtRawNum, 2, '0', STR_PAD_LEFT));
+                    }
                 })
                 ->first();
 
@@ -381,6 +388,10 @@ class RegionAdminManagementController extends Controller
             return back()->with('error', 'Akses ditolak: Pengajuan ini berada di luar wewenang desa Anda.');
         }
 
+        if ($application->status !== 'pending') {
+            return back()->with('error', 'Aplikasi ini sudah diproses sebelumnya.');
+        }
+
         $application->status = 'rejected';
         $application->save();
 
@@ -421,6 +432,7 @@ class RegionAdminManagementController extends Controller
         }
         $targetRegion = $result['region'];
 
+        $validRegions = $this->getValidRegionIds($admin);
         if (!in_array($targetRegion->id, $validRegions)) {
             return back()->with('error', 'Akses ditolak: Anda tidak dapat menempatkan admin di luar wilayah desa Anda.');
         }

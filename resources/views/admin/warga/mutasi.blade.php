@@ -325,11 +325,11 @@
                                         @endif
                                         @if(in_array($m->status, ['pending', 'pending_asal', 'pending_tujuan']))
                                             @if($isKeluar && in_array($m->status, ['pending', 'pending_asal']) && $m->requested_by != 'admin_asal')
-                                            <button type="button" class="btn btn-xs btn-outline-danger" onclick="$('button[data-bs-target=\'#navs-keluar\']').tab('show')">
+                                            <button type="button" class="btn btn-xs btn-outline-danger" onclick="bootstrap.Tab.getOrCreateInstance(document.querySelector('button[data-bs-target=\'#navs-keluar\']')).show()">
                                                 Kelola
                                             </button>
                                             @elseif(!$isKeluar && ($m->status == 'pending_tujuan' || $m->requested_by == 'admin_asal'))
-                                            <button type="button" class="btn btn-xs btn-outline-success" onclick="$('button[data-bs-target=\'#navs-masuk\']').tab('show')">
+                                            <button type="button" class="btn btn-xs btn-outline-success" onclick="bootstrap.Tab.getOrCreateInstance(document.querySelector('button[data-bs-target=\'#navs-masuk\']')).show()">
                                                 Tinjau
                                             </button>
                                             @else
@@ -423,11 +423,11 @@
                             @if(in_array($m->status, ['pending', 'pending_asal', 'pending_tujuan']))
                             <div class="mt-2">
                                 @if($isKeluar && in_array($m->status, ['pending', 'pending_asal']) && $m->requested_by != 'admin_asal')
-                                <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="$('button[data-bs-target=\'#navs-keluar\']').tab('show')">
+                                <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="bootstrap.Tab.getOrCreateInstance(document.querySelector('button[data-bs-target=\'#navs-keluar\']')).show()">
                                     <i class='bx bx-export me-1'></i> Kelola di Tab Pelepasan
                                 </button>
                                 @elseif(!$isKeluar && ($m->status == 'pending_tujuan' || $m->requested_by == 'admin_asal'))
-                                <button type="button" class="btn btn-sm btn-outline-success w-100" onclick="$('button[data-bs-target=\'#navs-masuk\']').tab('show')">
+                                <button type="button" class="btn btn-sm btn-outline-success w-100" onclick="bootstrap.Tab.getOrCreateInstance(document.querySelector('button[data-bs-target=\'#navs-masuk\']')).show()">
                                     <i class='bx bx-import me-1'></i> Tinjau di Tab Persetujuan
                                 </button>
                                 @endif
@@ -470,7 +470,7 @@
                                 <td>
                                     @include('admin.warga.partials.user_avatar_nik', ['user' => $p->user])
                                 </td>
-                                <td>{{ $p->toRegion->kecamatan }} - {{ $p->toRegion->desa }}</td>
+                                <td>{{ $p->toRegion?->parent?->name ? $p->toRegion->parent->name . ' - ' : '' }}{{ $p->toRegion?->name ?? '-' }}</td>
                                 <td>
                                     @if($p->requested_by == 'user')
                                     <span class="badge bg-label-info">Warga Sendiri</span>
@@ -573,7 +573,7 @@
                             <div class="bg-light p-2 rounded-2 mb-3" style="font-size: 0.82rem;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="text-muted">Desa Tujuan:</span>
-                                    <span class="fw-semibold text-dark">{{ $p->toRegion->kecamatan }} - {{ $p->toRegion->desa }}</span>
+                                    <span class="fw-semibold text-dark">{{ $p->toRegion?->parent?->name ? $p->toRegion->parent->name . ' - ' : '' }}{{ $p->toRegion?->name ?? '-' }}</span>
                                 </div>
                                 @if($p->reason)
                                 <div class="pt-1 border-top mt-1">
@@ -652,7 +652,7 @@
                                 <td>
                                     @include('admin.warga.partials.user_avatar_nik', ['user' => $p->user])
                                 </td>
-                                <td>{{ $p->fromRegion->kecamatan }} - {{ $p->fromRegion->desa }}</td>
+                                <td>{{ $p->fromRegion?->parent?->name ? $p->fromRegion->parent->name . ' - ' : '' }}{{ $p->fromRegion?->name ?? '-' }}</td>
                                 <td>
                                     @if($p->requested_by == 'user')
                                     <span class="badge bg-label-info">Warga Sendiri</span>
@@ -742,7 +742,7 @@
                             <div class="bg-light p-2 rounded-2 mb-3" style="font-size: 0.82rem;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="text-muted">Desa Asal:</span>
-                                    <span class="fw-semibold text-dark">{{ $p->fromRegion->kecamatan }} - {{ $p->fromRegion->desa }}</span>
+                                    <span class="fw-semibold text-dark">{{ $p->fromRegion?->parent?->name ? $p->fromRegion->parent->name . ' - ' : '' }}{{ $p->fromRegion?->name ?? '-' }}</span>
                                 </div>
                                 @if($p->reason)
                                 <div class="pt-1 border-top mt-1">
@@ -810,7 +810,7 @@
                                 <td>
                                     @include('admin.warga.partials.user_avatar_nik', ['user' => $r->user])
                                 </td>
-                                <td>{{ $r->fromRegion->desa }} <i class='bx bx-right-arrow-alt'></i> {{ $r->toRegion->desa }}</td>
+                                <td>{{ $r->fromRegion?->name ?? 'Asal' }} <i class='bx bx-right-arrow-alt'></i> {{ $r->toRegion?->name ?? 'Tujuan' }}</td>
                                 <td>
                                     @if($r->status == 'approved')
                                     <span class="badge bg-success">Disetujui</span>
@@ -849,7 +849,7 @@
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="text-muted">Rute:</span>
-                                    <span class="fw-semibold text-primary">{{ $r->fromRegion->desa }} <i class='bx bx-right-arrow-alt'></i> {{ $r->toRegion->desa }}</span>
+                                    <span class="fw-semibold text-primary">{{ $r->fromRegion?->name ?? 'Asal' }} <i class='bx bx-right-arrow-alt'></i> {{ $r->toRegion?->name ?? 'Tujuan' }}</span>
                                 </div>
                                 @if($r->status != 'approved' && $r->rejection_reason)
                                 <div class="pt-1 border-top mt-1">
@@ -1066,7 +1066,7 @@
 <script>
     $(document).ready(function() {
         // Data desa untuk filter kecamatan
-        var allDesas = @json(\App\Models\Region::where('type', 'desa')->orderBy('name')->get());
+        var allDesas = @json(\App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->orderBy('name')->get());
         var currentAdminRegionId = {{ auth()->user()->region_id ?? 0 }};
 
         // Data warga lokal desa admin untuk mutasi keluar

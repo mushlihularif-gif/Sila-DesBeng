@@ -43,8 +43,8 @@ class HistoryController extends Controller
         $rentals = RentalBooking::where('user_id', $user->id)->with('barang')->get();
         foreach ($rentals as $rental) {
             $title = $rental->barang ? $rental->barang->nama_barang : 'Sewa Alat';
-            if ($rental->rental_duration) {
-                $title .= ' - ' . $rental->rental_duration . ' Hari';
+            if ($rental->days_count) {
+                $title .= ' - ' . $rental->days_count . ' Hari';
             }
             $history->push([
                 'id' => $rental->id,
@@ -115,19 +115,29 @@ class HistoryController extends Controller
             'menunggu pembayaran' => 'Menunggu',
             'diproses' => 'Dikonfirmasi',
             'dikonfirmasi' => 'Dikonfirmasi',
-            'dikirim' => 'Dikonfirmasi',
+            'dikirim' => 'Dalam Pengiriman',
             'confirmed' => 'Dikonfirmasi',
-            'processing' => 'Dikonfirmasi',
-            'ready' => 'Dikonfirmasi',
+            'approved' => 'Disetujui',
+            'processing' => 'Diproses',
+            'process' => 'Diproses',
+            'being_prepared' => 'Sedang Dipersiapkan',
+            'in_delivery' => 'Dalam Pengiriman',
+            'delivering' => 'Dalam Pengiriman',
+            'arrived' => 'Tiba di Lokasi',
+            'ongoing' => 'Sedang Berjalan',
+            'ready' => 'Siap Diambil',
             'selesai' => 'Selesai',
             'completed' => 'Selesai',
-            'ditolak' => 'Batal',
+            'returned' => 'Selesai',
+            'resolved' => 'Selesai',
+            'ditolak' => 'Ditolak',
             'batal' => 'Batal',
             'cancelled' => 'Batal',
-            'rejected' => 'Batal',
+            'rejected' => 'Ditolak',
         ];
 
-        $lowerStatus = strtolower($status);
-        return $statusMap[$lowerStatus] ?? ucfirst($status);
+        $raw = (string) ($status ?? '');
+        $lowerStatus = strtolower($raw);
+        return $statusMap[$lowerStatus] ?? ($raw !== '' ? ucfirst(str_replace('_', ' ', $raw)) : 'Menunggu');
     }
 }

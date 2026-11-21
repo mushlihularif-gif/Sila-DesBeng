@@ -336,7 +336,7 @@
                                 </a>
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <a href="{{ route('user.settings') }}" class="block px-4 py-2.5 text-center text-gray-800 hover:bg-blue-50">Pengaturan Akun</a>
-                                @if(in_array(auth()->user()->role, ['super_admin', 'admin_desa']))
+                                @if(in_array(auth()->user()->role, ['super_admin', 'admin_desa', 'staff']))
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-blue-700 hover:bg-blue-100 hover:border-l-[3px] hover:border-l-blue-600 transition-all duration-150 border-l-[3px] border-l-transparent bg-blue-50/50">
                                     <span class="text-[15px] font-bold text-center block flex justify-center items-center gap-1">
@@ -505,12 +505,29 @@
         <a href="{{ route('pelayanan') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('pelayanan') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
             Tentang Layanan
         </a>
+        <a href="{{ route('announcements.index') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('announcements.*') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
+            Kabar dan Informasi Daerah
+        </a>
         <a href="{{ route('SiladesBeng.profile') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('SiladesBeng.profile') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
             Profil SegiDaerah
         </a>
         <a href="{{ route('kemitraan.create') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('kemitraan.*') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
             Daftar Pengelola Wilayah
         </a>
+        @auth
+            @if(in_array(auth()->user()->role, ['admin_rt', 'admin_rw']))
+                <div class="px-6 py-3 text-gray-700 font-bold bg-gray-50 border-y text-sm mt-1">Kelola Layanan Wilayah</div>
+                <a href="{{ route('wilayah.berita.index') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('wilayah.berita.*') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
+                    Kelola Kabar dan Berita
+                </a>
+                <a href="{{ route('wilayah.pengumuman.index') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('wilayah.pengumuman.*') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
+                    Kelola Pengumuman
+                </a>
+                <a href="{{ route('wilayah.warga.index') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('wilayah.warga.*') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
+                    Daftar Warga
+                </a>
+            @endif
+        @endauth
     </nav>
 
     {{-- Auth Section --}}
@@ -539,14 +556,14 @@
                         <span class="sd-notif-circle sd-notif-circle-avatar" style="position: absolute; top: 0px; right: 0px; width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-width: 20px; max-height: 20px; border-radius: 50%; background-color: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1; pointer-events: none; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"><span>{{ $navUnreadNotifs > 9 ? '9+' : $navUnreadNotifs }}</span></span>
                     @endif
                 </div>
-                <div>
-                    <p class="font-semibold text-gray-900 flex items-center gap-1">
-                        {{ auth()->user()->name }}
+                <div class="min-w-0 flex-1">
+                    <p class="font-semibold text-gray-900 flex items-center gap-1 min-w-0">
+                        <span class="truncate">{{ auth()->user()->name }}</span>
                         @if(auth()->user()->verification_status === 'verified')
-                        <img src="{{ asset('images/verified-badge.png?v=2') }}" class="w-4 h-4 object-contain inline-block select-none" alt="Warga Terverifikasi" title="Warga Terverifikasi">
+                        <img src="{{ asset('images/verified-badge.png?v=2') }}" class="w-4 h-4 object-contain inline-block select-none flex-shrink-0" alt="Warga Terverifikasi" title="Warga Terverifikasi">
                         @endif
                     </p>
-                    <p class="text-sm text-gray-500">{{ auth()->user()->email }}</p>
+                    <p class="text-sm text-gray-500 truncate">{{ auth()->user()->email }}</p>
                 </div>
             </div>
             <div class="space-y-2 sd-account-menu-mobile">
@@ -557,6 +574,12 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     {{ $sudahVerifMobile ? 'Status Verifikasi' : 'Verifikasi Akun' }}
                 </a>
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin_desa', 'staff']))
+                <a href="{{ route('admin.dashboard') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
+                    <span>Panel Admin</span>
+                </a>
+                @endif
                 <a href="{{ route('user.saldo.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Alamat Tersimpan
                 </a>

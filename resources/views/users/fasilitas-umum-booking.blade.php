@@ -349,7 +349,6 @@
                             Konfirmasi Peminjaman
                         </button>
                     </div>
-                </div>
             </form>
         </div>
     </section>
@@ -561,6 +560,7 @@
                     Swal.fire({ icon: 'error', title: 'Error', text: error.message });
                 });
             });
+        }
         }
 
         if (document.readyState === 'loading') {

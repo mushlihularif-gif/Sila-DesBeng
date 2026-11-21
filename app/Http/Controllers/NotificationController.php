@@ -7,20 +7,19 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
+    private function defaultNotificationRoute(): string
+    {
+        $role = auth()->user()?->role;
+
+        return in_array($role, ['super_admin', 'admin_desa', 'staff'], true)
+            ? 'admin.notifications.index'
+            : 'user.notifications';
+    }
+
     // Halaman daftar notifikasi
     public function index(Request $request)
     {
-        $query = Notification::where('user_id', auth()->id());
-
-        if ($request->filter === 'unread') {
-            $query->where('is_read', false);
-        } elseif ($request->filter === 'read') {
-            $query->where('is_read', true);
-        }
-
-        $notifications = $query->latest()->paginate(20);
-
-        return view('notifications.index', compact('notifications'));
+        return redirect()->route($this->defaultNotificationRoute(), $request->query());
     }
 
     // Mark as read + redirect ke detail
@@ -41,7 +40,7 @@ class NotificationController extends Controller
             return redirect($notification->link);
         }
 
-        return redirect()->route('notifications.index')
+        return redirect()->route($this->defaultNotificationRoute())
             ->with('success', 'Notifikasi telah dibaca!');
     }
 

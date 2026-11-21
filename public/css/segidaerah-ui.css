@@ -67,7 +67,10 @@
 }
 
 body:has(#application-modal:not(.hidden)) #chatbot-fab,
-body:has(#application-modal:not(.hidden)) #chatbot-window{visibility:hidden!important}
+body:has(#application-modal:not(.hidden)) #chatbot-window,
+body:has(.service-chat-widget.active) #chatbot-fab,
+body:has(.service-chat-widget.active) #chatbot-window,
+body:has(#chatbot-window.active) .service-chat-launcher{visibility:hidden!important;pointer-events:none!important}
 @media(max-width:639px){
  .segi-delivery-choices>.delivery-method-card{transform:none!important}
  .segi-product-summary{display:grid;grid-template-columns:4rem minmax(0,1fr);gap:1rem}
@@ -85,3 +88,20 @@ body:has(#application-modal:not(.hidden)) #chatbot-window{visibility:hidden!impo
  .segi-catalog-actions>div:first-child{grid-column:1/-1;justify-content:center;min-width:0}
  .segi-catalog-actions>button,.segi-catalog-actions>a{min-width:0;width:100%;padding:.75rem .5rem;font-size:.9rem}
 }
+
+/* Bootstrap 5 Pagination compatibility for Tailwind-based citizen pages */
+.segi-citizen nav.d-flex{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.75rem;width:100%}
+.segi-citizen nav.d-flex .d-none{display:none}
+.segi-citizen nav.d-flex .d-flex{display:flex;align-items:center;justify-content:space-between;gap:.75rem;width:100%}
+.segi-citizen nav.d-flex .flex-fill{flex:1 1 auto}
+@media(min-width:640px){
+ .segi-citizen nav.d-flex .d-sm-none{display:none!important}
+ .segi-citizen nav.d-flex .d-sm-flex{display:flex!important;align-items:center;justify-content:space-between;gap:1rem;width:100%}
+}
+.segi-citizen .pagination{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.35rem;list-style:none;margin:0;padding:0}
+.segi-citizen .pagination .page-item{display:inline-flex}
+.segi-citizen .pagination .page-link{display:inline-flex;align-items:center;justify-content:center;min-width:2.25rem;height:2.25rem;padding:.35rem .75rem;border-radius:.75rem;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.875rem;font-weight:600;text-decoration:none;transition:all .15s ease}
+.segi-citizen .pagination .page-link:hover{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8}
+.segi-citizen .pagination .page-item.active .page-link{background:#2563eb;border-color:#2563eb;color:#fff;box-shadow:0 4px 10px rgba(37,99,235,.22)}
+.segi-citizen .pagination .page-item.disabled .page-link{opacity:.48;cursor:not-allowed;background:#f8fafc;color:#94a3b8;pointer-events:none}
+.segi-citizen nav.d-flex p.small{margin:0;font-size:.8125rem;color:#64748b}

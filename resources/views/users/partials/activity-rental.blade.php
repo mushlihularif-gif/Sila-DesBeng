@@ -78,8 +78,13 @@
                                 
                                 <!-- Payment Method -->
                                 <p class="text-sm text-gray-600 mb-2">
-                                    @if($booking->payment_method == 'tunai')
+                                    @php $pmRental = strtolower($booking->payment_method ?? ''); @endphp
+                                    @if($pmRental === 'tunai')
                                         Pembayaran Tunai
+                                    @elseif($pmRental === 'ewallet')
+                                        Pembayaran E-Wallet
+                                    @elseif($pmRental === 'saldo')
+                                        Pembayaran Saldo Dompet
                                     @else
                                         Transfer - {{ $setting->bank_name ?? 'Bank' }}
                                     @endif
@@ -159,7 +164,7 @@
                                     @if($booking->payment_proof)
                                     <div>
                                         <p class="text-sm text-gray-500 mb-2">Bukti Transaksi</p>
-                                        <div class="flex gap-2">
+                                        <div class="flex flex-wrap gap-2">
                                             <a href="{{ asset('storage/' . $booking->payment_proof) }}" 
                                                target="_blank"
                                                class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
@@ -178,7 +183,7 @@
                                     <div>
                                         <p class="text-sm text-gray-500 mb-2">Bukti Transaksi Resmi</p>
                                         @if($booking->receipt_path && Storage::disk('public')->exists($booking->receipt_path))
-                                        <div class="flex gap-2">
+                                        <div class="flex flex-wrap gap-2">
                                             <a href="{{ route('receipt.rental.view', $booking->id) }}" 
                                                target="_blank"
                                                class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg">
@@ -209,7 +214,7 @@
                                     </div>
 
                                     <!-- Delivery Status Timeline -->
-                                    @if($booking->status != 'pending' && $booking->status != 'cancelled')
+                                    @if(!in_array($booking->status, ['pending', 'cancelled', 'rejected'], true))
                                     <div>
                                         <p class="text-sm text-gray-500 mb-3">Kondisi Pesanan Sewa Tiba</p>
                                         <div class="space-y-3">
@@ -229,11 +234,12 @@
                                                 }
                                                 
                                                 $currentStatusIndex = array_search($booking->status, array_column($timeline, 'status'));
-                                                if ($booking->status === 'completed') {
+                                                if (in_array($booking->status, ['completed', 'returned', 'resolved'], true)) {
                                                     $currentStatusIndex = count($timeline) - 1;
                                                 }
-                                                // Handle false return if search fails (and not completed)
-                                                if ($currentStatusIndex === false) $currentStatusIndex = 0;
+                                                if ($currentStatusIndex === false) {
+                                                    $currentStatusIndex = in_array($booking->status, ['approved', 'paid'], true) ? 0 : -1;
+                                                }
                                             @endphp
                                             
                                             @foreach($timeline as $index => $item)

@@ -70,9 +70,21 @@
 
     <!-- Flash Messages -->
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible border-0 shadow-sm rounded-4 d-flex align-items-center mb-4" role="alert">
-            <i class="bx bx-check-circle fs-4 me-2 flex-shrink-0"></i>
-            <div>{{ session('success') }}</div>
+        <div class="alert alert-success alert-dismissible border-0 shadow-sm rounded-4 d-flex align-items-start gap-2 mb-4" role="alert">
+            <i class="bx bx-check-circle fs-4 flex-shrink-0 mt-1"></i>
+            <div class="flex-grow-1">
+                <div>{{ session('success') }}</div>
+                @if(session('partner_wa_fallback'))
+                    @php $fb = session('partner_wa_fallback'); @endphp
+                    <div class="mt-2 p-2.5 bg-white rounded-3 border small">
+                        <div>Username: <strong>{{ $fb['username'] }}</strong></div>
+                        <div>Password: <strong>{{ $fb['password'] }}</strong></div>
+                        <a href="{{ $fb['wa_link'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-success rounded-pill mt-2">
+                            <i class="bx bxl-whatsapp me-1"></i>Kirim via WhatsApp
+                        </a>
+                    </div>
+                @endif
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -81,6 +93,14 @@
         <div class="alert alert-danger alert-dismissible border-0 shadow-sm rounded-4 d-flex align-items-center mb-4" role="alert">
             <i class="bx bx-error-circle fs-4 me-2 flex-shrink-0"></i>
             <div>{{ session('error') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible border-0 shadow-sm rounded-4 d-flex align-items-center mb-4" role="alert">
+            <i class="bx bx-error-circle fs-4 me-2 flex-shrink-0"></i>
+            <div>{{ $errors->first() }}</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -250,6 +270,7 @@
                                     <div class="d-inline-flex align-items-center gap-2">
                                         <form action="{{ route('admin.kemitraan.approve', $app->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Setujui pengajuan {{ $app->applicant_name }} untuk wilayah {{ $app->region_name }}?');">
                                             @csrf
+                                            <input type="hidden" name="reason" value="Disetujui oleh admin wilayah">
                                             <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm d-inline-flex align-items-center gap-1">
                                                 <i class="bx bx-check"></i>
                                                 <span>Setujui</span>
@@ -345,6 +366,7 @@
                                     </button>
                                     <form action="{{ route('admin.kemitraan.approve', $app->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Setujui pengajuan {{ $app->applicant_name }}?');">
                                         @csrf
+                                        <input type="hidden" name="reason" value="Disetujui oleh admin wilayah">
                                         <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
                                             <i class="bx bx-check me-1"></i>Setujui
                                         </button>
@@ -378,7 +400,7 @@
                     </div>
                     <div class="mb-2">
                         <label class="form-label fw-semibold small text-dark">Alasan Penolakan <span class="text-danger">*</span></label>
-                        <textarea name="rejection_reason" class="form-control rounded-3" rows="3" required placeholder="Jelaskan alasan penolakan (misal: dokumen SK tidak terbaca atau wilayah sudah memiliki pengurus aktif)..."></textarea>
+                        <textarea name="reason" class="form-control rounded-3" rows="3" required placeholder="Jelaskan alasan penolakan (misal: dokumen SK tidak terbaca atau wilayah sudah memiliki pengurus aktif)..."></textarea>
                         <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">
                             Alasan ini akan dikirimkan ke email/notifikasi pemohon agar dapat diperbaiki.
                         </small>

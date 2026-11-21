@@ -120,20 +120,18 @@
                 <!-- 1. Pilihan Jenis Sewa (Pill Tabs) -->
                 <div class="flex justify-center mb-8" id="jenis-sewa-container">
                     @if($harianActive && $boronganActive)
-                    <div class="bg-gray-200/80 backdrop-blur p-1.5 rounded-full inline-flex relative overflow-hidden shadow-inner border border-gray-300">
-                        <div id="jenis-sewa-slider" class="absolute top-1.5 bottom-1.5 left-1.5 bg-blue-600 rounded-full transition-all duration-300 ease-in-out shadow-md" style="width: calc(50% - 3px); z-index: 0; transform: translateX({{ $defaultJenis == 'borongan' ? '100%' : '0' }});"></div>
+                    <div class="bg-gray-200/80 backdrop-blur p-1.5 rounded-full inline-flex w-full max-w-[356px] relative overflow-hidden shadow-inner border border-gray-300">
+                        <div id="jenis-sewa-slider" class="absolute top-1.5 bottom-1.5 left-1.5 bg-blue-600 rounded-full transition-all duration-300 ease-in-out shadow-md" style="width: calc(50% - 6px); z-index: 0; transform: translateX({{ $defaultJenis == 'borongan' ? '100%' : '0' }});"></div>
                         
                         <button type="button" 
-                                class="jenis-sewa-btn relative z-10 px-8 py-2.5 text-sm font-bold rounded-full transition-colors duration-300 {{ $defaultJenis == 'harian' ? 'text-white' : 'text-gray-700 hover:text-gray-900' }}" 
-                                data-jenis="harian" 
-                                style="width: 170px;">
+                                class="jenis-sewa-btn relative z-10 flex-1 px-3 sm:px-6 py-2.5 text-xs sm:text-sm font-bold rounded-full transition-colors duration-300 text-center {{ $defaultJenis == 'harian' ? 'text-white' : 'text-gray-700 hover:text-gray-900' }}" 
+                                data-jenis="harian">
                             Sewa Harian
                         </button>
                         
                         <button type="button" 
-                                class="jenis-sewa-btn relative z-10 px-8 py-2.5 text-sm font-bold rounded-full transition-colors duration-300 {{ $defaultJenis == 'borongan' ? 'text-white' : 'text-gray-700 hover:text-gray-900' }}" 
-                                data-jenis="borongan" 
-                                style="width: 170px;">
+                                class="jenis-sewa-btn relative z-10 flex-1 px-3 sm:px-6 py-2.5 text-xs sm:text-sm font-bold rounded-full transition-colors duration-300 text-center {{ $defaultJenis == 'borongan' ? 'text-white' : 'text-gray-700 hover:text-gray-900' }}" 
+                                data-jenis="borongan">
                             Sewa Borongan
                         </button>
                     </div>
@@ -496,8 +494,8 @@
                         <div class="flex-1 w-full space-y-3">
                             <div>
                                 <p class="text-xs font-semibold text-gray-500">Tarif Satuan</p>
-                                <p class="text-xl font-extrabold text-gray-900" id="unit-price-display">
-                                    Rp. {{ number_format($item->harga_sewa, 0, ',', '.') }}
+                                <p class="text-xl font-extrabold text-gray-900">
+                                    <span id="unit-price-display">Rp. {{ number_format($item->harga_sewa, 0, ',', '.') }}</span>
                                     <span class="text-xs font-medium text-gray-500" id="unit-price-suffix">/ hari</span>
                                 </p>
                             </div>
@@ -1338,15 +1336,26 @@
         var panelTunai     = document.getElementById('cash-payment-mobil');
         var panelEwallet   = document.getElementById('ewallet-payment-mobil');
         [panelTransfer, panelTunai, panelEwallet].forEach(function (el) {
-            if (el) el.classList.add('hidden');
+            if (!el) return;
+            el.classList.add('hidden');
+            el.querySelectorAll('input[name="payment_proof"]').forEach(function (inp) {
+                inp.disabled = true;
+            });
         });
 
+        var activePanel = null;
         if (metode === 'tunai') {
-            if (panelTunai) panelTunai.classList.remove('hidden');
+            activePanel = panelTunai;
         } else if (metode === 'transfer') {
-            if (panelTransfer) panelTransfer.classList.remove('hidden');
+            activePanel = panelTransfer;
         } else if (metode === 'ewallet') {
-            if (panelEwallet) panelEwallet.classList.remove('hidden');
+            activePanel = panelEwallet;
+        }
+        if (activePanel) {
+            activePanel.classList.remove('hidden');
+            activePanel.querySelectorAll('input[name="payment_proof"]').forEach(function (inp) {
+                inp.disabled = false;
+            });
         }
 
         // Highlight active button

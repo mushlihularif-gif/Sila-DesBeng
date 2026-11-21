@@ -2,7 +2,7 @@
 @section('title', 'Kelola Kabar dan Informasi Daerah')
 @section('page')
 @include('partials.abstract-bg')
-@php($canCreate = $manager || (auth()->user()->role === 'user' && auth()->user()->verification_status === 'verified'))
+@php($canCreate = ($manager || (auth()->user()->role === 'user' && auth()->user()->verification_status === 'verified')) && auth()->user()->region_id)
 @php($states = ['draft'=>'Draf — belum dikirim','pending'=>'Menunggu admin','review'=>'Sedang diperiksa','published'=>'Terbit','scheduled'=>'Dijadwalkan','merged'=>'Digabungkan','rejected'=>'Tidak diterbitkan','cancelled'=>'Dibatalkan','archived'=>'Arsip','expired'=>'Sudah dibersihkan'])
 <main class="relative z-10 max-w-6xl mx-auto px-4 pt-36 pb-16 w-full" data-content-list>
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">

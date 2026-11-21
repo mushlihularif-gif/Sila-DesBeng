@@ -31,6 +31,7 @@ class CheckRole
         
         // Determine the appropriate guard (e.g., if auth:sanctum was called, 'sanctum' is in roles)
         $guard = in_array('sanctum', $roles) ? 'sanctum' : null;
+        $wantsJson = $request->expectsJson() || $request->ajax() || $request->is('api/*');
         
         // Check if user is authenticated
         if (!Auth::guard($guard)->check()) {
@@ -49,8 +50,8 @@ class CheckRole
                     'user_agent' => $request->userAgent(),
                 ]);
 
-                 // Handle AJAX request
-                 if ($request->expectsJson() || $request->ajax()) {
+                 // Handle AJAX/API request
+                 if ($wantsJson) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Anda tidak memiliki akses ke halaman ini'
@@ -61,8 +62,8 @@ class CheckRole
                 return redirect()->route('beranda')->with('open_login_modal', true)->with('error', 'Sesi Anda telah berakhir atau Anda belum login. Silakan login kembali.');
             }
             
-            // Handle AJAX request
-            if ($request->expectsJson() || $request->ajax()) {
+            // Handle AJAX/API request
+            if ($wantsJson) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Sesi Anda telah berakhir. Silakan login kembali.'
@@ -89,7 +90,7 @@ class CheckRole
         // Jika akun admin/staf membuka halaman frontend warga (/beranda, katalog warga, dll.),
         // arahkan otomatis ke dashboard admin (sebelum StaffAccess menolak halaman non-admin dengan 403).
         if ($isAdminUser && (in_array('user', $requiredRoles, true) || ($allowGuest && !in_array('admin', $requiredRoles, true)))) {
-            if ($request->expectsJson() || $request->ajax()) {
+            if ($wantsJson) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Admin harus menggunakan halaman admin',
@@ -144,8 +145,8 @@ class CheckRole
         // Pengecualian: rw dan rt diizinkan mengakses halaman frontend user
         $isAdminUser = in_array($user->role, ['super_admin', 'admin_desa', 'staff']);
         if ($isAdminUser && (in_array('user', $requiredRoles) || $allowGuest)) {
-            // Handle AJAX request
-            if ($request->expectsJson() || $request->ajax()) {
+            // Handle AJAX/API request
+            if ($wantsJson) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Admin harus menggunakan halaman admin',
@@ -157,8 +158,8 @@ class CheckRole
             return redirect()->route('admin.dashboard')->with('warning', 'Admin harus menggunakan halaman admin.');
         }
         
-        // Handle AJAX request
-        if ($request->expectsJson() || $request->ajax()) {
+        // Handle AJAX/API request
+        if ($wantsJson) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki akses ke halaman ini'

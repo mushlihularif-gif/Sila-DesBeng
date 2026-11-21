@@ -51,7 +51,7 @@ class ProfileController extends Controller
                     $rt_name = $currentRegion->name;
                 } elseif ($currentRegion->type == 'rw') {
                     $rw_name = $currentRegion->name;
-                } elseif ($currentRegion->type == 'desa') {
+                } elseif (in_array($currentRegion->type, ['desa', 'kelurahan'], true)) {
                     $desa_name = $currentRegion->name;
                     $currentDesaId = $currentRegion->id;
                 } elseif ($currentRegion->type == 'kecamatan') {
@@ -422,9 +422,20 @@ class ProfileController extends Controller
             if ($method === 'email') {
                 Mail::to($user->email)->send(new OtpMail($newOtpCode));
             } elseif ($method === 'whatsapp') {
-                if ($user->phone) {
-                    $fonnte = new \App\Services\FonnteService();
-                    $fonnte->sendOtp($user->phone, $newOtpCode);
+                $phone = trim((string) $user->phone);
+                if ($phone === '' || $phone === '-') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Nomor WhatsApp pada akun Anda belum diatur. Silakan gunakan metode email atau lengkapi nomor telepon terlebih dahulu.',
+                    ], 422);
+                }
+
+                $fonnte = new \App\Services\FonnteService();
+                if (! $fonnte->sendOtp($phone, $newOtpCode)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Gagal mengirim OTP ke WhatsApp saat ini. Silakan coba lagi atau beralih ke metode email.',
+                    ], 503);
                 }
             }
 

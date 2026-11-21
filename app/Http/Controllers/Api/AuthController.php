@@ -164,7 +164,10 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()?->currentAccessToken();
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        }
 
         return response()->json([
             'status' => 'success',
@@ -344,7 +347,7 @@ class AuthController extends Controller
                     $rt_name = $currentRegion->name;
                 } elseif ($currentRegion->type == 'rw') {
                     $rw_name = $currentRegion->name;
-                } elseif ($currentRegion->type == 'desa') {
+                } elseif (in_array($currentRegion->type, ['desa', 'kelurahan'], true)) {
                     $desa_name = $currentRegion->name;
                 } elseif ($currentRegion->type == 'kecamatan') {
                     $kecamatan_name = $currentRegion->name;
@@ -402,17 +405,17 @@ class AuthController extends Controller
 
         $user->update([
             'name' => $validated['name'],
-            'phone' => $validated['phone'],
-            'address' => $validated['address'],
+            'phone' => array_key_exists('phone', $validated) ? $validated['phone'] : $user->phone,
+            'address' => array_key_exists('address', $validated) ? $validated['address'] : $user->address,
             'rt' => $validated['rt'] ?? $user->rt,
             'rw' => $validated['rw'] ?? $user->rw,
-            'gender' => $validated['gender'],
+            'gender' => array_key_exists('gender', $validated) ? $validated['gender'] : $user->gender,
         ]);
 
         if ($request->hasFile('profile')) {
             if ($user->file) {
                 if (Storage::disk('local')->exists($user->file->path)) {
-                    Storage::delete($user->file->path);
+                    Storage::disk('local')->delete($user->file->path);
                 }
                 $user->file->delete();
             }
@@ -516,8 +519,20 @@ class AuthController extends Controller
         if ($request->otp_method === 'email') {
             Mail::to($user->email)->queue(new OtpMail($otpCode));
         } elseif ($request->otp_method === 'whatsapp') {
+            if (empty($user->phone) || trim((string) $user->phone) === '-') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Akun Anda belum memiliki nomor WhatsApp yang terdaftar.'
+                ], 422);
+            }
             $fonnte = new FonnteService();
-            $fonnte->sendOtp($user->phone, $otpCode);
+            $waResult = $fonnte->sendOtp($user->phone, $otpCode);
+            if (!($waResult['status'] ?? false)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $waResult['message'] ?? 'Gagal mengirim kode OTP melalui WhatsApp. Silakan coba lagi.'
+                ], 503);
+            }
         }
 
         return response()->json([

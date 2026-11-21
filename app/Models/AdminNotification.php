@@ -184,7 +184,7 @@ class AdminNotification extends Model
         }
         if ($type === 'penarikan_saldo') {
             $url = $isSuper
-                ? $safeRoute('admin.sistem-platform.penarikan-saldo.index')
+                ? $safeRoute('admin.sistem-platform.penarikan.index')
                 : $safeRoute('admin.keuangan.index');
 
             return ['category' => 'keuangan', 'label' => 'Penarikan Saldo', 'icon' => 'bx-wallet', 'color' => 'success', 'url' => $url];

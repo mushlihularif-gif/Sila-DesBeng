@@ -22,7 +22,7 @@ class ContentWorkspaceController extends Controller
         if ($request->filled('state')) $query->where('workflow_state', $request->string('state'));
         $items = $query->latest('updated_at')->paginate(20)->withQueryString();
         $manager = $this->access->manager($request->user());
-        if ($request->wantsJson()) return response()->json(['items' => $items->map(fn ($item) => $this->summary($item)), 'total' => $items->total(), 'current_page'=>$items->currentPage(), 'last_page'=>$items->lastPage()])->header('Cache-Control', 'private, no-store');
+        if ($request->wantsJson() || $request->is('api/*')) return response()->json(['items' => $items->map(fn ($item) => $this->summary($item)), 'total' => $items->total(), 'current_page'=>$items->currentPage(), 'last_page'=>$items->lastPage()])->header('Cache-Control', 'private, no-store');
         $useAdminLayout = in_array($request->user()?->role, ['admin_desa', 'super_admin', 'staff'], true);
         return view($useAdminLayout ? 'content.admin_index' : 'content.index', compact('items', 'manager'));
     }
@@ -39,7 +39,7 @@ class ContentWorkspaceController extends Controller
         }
         $item = $this->editorial->create($request->user(), $data['category']);
         if ($source) $item->update(['contribution_to'=>$source->id,'title'=>Str::limit('Dokumentasi: '.$source->title,250,''),'location'=>$source->location,'event_date'=>$source->event_date]);
-        if ($request->wantsJson()) return response()->json(['id'=>$item->id,'workspace_url'=>route('content.show',$item)],201);
+        if ($request->wantsJson() || $request->is('api/*')) return response()->json(['id'=>$item->id,'workspace_url'=>route('content.show',$item)],201);
         return redirect()->route('content.show', $item);
     }
 

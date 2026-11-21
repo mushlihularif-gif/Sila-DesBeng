@@ -60,10 +60,12 @@
             <p class="text-muted small mb-0">Kelola katalog peralatan sewa desa (tenda, sound system, kursi, mesin), stok unit, serta ketentuan SOP.</p>
         </div>
         <div class="d-flex flex-wrap gap-2 w-100 w-md-auto justify-content-start justify-content-md-end flex-shrink-0">
+            @unless(auth()->user()->isStaff())
             <a href="{{ route('admin.unit.penyewaan.sop') }}" class="btn btn-outline-info rounded-pill px-3 shadow-sm flex-grow-1 flex-sm-grow-0 text-nowrap d-inline-flex align-items-center justify-content-center gap-1">
                 <i class="bx bx-book-content"></i>
                 <span>Atur SOP</span>
             </a>
+            @endunless
             <a href="{{ route('admin.unit.penyewaan.create') }}" class="btn btn-primary rounded-pill px-3 shadow-sm flex-grow-1 flex-sm-grow-0 text-nowrap d-inline-flex align-items-center justify-content-center gap-1">
                 <i class="bx bx-plus-circle"></i>
                 <span>Tambah Alat</span>

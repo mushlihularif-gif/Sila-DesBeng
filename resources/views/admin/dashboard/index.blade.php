@@ -313,7 +313,12 @@
             'Pengumuman' => [
                 'title' => 'Kabar & Info',
                 'category' => 'Informasi Publik',
-                'count' => (\App\Models\Announcement::count() ?? 0),
+                'count' => (auth()->user()->region_id
+                    ? \App\Models\Announcement::where(function ($q) {
+                        $rids = array_merge([auth()->user()->region_id], \App\Models\Region::getDescendantIds(auth()->user()->region_id));
+                        $q->whereIn('region_id', $rids)->orWhereIn('target_audience_id', $rids);
+                    })->count()
+                    : (\App\Models\Announcement::count() ?? 0)),
                 'label' => 'Info',
                 'route' => route('admin.announcements.index'),
                 'image' => asset('User/img/elemen/KabardanInformasiDaerah.png'),
@@ -405,21 +410,22 @@
                             $bgClass = 'bg-label-primary text-primary';
                             $badgeClass = 'bg-label-primary';
                             $serviceName = 'Umum';
-                            $detailLink = route('admin.aktivitas.permintaan-pengajuan.show', [$request->id, $request->type ?? 'rental']);
-                            $canQuickAction = in_array($request->type, ['rental', 'gas', 'mobil', 'fasilitas_umum']);
+                            $requestRouteType = $request->type === 'fasilitas_umum' ? 'fasilitas' : ($request->type ?? 'rental');
+                            $detailLink = route('admin.aktivitas.permintaan-pengajuan.show', [$request->id, $requestRouteType]);
+                            $canQuickAction = in_array($requestRouteType, ['rental', 'gas', 'mobil', 'fasilitas'], true);
 
-                            if ($request->type == 'rental') {
+                            if ($requestRouteType == 'rental') {
                                 $rIcon = 'bx-wrench'; $bgClass = 'bg-label-warning text-warning'; $badgeClass = 'bg-label-warning'; $serviceName = 'Penyewaan Alat';
-                            } elseif ($request->type == 'gas') {
+                            } elseif ($requestRouteType == 'gas') {
                                 $rIcon = 'bxs-gas-pump'; $bgClass = 'bg-label-danger text-danger'; $badgeClass = 'bg-label-danger'; $serviceName = 'Penjualan Gas';
-                            } elseif ($request->type == 'mobil') {
+                            } elseif ($requestRouteType == 'mobil') {
                                 $rIcon = 'bx-car'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Transportasi';
-                            } elseif ($request->type == 'fasilitas_umum') {
+                            } elseif ($requestRouteType == 'fasilitas') {
                                 $rIcon = 'bx-building-house'; $bgClass = 'bg-label-success text-success'; $badgeClass = 'bg-label-success'; $serviceName = 'Fasilitas Umum';
-                            } elseif ($request->type == 'kyc') {
+                            } elseif ($requestRouteType == 'kyc') {
                                 $rIcon = 'bx-id-card'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Verifikasi Identitas';
                                 $detailLink = route('admin.kyc.show', $request->id);
-                            } elseif ($request->type == 'mutasi') {
+                            } elseif ($requestRouteType == 'mutasi') {
                                 $rIcon = 'bx-user-pin'; $bgClass = 'bg-label-secondary text-secondary'; $badgeClass = 'bg-label-secondary'; $serviceName = 'Mutasi Penduduk';
                                 $detailLink = route('admin.warga.mutasi.index');
                             }
@@ -456,11 +462,11 @@
                                     </a>
                                     @if($canQuickAction)
                                         @if(isset($request->cancellation_status) && $request->cancellation_status == 'pending')
-                                            <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold" onclick="handleCancellation({{ $request->id }}, '{{ $request->type }}', 'approve')">
+                                            <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold" onclick="handleCancellation({{ $request->id }}, '{{ $requestRouteType }}', 'approve')">
                                                 <i class="bx bx-check me-1"></i>Setujui Batal
                                             </button>
                                         @elseif($request->status == 'pending' || $request->status == 'waiting')
-                                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold" onclick="approveRequest({{ $request->id }}, '{{ $request->type }}')">
+                                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold" onclick="approveRequest({{ $request->id }}, '{{ $requestRouteType }}')">
                                                 <i class="bx bx-check me-1"></i>Proses
                                             </button>
                                         @endif

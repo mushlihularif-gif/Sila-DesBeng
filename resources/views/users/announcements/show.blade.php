@@ -91,7 +91,21 @@
                         </div>
                         @auth
                         @if($announcement->post_category === 'Berita')
-                        <form method="post" action="{{ route('content.store') }}" class="mt-6">@csrf<input type="hidden" name="category" value="Berita"><input type="hidden" name="contribution_to" value="{{ $announcement->id }}"><button class="px-4 py-3 rounded-xl border border-blue-500 text-blue-700">Tambah Dokumentasi Kegiatan Ini</button></form>
+                            @php
+                                $authUser = auth()->user();
+                                $isContentManager = app(\App\Services\ContentAccess::class)->manager($authUser);
+                                $canContributeBerita = false;
+                                if ($authUser->region_id && ($isContentManager || ($authUser->role === 'user' && $authUser->verification_status === 'verified'))) {
+                                    $announcementVillageId = \App\Models\Region::whereIn('id', \App\Models\Region::garisLayananUntukWarga($announcement->region_id))
+                                        ->whereIn('type', ['desa', 'kelurahan'])
+                                        ->value('id');
+                                    $userLineageIds = array_map('intval', \App\Models\Region::garisLayananUntukWarga($authUser->region_id));
+                                    $canContributeBerita = $announcementVillageId && in_array((int) $announcementVillageId, $userLineageIds, true);
+                                }
+                            @endphp
+                            @if($canContributeBerita)
+                            <form method="post" action="{{ route('content.store') }}" class="mt-6">@csrf<input type="hidden" name="category" value="Berita"><input type="hidden" name="contribution_to" value="{{ $announcement->id }}"><button class="px-4 py-3 rounded-xl border border-blue-500 text-blue-700 hover:bg-blue-50 transition font-semibold text-sm">Tambah Dokumentasi Kegiatan Ini</button></form>
+                            @endif
                         @endif
                         @endauth
 

@@ -14,11 +14,16 @@ class FasilitasBookingApiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = FasilitasUmum::inCatalog()->where('status', 'tersedia');
+        $query = FasilitasUmum::inCatalog()->whereRaw('LOWER(status) = ?', ['tersedia']);
 
         $user = $request->user('sanctum');
         if ($user && $user->region_id) {
-            $query->where('region_id', $user->region_id);
+            if (\Illuminate\Support\Facades\Schema::hasTable('regions') && \Illuminate\Support\Facades\Schema::hasTable('region_services')) {
+                $visibleRegionIds = \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'fasilitas-umum');
+                $query->whereIn('region_id', $visibleRegionIds);
+            } else {
+                $query->where('region_id', $user->region_id);
+            }
         }
 
         $items = $query->get()
@@ -65,6 +70,10 @@ class FasilitasBookingApiController extends Controller
             ], 404);
         }
 
+        $firstPengurus = (\Illuminate\Support\Facades\Schema::hasTable('fasilitas_pengurus') && \Illuminate\Support\Facades\Schema::hasTable('supirs'))
+            ? $item->pengurus()->first()
+            : null;
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -80,8 +89,8 @@ class FasilitasBookingApiController extends Controller
                 'type' => 'fasilitas',
                 'is_ambulance' => false,
                 'opsi_supir' => $item->opsi_supir,
-                'nama_supir' => $item->nama_supir,
-                'kontak_supir' => $item->kontak_supir,
+                'nama_supir' => $firstPengurus?->nama,
+                'kontak_supir' => $firstPengurus?->no_hp,
                 'bbm_ditanggung' => $item->bbm_ditanggung,
                 'price' => (float) $item->harga_sewa,
                 'status_biaya' => $item->status_biaya,
@@ -114,7 +123,7 @@ class FasilitasBookingApiController extends Controller
             return \Illuminate\Support\Facades\DB::transaction(function () use ($request, &$proofPath) {
                 $fasilitas = FasilitasUmum::inCatalog()->lockForUpdate()->findOrFail($request->fasilitas_id);
 
-                if ($fasilitas->stok !== null && $fasilitas->stok < ($request->quantity ?? 1)) {
+                if (strtolower((string) $fasilitas->status) !== 'tersedia' || ($fasilitas->stok !== null && $fasilitas->stok < ($request->quantity ?? 1))) {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Fasilitas sedang tidak tersedia.',
@@ -149,13 +158,23 @@ class FasilitasBookingApiController extends Controller
                     'total_amount' => $totalAmount,
                     'status' => 'pending',
                     'payment_proof' => $proofPath,
-                    'delivery_method' => $request->delivery_method,
+                    'delivery_method' => $request->delivery_method ?? 'jemput',
                     'dengan_supir' => $request->dengan_supir ?? false,
                     'region_id' => $fasilitas->region_id,
                 ]);
 
-                if ($totalAmount > 0) {
-                    \App\Models\WalletTransaction::catatPemasukan($fasilitas->region_id, 'fasilitas', $booking->id, $totalAmount, $paymentMethod, $proofPath);
+                if ($totalAmount > 0 && $fasilitas->region_id) {
+                    \App\Models\WalletTransaction::catatPemasukan((int) $fasilitas->region_id, 'fasilitas', $booking->id, $totalAmount, $paymentMethod, $proofPath);
+                }
+                if ($fasilitas->region_id && \Illuminate\Support\Facades\Schema::hasTable('admin_notifications')) {
+                    \App\Models\AdminNotification::create([
+                        'type' => 'fasilitas_booking',
+                        'reference_id' => $booking->id,
+                        'region_id' => (int) $fasilitas->region_id,
+                        'title' => 'Peminjaman Fasilitas Umum Baru',
+                        'message' => ($request->user()->name ?? 'Warga') . " mengajukan peminjaman {$fasilitas->nama_fasilitas} (#{$booking->order_number}).",
+                        'is_read' => false,
+                    ]);
                 }
                 // Stok dialokasikan saat admin menyetujui, sama seperti pemesanan web.
 

@@ -76,8 +76,13 @@
                                 
                                 <!-- Payment Method -->
                                 <p class="text-sm text-gray-600 mb-2">
-                                    @if($order->payment_method == 'Tunai')
+                                    @php $pmGas = strtolower($order->payment_method ?? ''); @endphp
+                                    @if($pmGas === 'tunai')
                                         Pembayaran Tunai
+                                    @elseif($pmGas === 'ewallet')
+                                        Pembayaran E-Wallet
+                                    @elseif($pmGas === 'saldo')
+                                        Pembayaran Saldo Dompet
                                     @else
                                         Transfer - {{ $setting->bank_name ?? 'Bank' }}
                                     @endif
@@ -114,20 +119,20 @@
                                         </p>
                                     </div>
                                     
-                                    @if($order->completion_time)
-                                    <div>
-                                        <p class="text-sm text-gray-500 mb-1">Waktu Pengambilan</p>
-                                        <p class="font-semibold text-gray-800">
-                                            {{ \Carbon\Carbon::parse($order->completion_time)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
-                                        </p>
-                                    </div>
-                                    @endif
-                                    
                                     @if($order->confirmed_at)
                                     <div>
                                         <p class="text-sm text-gray-500 mb-1">Waktu Pembayaran</p>
                                         <p class="font-semibold text-gray-800">
                                             {{ \Carbon\Carbon::parse($order->confirmed_at)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
+                                        </p>
+                                    </div>
+                                    @endif
+
+                                    @if(!empty($order->delivery_time))
+                                    <div>
+                                        <p class="text-sm text-gray-500 mb-1">Waktu Pengantaran / Pengambilan</p>
+                                        <p class="font-semibold text-gray-800">
+                                            {{ \Carbon\Carbon::parse($order->delivery_time)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
                                         </p>
                                     </div>
                                     @endif
@@ -150,7 +155,7 @@
                                     @if($order->proof_of_payment)
                                     <div>
                                         <p class="text-sm text-gray-500 mb-2">Bukti Transaksi</p>
-                                        <div class="flex gap-2">
+                                        <div class="flex flex-wrap gap-2">
                                             <a href="{{ asset('storage/' . $order->proof_of_payment) }}" 
                                                target="_blank"
                                                class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
@@ -169,7 +174,7 @@
                                     <div>
                                         <p class="text-sm text-gray-500 mb-2">Bukti Transaksi Resmi</p>
                                         @if($order->receipt_path && Storage::disk('public')->exists($order->receipt_path))
-                                        <div class="flex gap-2">
+                                        <div class="flex flex-wrap gap-2">
                                             <a href="{{ route('receipt.gas.view', $order->id) }}" 
                                                target="_blank"
                                                class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg">

@@ -139,11 +139,13 @@
                         <i class="bx bx-building-house me-1"></i>Gedung &amp; Ruang Publik
                     </button>
                 </li>
+                @unless(auth()->user()->isStaff())
                 <li class="nav-item flex-shrink-0">
                     <button type="button" class="nav-link rounded-pill px-3 py-2 fw-semibold text-nowrap" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-selected="false">
                         <i class="bx bx-book-content me-1"></i>Pengaturan &amp; SOP
                     </button>
                 </li>
+                @endunless
                 <li class="nav-item flex-shrink-0">
                     <button type="button" class="nav-link rounded-pill px-3 py-2 fw-semibold text-nowrap {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
                         <i class="bx bx-chat me-1"></i>Layanan Pesan

@@ -14,12 +14,17 @@ class MobilBookingApiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Mobil::inCatalog()->where('status', 'tersedia')
+        $query = Mobil::inCatalog()->whereRaw('LOWER(status) = ?', ['tersedia'])
             ->where('stok', '>', 0);
 
         $user = $request->user('sanctum');
         if ($user && $user->region_id) {
-            $query->where('region_id', $user->region_id);
+            if (\Illuminate\Support\Facades\Schema::hasTable('regions') && \Illuminate\Support\Facades\Schema::hasTable('region_services')) {
+                $visibleRegionIds = \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'penyewaan-mobil');
+                $query->whereIn('region_id', $visibleRegionIds);
+            } else {
+                $query->where('region_id', $user->region_id);
+            }
         }
 
         $items = $query->get()
@@ -65,6 +70,10 @@ class MobilBookingApiController extends Controller
             ], 404);
         }
 
+        $firstSupir = (\Illuminate\Support\Facades\Schema::hasTable('mobil_supir') && \Illuminate\Support\Facades\Schema::hasTable('supirs'))
+            ? $item->supirs()->first()
+            : null;
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -81,8 +90,8 @@ class MobilBookingApiController extends Controller
                 'image_3' => $item->foto_3 ? asset('storage/' . $item->foto_3) : null,
                 'type' => 'mobil',
                 'opsi_supir' => $item->opsi_supir,
-                'nama_supir' => $item->nama_supir,
-                'kontak_supir' => $item->kontak_supir,
+                'nama_supir' => $firstSupir?->nama,
+                'kontak_supir' => $firstSupir?->no_hp,
                 'bbm_ditanggung' => $item->bbm_ditanggung,
                 'harga_dalam_desa' => (float) $item->harga_dalam_desa,
                 'batas_km_dalam_desa' => $item->batas_km_dalam_desa,
@@ -118,7 +127,7 @@ class MobilBookingApiController extends Controller
             return \Illuminate\Support\Facades\DB::transaction(function () use ($request, &$proofPath) {
                 $mobil = Mobil::inCatalog()->lockForUpdate()->findOrFail($request->mobil_id);
 
-                if (!$mobil->hasStock(1)) {
+                if (strtolower((string) $mobil->status) !== 'tersedia' || !$mobil->hasStock(1)) {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Kendaraan sedang tidak tersedia.',
@@ -146,14 +155,26 @@ class MobilBookingApiController extends Controller
                     'payment_method' => $request->payment_method,
                     'rental_purpose' => $request->rental_purpose,
                     'dengan_supir' => $request->dengan_supir ?? false,
-                    'distance_km' => $request->distance_km,
+                    'distance_km' => $request->distance_km ?? 1,
                     'total_amount' => $totalAmount,
                     'status' => 'pending',
                     'payment_proof' => $proofPath,
                     'region_id' => $mobil->region_id,
                 ]);
 
-                \App\Models\WalletTransaction::catatPemasukan($mobil->region_id, 'mobil', $booking->id, $totalAmount, $request->payment_method, $proofPath);
+                if ($mobil->region_id) {
+                    \App\Models\WalletTransaction::catatPemasukan((int) $mobil->region_id, 'mobil', $booking->id, $totalAmount, $request->payment_method, $proofPath);
+                    if (\Illuminate\Support\Facades\Schema::hasTable('admin_notifications')) {
+                        \App\Models\AdminNotification::create([
+                            'type' => 'mobil_booking',
+                            'reference_id' => $booking->id,
+                            'region_id' => (int) $mobil->region_id,
+                            'title' => 'Pesanan Transportasi Baru',
+                            'message' => "{$request->recipient_name} mengajukan sewa {$mobil->nama_mobil} (#{$booking->order_number}).",
+                            'is_read' => false,
+                        ]);
+                    }
+                }
 
                 // Stok dialokasikan saat admin menyetujui, sama seperti pemesanan web.
 

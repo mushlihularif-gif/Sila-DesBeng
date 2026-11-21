@@ -43,7 +43,7 @@
 
             <!-- Grid Kartu Produk (2 Kolom di Mobile, 2 di Tablet, 3 di Desktop) -->
             @if($items->count() > 0)
-                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 lg:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
+                <div id="katalog-gas" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 lg:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
                     @foreach($items as $item)
                     <a href="{{ route('gas.sales.show', $item->id) }}" data-turbo="false" class="block group product-item transition-all duration-500" data-category="{{ $item->kategori ? Str::slug($item->kategori) : '' }}">
                     <div class="product-card p-3 sm:p-5">
@@ -111,7 +111,7 @@
                 </div>
             @else
                 <!-- Kondisi Kosong (Format persis seperti Penyewaan Alat) -->
-                <div class="text-center py-20">
+                <div id="katalog-gas" class="text-center py-20">
                     <svg class="w-24 h-24 mx-auto mb-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                     </svg>
@@ -174,17 +174,17 @@
                 Jika susunan anggota keluarga Anda tidak mengalami perubahan dan sesuai dengan data anggota keluarga yang Anda masukkan sebelumnya, silakan lanjutkan pemesanan gas.
             </p>
             <p class="text-gray-700 mb-8 max-w-lg font-medium text-orange-600">
-                Namun, jika terdapat perubahan data pada Kartu Keluarga Anda, mohon perbarui data terlebih dahulu.
+                Jika terdapat perubahan susunan anggota pada Kartu Keluarga Anda, silakan hubungi Admin Desa melalui layanan chat untuk pembaruan data KK.
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 w-full max-w-lg justify-center">
-                <button type="button" onclick="document.getElementById('katalog-gas').scrollIntoView({behavior:'smooth'})" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all hover:-translate-y-1">
+                <button type="button" onclick="document.getElementById('katalog-gas')?.scrollIntoView({behavior:'smooth'})" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all hover:-translate-y-1">
                     LANJUTKAN PESAN GAS
-                    <span class="block text-xs font-normal opacity-80">(Data Lama)</span>
+                    <span class="block text-xs font-normal opacity-80">(Gunakan Data KK Terdaftar)</span>
                 </button>
-                <button type="button" onclick="openKkModal()" class="flex-1 bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-200 font-bold py-3 px-6 rounded-xl shadow-sm transition-all hover:-translate-y-1">
-                    PERBARUI KK
-                    <span class="block text-xs font-normal text-gray-500">(Terdapat Perubahan)</span>
+                <button type="button" onclick="if (typeof toggleServiceChatWidget === 'function') { toggleServiceChatWidget('gas'); } else { document.getElementById('serviceChatLauncher_gas')?.click(); }" class="flex-1 bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-200 font-bold py-3 px-6 rounded-xl shadow-sm transition-all hover:-translate-y-1">
+                    HUBUNGI ADMIN DESA
+                    <span class="block text-xs font-normal text-gray-500">(Untuk Perubahan Data KK)</span>
                 </button>
             </div>
         </div>

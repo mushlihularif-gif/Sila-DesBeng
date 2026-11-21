@@ -19,7 +19,14 @@ class KycController extends Controller
     public function process(Request $request)
     {
         $request->validate([
-            'ktp_image' => 'required|image|max:5120', 
+            'ktp_image' => 'required|image|max:5120',
+            'nik' => 'nullable|string|max:32',
+            'name' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:2000',
+            'rt' => 'nullable|string|max:20',
+            'rw' => 'nullable|string|max:20',
+            'kecamatan' => 'nullable|string|max:255',
+            'desa' => 'nullable|string|max:255',
         ]);
 
         $user = $request->user();

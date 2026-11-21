@@ -144,19 +144,19 @@ class MutasiAdminController extends Controller
             $kecId = null;
 
             if ($u->region) {
-                if ($u->region->type === 'desa') {
+                if (in_array($u->region->type, ['desa', 'kelurahan'], true)) {
                     $desaName = $u->region->name;
                     $desaId = $u->region->id;
                     if ($u->region->parent && $u->region->parent->type === 'kecamatan') {
                         $kecName = $u->region->parent->name;
                         $kecId = $u->region->parent->id;
                     }
-                } elseif (in_array($u->region->type, ['rw', 'rt'])) {
+                } elseif (in_array($u->region->type, ['rw', 'rt'], true)) {
                     $curr = $u->region->parent;
-                    while ($curr && $curr->type !== 'desa' && $curr->parent) {
+                    while ($curr && !in_array($curr->type, ['desa', 'kelurahan'], true) && $curr->parent) {
                         $curr = $curr->parent;
                     }
-                    if ($curr && $curr->type === 'desa') {
+                    if ($curr && in_array($curr->type, ['desa', 'kelurahan'], true)) {
                         $desaName = $curr->name;
                         $desaId = $curr->id;
                         if ($curr->parent && $curr->parent->type === 'kecamatan') {
@@ -219,21 +219,23 @@ class MutasiAdminController extends Controller
 
         $admin = Auth::user();
         
-        // Cari user berdasarkan NIK atau ID, dan fallback ke dekripsi jika perlu
-        $user = User::where('nik', $request->nik)->first();
-        if (!$user && is_numeric($request->nik)) {
-            $user = User::find($request->nik);
-        }
-        if (!$user) {
-            $user = User::all()->first(function($u) use ($request) {
-                return $u->nik === $request->nik;
-            });
+        // Cari warga (role 'user') berdasarkan nik_hash, nik, atau ID
+        $nikInput = trim((string) $request->nik);
+        $nikHash = hash_hmac('sha256', $nikInput, config('app.key'));
+        $user = User::where('role', 'user')
+            ->where(function ($q) use ($nikHash, $nikInput) {
+                $q->where('nik_hash', $nikHash)->orWhere('nik', $nikInput);
+            })
+            ->first();
+        if (!$user && ctype_digit($nikInput)) {
+            $user = User::where('role', 'user')->find((int) $nikInput);
         }
         
         if (!$user) return redirect()->back()->with('error', 'Warga tidak ditemukan.');
         $kecamatanId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id');
         abort_if(! $kecamatanId || ! in_array((int) $user->region_id, array_map('intval', Region::getDescendantIds($kecamatanId)), true), 422, 'Warga berada di luar Kecamatan Bengkalis.');
-        if ($user->region_id == $admin->region_id) return redirect()->back()->with('error', 'Warga ini sudah di desa Anda.');
+        $adminScopeIds = array_map('intval', array_merge([(int) $admin->region_id], Region::getDescendantIds($admin->region_id)));
+        if (in_array((int) $user->region_id, $adminScopeIds, true)) return redirect()->back()->with('error', 'Warga ini sudah di desa Anda.');
 
         $existing = MutasiPenduduk::where('user_id', $user->id)->whereIn('status', ['pending', 'pending_asal', 'pending_tujuan'])->first();
         if ($existing) return redirect()->back()->with('error', 'Warga ini sedang dalam proses mutasi.');
@@ -274,10 +276,11 @@ class MutasiAdminController extends Controller
         ]);
 
         $admin = Auth::user();
-        $user = User::findOrFail($request->user_id);
+        $user = User::where('role', 'user')->findOrFail($request->user_id);
 
-        if ($user->region_id != $admin->region_id) return redirect()->back()->with('error', 'Warga ini bukan penduduk desa Anda.');
-        if ($request->to_region_id == $admin->region_id) return redirect()->back()->with('error', 'Desa tujuan tidak boleh sama dengan desa asal.');
+        $adminScopeIds = array_map('intval', array_merge([(int) $admin->region_id], Region::getDescendantIds($admin->region_id)));
+        if (!in_array((int) $user->region_id, $adminScopeIds, true)) return redirect()->back()->with('error', 'Warga ini bukan penduduk desa Anda.');
+        if ((int) $request->to_region_id === (int) $admin->region_id) return redirect()->back()->with('error', 'Desa tujuan tidak boleh sama dengan desa asal.');
 
         $existing = MutasiPenduduk::where('user_id', $user->id)->whereIn('status', ['pending', 'pending_asal', 'pending_tujuan'])->first();
         if ($existing) return redirect()->back()->with('error', 'Warga ini sedang dalam proses mutasi.');
@@ -376,6 +379,10 @@ class MutasiAdminController extends Controller
         }
 
         // ALUR DARI ADMIN KE ADMIN LAIN
+        if (!in_array($mutasi->status, ['pending', 'pending_asal', 'pending_tujuan'], true)) {
+            return redirect()->back()->with('error', 'Pengajuan mutasi ini sudah diproses sebelumnya.');
+        }
+
         $berhakApprove = false;
         if ($mutasi->requested_by == 'admin_asal') {
             if ($mutasi->to_region_id == $admin->region_id) $berhakApprove = true;
@@ -413,6 +420,9 @@ class MutasiAdminController extends Controller
     {
         $request->validate(['rejection_reason' => 'required|string']);
         $mutasi = MutasiPenduduk::with(['user', 'fromRegion', 'toRegion'])->findOrFail($id);
+        if (!in_array($mutasi->status, ['pending', 'pending_asal', 'pending_tujuan'], true)) {
+            return redirect()->back()->with('error', 'Pengajuan mutasi ini sudah diproses sebelumnya.');
+        }
         $admin = Auth::user();
 
         $isSuperOrKec = in_array($admin->role, ['super_admin']);

@@ -277,19 +277,24 @@
                                         <i class="bx bx-error-circle"></i> Tidak Bisa Diproses
                                     </button>
 
-                                    <div class="modal fade" id="acc-{{ $p->id }}" tabindex="-1">
-                                        <div class="modal-dialog">
+                                    @push('modals')
+                                    <div class="modal fade" id="acc-{{ $p->id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
                                             <form method="POST" action="{{ route('admin.sistem-platform.penarikan.approve', $p) }}" enctype="multipart/form-data">
-                                                @csrf<div class="p-3"><label>Bukti transfer pencairan (JPG, PNG, WebP; maksimal 5 MB)<input class="form-control" type="file" name="proof" accept="image/jpeg,image/png,image/webp" required></label></div>
+                                                @csrf
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h6 class="modal-title">Setujui Penarikan</h6>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        <h6 class="modal-title fw-bold">Setujui Penarikan</h6>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <p>Pastikan transfer <strong>Rp {{ number_format($p->jumlah, 0, ',', '.') }}</strong>
                                                            ke <strong>{{ $p->nama_bank }} {{ $p->no_rekening }}</strong> (a.n. {{ $p->nama_pemilik }})
                                                            sudah benar-benar dikirim sebelum menekan tombol ini.</p>
+                                                        <div class="mb-3">
+                                                            <label class="form-label small fw-semibold" for="proof-{{ $p->id }}">Bukti transfer pencairan (JPG, PNG, WebP; maksimal 5 MB) <span class="text-danger">*</span></label>
+                                                            <input id="proof-{{ $p->id }}" class="form-control form-control-sm" type="file" name="proof" accept="image/jpeg,image/png,image/webp" required>
+                                                        </div>
                                                         <label class="form-label small">Catatan (opsional)</label>
                                                         <input type="text" name="catatan_admin" class="form-control form-control-sm" placeholder="Misal: no. referensi transfer">
                                                     </div>
@@ -302,14 +307,14 @@
                                         </div>
                                     </div>
 
-                                    <div class="modal fade" id="tolak-{{ $p->id }}" tabindex="-1">
-                                        <div class="modal-dialog">
+                                    <div class="modal fade" id="tolak-{{ $p->id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
                                             <form method="POST" action="{{ route('admin.sistem-platform.penarikan.reject', $p) }}">
                                                 @csrf
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h6 class="modal-title">Tandai Tidak Bisa Diproses</h6>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        <h6 class="modal-title fw-bold">Tandai Tidak Bisa Diproses</h6>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <div class="alert alert-warning py-2 px-3 small mb-3">
@@ -330,6 +335,7 @@
                                             </form>
                                         </div>
                                     </div>
+                                    @endpush
                                 @else
                                     <small class="text-muted">
                                         {{ optional($p->diselesaikan_pada)->format('d M Y H:i') }}

@@ -523,17 +523,22 @@
         <div class="modal-content rounded-4 border-0 shadow-lg">
             <form action="{{ route('admin.kelola-wilayah.store') }}" method="POST">
                 @csrf
+                @if($parentRegion)
+                    <input type="hidden" name="parent_id" value="{{ $parentRegion->id }}">
+                @endif
                 <div class="modal-header border-bottom-0 pb-0">
                     <h5 class="modal-title fw-bold text-primary"><i class="bx bx-map-pin me-2"></i> Tambah Wilayah / Struktur Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     @if($parentRegion && in_array($parentRegion->type, ['desa', 'kelurahan']))
+                        <input type="hidden" name="type" value="rw">
+                    @elseif($parentRegion && $parentRegion->type === 'kecamatan')
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Jenis Wilayah</label>
                             <select name="type" class="form-select" required>
-                                <option value="rw">RW (Rukun Warga)</option>
-                                <option value="rt">RT (Rukun Tetangga) Langsung</option>
+                                <option value="desa">Desa</option>
+                                <option value="kelurahan">Kelurahan</option>
                             </select>
                         </div>
                     @else

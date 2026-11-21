@@ -115,7 +115,7 @@
 
 <div id="global-cropper-modal">
     <div class="cropper-modal-content">
-        <div class="d-flex align-items-center justify-content-between mb-3">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;">
             <h4 style="margin: 0; font-family: inherit; font-size: 1.25rem; font-weight: 700; color: #1e293b;">Sesuaikan dan Potong Foto</h4>
             <button type="button" class="btn-close" onclick="document.getElementById('btn-cropper-cancel').click()" aria-label="Close" style="cursor: pointer; border: none; background: transparent; font-size: 1.25rem; line-height: 1;">&times;</button>
         </div>

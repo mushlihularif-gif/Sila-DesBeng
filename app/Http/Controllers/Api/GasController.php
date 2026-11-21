@@ -22,7 +22,7 @@ class GasController extends Controller
 
         // Format image URLs
         $gasItems->transform(function ($item) {
-            $item->image_url = asset('storage/' . $item->foto);
+            $item->image_url = $item->foto ? asset('storage/' . $item->foto) : null;
             return $item;
         });
 
@@ -54,7 +54,7 @@ class GasController extends Controller
             $gas->region->setAttribute('payment_info', $paymentInfo);
         }
         
-        $gas->image_url = asset('storage/' . $gas->foto);
+        $gas->image_url = $gas->foto ? asset('storage/' . $gas->foto) : null;
 
         return response()->json([
             'status' => 'success',

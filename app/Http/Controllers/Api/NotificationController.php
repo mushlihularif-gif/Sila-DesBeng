@@ -18,11 +18,14 @@ class NotificationController extends Controller
                             ->where('type', 'pesan_admin');
                       });
             })
-            ->with('user')
             ->orderByDesc('created_at')
+            ->limit(100)
             ->get();
 
-        $unreadCount = $notifications->where('is_read', false)->count();
+        $unreadCount = $notifications
+            ->where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->count();
 
         return response()->json([
             'success' => true,
@@ -36,13 +39,21 @@ class NotificationController extends Controller
     public function markAsRead($id)
     {
         $notification = Notification::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where(function ($query) {
+                $query->where('user_id', auth()->id())
+                      ->orWhere(function ($q) {
+                          $q->whereNull('user_id')
+                            ->where('type', 'pesan_admin');
+                      });
+            })
             ->firstOrFail();
 
-        $notification->update([
-            'is_read' => true,
-            'read_at' => now()
-        ]);
+        if ((int) $notification->user_id === (int) auth()->id()) {
+            $notification->update([
+                'is_read' => true,
+                'read_at' => now()
+            ]);
+        }
 
         return response()->json([
             'success' => true,

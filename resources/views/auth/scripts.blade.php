@@ -48,6 +48,7 @@
 
         function closeModal() {
             // 1. Hide Overlay
+            overlay.classList.remove('show');
             overlay.classList.add('opacity-0');
             
             // 2. Hide All Modals (Scale down)
@@ -231,7 +232,9 @@
                 if (response.ok) {
                     if (data.require_otp) {
                         switchModal(modalGoogleRegister, modalOtp);
-                        startOtpTimer();
+                        if (typeof startOtpTimer === 'function') {
+                            startOtpTimer();
+                        }
                         showToast(data.message, 'success');
                     } else {
                         showToast(data.message, 'success');
@@ -258,14 +261,6 @@
             }
         });
 
-        @if(session('info'))
-            showToast("{{ session('info') }}", 'info');
-        @endif
-
-        @if(session('warning'))
-            showToast("{{ session('warning') }}", 'warning');
-        @endif
-
         // ========================================
         // MODAL TRIGGERS
         // ========================================
@@ -280,23 +275,6 @@
             openModal(modalLogout);
             if (typeof window.closeMobileSidebar === 'function') {
                 window.closeMobileSidebar();
-            }
-        });
-
-        document.getElementById('btn-open-login-mobile')?.addEventListener('click', () => {
-             // 1. Open Modal Immediately (Overlay z-60 covers Sidebar z-51)
-            openModal(modalLogin);
-            
-            // 2. Close Sidebar in background (better UX)
-            if (typeof window.closeMobileSidebar === 'function') {
-                window.closeMobileSidebar();
-            }
-        });
-
-        document.getElementById('btn-open-register-mobile')?.addEventListener('click', () => {
-            openModal(modalRegister);
-            if (typeof window.closeMobileSidebar === 'function') {
-                 window.closeMobileSidebar();
             }
         });
 

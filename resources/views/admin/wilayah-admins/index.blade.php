@@ -355,10 +355,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    @if(session('duplicate_nik') || session('error'))
+    @if(session('error'))
         <div class="alert alert-danger alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
             <i class="bx bx-error-circle fs-4 me-2"></i>
-            {{ session('duplicate_nik') ?? session('error') }}
+            {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif

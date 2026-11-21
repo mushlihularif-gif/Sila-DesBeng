@@ -25,11 +25,11 @@ class AnnouncementController extends Controller
             });
         }
 
-        $beritas = $beritasQuery->paginate(12, ['*'], 'page_b');
+        $beritas = $beritasQuery->paginate(12, ['*'], 'page_b')->withQueryString();
 
         // 2. Pengumuman Warga (Sesuai domisili)
         $user = auth()->user();
-        $pengumumanQuery = Announcement::with(['region', 'admin'])
+        $pengumumanQuery = Announcement::with(['region', 'admin', 'images'])
             ->visibleTo(auth()->user())
             ->where('post_category', 'Pengumuman')
             ->orderBy('published_at', 'desc');
@@ -46,7 +46,7 @@ class AnnouncementController extends Controller
             });
         }
 
-        $pengumumans = $pengumumanQuery->paginate(12, ['*'], 'page_p');
+        $pengumumans = $pengumumanQuery->paginate(12, ['*'], 'page_p')->withQueryString();
 
         $activeTab = $request->get('tab', 'berita'); // Default tab
 

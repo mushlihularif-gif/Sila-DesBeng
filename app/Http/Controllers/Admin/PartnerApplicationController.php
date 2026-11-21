@@ -53,7 +53,7 @@ class PartnerApplicationController extends Controller
 
         $induk = Region::find($application->parent_region_id);
         $indukTipe = match ($application->region_type) {
-            'desa' => 'kecamatan',
+            'desa', 'kelurahan' => 'kecamatan',
             'rw' => ['desa', 'kelurahan'],
             'rt' => 'rw',
             default => null,
@@ -174,7 +174,8 @@ class PartnerApplicationController extends Controller
     {
         $this->pastikanPeninjau();
 
-        $request->validate(['reason' => 'required|string']);
+        $request->validate(['reason' => 'nullable|string|max:1000']);
+        $approvalReason = trim((string) ($request->input('reason') ?? '')) ?: 'Disetujui oleh admin wilayah';
         $application = PartnerApplication::findOrFail($id);
         if ($application->status !== 'pending') {
             return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
@@ -334,13 +335,13 @@ class PartnerApplicationController extends Controller
         $application->update(['status' => 'approved']);
 
         if ($application->user_id) {
-            \App\Services\NotificationService::notifyPartnerApplicationApproved($application, $region->name, $request->reason);
+            \App\Services\NotificationService::notifyPartnerApplicationApproved($application, $region->name, $approvalReason);
         }
 
         // Send Email to Applicant
         try {
             Mail::to($application->contact_email)->send(new AccountApprovedMail($username, $password, $region->name));
-            return back()->with('success', "Kemitraan disetujui! Wilayah dan Akun Admin berhasil dibuat. Username dan Password telah dikirimkan ke email: <b>" . $application->contact_email . "</b>");
+            return back()->with('success', "Kemitraan disetujui! Wilayah dan Akun Admin berhasil dibuat. Username dan Password telah dikirimkan ke email: {$application->contact_email}");
         } catch (\Exception $e) {
             // Format nomor HP (ubah 0 jadi 62 jika perlu)
             $phone = $application->contact_phone;
@@ -352,11 +353,15 @@ class PartnerApplicationController extends Controller
             $waText = "Halo " . $application->applicant_name . ", Pengajuan kemitraan " . $region->name . " telah disetujui.\n\nBerikut adalah informasi akun Admin Anda:\nUsername: " . $username . "\nPassword: " . $password . "\n\nHarap segera login dan ubah password Anda demi keamanan.";
             $waLink = "https://api.whatsapp.com/send?phone=" . $phone . "&text=" . urlencode($waText);
 
-            $fallbackMsg = "Email GAGAL terkirim karena masalah koneksi. <br>Silahkan kirim email dan sandi ini ke WhatsApp <b>{$application->applicant_name}</b> ({$application->contact_phone}):<br><br>";
-            $fallbackMsg .= "Username: <b>{$username}</b><br>Password: <b>{$password}</b><br>";
-            $fallbackMsg .= "<a href='{$waLink}' target='_blank' class='inline-block mt-3 px-4 py-2 bg-green-500 text-white text-xs font-bold rounded-full shadow hover:bg-green-600 transition-colors'>Kirim via WhatsApp</a>";
-
-            return back()->with('success', $fallbackMsg);
+            return back()
+                ->with('success', "Kemitraan disetujui, namun email gagal terkirim. Silakan kirim kredensial akun ({$username}) ke {$application->applicant_name} ({$application->contact_phone}) melalui WhatsApp.")
+                ->with('partner_wa_fallback', [
+                    'applicant_name' => $application->applicant_name,
+                    'contact_phone' => $application->contact_phone,
+                    'username' => $username,
+                    'password' => $password,
+                    'wa_link' => $waLink,
+                ]);
         }
     }
 
@@ -364,7 +369,10 @@ class PartnerApplicationController extends Controller
     {
         $this->pastikanPeninjau();
 
-        $request->validate(['reason' => 'required|string']);
+        if (!$request->filled('reason') && $request->filled('rejection_reason')) {
+            $request->merge(['reason' => $request->input('rejection_reason')]);
+        }
+        $request->validate(['reason' => 'required|string|max:1000']);
         $application = PartnerApplication::findOrFail($id);
         if ($application->status !== 'pending') {
             return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');

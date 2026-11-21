@@ -111,6 +111,7 @@ class User extends Authenticatable
         'ktp_rejection_reason',
         'store_description',
         'store_banner',
+        'fcm_token',
     ];
 
     /**

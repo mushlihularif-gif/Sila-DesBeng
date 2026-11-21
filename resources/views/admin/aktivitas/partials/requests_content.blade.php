@@ -290,21 +290,23 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             </button>
                                                         @elseif($req->status == 'arrived')
                                                             <button type="button" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" 
-                                                                    onclick="prepareReturn({{ $req->id }})"
+                                                                    onclick="prepareReturn({{ $req->id }}, {{ (int) $req->quantity }})"
                                                                     data-bs-toggle="modal" data-bs-target="#returnModal">
                                                                 <i class="bx bx-check-circle me-1"></i>Selesai
                                                             </button>
                                                         @endif
                                                     @else
-                                                        @if($req->status == 'confirmed')
-                                                            <button type="button" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" 
-                                                                    onclick="prepareUpload({{ $req->id }}, 'rental', 'jemput')"
-                                                                    data-bs-toggle="modal" data-bs-target="#uploadProofModal">
-                                                                <i class="bx bx-package me-1"></i>Siapkan
-                                                            </button>
-                                                        @elseif($req->status == 'being_prepared' || $req->status == 'approved')
+                                                        @if(in_array($req->status, ['confirmed', 'approved', 'being_prepared']))
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'rental', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="arrived">
+                                                                <button type="submit" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" data-konfirmasi="Tandai alat sudah diserahkan ke penyewa?">
+                                                                    <i class="bx bx-package me-1"></i>Serahkan Alat
+                                                                </button>
+                                                            </form>
+                                                        @elseif($req->status == 'arrived')
                                                             <button type="button" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" 
-                                                                    onclick="prepareReturn({{ $req->id }})"
+                                                                    onclick="prepareReturn({{ $req->id }}, {{ (int) $req->quantity }})"
                                                                     data-bs-toggle="modal" data-bs-target="#returnModal">
                                                                 <i class="bx bx-check-circle me-1"></i>Selesai
                                                             </button>
@@ -403,13 +405,17 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                     @elseif($req->status == 'in_delivery')
                                                         <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" onclick="prepareUpload({{ $req->id }}, 'rental', 'antar')" data-bs-toggle="modal" data-bs-target="#uploadProofModal">Tiba</button>
                                                     @elseif($req->status == 'arrived')
-                                                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3" onclick="prepareReturn({{ $req->id }})" data-bs-toggle="modal" data-bs-target="#returnModal">Selesai</button>
+                                                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3" onclick="prepareReturn({{ $req->id }}, {{ (int) $req->quantity }})" data-bs-toggle="modal" data-bs-target="#returnModal">Selesai</button>
                                                     @endif
                                                 @else
-                                                    @if($req->status == 'confirmed')
-                                                        <button type="button" class="btn btn-sm btn-warning rounded-pill px-3" onclick="prepareUpload({{ $req->id }}, 'rental', 'jemput')" data-bs-toggle="modal" data-bs-target="#uploadProofModal">Siapkan</button>
-                                                    @elseif($req->status == 'being_prepared' || $req->status == 'approved')
-                                                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3" onclick="prepareReturn({{ $req->id }})" data-bs-toggle="modal" data-bs-target="#returnModal">Selesai</button>
+                                                    @if(in_array($req->status, ['confirmed', 'approved', 'being_prepared']))
+                                                        <form action="{{ route('admin.aktivitas.update-status', ['type' => 'rental', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="arrived">
+                                                            <button type="submit" class="btn btn-sm btn-warning rounded-pill px-3" data-konfirmasi="Tandai alat sudah diserahkan ke penyewa?">Serahkan Alat</button>
+                                                        </form>
+                                                    @elseif($req->status == 'arrived')
+                                                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3" onclick="prepareReturn({{ $req->id }}, {{ (int) $req->quantity }})" data-bs-toggle="modal" data-bs-target="#returnModal">Selesai</button>
                                                     @endif
                                                 @endif
                                             </div>
@@ -633,23 +639,23 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                             <div class="d-flex gap-2 justify-content-end align-items-center flex-wrap">
                                                 @if($req->status != 'pending' && $req->cancellation_status != 'pending')
                                                     @if($req->dengan_supir)
-                                                        @if($req->status == 'confirmed')
+                                                        @if(in_array($req->status, ['confirmed', 'approved']))
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
-                                                                <input type="hidden" name="status" value="process">
+                                                                <input type="hidden" name="status" value="being_prepared">
                                                                 <button type="submit" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" data-konfirmasi="Mulai siapkan transportasi ini?">
                                                                     <i class="bx bx-package me-1"></i>Proses
                                                                 </button>
                                                             </form>
-                                                        @elseif($req->status == 'process')
+                                                        @elseif(in_array($req->status, ['being_prepared', 'process']))
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
-                                                                <input type="hidden" name="status" value="delivering">
+                                                                <input type="hidden" name="status" value="in_delivery">
                                                                 <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" data-konfirmasi="Mulai jalan / kirim transportasi?">
                                                                     <i class="bx bx-car me-1"></i>Kirim
                                                                 </button>
                                                             </form>
-                                                        @elseif($req->status == 'delivering')
+                                                        @elseif(in_array($req->status, ['in_delivery', 'delivering']))
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="arrived">
@@ -657,7 +663,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                                     <i class="bx bx-check me-1"></i>Tiba
                                                                 </button>
                                                             </form>
-                                                        @elseif($req->status == 'arrived')
+                                                        @elseif(in_array($req->status, ['arrived', 'ongoing']))
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="completed">
@@ -667,7 +673,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             </form>
                                                         @endif
                                                     @else
-                                                        @if($req->status == 'confirmed')
+                                                        @if(in_array($req->status, ['confirmed', 'approved', 'arrived', 'ongoing']))
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="completed">
@@ -735,6 +741,38 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                 @elseif($req->status == 'pending')
                                                     <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2.5" onclick="rejectRequest({{ $req->id }}, 'mobil')">Tolak</button>
                                                     <button type="button" class="btn btn-sm btn-success rounded-pill px-3" onclick="approveRequest({{ $req->id }}, 'mobil')"><i class="bx bx-check me-1"></i>Setujui</button>
+                                                @elseif($req->dengan_supir)
+                                                    @if(in_array($req->status, ['confirmed', 'approved']))
+                                                        <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="being_prepared">
+                                                            <button type="submit" class="btn btn-sm btn-warning rounded-pill px-3" data-konfirmasi="Mulai siapkan transportasi ini?">Proses</button>
+                                                        </form>
+                                                    @elseif(in_array($req->status, ['being_prepared', 'process']))
+                                                        <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="in_delivery">
+                                                            <button type="submit" class="btn btn-sm btn-info text-white rounded-pill px-3" data-konfirmasi="Mulai jalan / kirim transportasi?">Kirim</button>
+                                                        </form>
+                                                    @elseif(in_array($req->status, ['in_delivery', 'delivering']))
+                                                        <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="arrived">
+                                                            <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3" data-konfirmasi="Konfirmasi tiba?">Tiba</button>
+                                                        </form>
+                                                    @elseif(in_array($req->status, ['arrived', 'ongoing']))
+                                                        <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="completed">
+                                                            <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" data-konfirmasi="Selesaikan penyewaan ini?">Selesai</button>
+                                                        </form>
+                                                    @endif
+                                                @elseif(in_array($req->status, ['confirmed', 'approved', 'arrived', 'ongoing']))
+                                                    <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="completed">
+                                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" data-konfirmasi="Serahkan Kunci / Selesaikan penyewaan ini?">Selesai</button>
+                                                    </form>
                                                 @endif
                                             </div>
                                         </div>
@@ -805,15 +843,15 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                             <div class="d-flex gap-2 justify-content-end align-items-center flex-wrap">
                                                 @if($req->status != 'pending' && $req->cancellation_status != 'pending')
                                                     @if($req->delivery_method == 'antar' || $req->dengan_supir)
-                                                        @if($req->status == 'confirmed' || $req->status == 'approved')
+                                                        @if(in_array($req->status, ['confirmed', 'approved', 'being_prepared']))
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
-                                                                <input type="hidden" name="status" value="delivering">
+                                                                <input type="hidden" name="status" value="in_delivery">
                                                                 <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" data-konfirmasi="Mulai jalan / kirim?">
                                                                     <i class="bx bx-truck me-1"></i>Kirim/Berangkat
                                                                 </button>
                                                             </form>
-                                                        @elseif($req->status == 'delivering')
+                                                        @elseif(in_array($req->status, ['in_delivery', 'delivering']))
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="arrived">
@@ -821,7 +859,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                                     <i class="bx bx-check me-1"></i>Tiba
                                                                 </button>
                                                             </form>
-                                                        @elseif($req->status == 'arrived' || $req->status == 'ongoing')
+                                                        @elseif(in_array($req->status, ['arrived', 'ongoing']))
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="completed">
@@ -831,7 +869,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             </form>
                                                         @endif
                                                     @else
-                                                        @if($req->status == 'confirmed' || $req->status == 'approved')
+                                                        @if(in_array($req->status, ['confirmed', 'approved', 'arrived', 'ongoing']))
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="completed">
@@ -899,6 +937,32 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                 @elseif($req->status == 'pending')
                                                     <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2.5" onclick="rejectRequest({{ $req->id }}, 'fasilitas')">Tolak</button>
                                                     <button type="button" class="btn btn-sm btn-success rounded-pill px-3" onclick="approveRequest({{ $req->id }}, 'fasilitas')"><i class="bx bx-check me-1"></i>Setujui</button>
+                                                @elseif($req->delivery_method == 'antar' || $req->dengan_supir)
+                                                    @if(in_array($req->status, ['confirmed', 'approved', 'being_prepared']))
+                                                        <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="in_delivery">
+                                                            <button type="submit" class="btn btn-sm btn-info text-white rounded-pill px-3" data-konfirmasi="Mulai jalan / kirim?">Berangkat</button>
+                                                        </form>
+                                                    @elseif(in_array($req->status, ['in_delivery', 'delivering']))
+                                                        <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="arrived">
+                                                            <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3" data-konfirmasi="Konfirmasi tiba/digunakan?">Tiba</button>
+                                                        </form>
+                                                    @elseif(in_array($req->status, ['arrived', 'ongoing']))
+                                                        <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="completed">
+                                                            <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" data-konfirmasi="Selesaikan peminjaman ini?">Selesai</button>
+                                                        </form>
+                                                    @endif
+                                                @elseif(in_array($req->status, ['confirmed', 'approved', 'arrived', 'ongoing']))
+                                                    <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="completed">
+                                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" data-konfirmasi="Selesaikan peminjaman ini?">Selesai</button>
+                                                    </form>
                                                 @endif
                                             </div>
                                         </div>
@@ -985,6 +1049,14 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                         <div class="small text-dark">
                             Stok alat akan otomatis <strong>bertambah kembali</strong> setelah pengembalian dikonfirmasi.
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-dark" for="listReturnedQuantity">Jumlah Kembali Layak Pakai</label>
+                        <input type="number" id="listReturnedQuantity" name="returned_quantity" min="0" value="1" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-dark" for="listReturnNotes">Catatan Kondisi Alat</label>
+                        <textarea id="listReturnNotes" name="return_notes" class="form-control" rows="2" maxlength="1000" placeholder="Wajib diisi bila ada alat rusak/hilang"></textarea>
                     </div>
                     <div class="mb-2">
                         <label class="form-label fw-semibold small text-dark">Waktu Pengembalian</label>
@@ -1158,7 +1230,8 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
         fetch(url, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
             body: formData
         })
@@ -1177,8 +1250,16 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
         });
     });
 
-    function prepareReturn(id) {
+    function prepareReturn(id, maxQty = 1) {
         document.getElementById('returnId').value = id;
+        const qtyInput = document.getElementById('listReturnedQuantity');
+        if (qtyInput) {
+            const safeMax = Math.max(1, parseInt(maxQty, 10) || 1);
+            qtyInput.max = safeMax;
+            qtyInput.value = safeMax;
+        }
+        const notesInput = document.getElementById('listReturnNotes');
+        if (notesInput) notesInput.value = '';
     }
 
     document.getElementById('returnForm')?.addEventListener('submit', function(e) {
@@ -1209,10 +1290,13 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        return_time: formData.get('return_time')
+                        return_time: formData.get('return_time'),
+                        returned_quantity: formData.get('returned_quantity'),
+                        return_notes: formData.get('return_notes')
                     })
                 })
                 .then(response => response.json())

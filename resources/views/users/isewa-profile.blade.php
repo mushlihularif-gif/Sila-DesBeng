@@ -146,6 +146,7 @@
                                 <p class="text-gray-600">Manajemen terintegrasi untuk memantau proses ketersediaan dan pendistribusian gas secara merata dan transparan.</p>
                             </div>
                         </div>
+                    </div>
                 </div>
             </div>
 

@@ -501,10 +501,12 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::post('/keuangan/penarikan/{penarikan}/batal', [\App\Http\Controllers\Admin\KeuanganController::class, 'batalkanPenarikan'])->name('admin.keuangan.batal');
     
     // Manajemen Banner / Iklan
-    Route::get('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'index'])->name('admin.banners.index')->middleware('staff.permission:platform_banner');
-    Route::post('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'store'])->name('admin.banners.store');
-    Route::put('/banners/{id}', [\App\Http\Controllers\Admin\BannerController::class, 'update'])->name('admin.banners.update');
-    Route::delete('/banners/{id}', [\App\Http\Controllers\Admin\BannerController::class, 'destroy'])->name('admin.banners.destroy');
+    Route::middleware('staff.permission:platform_banner')->group(function () {
+        Route::get('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'index'])->name('admin.banners.index');
+        Route::post('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'store'])->name('admin.banners.store');
+        Route::put('/banners/{id}', [\App\Http\Controllers\Admin\BannerController::class, 'update'])->name('admin.banners.update');
+        Route::delete('/banners/{id}', [\App\Http\Controllers\Admin\BannerController::class, 'destroy'])->name('admin.banners.destroy');
+    });
     
     // Manajemen Pengumuman & Event
     Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class)->names([
@@ -848,12 +850,15 @@ Route::get('/api/regions', function () {
 Route::get('/api/geocode/reverse', function (\Illuminate\Http\Request $request) {
     $lat = $request->query('lat');
     $lng = $request->query('lng');
-    $address = \App\Support\GeocodeHelper::reverse($lat, $lng);
+    if (!is_numeric($lat) || !is_numeric($lng) || abs((float) $lat) > 90 || abs((float) $lng) > 180) {
+        return response()->json(['status' => 'error', 'address' => null, 'message' => 'Koordinat tidak valid.'], 422);
+    }
+    $address = \App\Support\GeocodeHelper::reverse((float) $lat, (float) $lng);
     return response()->json([
         'status' => $address ? 'success' : 'fallback',
         'address' => $address,
     ]);
-});
+})->middleware('throttle:30,1');
 
 // Route debug, setup data uji, migrasi, dan migrasi enkripsi melalui HTTP
 // sengaja tidak disediakan. Operasi pemeliharaan dijalankan melalui Artisan CLI.

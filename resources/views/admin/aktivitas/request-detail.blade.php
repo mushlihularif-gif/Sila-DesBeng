@@ -468,6 +468,65 @@
                                             <i class="bx bx-x me-2"></i>Tolak Pengajuan
                                         </button>
                                     </div>
+                                @else
+                                    @php
+                                        $otherPaid = $request->subtotalAmount() <= 0 || $request->paymentReceived();
+                                    @endphp
+                                    @if($request->supir)
+                                        <div class="alert alert-light border rounded-3 py-2 px-3 small mb-3 d-flex align-items-center gap-2">
+                                            <i class="bx bx-user-check text-primary fs-5"></i>
+                                            <div>
+                                                <span class="text-muted d-block" style="font-size: 0.72rem;">Petugas / Supir Ditugaskan</span>
+                                                <strong class="text-dark">{{ $request->supir->nama }}</strong>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <div class="d-grid gap-2">
+                                        @if(in_array($request->status, ['confirmed', 'approved']))
+                                            @if($request->dengan_supir || $request->delivery_method === 'antar')
+                                                <button type="button" class="btn btn-warning rounded-pill py-2" onclick="updateStatus('being_prepared')">
+                                                    <i class="bx bx-package me-2"></i>Siapkan Layanan
+                                                </button>
+                                                <button type="button" class="btn btn-primary rounded-pill py-2" data-bs-toggle="modal" data-bs-target="#pilihSupirModal">
+                                                    <i class="bx bx-car me-2"></i>Tugaskan Petugas &amp; Berangkatkan
+                                                </button>
+                                            @else
+                                                <button type="button" class="btn btn-primary rounded-pill py-2" onclick="updateStatus('arrived')">
+                                                    <i class="bx bx-check-circle me-2"></i>Tandai Mulai Digunakan / Diserahkan
+                                                </button>
+                                                @if($otherPaid)
+                                                    <button type="button" class="btn btn-success rounded-pill py-2" onclick="updateStatus('completed')">
+                                                        <i class="bx bx-check-double me-2"></i>Selesaikan Pesanan
+                                                    </button>
+                                                @else
+                                                    <div class="alert alert-warning py-2 px-3 small rounded-3 mb-0">
+                                                        <i class="bx bx-lock-alt me-1"></i>Konfirmasi pembayaran diterima sebelum menyelesaikan layanan.
+                                                    </div>
+                                                @endif
+                                            @endif
+                                        @elseif(in_array($request->status, ['being_prepared', 'process']))
+                                            <button type="button" class="btn btn-primary rounded-pill py-2" data-bs-toggle="modal" data-bs-target="#pilihSupirModal">
+                                                <i class="bx bx-car me-2"></i>Tugaskan Petugas &amp; Berangkatkan
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary rounded-pill py-2" onclick="updateStatus('in_delivery')">
+                                                <i class="bx bx-send me-2"></i>Berangkatkan Tanpa Pilih Supir
+                                            </button>
+                                        @elseif(in_array($request->status, ['in_delivery', 'delivering']))
+                                            <button type="button" class="btn btn-primary rounded-pill py-2" onclick="updateStatus('arrived')">
+                                                <i class="bx bx-map-pin me-2"></i>Tandai Tiba / Sedang Digunakan
+                                            </button>
+                                        @elseif(in_array($request->status, ['arrived', 'ongoing']))
+                                            @if($otherPaid)
+                                                <button type="button" class="btn btn-success rounded-pill py-2" onclick="updateStatus('completed')">
+                                                    <i class="bx bx-check-double me-2"></i>Selesaikan Pesanan
+                                                </button>
+                                            @else
+                                                <div class="alert alert-warning py-2 px-3 small rounded-3 mb-0">
+                                                    <i class="bx bx-lock-alt me-1"></i>Konfirmasi pembayaran diterima sebelum menyelesaikan layanan.
+                                                </div>
+                                            @endif
+                                        @endif
+                                    </div>
                                 @endif
                             @elseif($request->status === 'rejected')
                                 <div class="alert alert-danger mb-0">
@@ -602,6 +661,63 @@
     </div>
 </div>
 
+@if(in_array($type, ['mobil', 'fasilitas'], true))
+<!-- Modal Pilih Supir -->
+<div class="modal fade" id="pilihSupirModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom bg-light">
+                <h5 class="modal-title fw-bold"><i class="bx bx-user me-2 text-primary"></i>Pilih Supir / Petugas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-4">Silakan pilih supir atau petugas yang akan ditugaskan untuk pesanan ini sebelum diberangkatkan.</p>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="assigned_supir_id">Daftar Supir / Petugas Tersedia</label>
+                    <select id="assigned_supir_id" class="form-select form-select-lg">
+                        <option value="">-- Pilih Supir / Petugas --</option>
+                        @php
+                            $allSupirs = \App\Services\ServiceAssignment::eligible($type, (int) auth()->user()->region_id)->get();
+                            $tersedia = $allSupirs->where('status', 'Tersedia');
+                            $bertugas = $allSupirs->where('status', 'Sedang Bertugas');
+                            $tidakAktif = $allSupirs->where('status', 'Tidak Aktif');
+                        @endphp
+
+                        @if($tersedia->count() > 0)
+                            <optgroup label="Tersedia (Bisa Dipilih)">
+                                @foreach($tersedia as $supir)
+                                    <option value="{{ $supir->id }}" {{ (int) $request->assigned_supir_id === (int) $supir->id ? 'selected' : '' }}>{{ $supir->nama }} - {{ $supir->kategori_layanan }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+
+                        @if($bertugas->count() > 0)
+                            <optgroup label="Sedang Bertugas (Tidak Bisa Dipilih)">
+                                @foreach($bertugas as $supir)
+                                    <option value="{{ $supir->id }}" {{ (int) $request->assigned_supir_id === (int) $supir->id ? 'selected' : 'disabled' }}>{{ $supir->nama }} - {{ $supir->kategori_layanan }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+
+                        @if($tidakAktif->count() > 0)
+                            <optgroup label="Tidak Aktif / Cuti (Tidak Bisa Dipilih)">
+                                @foreach($tidakAktif as $supir)
+                                    <option value="{{ $supir->id }}" disabled>{{ $supir->nama }} - {{ $supir->kategori_layanan }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitInDeliveryWithSupir()">Tugaskan dan Berangkatkan</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 @endsection
 
 @section('scripts')
@@ -636,7 +752,6 @@ function confirmApprove(id, type) {
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Content-Type': 'application/json',
-                        'Accept': 'application/json',
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
@@ -704,7 +819,6 @@ document.getElementById('rejectForm').addEventListener('submit', function(e) {
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
             'Content-Type': 'application/json',
-                        'Accept': 'application/json',
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
         },
@@ -848,7 +962,6 @@ function updateStatus(newStatus) {
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Content-Type': 'application/json',
-                        'Accept': 'application/json',
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
@@ -972,64 +1085,61 @@ if (returnForm) {
         });
     });
 }
+function submitInDeliveryWithSupir() {
+    const supirEl = document.getElementById('assigned_supir_id');
+    const supirId = supirEl ? supirEl.value : '';
+    if (!supirId) {
+        Swal.fire('Perhatian', 'Silakan pilih supir atau petugas yang tersedia terlebih dahulu.', 'warning');
+        return;
+    }
+
+    const url = `{{ route('admin.aktivitas.update-status', ['type' => $type, 'id' => $request->id]) }}`;
+    Swal.fire({
+        title: 'Memproses...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            status: 'in_delivery',
+            assigned_supir_id: supirId
+        })
+    })
+    .then(async response => {
+        const isJson = response.headers.get('content-type')?.includes('application/json');
+        const data = isJson ? await response.json() : null;
+        if (!response.ok) {
+            throw new Error((data && data.message) || 'Gagal menugaskan petugas dan memperbarui status.');
+        }
+        return data;
+    })
+    .then(data => {
+        if (data && data.success) {
+            Swal.fire({
+                title: 'Berhasil',
+                text: data.message || 'Petugas berhasil ditugaskan dan pesanan diberangkatkan.',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => location.reload());
+        } else {
+            Swal.fire('Error', (data && data.message) || 'Gagal memperbarui status.', 'error');
+        }
+    })
+    .catch(err => {
+        Swal.fire('Error', err.message || 'Terjadi kesalahan sistem.', 'error');
+    });
+}
 </script>
 @endsection
-
-
-<!-- Modal Pilih Supir -->
-<div class="modal fade" id="pilihSupirModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header border-bottom bg-light">
-                <h5 class="modal-title fw-bold"><i class="bx bx-user me-2 text-primary"></i>Pilih Supir / Petugas</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <p class="text-muted mb-4">Silakan pilih supir yang akan ditugaskan untuk pesanan ini sebelum kendaraan diberangkatkan.</p>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Daftar Supir Tersedia</label>
-                    <select id="assigned_supir_id" class="form-select form-select-lg">
-                        <option value="">-- Pilih Supir --</option>
-                        @php
-                            $allSupirs = \App\Services\ServiceAssignment::eligible($type, (int) auth()->user()->region_id)->get();
-                            $tersedia = $allSupirs->where('status', 'Tersedia');
-                            $bertugas = $allSupirs->where('status', 'Sedang Bertugas');
-                            $tidakAktif = $allSupirs->where('status', 'Tidak Aktif');
-                        @endphp
-                        
-                        @if($tersedia->count() > 0)
-                            <optgroup label="Tersedia (Bisa Dipilih)">
-                                @foreach($tersedia as $supir)
-                                    <option value="{{ $supir->id }}">{{ $supir->nama }} - {{ $supir->kategori_layanan }}</option>
-                                @endforeach
-                            </optgroup>
-                        @endif
-                        
-                        @if($bertugas->count() > 0)
-                            <optgroup label="Sedang Bertugas (Tidak Bisa Dipilih)">
-                                @foreach($bertugas as $supir)
-                                    <option value="{{ $supir->id }}" disabled>{{ $supir->nama }} - {{ $supir->kategori_layanan }}</option>
-                                @endforeach
-                            </optgroup>
-                        @endif
-
-                        @if($tidakAktif->count() > 0)
-                            <optgroup label="Tidak Aktif / Cuti (Tidak Bisa Dipilih)">
-                                @foreach($tidakAktif as $supir)
-                                    <option value="{{ $supir->id }}" disabled>{{ $supir->nama }} - {{ $supir->kategori_layanan }}</option>
-                                @endforeach
-                            </optgroup>
-                        @endif
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer border-top bg-light">
-                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitInDeliveryWithSupir()">Tugaskan dan Berangkatkan</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 @push('scripts')
 {{-- Peta kecil titik antar. Hanya dimuat kalau petanya memang dirender, supaya

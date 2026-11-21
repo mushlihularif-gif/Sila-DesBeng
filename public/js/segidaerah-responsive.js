@@ -2,6 +2,7 @@
     const enhance = () => {
         // Preserve the table's columns and controls; scrolling stays inside the card.
         document.querySelectorAll('.segi-citizen main table, .segi-admin .content-wrapper table').forEach(table => {
+            if (table.hasAttribute('data-no-table-scroll') || table.classList.contains('no-table-scroll')) return;
             if (table.closest('.table-responsive, .overflow-x-auto, .segi-table-scroll, .dataTables_scrollBody')) return;
             const wrapper = document.createElement('div');
             wrapper.className = 'segi-table-scroll';

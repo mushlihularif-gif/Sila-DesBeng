@@ -12,12 +12,7 @@
 @endsection
 
 @section('actions')
-    @php
-        $isAdminPanelUser = auth()->check()
-            && in_array(auth()->user()->role, ['super_admin', 'admin_desa', 'staff'], true)
-            && auth()->user()->hasSupportedRole();
-    @endphp
-    @if($isAdminPanelUser)
+    @if(request()->is('admin', 'admin/*'))
         <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">
             <i class="bx bx-home-alt"></i>
             <span>Kembali ke Dashboard</span>

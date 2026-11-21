@@ -245,8 +245,9 @@ class ReportController extends Controller
         }
 
         // Kalkulasi Persentase Kinerja (Bulan ini vs Bulan lalu)
-        $currentMonthTotal = $monthlyPerformance[$months[$month - 1]] ?? 0;
-        $lastMonthTotal = $month > 1 ? ($monthlyPerformance[$months[$month - 2]] ?? 0) : 0;
+        $safeMonth = max(1, min(12, (int) $month));
+        $currentMonthTotal = $monthlyPerformance[$months[$safeMonth - 1]] ?? 0;
+        $lastMonthTotal = $safeMonth > 1 ? ($monthlyPerformance[$months[$safeMonth - 2]] ?? 0) : 0;
 
         $growth = 0;
         if ($lastMonthTotal > 0) {

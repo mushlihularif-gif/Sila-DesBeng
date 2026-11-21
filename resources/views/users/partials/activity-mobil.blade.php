@@ -36,7 +36,7 @@
                                 <button type="button" class="delete-order-btn px-4 py-2 bg-red-50 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors" data-type="mobil" data-id="{{ $booking->id }}">
                                     Hapus Riwayat
                                 </button>
-                                @elseif($booking->canBeCancelled && $booking->canBeCancelled())
+                                @elseif($booking->canBeCancelled())
                                 <button type="button" class="cancel-order-btn px-4 py-2 bg-yellow-50 text-yellow-600 rounded-lg text-sm font-semibold hover:bg-yellow-100 transition-colors" data-type="mobil" data-id="{{ $booking->id }}">
                                     Batalkan
                                 </button>

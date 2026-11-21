@@ -308,8 +308,9 @@ class PartnerApplicationController extends Controller
                         ->first();
 
                     if ($existingAdmin) {
+                        $rwLabel = $parentRw?->name ?? 'RW yang dipilih';
                         return back()->withInput()->withErrors([
-                            'region_name' => "Gagal: {$targetRt->name} di lingkungan {$parentRw->name} sudah memiliki Admin aktif ({$existingAdmin->name}). Silakan tentukan nomor RT lain.",
+                            'region_name' => "Gagal: {$targetRt->name} di lingkungan {$rwLabel} sudah memiliki Admin aktif ({$existingAdmin->name}). Silakan tentukan nomor RT lain.",
                         ]);
                     }
                 }
@@ -328,8 +329,9 @@ class PartnerApplicationController extends Controller
                     ->first();
 
                 if ($pendingRtApp) {
+                    $rwLabel = $parentRw?->name ?? 'RW yang dipilih';
                     return back()->withInput()->withErrors([
-                        'region_name' => "Pengajuan kemitraan untuk {$formattedRtName} di lingkungan {$parentRw->name} saat ini sudah ada yang sedang diproses oleh Pemerintah Desa.",
+                        'region_name' => "Pengajuan kemitraan untuk {$formattedRtName} di lingkungan {$rwLabel} saat ini sudah ada yang sedang diproses oleh Pemerintah Desa.",
                     ]);
                 }
 
@@ -455,7 +457,7 @@ class PartnerApplicationController extends Controller
                             'type' => 'kemitraan_submitted',
                             'title' => 'Pengajuan Pengurus RT Baru di Wilayah Anda',
                             'message' => "Warga {$validated['applicant_name']} mengajukan diri sebagai pengurus {$validated['region_name']} ({$validated['position']}) di lingkungan {$induk->name}.",
-                            'link' => route('user.wilayah.warga'),
+                            'link' => route('wilayah.warga.index'),
                             'icon' => 'bx bx-user-plus',
                             'is_read' => false,
                             'sent_at' => now(),

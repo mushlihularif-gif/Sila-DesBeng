@@ -231,7 +231,7 @@
                             <svg class="w-16 h-16 opacity-0 transition-opacity duration-300" viewBox="0 0 24 24"></svg>
                         </div>
 
-                        <div class="w-48 h-64 border-4 border-dashed border-white/70 rounded-full"></div>
+                        <div class="w-[55vw] max-w-48 aspect-[3/4] border-4 border-dashed border-white/70 rounded-full"></div>
 
                         <div id="liveness-status" class="bg-blue-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg mb-4 flex items-center space-x-2">
                             <span class="relative flex h-3 w-3">
@@ -350,7 +350,7 @@ document.addEventListener('click', async function(e) {
         document.getElementById('preview-container-ktp').style.display = 'none';
         document.getElementById('ktp-preview').src = '';
         const dropZoneText = document.getElementById('drop-zone-text');
-        if(dropZoneText) dropZoneText.style.display = 'flex';
+        if(dropZoneText) dropZoneText.style.display = '';
         document.getElementById('btn-process-ktp').disabled = true;
     }
 
@@ -373,7 +373,10 @@ document.addEventListener('click', async function(e) {
         try {
             const response = await fetch('{{ route("kyc.process") }}', {
                 method: 'POST',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
                 body: formData
             });
             const data = await response.json();
@@ -967,7 +970,7 @@ function initKycPage() {
             } else {
                 let errorMsg = data.message || 'Gagal menyimpan data.';
                 if (data.errors) {
-                    errorMsg = Object.values(data.errors).flat().join('<br>');
+                    errorMsg = Object.values(data.errors).flat().join(' | ');
                 }
                 showToast(errorMsg, 'error');
                 isSubmittingKyc = false;
@@ -998,9 +1001,12 @@ function initKycPage() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initKycPage);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initKycPage);
+} else {
+    initKycPage();
+}
 document.addEventListener('turbo:load', initKycPage);
-if (document.readyState !== 'loading') initKycPage();
 
 </script>
 @endpush

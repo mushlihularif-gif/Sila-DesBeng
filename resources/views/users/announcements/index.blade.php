@@ -200,7 +200,7 @@
                                     
                                     {{-- Image Header --}}
                                     <div class="h-56 relative overflow-hidden bg-gray-100">
-                                        @if($item->image_path)
+                                        @if($item->cover_url)
                                             <img src="{{ $item->cover_url }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">

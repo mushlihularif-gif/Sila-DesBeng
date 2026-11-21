@@ -226,7 +226,7 @@
                 </div>
 
                 <!-- Info Note -->
-                <div id="antar-note" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-r-lg {{ $defaultMethod == 'antar' ? '' : 'hidden' }}">
+                <div id="antar-note" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-r-lg {{ $defaultDelivery == 'antar' ? '' : 'hidden' }}">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -241,7 +241,7 @@
                     </div>
                 </div>
 
-                <div id="jemput-note" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg {{ $defaultMethod == 'jemput' ? '' : 'hidden' }}">
+                <div id="jemput-note" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg {{ $defaultDelivery == 'jemput' ? '' : 'hidden' }}">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">

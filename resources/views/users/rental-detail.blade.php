@@ -93,9 +93,10 @@
                         <!-- Quantity Selector + Rent Button - SIDE BY SIDE -->
                         <div class="segi-catalog-actions flex items-center gap-4 mt-auto">
                             <!-- Quantity Selector -->
-                            <div class="flex items-center gap-3 border-2 border-gray-300 rounded-full px-4 py-2">
+                            <div class="flex items-center gap-3 border-2 border-gray-300 rounded-full px-4 py-2 {{ $item->stok <= 0 ? 'opacity-50 pointer-events-none' : '' }}">
                                 <button type="button" 
                                         id="decrease-qty"
+                                        @disabled($item->stok <= 0)
                                         class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -104,13 +105,15 @@
                                 
                                 <input type="number" 
                                        id="quantity" 
-                                       value="1" 
-                                       min="1" 
+                                       value="{{ $item->stok > 0 ? 1 : 0 }}" 
+                                       min="{{ $item->stok > 0 ? 1 : 0 }}" 
                                        max="{{ $item->stok }}"
+                                       @disabled($item->stok <= 0)
                                        class="w-12 text-center text-lg font-semibold border-0 focus:outline-none focus:ring-0">
                                 
                                 <button type="button" 
                                         id="increase-qty"
+                                        @disabled($item->stok <= 0)
                                         class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -125,12 +128,20 @@
                             </button>
 
                             <!-- Rent Button -->
-                            <a href="{{ route('rental.booking', $item->id) }}?quantity={{ $item->stok > 0 ? 1 : 0 }}" 
+                            @if($item->stok > 0)
+                            <a href="{{ route('rental.booking', $item->id) }}?quantity=1" 
                                id="rent-button"
                                data-turbo="false"
                                class="catalog-detail-primary flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 shadow-sm text-center">
                                 Sewa
                             </a>
+                            @else
+                            <button type="button"
+                                    disabled
+                                    class="catalog-detail-primary flex-1 bg-gray-300 text-gray-500 font-bold py-3 px-8 rounded-xl cursor-not-allowed text-center">
+                                Stok Habis
+                            </button>
+                            @endif
                         </div>
                     </div>
                 </div>

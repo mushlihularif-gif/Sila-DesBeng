@@ -85,9 +85,9 @@ public function index(Request $request)
         $rentalRequests = $baseRental->clone()->with(['user', 'barang'])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'rental'; $i->item_name = $i->barang->nama_barang ?? 'Alat'; return $i; });
         $gasRequests = $baseGas->clone()->with('user')->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'gas'; $i->item_name = $i->item_name ?? 'Tabung Gas'; return $i; });
         
-        $mobilRequests = $baseMobil->clone()->with(['user', 'mobil' => function($q) { $q->withTrashed(); }])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'mobil'; $i->item_name = $i->mobil->nama_mobil ?? 'Mobil'; return $i; });
+        $mobilRequests = $baseMobil->clone()->with(['user', 'mobil'])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'mobil'; $i->item_name = $i->mobil->nama_mobil ?? 'Mobil'; return $i; });
         
-        $fasilitasRequests = $baseFasilitas->clone()->with(['user', 'fasilitas' => function($q) { $q->withTrashed(); }])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'fasilitas_umum'; $i->item_name = $i->fasilitas->nama_fasilitas ?? 'Fasilitas'; return $i; });
+        $fasilitasRequests = $baseFasilitas->clone()->with(['user', 'fasilitas'])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'fasilitas'; $i->item_name = $i->fasilitas->nama_fasilitas ?? 'Fasilitas'; return $i; });
         
         
         $kycRequests = collect();
@@ -892,7 +892,13 @@ public function index(Request $request)
             $orderPending = 0;
 
             if ($regionId && \Illuminate\Support\Facades\Schema::hasTable($cfg['catalog_table'])) {
-                $catalogCount = (int) $cfg['catalog_model']::where('region_id', $regionId)->count();
+                $catQuery = $cfg['catalog_model']::where('region_id', $regionId);
+                if ($key === 'sewa_mobil') {
+                    $catQuery->inCatalog()->forRental();
+                } elseif ($key === 'fasilitas_umum') {
+                    $catQuery->inCatalog();
+                }
+                $catalogCount = (int) $catQuery->count();
             }
 
             if ($regionId && \Illuminate\Support\Facades\Schema::hasTable($cfg['order_table']) && \Illuminate\Support\Facades\Schema::hasTable($cfg['catalog_table'])) {

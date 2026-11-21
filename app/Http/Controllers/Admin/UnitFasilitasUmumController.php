@@ -103,15 +103,17 @@ class UnitFasilitasUmumController extends Controller
 
         $paymentInfo = $region->payment_info ?? [];
         
-        $paymentInfo['sop_fasilitas_active'] = $request->sop_active;
-        $paymentInfo['sop_fasilitas_ditanggung'] = $request->sop_ditanggung;
-        $paymentInfo['sop_fasilitas_tidak_ditanggung'] = $request->sop_tidak_ditanggung;
+        $paymentInfo['sop_fasilitas_active'] = $request->input('sop_active', $request->input('sop_fasilitas_umum_active'));
+        $paymentInfo['sop_fasilitas_ditanggung'] = $request->input('sop_ditanggung', $request->input('sop_fasilitas_ditanggung'));
+        $paymentInfo['sop_fasilitas_tidak_ditanggung'] = $request->input('sop_tidak_ditanggung', $request->input('sop_fasilitas_tidak_ditanggung'));
         
         $region->payment_info = $paymentInfo;
         
-        $settings = $region->settings ?? [];
-        $settings['kontak_aula'] = $request->kontak_aula;
-        $region->settings = $settings;
+        if ($request->has('kontak_aula')) {
+            $settings = $region->settings ?? [];
+            $settings['kontak_aula'] = $request->kontak_aula;
+            $region->settings = $settings;
+        }
         
         $region->save();
 
@@ -156,9 +158,9 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => 'required|string',
             'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
             'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
-            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',
@@ -281,9 +283,9 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => 'required|string',
             'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
             'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
-            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',

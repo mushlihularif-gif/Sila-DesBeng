@@ -199,7 +199,7 @@
                         // Map statuses to the main filter categories
                         if (['pending', 'proses', 'dilanjutkan'].includes(rawStatus)) {
                             mappedStatus = 'pending';
-                        } else if (['confirmed', 'in_delivery', 'process', 'delivering', 'arrived', 'disewa', 'approved'].includes(rawStatus)) {
+                        } else if (['confirmed', 'being_prepared', 'in_delivery', 'process', 'delivering', 'arrived', 'disewa', 'approved'].includes(rawStatus)) {
                             mappedStatus = 'confirmed';
                         } else if (['completed', 'selesai', 'resolved', 'returned', 'lunas', 'paid'].includes(rawStatus)) {
                             mappedStatus = 'completed';
@@ -352,6 +352,7 @@
                                 const response = await fetch(`/aktivitas/${type}/${id}/cancel`, {
                                     method: 'POST',
                                     headers: {
+                                        'Accept': 'application/json',
                                         'Content-Type': 'application/json',
                                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                                     },
@@ -425,6 +426,7 @@
                                 const response = await fetch(`/aktivitas/${type}/${id}`, {
                                     method: 'DELETE',
                                     headers: {
+                                        'Accept': 'application/json',
                                         'Content-Type': 'application/json',
                                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                                     }
@@ -508,6 +510,7 @@
                             const response = await fetch(`/aktivitas/clear-all/${type}`, {
                                 method: 'DELETE',
                                 headers: {
+                                    'Accept': 'application/json',
                                     'Content-Type': 'application/json',
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                                 }
@@ -565,8 +568,16 @@
                                     </div>`,
                                     };
                                 const section = document.getElementById(`${type}-section`);
-                                if(section) {
-                                    section.innerHTML = emptyStates[type] || '<div class="bg-white rounded-2xl shadow-lg p-8 text-center"><p class="text-gray-500">Belum ada riwayat aktivitas</p></div>';
+                                if (section) {
+                                    section.querySelectorAll('.transaction-card, .activity-item').forEach(card => {
+                                        const st = (card.dataset.status || '').toLowerCase();
+                                        if (['completed', 'cancelled', 'rejected', 'selesai', 'resolved', 'ditolak'].includes(st)) {
+                                            card.remove();
+                                        }
+                                    });
+                                    if (section.querySelectorAll('.transaction-card, .activity-item').length === 0) {
+                                        section.innerHTML = emptyStates[type] || '<div class="bg-white rounded-2xl shadow-lg p-8 text-center"><p class="text-gray-500">Belum ada riwayat aktivitas</p></div>';
+                                    }
                                 }
                             } else {
                                  await Swal.fire({

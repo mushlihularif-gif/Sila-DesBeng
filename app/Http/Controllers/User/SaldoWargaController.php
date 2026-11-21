@@ -34,8 +34,13 @@ class SaldoWargaController extends Controller
             ->orderBy('id')
             ->get();
 
-        // Pilihan desa/kelurahan untuk formulir alamat
+        // Pilihan desa/kelurahan Kecamatan Bengkalis untuk formulir alamat (selaras dengan AlamatWargaController::validasi)
+        $kecamatanId = \App\Models\Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->value('id');
+
         $desa = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])
+            ->when($kecamatanId, fn ($q) => $q->where('parent_id', $kecamatanId))
             ->with('parent')
             ->orderBy('name')
             ->get();
@@ -51,7 +56,7 @@ class SaldoWargaController extends Controller
             'amount'       => 'required|numeric|min:' . SaldoWarga::MINIMAL_PENARIKAN,
             'nama_bank'    => 'required|string|max:100',
             'no_rekening'  => 'required|string|max:50',
-            'nama_pemilik' => 'required|string|max:255',
+            'nama_pemilik' => 'required|string|max:150',
             'catatan'      => 'nullable|string|max:500',
         ], [
             'amount.min'   => 'Penarikan minimal Rp ' . number_format(SaldoWarga::MINIMAL_PENARIKAN, 0, ',', '.')

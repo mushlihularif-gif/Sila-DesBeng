@@ -30,8 +30,8 @@ class MobilBookingController extends Controller
         // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
         $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         
-        // Ambil SOP Penyewaan Mobil
-        $region = \App\Models\Region::find(Auth::user()->region_id);
+        // Ambil SOP Penyewaan Mobil milik wilayah pemilik kendaraan
+        $region = $item->region ?? \App\Models\Region::find(Auth::user()->region_id);
         $paymentInfo = $region ? ($region->payment_info ?? []) : [];
         
         $activeSop = $paymentInfo['sop_mobil_active'] ?? 'ditanggung';
@@ -41,7 +41,7 @@ class MobilBookingController extends Controller
         
         $sop_mobil = $paymentInfo['sop_mobil_' . $activeSop] ?? ($activeSop == 'ditanggung' ? $defaultSopDitanggung : $defaultSopTidakDitanggung);
         
-        $quantity = request()->get('quantity', 1);
+        $quantity = max(1, (int) request()->get('quantity', 1));
 
         $isWilayah = ($item->tipe_tarif_borongan ?? 'jarak') === 'wilayah';
         $tarifWilayah = json_decode($item->tarif_borongan_wilayah, true) ?? [];

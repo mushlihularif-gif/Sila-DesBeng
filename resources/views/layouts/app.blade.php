@@ -250,6 +250,10 @@
         .sdb-toast-warning .sdb-toast-progress { background: linear-gradient(90deg, #f59e0b, #fde68a); }
         .sdb-toast-info .sdb-toast-progress { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
         @keyframes sdb-toast-progress { from { width: 100%; } to { width: 0%; } }
+        @media (max-width: 575.98px) {
+            .sdb-toast-container { top: 64px; left: 12px; right: 12px; }
+            .sdb-toast { max-width: 100%; }
+        }
     </style>
 
     <div id="sdbToastContainer" class="sdb-toast-container"></div>
@@ -279,16 +283,42 @@
         toast.className = 'sdb-toast sdb-toast-' + type;
         toast.style.position = 'relative';
         toast.style.overflow = 'hidden';
-        toast.innerHTML =
-            '<div class="sdb-toast-icon">' + (icons[type] || icons.info) + '</div>' +
-            '<div class="sdb-toast-body">' +
-                '<div class="sdb-toast-title">' + title + '</div>' +
-                (message ? '<div class="sdb-toast-msg">' + message + '</div>' : '') +
-            '</div>' +
-            '<button class="sdb-toast-close" onclick="this.parentElement.classList.add(\'sdb-toast-hide\'); setTimeout(function(){this.parentElement.remove()}.bind(this), 400)">' +
-                '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' +
-            '</button>' +
-            '<div class="sdb-toast-progress" style="animation: sdb-toast-progress ' + duration + 'ms linear forwards;"></div>';
+
+        var iconEl = document.createElement('div');
+        iconEl.className = 'sdb-toast-icon';
+        iconEl.innerHTML = icons[type] || icons.info;
+
+        var bodyEl = document.createElement('div');
+        bodyEl.className = 'sdb-toast-body';
+        var titleEl = document.createElement('div');
+        titleEl.className = 'sdb-toast-title';
+        titleEl.textContent = String(title ?? '');
+        bodyEl.appendChild(titleEl);
+        if (message) {
+            var msgEl = document.createElement('div');
+            msgEl.className = 'sdb-toast-msg';
+            msgEl.textContent = String(message);
+            bodyEl.appendChild(msgEl);
+        }
+
+        var closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'sdb-toast-close';
+        closeBtn.setAttribute('aria-label', 'Tutup notifikasi');
+        closeBtn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+        closeBtn.addEventListener('click', function() {
+            toast.classList.add('sdb-toast-hide');
+            setTimeout(function() { if (toast.parentElement) toast.remove(); }, 400);
+        });
+
+        var progressEl = document.createElement('div');
+        progressEl.className = 'sdb-toast-progress';
+        progressEl.style.animation = 'sdb-toast-progress ' + duration + 'ms linear forwards';
+
+        toast.appendChild(iconEl);
+        toast.appendChild(bodyEl);
+        toast.appendChild(closeBtn);
+        toast.appendChild(progressEl);
 
         container.appendChild(toast);
 

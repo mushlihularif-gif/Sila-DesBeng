@@ -66,6 +66,20 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bx bx-error-circle fs-4 me-2 flex-shrink-0"></i>
+            <div>{{ session('error') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bx bx-error-circle fs-4 me-2 flex-shrink-0"></i>
+            <div>{{ $errors->first() }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
     <!-- Info Banner & KPI Cards -->
     <div class="row g-3 mb-4">
@@ -186,7 +200,7 @@
                 @csrf
                 <input type="hidden" name="tipe" value="supir">
                 @if(Auth::user()->role === 'super_admin')
-                <input type="hidden" name="region_id" value="1">
+                <input type="hidden" name="region_id" value="{{ \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->value('id') }}">
                 @endif
                 <div class="modal-body p-4">
                     <div class="alert alert-primary d-flex mb-4 rounded-3 border-0" role="alert">
@@ -300,7 +314,7 @@
                 @csrf
                 <input type="hidden" name="tipe" value="pengurus_gedung">
                 @if(Auth::user()->role === 'super_admin')
-                <input type="hidden" name="region_id" value="1">
+                <input type="hidden" name="region_id" value="{{ \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->value('id') }}">
                 @endif
                 <div class="modal-body p-4">
                     <div class="alert alert-success d-flex mb-4 rounded-3 border-0 bg-label-success" role="alert">

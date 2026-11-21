@@ -11,11 +11,19 @@ class AdminWargaApiController extends Controller
 {
     public function index(Request $request)
     {
-        $users = $this->scopedCitizens()->select('id', 'name', 'email', 'phone', 'rt', 'rw', 'address', 'verification_status', 'created_at')
+        $citizenRows = $this->scopedCitizens()
+            ->select('id', 'name', 'nik', 'email', 'phone', 'rt', 'rw', 'address', 'verification_status', 'created_at')
             ->orderBy('created_at', 'desc')
+            ->get();
+
+        $latestKycs = KycVerification::whereIn('user_id', $citizenRows->pluck('id'))
+            ->orderByDesc('id')
             ->get()
-            ->map(function ($user) {
-                $kyc = KycVerification::where('user_id', $user->id)->latest()->first();
+            ->unique('user_id')
+            ->keyBy('user_id');
+
+        $users = $citizenRows->map(function ($user) use ($latestKycs) {
+                $kyc = $latestKycs->get($user->id);
                 $rtStr = $user->rt ? 'RT ' . str_pad($user->rt, 2, '0', STR_PAD_LEFT) : 'RT belum terdata';
                 $rwStr = $user->rw ? 'RW ' . str_pad($user->rw, 2, '0', STR_PAD_LEFT) : 'RW belum terdata';
                 

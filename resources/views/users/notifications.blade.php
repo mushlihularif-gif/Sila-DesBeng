@@ -41,7 +41,7 @@
             <!-- Notifications List -->
             <div class="space-y-4 sm:space-y-6">
                 @forelse($notifications as $notification)
-                <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-300 border-opacity-50">
+                <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-300/50">
                     <div class="p-4 sm:p-6">
                         <div class="flex items-start gap-3.5 sm:gap-6">
                             <!-- Icon/Image -->

@@ -16,8 +16,8 @@ class NotificationChannelController extends Controller
     {
         $preferences = $this->delivery->preferences($request->user());
         $settings = $preferences['settings'];
-        if ($request->wantsJson()) return response()->json(['categories'=>$preferences['categories'],'push_enabled'=>$settings?->push_enabled ?? true,'phone_verified'=>$preferences['verified'],'history'=>$preferences['history']]);
-        if ($request->user()->role === 'user') return redirect()->to(route('user.settings').'#notifikasi');
+        if ($request->wantsJson() || $request->is('api/*')) return response()->json(['categories'=>$preferences['categories'],'push_enabled'=>$settings?->push_enabled ?? true,'phone_verified'=>$preferences['verified'],'history'=>$preferences['history']]);
+        if (in_array($request->user()->role, ['user', 'admin_rt', 'admin_rw'], true)) return redirect()->to(route('user.settings').'#notifikasi');
         return view('notifications.channels',$preferences);
     }
 
@@ -40,7 +40,7 @@ class NotificationChannelController extends Controller
             'categories'=>json_encode($data['categories']),'push_enabled'=>$request->boolean('push_enabled'),
             'consented_at'=>$whatsapp ? ($settings?->consented_at ?? now()) : null,'updated_at'=>now(),'created_at'=>$settings?->created_at ?? now(),
         ]);
-        if ($request->wantsJson()) return response()->json(['message'=>'Pilihan notifikasi disimpan.']);
+        if ($request->wantsJson() || $request->is('api/*')) return response()->json(['message'=>'Pilihan notifikasi disimpan.']);
         return back()->with('success','Pilihan notifikasi disimpan.');
     }
 
@@ -56,10 +56,10 @@ class NotificationChannelController extends Controller
         $result=$fonnte->sendOtp($user->phone,$code);
         if (!$result['status']) {
             DB::table('notification_settings')->where('user_id',$user->id)->update(['otp_hash'=>null,'otp_expires_at'=>null]);
-            if ($request->wantsJson()) return response()->json(['message'=>$result['message']],503);
+            if ($request->wantsJson() || $request->is('api/*')) return response()->json(['message'=>$result['message']],503);
             return back()->with('error',$result['message']);
         }
-        if ($request->wantsJson()) return response()->json(['message'=>'Kode verifikasi telah diajukan untuk dikirim. Berlaku lima menit.']);
+        if ($request->wantsJson() || $request->is('api/*')) return response()->json(['message'=>'Kode verifikasi telah diajukan untuk dikirim. Berlaku lima menit.']);
         return back()->with('success','Kode verifikasi dikirim ke nomor pada profil. Berlaku lima menit.');
     }
 
@@ -78,17 +78,17 @@ class NotificationChannelController extends Controller
             return true;
         });
         if (!$ok) {
-            if ($request->wantsJson()) return response()->json(['message'=>'Kode salah atau kedaluwarsa.'],422);
+            if ($request->wantsJson() || $request->is('api/*')) return response()->json(['message'=>'Kode salah atau kedaluwarsa.'],422);
             return back()->with('error','Kode salah atau kedaluwarsa.');
         }
-        if ($request->wantsJson()) return response()->json(['message'=>'Nomor berhasil diverifikasi.']);
+        if ($request->wantsJson() || $request->is('api/*')) return response()->json(['message'=>'Nomor berhasil diverifikasi.']);
         return back()->with('success','Nomor berhasil diverifikasi. Pilih kategori pemberitahuan yang Anda inginkan.');
     }
 
     public function open(Request $request, string $kind, int $notification)
     {
         if (!$request->user()) {
-            if ($request->wantsJson()) return response()->json(['message'=>'Silakan masuk untuk melihat pemberitahuan.'],401);
+            if ($request->wantsJson() || $request->is('api/*')) return response()->json(['message'=>'Silakan masuk untuk melihat pemberitahuan.'],401);
             $request->session()->put('url.intended',$request->url());
             return redirect()->route('beranda')->with('open_login_modal',true);
         }
@@ -99,7 +99,7 @@ class NotificationChannelController extends Controller
         $entry=(object)['source_kind'=>$kind,'source_id'=>$notification,'category'=>$this->delivery->category($source->type ?? '')];
         abort_unless($this->delivery->source($entry,$request->user()),404);
         $url=$this->delivery->destination($source);
-        if ($request->wantsJson()) return response()->json(['title'=>$source->title,'message'=>$source->message,'destination'=>$url,'type'=>$source->type]);
+        if ($request->wantsJson() || $request->is('api/*')) return response()->json(['title'=>$source->title,'message'=>$source->message,'destination'=>$url,'type'=>$source->type]);
         return redirect($url);
     }
 

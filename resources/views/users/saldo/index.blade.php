@@ -168,6 +168,8 @@
                             'rw'            => $a->rw,
                             'kode_pos'      => $a->kode_pos,
                             'patokan'       => $a->patokan,
+                            'latitude'      => $a->latitude,
+                            'longitude'     => $a->longitude,
                             'is_utama'      => $a->is_utama,
                         ];
                     @endphp

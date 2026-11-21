@@ -7,7 +7,7 @@
             <p class="mt-2">Nomor pada profil sudah terverifikasi. Anda tidak perlu memasukkan kode lagi.</p>
         @elseif(!auth()->user()->phone)
             <p class="mt-2">Nomor WhatsApp belum diisi. Lengkapi nomor pada profil jika ingin menerima pesan WhatsApp.</p>
-            <a href="{{ auth()->user()->role === 'user' ? route('profile') : route('admin.profile') }}" class="segi-outline inline-flex mt-3">Lengkapi Profil</a>
+            <a href="{{ in_array(auth()->user()->role, ['user', 'admin_rt', 'admin_rw'], true) ? route('profile') : route('admin.profile') }}" class="segi-outline inline-flex mt-3">Lengkapi Profil</a>
         @else
             <p class="mt-2 text-sm">Nomor sudah tercatat di profil, tetapi kepemilikannya belum dikonfirmasi melalui WhatsApp. Konfirmasi sekali agar pesan tidak dikirim ke nomor yang salah. Verifikasi identitas dan OTP email tidak menggantikan konfirmasi nomor ini.</p>
             <details class="mt-3"><summary class="font-semibold text-[#115789] cursor-pointer">Konfirmasi nomor WhatsApp</summary>

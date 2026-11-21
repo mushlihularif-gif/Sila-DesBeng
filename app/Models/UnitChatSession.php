@@ -73,15 +73,28 @@ class UnitChatSession extends Model
 
     public function scopeVisibleForAdmin($query, string $serviceType, ?int $regionId)
     {
-        return $query->where('region_id', $regionId)
+        $hasStatus = \Illuminate\Support\Facades\Schema::hasColumn('unit_chat_sessions', 'status');
+        $hasMessages = \Illuminate\Support\Facades\Schema::hasTable('unit_chat_messages');
+        $hasUpdatedAt = \Illuminate\Support\Facades\Schema::hasColumn('unit_chat_sessions', 'updated_at');
+
+        $query->where('region_id', $regionId)
             ->where('service_type', $serviceType)
-            ->where(function ($q) {
+            ->where(function ($q) use ($hasStatus, $hasMessages) {
                 $q->whereNotNull('last_message_at')
-                    ->orWhere('status', 'escalated')
-                    ->orWhere('unread_admin_count', '>', 0)
-                    ->orWhereHas('messages', fn ($m) => $m->whereIn('sender_type', ['user', 'admin']));
-            })
-            ->orderByRaw('COALESCE(last_message_at, updated_at) DESC');
+                    ->orWhere('unread_admin_count', '>', 0);
+
+                if ($hasStatus) {
+                    $q->orWhere('status', 'escalated');
+                }
+
+                if ($hasMessages) {
+                    $q->orWhereHas('messages', fn ($m) => $m->whereIn('sender_type', ['user', 'admin']));
+                }
+            });
+
+        return $hasUpdatedAt
+            ? $query->orderByRaw('COALESCE(last_message_at, updated_at) DESC')
+            : $query->orderByDesc('last_message_at');
     }
 
     public function latestMessage()

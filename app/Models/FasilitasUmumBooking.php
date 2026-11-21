@@ -115,4 +115,14 @@ class FasilitasUmumBooking extends Model
     {
         return $this->belongsTo(Supir::class, 'assigned_supir_id');
     }
+
+    public function hasCancellationRequest(): bool
+    {
+        return $this->cancellation_status === 'pending';
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return $this->status === 'pending' && ! $this->hasCancellationRequest();
+    }
 }

@@ -116,12 +116,12 @@
 
                     {{-- Peringatan jika belum verifikasi identitas --}}
                     @if($user->verification_status !== 'verified')
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
-                        <div>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="min-w-0">
                             <h3 class="font-bold text-yellow-800 text-lg mb-1">Identitas Belum Terverifikasi</h3>
                             <p class="text-yellow-700 text-sm">Anda belum dapat mengakses layanan publik (seperti meminjam fasilitas) sebelum memverifikasi KTP dan Wajah.</p>
                         </div>
-                        <a href="{{ route('kyc.index') }}" class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-xl shadow transition shrink-0">
+                        <a href="{{ route('kyc.index') }}" class="px-6 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-xl shadow transition shrink-0 text-center">
                             Verifikasi Sekarang
                         </a>
                     </div>
@@ -784,6 +784,7 @@
 
                 if (newContainer) {
                     container.innerHTML = newContainer.innerHTML;
+                    autoInitDesaMutasi();
                 }
             } catch (err) {
                 console.error('Error reload mutasi:', err);

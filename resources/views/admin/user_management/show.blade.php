@@ -345,7 +345,7 @@
                                             <td><span class="text-muted">{{ $trans->created_at->format('d M Y') }}</span></td>
                                             <td class="fw-semibold">{{ $trans->mobil->nama_mobil ?? 'N/A' }}</td>
                                             <td><span class="badge bg-label-{{ $trans->status === 'completed' ? 'success' : ($trans->status === 'pending' ? 'warning' : 'secondary') }}">{{ ucfirst($trans->status ?: 'N/A') }}</span></td>
-                                            <td class="text-end fw-bold text-dark">Rp {{ number_format($trans->total_price ?? 0, 0, ',', '.') }}</td>
+                                            <td class="text-end fw-bold text-dark">Rp {{ number_format($trans->total_amount ?? $trans->total_price ?? 0, 0, ',', '.') }}</td>
                                         </tr>
                                         @endforeach
                                     </tbody>
@@ -381,7 +381,7 @@
                                             <td><span class="text-muted">{{ $trans->created_at->format('d M Y') }}</span></td>
                                             <td class="fw-semibold">{{ $trans->fasilitas->nama_fasilitas ?? 'N/A' }}</td>
                                             <td><span class="badge bg-label-{{ $trans->status === 'completed' ? 'success' : ($trans->status === 'pending' ? 'warning' : 'secondary') }}">{{ ucfirst($trans->status ?: 'N/A') }}</span></td>
-                                            <td class="text-end fw-bold text-dark">Rp {{ number_format($trans->total_price ?? 0, 0, ',', '.') }}</td>
+                                            <td class="text-end fw-bold text-dark">Rp {{ number_format($trans->total_amount ?? $trans->total_price ?? 0, 0, ',', '.') }}</td>
                                         </tr>
                                         @endforeach
                                     </tbody>

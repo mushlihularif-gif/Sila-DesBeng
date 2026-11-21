@@ -62,9 +62,9 @@
                                         <span class="text-xl font-bold uppercase">{{ substr($warga->name, 0, 1) }}</span>
                                     @endif
                                 </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-800 text-lg line-clamp-1" title="{{ $warga->name }}">{{ $warga->name }}</h3>
-                                    <p class="text-sm text-gray-500 line-clamp-1">{{ $warga->email }}</p>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="font-bold text-gray-800 text-lg truncate" title="{{ $warga->name }}">{{ $warga->name }}</h3>
+                                    <p class="text-sm text-gray-500 truncate break-all" title="{{ $warga->email }}">{{ $warga->email }}</p>
                                 </div>
                             </div>
                             

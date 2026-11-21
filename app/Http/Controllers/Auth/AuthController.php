@@ -369,12 +369,14 @@ class AuthController extends Controller
                 'otp_method.required' => 'Metode OTP harus dipilih',
             ]);
 
-            $user = User::where('email', $validated['email_or_phone'])
-                        ->orWhere('phone', $validated['email_or_phone'])
+            $identifier = trim($validated['email_or_phone']);
+            $phoneHash = hash_hmac('sha256', $identifier, config('app.key'));
+            $user = User::where('email', $identifier)
+                        ->orWhere('phone_hash', $phoneHash)
                         ->first();
 
             if (!$user) {
-                return redirect()->route('beranda')->with('error', 'Email atau Nomor Telepon tidak terdaftar')->with('open_forgot_password_modal', true);
+                return redirect()->route('beranda')->with('error', 'Email atau Nomor Telepon tidak terdaftar')->with('open_forgot_modal', true);
             }
 
             // Generate 4 digit OTP

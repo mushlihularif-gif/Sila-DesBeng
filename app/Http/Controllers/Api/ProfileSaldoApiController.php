@@ -54,7 +54,7 @@ class ProfileSaldoApiController extends Controller
             'amount'       => 'required|numeric|min:' . SaldoWarga::MINIMAL_PENARIKAN,
             'nama_bank'    => 'required|string|max:100',
             'no_rekening'  => 'required|string|max:50',
-            'nama_pemilik' => 'required|string|max:255',
+            'nama_pemilik' => 'required|string|max:150',
             'catatan'      => 'nullable|string|max:500',
         ], [
             'amount.min'   => 'Penarikan minimal Rp ' . number_format(SaldoWarga::MINIMAL_PENARIKAN, 0, ',', '.')
@@ -108,31 +108,49 @@ class ProfileSaldoApiController extends Controller
     public function batal(Request $request, $id)
     {
         $user = $request->user();
-        $saldo = SaldoWarga::where('id', $id)->where('user_id', $user->id)->first();
 
-        if (!$saldo) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Pengajuan tidak ditemukan atau bukan milik Anda.'
-            ], 404);
-        }
+        $result = DB::transaction(function () use ($id, $user) {
+            $saldo = SaldoWarga::where('id', $id)
+                ->where('user_id', $user->id)
+                ->where('type', SaldoWarga::PENARIKAN)
+                ->lockForUpdate()
+                ->first();
 
-        if ($saldo->status !== SaldoWarga::MENUNGGU) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Pengajuan ini sudah mulai diproses petugas, jadi tidak bisa dibatalkan sendiri.'
-            ], 400);
-        }
+            if (!$saldo) {
+                return [
+                    'code' => 404,
+                    'body' => [
+                        'status' => 'error',
+                        'message' => 'Pengajuan tidak ditemukan atau bukan milik Anda.'
+                    ],
+                ];
+            }
 
-        $saldo->update([
-            'status'  => SaldoWarga::DITOLAK,
-            'catatan' => trim(($saldo->catatan ? $saldo->catatan . ' — ' : '') . 'Dibatalkan sendiri oleh warga via aplikasi.'),
-        ]);
+            if ($saldo->status !== SaldoWarga::MENUNGGU) {
+                return [
+                    'code' => 400,
+                    'body' => [
+                        'status' => 'error',
+                        'message' => 'Pengajuan ini sudah mulai diproses petugas, jadi tidak bisa dibatalkan sendiri.'
+                    ],
+                ];
+            }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Pengajuan penarikan dibatalkan. Saldo Anda kembali tersedia.',
-            'data' => $saldo
-        ]);
+            $saldo->update([
+                'status'  => SaldoWarga::DITOLAK,
+                'catatan' => trim(($saldo->catatan ? $saldo->catatan . ' — ' : '') . 'Dibatalkan sendiri oleh warga via aplikasi.'),
+            ]);
+
+            return [
+                'code' => 200,
+                'body' => [
+                    'status' => 'success',
+                    'message' => 'Pengajuan penarikan dibatalkan. Saldo Anda kembali tersedia.',
+                    'data' => $saldo
+                ],
+            ];
+        });
+
+        return response()->json($result['body'], $result['code']);
     }
 }

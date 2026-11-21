@@ -32,13 +32,13 @@ class FasilitasUmumBookingController extends Controller
         // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
         $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         
-        // Ambil SOP Fasilitas Umum
-        $region = \App\Models\Region::find(Auth::user()->region_id);
-        $paymentInfo = $region ? ($region->payment_info ?? []) : [];
-        
+        // Ambil SOP Fasilitas Umum & pengaturan kontak wilayah layanan
+        $region = $item->region ?? \App\Models\Region::find(Auth::user()->region_id);
+        $regionSettings = $region ? ($region->settings ?? []) : [];
         $sop_fasilitas = \App\Support\ServiceTerms::forRegion($item->region, 'facility');
+        $sop_fasilitas_umum = $sop_fasilitas;
         
-        $quantity = request()->get('quantity', 1);
+        $quantity = max(1, (int) request()->get('quantity', 1));
         
 
         // Buku alamat warga, supaya alamat pengiriman tidak perlu diketik ulang
@@ -51,7 +51,7 @@ class FasilitasUmumBookingController extends Controller
 
         $adaGateway = false;
 
-        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'region', 'alamatTersimpan', 'adaGateway'));
+        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'sop_fasilitas_umum', 'region', 'regionSettings', 'alamatTersimpan', 'adaGateway'));
     }
 
     public function store(Request $request)
@@ -72,8 +72,8 @@ class FasilitasUmumBookingController extends Controller
             // Sebelumnya kolom payment_method/payment_proof ada di tabel tetapi
             // tidak pernah diisi, sehingga tagihannya tidak punya jejak bayar.
             'payment_method' => 'nullable|in:tunai,transfer,ewallet',
-            'payment_proof' => 'required_if:payment_method,transfer,ewallet|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-        ], ['payment_proof.required_if'=>'Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.', 'payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
+            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        ], ['payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
 
         $item = FasilitasUmum::inCatalog()->findOrFail($validated['fasilitas_id']);
         
@@ -106,15 +106,21 @@ class FasilitasUmumBookingController extends Controller
             $totalAmount = $days * $item->harga_sewa * $validated['quantity'];
         }
 
+        // Metode bayar hanya bermakna kalau pesanannya memang ditagih.
+        $metodeBayar = $totalAmount > 0 ? ($validated['payment_method'] ?? 'tunai') : null;
+        if ($totalAmount > 0 && in_array($metodeBayar, ['transfer', 'ewallet'], true) && ! $request->hasFile('payment_proof')) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'payment_proof' => ['Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.'],
+            ]);
+        }
+
         $suratPath = null;
         if ($request->hasFile('surat_pengantar')) {
             $suratPath = $request->file('surat_pengantar')->store('surat_pengantar', 'public');
         }
 
-        // Metode bayar hanya bermakna kalau pesanannya memang ditagih.
-        $metodeBayar = $totalAmount > 0 ? ($validated['payment_method'] ?? 'tunai') : null;
         $buktiBayar = null;
-        if (in_array($metodeBayar, ['tunai', 'transfer']) && $request->hasFile('payment_proof')) {
+        if (in_array($metodeBayar, ['tunai', 'transfer', 'ewallet'], true) && $request->hasFile('payment_proof')) {
             $buktiBayar = $request->file('payment_proof')->store('payment_proofs', 'public');
         }
 

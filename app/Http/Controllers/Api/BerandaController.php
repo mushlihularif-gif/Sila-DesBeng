@@ -89,54 +89,70 @@ class BerandaController extends Controller
      */
     public function services()
     {
-        $services = \Illuminate\Support\Facades\Cache::remember('api.beranda.services.v3', 300, function () {
-            // Simple aggregation of services for mobile display
-            $rentals = Barang::where('status', 'tersedia')->take(10)->get()->map(function($item) {
+        $user = auth('sanctum')->user();
+        $userRegionId = $user?->region_id;
+
+        $rentals = app(\App\Services\RentalOrdering::class)->visibleQuery($user)
+            ->whereRaw('LOWER(status) = ?', ['tersedia'])
+            ->take(10)
+            ->get()
+            ->map(function ($item) {
                 return [
                     'id' => $item->id,
                     'name' => $item->nama_barang,
                     'type' => 'rental',
-                    'image' => asset('storage/' . $item->foto),
-                    'price' => $item->harga_sewa
+                    'image' => $item->foto ? asset('storage/' . $item->foto) : null,
+                    'price' => $item->harga_sewa,
                 ];
             });
 
-            $gases = Gas::where('stok', '>', 0)->take(10)->get()->map(function($item) {
+        $gases = app(\App\Services\GasOrdering::class)->visibleQuery($user)
+            ->where('stok', '>', 0)
+            ->take(10)
+            ->get()
+            ->map(function ($item) {
                 return [
                     'id' => $item->id,
                     'name' => $item->jenis_gas,
                     'type' => 'gas',
-                    'image' => asset('storage/' . $item->foto),
-                    'price' => $item->harga_satuan
+                    'image' => $item->foto ? asset('storage/' . $item->foto) : null,
+                    'price' => $item->harga_satuan,
                 ];
             });
 
-            $mobils = \App\Models\Mobil::inCatalog()->where('status', 'tersedia')->take(10)->get()->map(function($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->nama_mobil,
-                    'type' => 'mobil',
-                    'image' => asset('storage/' . $item->foto),
-                    'price' => $item->harga_sewa
-                ];
-            });
-
-            $fasilitas = \App\Models\FasilitasUmum::inCatalog()->where('status', 'tersedia')->take(10)->get()->map(function($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->nama_fasilitas,
-                    'type' => 'fasilitas',
-                    'image' => asset('storage/' . $item->foto),
-                    'price' => 0
-                ];
-            });
-
-            return $rentals->concat($gases)->concat($mobils)->concat($fasilitas);
+        $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()->whereRaw('LOWER(status) = ?', ['tersedia']);
+        if ($userRegionId) {
+            $mobilQuery->whereIn('region_id', \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil'));
+        }
+        $mobils = $mobilQuery->take(10)->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->nama_mobil,
+                'type' => 'mobil',
+                'image' => $item->foto ? asset('storage/' . $item->foto) : null,
+                'price' => $item->harga_sewa,
+            ];
         });
 
-        $visible = app(\App\Services\RentalOrdering::class)->visibleQuery(auth('sanctum')->user())->pluck('id')->all();
-        $services = $services->filter(fn ($item) => $item['type'] !== 'rental' || in_array($item['id'], $visible))->values();
-        return response()->json(['status'=>'success','data'=>$services])->header('Cache-Control','private, no-store')->header('Vary','Authorization, Cookie');
+        $fasilitasQuery = \App\Models\FasilitasUmum::inCatalog()->whereRaw('LOWER(status) = ?', ['tersedia']);
+        if ($userRegionId) {
+            $fasilitasQuery->whereIn('region_id', \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'fasilitas-umum'));
+        }
+        $fasilitas = $fasilitasQuery->take(10)->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->nama_fasilitas,
+                'type' => 'fasilitas',
+                'image' => $item->foto ? asset('storage/' . $item->foto) : null,
+                'price' => (float) ($item->harga_sewa ?? 0),
+            ];
+        });
+
+        $services = $rentals->concat($gases)->concat($mobils)->concat($fasilitas)->values();
+
+        return response()->json(['status' => 'success', 'data' => $services])
+            ->header('Cache-Control', 'private, no-store')
+            ->header('Vary', 'Authorization, Cookie');
     }
 
     /**
@@ -155,13 +171,13 @@ class BerandaController extends Controller
         // Ensure sanctum auth is parsed if token exists
         $user = auth('sanctum')->user();
         if ($user && $user->region_id) {
-            $regionId = $user->region_id;
-            // Get active services for this region
+            $regionLineage = \App\Models\Region::garisLayananUntukWarga($user->region_id);
             $activeSlugs = \Illuminate\Support\Facades\DB::table('region_services')
                 ->join('services', 'services.id', '=', 'region_services.service_id')
-                ->where('region_services.region_id', $regionId)
+                ->whereIn('region_services.region_id', $regionLineage)
                 ->where('region_services.is_active', true)
                 ->pluck('services.slug')
+                ->unique()
                 ->toArray();
             
             $menus = array_filter($menus, function($m) use ($activeSlugs) {
@@ -183,77 +199,79 @@ class BerandaController extends Controller
 
     public function popular(Request $request)
     {
-        $allPopular = \Illuminate\Support\Facades\Cache::remember('api.beranda.popular.v3', 300, function () {
-            $limitPerCategory = 5;
+        $user = auth('sanctum')->user();
+        $userRegionId = $user?->region_id;
+        $limitPerCategory = 5;
 
-            // Gas - Most ordered
-            $gasProducts = \App\Models\Gas::where('stok', '>', 0)
-                ->withCount('gasOrders')
-                ->orderBy('gas_orders_count', 'desc')
-                ->take($limitPerCategory)
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->jenis_gas,
-                        'price' => $item->harga_satuan,
-                        'type' => 'gas',
-                        'category' => 'Penjualan Gas',
-                        'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
-                        'satuan' => 'tabung',
-                        'order_count' => $item->gas_orders_count,
-                    ];
-                });
+        $gasProducts = app(\App\Services\GasOrdering::class)->visibleQuery($user)
+            ->where('stok', '>', 0)
+            ->withCount('gasOrders')
+            ->orderBy('gas_orders_count', 'desc')
+            ->take($limitPerCategory)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->jenis_gas,
+                    'price' => $item->harga_satuan,
+                    'type' => 'gas',
+                    'category' => 'Penjualan Gas',
+                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                    'satuan' => 'tabung',
+                    'order_count' => $item->gas_orders_count,
+                ];
+            });
 
-            // Sewa Alat
-            $alatProducts = \App\Models\Barang::where('status', 'tersedia')
-                ->withCount('rentalBookings')
-                ->orderBy('rental_bookings_count', 'desc')
-                ->take($limitPerCategory)
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->nama_barang,
-                        'price' => $item->harga_sewa,
-                        'type' => 'alat',
-                        'category' => 'Penyewaan Alat',
-                        'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
-                        'satuan' => $item->satuan ?? 'hari',
-                        'order_count' => $item->rental_bookings_count,
-                    ];
-                });
+        $alatProducts = app(\App\Services\RentalOrdering::class)->visibleQuery($user)
+            ->whereRaw('LOWER(status) = ?', ['tersedia'])
+            ->withCount('rentalBookings')
+            ->orderBy('rental_bookings_count', 'desc')
+            ->take($limitPerCategory)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nama_barang,
+                    'price' => $item->harga_sewa,
+                    'type' => 'alat',
+                    'category' => 'Penyewaan Alat',
+                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                    'satuan' => $item->satuan ?? 'hari',
+                    'order_count' => $item->rental_bookings_count,
+                ];
+            });
 
-            // Sewa Mobil
-            $mobilProducts = \App\Models\Mobil::inCatalog()->where('status', 'tersedia')
-                ->withCount('bookings')
-                ->orderBy('bookings_count', 'desc')
-                ->take($limitPerCategory)
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->nama_mobil,
-                        'price' => $item->harga_sewa,
-                        'type' => 'mobil',
-                        'category' => 'Penyewaan Transportasi',
-                        'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
-                        'satuan' => 'hari',
-                        'order_count' => $item->bookings_count,
-                    ];
-                });
+        $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()->whereRaw('LOWER(status) = ?', ['tersedia']);
+        if ($userRegionId) {
+            $mobilQuery->whereIn('region_id', \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil'));
+        }
+        $mobilProducts = $mobilQuery
+            ->withCount('bookings')
+            ->orderBy('bookings_count', 'desc')
+            ->take($limitPerCategory)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nama_mobil,
+                    'price' => $item->harga_sewa,
+                    'type' => 'mobil',
+                    'category' => 'Penyewaan Transportasi',
+                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                    'satuan' => 'hari',
+                    'order_count' => $item->bookings_count,
+                ];
+            });
 
-            // Merge all
-            return $gasProducts
-                ->concat($alatProducts)
-                ->concat($mobilProducts)
-                ->sortByDesc('order_count')
-                ->values()
-                ->take(10); // Show top 10 overall
-        });
+        $allPopular = $gasProducts
+            ->concat($alatProducts)
+            ->concat($mobilProducts)
+            ->sortByDesc('order_count')
+            ->values()
+            ->take(10);
 
-        $visible = app(\App\Services\RentalOrdering::class)->visibleQuery(auth('sanctum')->user())->pluck('id')->all();
-        $allPopular = $allPopular->filter(fn ($item) => $item['type'] !== 'alat' || in_array($item['id'], $visible))->values();
-        return response()->json(['status'=>'success','data'=>$allPopular])->header('Cache-Control','private, no-store')->header('Vary','Authorization, Cookie');
+        return response()->json(['status' => 'success', 'data' => $allPopular])
+            ->header('Cache-Control', 'private, no-store')
+            ->header('Vary', 'Authorization, Cookie');
     }
 }

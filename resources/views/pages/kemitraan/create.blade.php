@@ -659,7 +659,7 @@
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-1 text-sm">
                                                 <span class="font-semibold group-hover:text-blue-600 transition-colors" style="color: #2f80ed;">Pilih file</span>
-                                                <input id="document" name="document" type="file" style="display: none;" required accept=".pdf,.jpg,.jpeg,.png">
+                                                <input id="document" name="document" type="file" style="display: none;" accept=".pdf,.jpg,.jpeg,.png">
                                                 <span class="text-gray-500">atau seret dan lepas</span>
                                             </div>
                                             <p class="text-xs text-gray-400 mt-0.5" id="file-name-display">
@@ -679,9 +679,9 @@
                             </div>
 
                             {{-- Tombol Aksi --}}
-                            <div class="flex items-center justify-between border-t border-gray-100 pt-5 mt-2">
+                            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-5 mt-2">
                                 <p class="text-xs text-gray-400 italic">* Semua kolom wajib diisi</p>
-                                <div class="flex items-center gap-3">
+                                <div class="flex flex-wrap items-center gap-3">
                                     <button type="button" onclick="closeModal()" class="inline-flex justify-center rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-200 hover:bg-gray-50 transition-colors">Batal</button>
                                     <button type="submit" id="btn-submit-partner" class="inline-flex justify-center items-center gap-2 rounded-full px-8 py-2.5 text-sm font-bold text-white shadow-sm hover:shadow transition-all hover:bg-blue-600 {{ !empty($pendingApplication) ? 'opacity-50 cursor-not-allowed' : '' }}" style="background-color: #2f80ed;" {{ !empty($pendingApplication) ? 'disabled' : '' }}>
                                         Kirim Pengajuan
@@ -1087,9 +1087,16 @@
         element.innerHTML = `${iconSvg}<span>${message}</span>`;
     }
 
+    const hasPendingPartnerApp = @json(!empty($pendingApplication));
+
     function checkSubmitButtonState() {
         const btn = document.getElementById('btn-submit-partner');
         if (!btn) return;
+        if (hasPendingPartnerApp) {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            return;
+        }
         const type = selRegionType ? selRegionType.value : '';
         if (canApplyRtRw) {
             if ((type === 'rw' && isRwBlocked) || (type === 'rt' && isRtBlocked)) {
@@ -1141,6 +1148,17 @@
     const partnerForm = document.getElementById('partner-form');
     if (partnerForm) {
         partnerForm.addEventListener('submit', function(e) {
+            if (hasPendingPartnerApp) {
+                e.preventDefault();
+                alert('Anda masih memiliki pengajuan yang sedang ditinjau.');
+                return false;
+            }
+            const docEl = document.getElementById('document');
+            if (docEl && (!docEl.files || docEl.files.length === 0)) {
+                e.preventDefault();
+                alert('Silakan unggah dokumen surat mandat / SK terlebih dahulu.');
+                return false;
+            }
             const type = selRegionType.value;
             if (['rw', 'rt'].includes(type) && canApplyRtRw) {
                 if (type === 'rw') {
@@ -1253,7 +1271,7 @@
 
 @if(session('success_modal'))
 <!-- Success Modal -->
-<div id="success-modal" class="fixed inset-0 z-[2147483647] flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<div id="success-modal" class="fixed inset-0 z-[2147483647] flex items-center justify-center bg-gray-900/50 transition-opacity" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="bg-white rounded-3xl overflow-hidden shadow-2xl transform transition-all sm:max-w-md w-full mx-4 relative animate-fade-in-up">
         <div class="px-6 pt-10 pb-8 text-center">
             <!-- Icon Success (Animated Checkmark) -->

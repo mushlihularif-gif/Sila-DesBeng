@@ -6,14 +6,14 @@
 ======================================== --}}
 
 {{-- Modal Overlay --}}
-<div id="profile-modal-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300" style="z-index: 9999;">
+<div id="profile-modal-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 overflow-y-auto" style="z-index: 9999;">
     <div class="flex items-center justify-center min-h-screen p-4">
 
         {{-- ================================
             MODAL 1: CHANGE PASSWORD 
             (Input 3 passwords)
         ================================ --}}
-        <div id="modal-change-password" class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+        <div id="modal-change-password" class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <button type="button" class="modal-close-profile absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition z-10">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -96,34 +96,34 @@
             MODAL 2: OTP VERIFICATION
             (4 digit input boxes)
         ================================ --}}
-        <div id="modal-change-password-otp" class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-10 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+        <div id="modal-change-password-otp" class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-10 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <button type="button" class="modal-close-profile absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition z-10">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
 
-            <div class="text-center mb-8">
+            <div class="text-center mb-6 sm:mb-8">
                 {{-- Title at the top --}}
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">Verifikasi Kode</h2>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Verifikasi Kode</h2>
                 
                 {{-- Image below title --}}
-                <div class="flex justify-center mb-6">
-                    <img src="{{ asset('User/img/elemen/verifff.png') }}" alt="Verification Icon" class="h-48 w-auto">
+                <div class="flex justify-center mb-4 sm:mb-6">
+                    <img src="{{ asset('User/img/elemen/verifff.png') }}" alt="Verification Icon" class="h-32 sm:h-48 w-auto">
                 </div>
 
                 {{-- Subtitles --}}
-                <p class="text-lg font-semibold text-gray-800 mb-2">Masukkan Kode Untuk Melanjutkan</p>
+                <p class="text-base sm:text-lg font-semibold text-gray-800 mb-2">Masukkan Kode Untuk Melanjutkan</p>
                 <p class="text-sm text-gray-500">Silahkan masukkan kode konfirmasi yang anda terima</p>
             </div>
 
             <form id="form-change-password-otp">
                 {{-- 4 OTP Input Boxes --}}
-                <div class="flex justify-center gap-4 mb-8">
-                    <input type="text" maxlength="1" class="profile-otp-input w-16 h-16 text-center text-2xl font-bold border border-gray-300 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition bg-white shadow-sm" data-index="0">
-                    <input type="text" maxlength="1" class="profile-otp-input w-16 h-16 text-center text-2xl font-bold border border-gray-300 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition bg-white shadow-sm" data-index="1">
-                    <input type="text" maxlength="1" class="profile-otp-input w-16 h-16 text-center text-2xl font-bold border border-gray-300 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition bg-white shadow-sm" data-index="2">
-                    <input type="text" maxlength="1" class="profile-otp-input w-16 h-16 text-center text-2xl font-bold border border-gray-300 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition bg-white shadow-sm" data-index="3">
+                <div class="flex justify-center gap-2 sm:gap-4 mb-6 sm:mb-8">
+                    <input type="text" maxlength="1" class="profile-otp-input w-12 h-12 sm:w-16 sm:h-16 text-center text-xl sm:text-2xl font-bold border border-gray-300 rounded-xl sm:rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition bg-white shadow-sm" data-index="0">
+                    <input type="text" maxlength="1" class="profile-otp-input w-12 h-12 sm:w-16 sm:h-16 text-center text-xl sm:text-2xl font-bold border border-gray-300 rounded-xl sm:rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition bg-white shadow-sm" data-index="1">
+                    <input type="text" maxlength="1" class="profile-otp-input w-12 h-12 sm:w-16 sm:h-16 text-center text-xl sm:text-2xl font-bold border border-gray-300 rounded-xl sm:rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition bg-white shadow-sm" data-index="2">
+                    <input type="text" maxlength="1" class="profile-otp-input w-12 h-12 sm:w-16 sm:h-16 text-center text-xl sm:text-2xl font-bold border border-gray-300 rounded-xl sm:rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition bg-white shadow-sm" data-index="3">
                 </div>
 
                 <button type="submit" class="w-full py-4 bg-blue-500 text-white rounded-full font-bold text-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl mb-6">
@@ -155,7 +155,7 @@
         {{-- ================================
             MODAL 3: SUCCESS MESSAGE
         ================================ --}}
-        <div id="modal-change-password-success" class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-10 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+        <div id="modal-change-password-success" class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-10 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <div class="text-center">
                 {{-- Title at the top --}}
                 <h2 class="text-3xl font-bold text-gray-900 mb-8">Berhasil Diperbarui</h2>

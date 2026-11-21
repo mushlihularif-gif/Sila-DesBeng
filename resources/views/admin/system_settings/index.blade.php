@@ -570,7 +570,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        </div>
                                         
                                         <!-- Fasilitas Umum Detail -->
                                         <div class="tab-pane fade" id="box_delivery_fasilitas" role="tabpanel" aria-labelledby="v-pills-fasilitas-tab">
