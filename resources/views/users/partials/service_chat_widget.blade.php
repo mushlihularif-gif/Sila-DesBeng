@@ -123,9 +123,15 @@
                 </div>
             </div>
         </div>
-        <button type="button" class="service-chat-close-btn" onclick="closeServiceChatWidget('{{ $serviceType }}')" title="Tutup Chat">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
+        <div class="service-chat-header-actions">
+            <button type="button" id="serviceChatExpandBtn_{{ $serviceType }}" class="service-chat-expand-btn" onclick="toggleServiceChatExpand('{{ $serviceType }}')" title="Perbesar panel obrolan" aria-expanded="false">
+                <svg id="serviceChatExpandIcon_{{ $serviceType }}" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
+                <span id="serviceChatExpandLabel_{{ $serviceType }}">Perbesar</span>
+            </button>
+            <button type="button" class="service-chat-close-btn" onclick="closeServiceChatWidget('{{ $serviceType }}')" title="Tutup Chat">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
     </div>
 
     @if($showVillageSelector)
@@ -223,28 +229,35 @@
     }
     .service-chat-widget {
         position: fixed;
-        bottom: 80px;
+        bottom: 76px;
         left: 50%;
         transform: translateX(-50%);
-        width: 370px;
-        max-width: calc(100vw - 32px);
-        height: 540px;
-        max-height: calc(100vh - 110px);
+        width: 340px;
+        max-width: calc(100vw - 24px);
+        height: 440px;
+        max-height: calc(100vh - 104px);
         background: #ffffff;
-        border-radius: 1.25rem;
+        border-radius: 1.15rem;
         box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.25);
         z-index: 9999;
         display: none;
         flex-direction: column;
         overflow: hidden;
         border: 1px solid #e2e8f0;
+        transition: width 0.22s ease, height 0.22s ease, max-height 0.22s ease, border-radius 0.22s ease;
+    }
+    .service-chat-widget.is-expanded {
+        width: min(660px, calc(100vw - 2rem));
+        max-width: calc(100vw - 2rem);
+        height: min(82vh, 720px);
+        max-height: calc(100vh - 96px);
     }
     .service-chat-widget.active {
         display: flex;
-        animation: chatSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: chatSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @keyframes chatSlideUp {
-        from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
+        from { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.96); }
         to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
     }
     @media (max-width: 768px) {
@@ -268,35 +281,68 @@
             text-overflow: ellipsis;
         }
         .service-chat-widget {
-            bottom: 70px;
+            bottom: 68px;
             left: 50%;
             transform: translateX(-50%);
             width: calc(100vw - 24px);
-            max-width: 380px;
-            height: 490px;
-            max-height: calc(100vh - 90px);
+            max-width: 360px;
+            height: 420px;
+            max-height: calc(100vh - 92px);
             border-radius: 1rem;
+        }
+        .service-chat-widget.is-expanded {
+            bottom: 64px;
+            width: calc(100vw - 16px);
+            max-width: calc(100vw - 16px);
+            height: calc(100vh - 80px);
+            max-height: calc(100vh - 80px);
         }
     }
     .service-chat-header {
         background: #ffffff;
-        padding: 13px 16px;
+        padding: 11px 13px;
         border-bottom: 1px solid #f1f5f9;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
     .service-chat-header-left {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 9px;
         min-width: 0;
         flex: 1;
     }
+    .service-chat-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    .service-chat-expand-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        border-radius: 999px;
+        padding: 4px 9px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        white-space: nowrap;
+    }
+    .service-chat-expand-btn:hover {
+        background: #e0f2fe;
+        border-color: #bae6fd;
+        color: #0284c7;
+    }
     .service-chat-avatar {
-        width: 36px;
-        height: 36px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         background: linear-gradient(135deg, #0ea5e9, #0284c7);
         display: flex;
@@ -305,10 +351,10 @@
         flex-shrink: 0;
     }
     .service-chat-title {
-        font-size: 0.94rem;
+        font-size: 0.9rem;
         font-weight: 700;
         color: #0f172a;
-        line-height: 1.25;
+        line-height: 1.2;
     }
     .service-chat-status {
         font-size: 11px;
@@ -330,7 +376,7 @@
         border: none;
         color: #94a3b8;
         cursor: pointer;
-        padding: 6px;
+        padding: 5px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -344,7 +390,7 @@
     .service-chat-region-bar {
         background: #f8fafc;
         border-bottom: 1px solid #e2e8f0;
-        padding: 6px 14px;
+        padding: 6px 12px;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -369,7 +415,7 @@
     }
     .service-chat-privacy {
         background: #f0fdf4;
-        padding: 6px 14px;
+        padding: 5px 12px;
         font-size: 11px;
         color: #166534;
         display: flex;
@@ -380,16 +426,20 @@
     .service-chat-quick-replies {
         display: flex;
         gap: 6px;
-        padding: 8px 12px;
+        padding: 7px 12px;
         background: #f8fafc;
         overflow-x: auto;
         white-space: nowrap;
         border-bottom: 1px solid #e2e8f0;
+        scrollbar-width: none;
+    }
+    .service-chat-quick-replies::-webkit-scrollbar {
+        display: none;
     }
     .service-chip-btn {
         background: #ffffff;
         border: 1px solid #cbd5e1;
-        padding: 5px 11px;
+        padding: 4px 10px;
         border-radius: 50rem;
         font-size: 11px;
         color: #334155;
@@ -421,58 +471,70 @@
     }
     .service-chat-body {
         flex: 1;
-        padding: 14px;
+        padding: 12px;
         overflow-y: auto;
         background: #f8fafc;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+    }
+    .service-chat-body::-webkit-scrollbar {
+        width: 5px;
+    }
+    .service-chat-body::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 999px;
     }
     .chat-bubble-warga {
         align-self: flex-end;
         background: #0284c7;
         color: #ffffff;
-        padding: 10px 14px;
+        padding: 8px 12px;
         border-radius: 14px;
         border-bottom-right-radius: 3px;
         max-width: 82%;
-        font-size: 0.87rem;
-        line-height: 1.45;
+        font-size: 0.84rem;
+        line-height: 1.4;
         word-break: break-word;
-        white-space: pre-wrap;
         box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     .chat-bubble-admin {
         align-self: flex-start;
         background: #ffffff;
         color: #0f172a;
-        padding: 10px 14px;
+        padding: 8px 12px;
         border-radius: 14px;
         border-bottom-left-radius: 3px;
         max-width: 82%;
-        font-size: 0.87rem;
-        line-height: 1.45;
+        font-size: 0.84rem;
+        line-height: 1.4;
         word-break: break-word;
-        white-space: pre-wrap;
         border: 1px solid #bae6fd;
         box-shadow: 0 1px 3px rgba(2,132,199,0.08);
+    }
+    .chat-msg-text {
+        white-space: pre-wrap;
+        word-break: break-word;
     }
     .chat-bubble-bot {
         align-self: center;
         background: #e0f2fe;
         color: #0369a1;
-        padding: 8px 14px;
-        border-radius: 14px;
-        font-size: 11.5px;
+        padding: 7px 12px;
+        border-radius: 12px;
+        font-size: 11px;
         max-width: 92%;
         text-align: center;
-        line-height: 1.45;
+        line-height: 1.4;
     }
     .chat-bubble-time {
         font-size: 9.5px;
-        margin-top: 4px;
-        opacity: 0.72;
+        margin-top: 3px;
+        opacity: 0.78;
         text-align: right;
+        line-height: 1;
     }
     .service-chat-error {
         background: #fef2f2;
@@ -619,6 +681,27 @@
         }
     }
 
+    function toggleServiceChatExpand(service) {
+        const widget = document.getElementById(`serviceChatWidget_${service}`);
+        if (!widget) return;
+        const expanded = widget.classList.toggle('is-expanded');
+        const btn = document.getElementById(`serviceChatExpandBtn_${service}`);
+        const label = document.getElementById(`serviceChatExpandLabel_${service}`);
+        const icon = document.getElementById(`serviceChatExpandIcon_${service}`);
+        if (btn) {
+            btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            btn.setAttribute('title', expanded ? 'Kecilkan panel obrolan' : 'Perbesar panel obrolan');
+        }
+        if (label) {
+            label.textContent = expanded ? 'Kecilkan' : 'Perbesar';
+        }
+        if (icon) {
+            icon.innerHTML = expanded
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"></path>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>';
+        }
+    }
+
     function closeServiceChatWidget(service) {
         const widget = document.getElementById(`serviceChatWidget_${service}`);
         if (widget) widget.classList.remove('active');
@@ -715,21 +798,14 @@
 
         if (msg.sender_type === 'user') {
             bubble.className = 'chat-bubble-warga';
-            bubble.innerHTML = `
-                <div>${escapeHtmlService(msg.message)}</div>
-                ${time ? `<div class="chat-bubble-time">${time}</div>` : ''}
-            `;
+            bubble.innerHTML = `<div class="chat-msg-text">${escapeHtmlService(msg.message)}</div>${time ? `<div class="chat-bubble-time">${time}</div>` : ''}`;
         } else if (msg.sender_type === 'admin') {
             bubble.className = 'chat-bubble-admin';
             const adminLabel = msg.sender && msg.sender.name ? `Petugas • ${msg.sender.name}` : 'Petugas Layanan';
-            bubble.innerHTML = `
-                <div style="font-size: 11px; font-weight: 700; color: #0284c7; margin-bottom: 3px;">${escapeHtmlService(adminLabel)}</div>
-                <div>${escapeHtmlService(msg.message)}</div>
-                ${time ? `<div class="chat-bubble-time" style="color: #64748b;">${time}</div>` : ''}
-            `;
+            bubble.innerHTML = `<div style="font-size: 10.5px; font-weight: 700; color: #0284c7; margin-bottom: 2px;">${escapeHtmlService(adminLabel)}</div><div class="chat-msg-text">${escapeHtmlService(msg.message)}</div>${time ? `<div class="chat-bubble-time" style="color: #64748b;">${time}</div>` : ''}`;
         } else {
             bubble.className = 'chat-bubble-bot';
-            bubble.innerHTML = `<div>${escapeHtmlService(msg.message)}</div>`;
+            bubble.innerHTML = `<div class="chat-msg-text">${escapeHtmlService(msg.message)}</div>`;
         }
 
         container.appendChild(bubble);

@@ -34,9 +34,15 @@
                 </div>
             </div>
         </div>
-        <button type="button" onclick="closeUnitChat()" class="toko-chat-close-btn" title="Tutup Chat">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
+        <div class="toko-chat-header-actions">
+            <button type="button" id="unitChatExpandBtn" onclick="toggleUnitChatExpand()" class="toko-chat-expand-btn" title="Perbesar panel obrolan" aria-expanded="false">
+                <svg id="unitChatExpandIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
+                <span id="unitChatExpandLabel">Perbesar</span>
+            </button>
+            <button type="button" onclick="closeUnitChat()" class="toko-chat-close-btn" title="Tutup Chat">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
     </div>
 
     <!-- Privacy Shield Notice -->
@@ -81,12 +87,12 @@
         position: fixed;
         bottom: 24px;
         right: 24px;
-        width: 380px;
-        max-width: calc(100vw - 32px);
-        height: 600px;
-        max-height: calc(100vh - 100px);
+        width: 340px;
+        max-width: calc(100vw - 24px);
+        height: 460px;
+        max-height: calc(100vh - 96px);
         background: #fff;
-        border-radius: 20px;
+        border-radius: 18px;
         box-shadow: 0 10px 40px -10px rgba(0,0,0,0.2), 0 0 15px rgba(0,0,0,0.05);
         display: flex;
         flex-direction: column;
@@ -96,8 +102,32 @@
         pointer-events: none;
         transform: translateY(20px) scale(0.95);
         transform-origin: bottom right;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         border: 1px solid #e2e8f0;
+    }
+    .toko-chat-widget.is-expanded {
+        width: min(660px, calc(100vw - 2rem));
+        max-width: calc(100vw - 2rem);
+        height: min(82vh, 720px);
+        max-height: calc(100vh - 48px);
+    }
+    @media (max-width: 768px) {
+        .toko-chat-widget {
+            bottom: 16px;
+            right: 12px;
+            width: calc(100vw - 24px);
+            max-width: 360px;
+            height: 440px;
+        }
+        .toko-chat-widget.is-expanded {
+            bottom: 10px;
+            right: 8px;
+            left: 8px;
+            width: calc(100vw - 16px);
+            max-width: calc(100vw - 16px);
+            height: calc(100vh - 20px);
+            max-height: calc(100vh - 20px);
+        }
     }
     .toko-chat-widget.active {
         opacity: 1;
@@ -106,34 +136,42 @@
     }
     .toko-chat-header {
         background: linear-gradient(135deg, #0ea5e9, #0284c7);
-        padding: 16px;
+        padding: 12px 14px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 8px;
         color: white;
     }
-    .toko-chat-header-info { display: flex; align-items: center; gap: 12px; }
-    .toko-chat-avatar-wrap { position: relative; }
-    .toko-chat-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); }
-    .toko-chat-status-dot { position: absolute; bottom: 0; right: 0; width: 11px; height: 11px; background: #10b981; border: 2px solid #0284c7; border-radius: 50%; }
-    .toko-chat-header-title { font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
-    .toko-chat-header-subtitle { font-size: 0.75rem; color: #e0f2fe; display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+    .toko-chat-header-info { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+    .toko-chat-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .toko-chat-expand-btn {
+        display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28);
+        color: #ffffff; border-radius: 999px; padding: 4px 9px; font-size: 11px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+        white-space: nowrap;
+    }
+    .toko-chat-expand-btn:hover { background: rgba(255,255,255,0.3); }
+    .toko-chat-avatar-wrap { position: relative; flex-shrink: 0; }
+    .toko-chat-avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); }
+    .toko-chat-status-dot { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #10b981; border: 2px solid #0284c7; border-radius: 50%; }
+    .toko-chat-header-title { font-weight: 700; font-size: 0.9rem; line-height: 1.2; }
+    .toko-chat-header-subtitle { font-size: 0.72rem; color: #e0f2fe; display: flex; align-items: center; gap: 5px; margin-top: 2px; }
     .toko-chat-close-btn {
-        background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
+        background: rgba(255,255,255,0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;
     }
     .toko-chat-close-btn:hover { background: rgba(255,255,255,0.3); }
     .toko-chat-privacy {
-        background: #ecfdf5; color: #065f46; font-size: 0.72rem; padding: 7px 14px; display: flex; align-items: center; gap: 6px;
+        background: #ecfdf5; color: #065f46; font-size: 0.72rem; padding: 6px 12px; display: flex; align-items: center; gap: 6px;
         border-bottom: 1px solid #d1fae5; font-weight: 500;
     }
     .toko-chat-quick-replies {
-        display: flex; gap: 6px; padding: 8px 12px; background: #f8fafc; overflow-x: auto; white-space: nowrap;
+        display: flex; gap: 6px; padding: 7px 12px; background: #f8fafc; overflow-x: auto; white-space: nowrap;
         border-bottom: 1px solid #e2e8f0; scrollbar-width: none;
     }
     .toko-chat-quick-replies::-webkit-scrollbar { display: none; }
     .toko-chip-btn {
-        background: #fff; border: 1px solid #cbd5e1; color: #334155; font-size: 0.72rem; padding: 5px 11px;
+        background: #fff; border: 1px solid #cbd5e1; color: #334155; font-size: 0.72rem; padding: 4px 10px;
         border-radius: 999px; cursor: pointer; transition: all 0.2s; font-weight: 500; flex-shrink: 0;
     }
     .toko-chip-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
@@ -141,11 +179,18 @@
     .toko-chip-primary:hover { background: #0369a1; border-color: #0369a1; color: #ffffff; }
     .toko-chip-connected { background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600; cursor: default; }
     .toko-chat-body {
-        flex: 1; padding: 16px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 12px;
+        flex: 1; padding: 12px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 8px;
+        scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;
     }
+    .toko-chat-body::-webkit-scrollbar { width: 5px; }
+    .toko-chat-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
     .toko-chat-bubble {
-        max-width: 82%; padding: 10px 14px; border-radius: 16px; font-size: 0.875rem; line-height: 1.45; position: relative;
-        word-break: break-word; white-space: pre-wrap;
+        max-width: 82%; padding: 8px 12px; border-radius: 14px; font-size: 0.84rem; line-height: 1.4; position: relative;
+        word-break: break-word;
+    }
+    .toko-chat-msg-text {
+        white-space: pre-wrap;
+        word-break: break-word;
     }
     .toko-chat-bubble.toko {
         background: #ffffff; color: #1e293b; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0;
@@ -306,6 +351,25 @@
         return p;
     };
 
+    window.toggleUnitChatExpand = function() {
+        const widget = document.getElementById('unitChatWidget');
+        if (!widget) return;
+        const expanded = widget.classList.toggle('is-expanded');
+        const btn = document.getElementById('unitChatExpandBtn');
+        const label = document.getElementById('unitChatExpandLabel');
+        const icon = document.getElementById('unitChatExpandIcon');
+        if (btn) {
+            btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            btn.setAttribute('title', expanded ? 'Kecilkan panel obrolan' : 'Perbesar panel obrolan');
+        }
+        if (label) label.textContent = expanded ? 'Kecilkan' : 'Perbesar';
+        if (icon) {
+            icon.innerHTML = expanded
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"></path>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>';
+        }
+    };
+
     window.closeUnitChat = function() {
         const widget = document.getElementById('unitChatWidget');
         if (widget) widget.classList.remove('active');
@@ -335,37 +399,18 @@
 
         if (sender === 'user') {
             bubble.className = 'toko-chat-bubble user';
-            bubble.innerHTML = `
-                ${itemHtml}
-                <div>${escapeHtml(text)}</div>
-                <div class="toko-chat-time">${timeStr}</div>
-            `;
+            bubble.innerHTML = `${itemHtml}<div class="toko-chat-msg-text">${escapeHtml(text)}</div><div class="toko-chat-time">${timeStr}</div>`;
         } else if (sender === 'admin') {
             bubble.className = 'toko-chat-bubble admin';
             const badgeText = adminName ? `Petugas • ${adminName}` : 'Petugas Layanan';
-            bubble.innerHTML = `
-                <div class="toko-chat-admin-badge">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>${escapeHtml(badgeText)}</span>
-                </div>
-                <div>${escapeHtml(text)}</div>
-                <div class="toko-chat-time" style="color: #0369a1;">${timeStr}</div>
-            `;
+            bubble.innerHTML = `<div class="toko-chat-admin-badge"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>${escapeHtml(badgeText)}</span></div><div class="toko-chat-msg-text">${escapeHtml(text)}</div><div class="toko-chat-time" style="color: #0369a1;">${timeStr}</div>`;
         } else {
             bubble.className = 'toko-chat-bubble toko';
             let escalateBtn = '';
             if (text && text.includes('Chat Petugas') && !isUnitChatEscalated) {
-                escalateBtn = `
-                    <button type="button" class="toko-chat-escalate-btn" onclick="escalateToAdminUnit()">
-                        <span>Chat Petugas Layanan</span>
-                    </button>
-                `;
+                escalateBtn = `<button type="button" class="toko-chat-escalate-btn" onclick="escalateToAdminUnit()"><span>Chat Petugas Layanan</span></button>`;
             }
-            bubble.innerHTML = `
-                <div>${escapeHtml(text)}</div>
-                ${escalateBtn}
-                <div class="toko-chat-time">${timeStr}</div>
-            `;
+            bubble.innerHTML = `<div class="toko-chat-msg-text">${escapeHtml(text)}</div>${escalateBtn}<div class="toko-chat-time">${timeStr}</div>`;
         }
 
         messages.appendChild(bubble);
