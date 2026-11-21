@@ -264,34 +264,56 @@
 
                     <!-- PROOF OF PAYMENT -->
                     @if($request->proof_of_payment || $request->payment_proof)
+                    @php
+                        $proof = $request->proof_of_payment ?? $request->payment_proof;
+                        $detailReceiptUrl = match ($type) {
+                            'rental' => route('receipt.rental.view', $request->id),
+                            'gas' => route('receipt.gas.view', $request->id),
+                            'mobil' => route('receipt.mobil.view', $request->id),
+                            'fasilitas' => route('receipt.fasilitas.view', $request->id),
+                            default => null,
+                        };
+                    @endphp
                     <div class="card shadow-sm border-0 rounded-4">
 
-                        <div class="card-header bg-white border-bottom py-3">
+                        <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                             <h5 class="mb-0 fw-bold text-dark">
-                                <i class="bx bx-receipt me-2 text-primary"></i>Bukti Pembayaran
+                                <i class="bx bx-receipt me-2 text-primary"></i>Bukti Pembayaran Transfer Pengguna
                             </h5>
+                            <span class="badge bg-label-warning rounded-pill px-3 py-1">
+                                <i class="bx bx-search-alt me-1"></i>Wajib Cocokkan Nominal
+                            </span>
                         </div>
-                        <div class="card-body p-4 text-center">
-                            @php
-                                $proof = $request->proof_of_payment ?? $request->payment_proof;
-                            @endphp
-                            <div class="position-relative">
+                        <div class="card-body p-4">
+                            <div class="alert alert-warning border-warning-subtle rounded-3 mb-3 d-flex align-items-start gap-2.5 text-start" role="alert">
+                                <i class="bx bx-error-circle fs-4 text-warning flex-shrink-0 mt-1"></i>
+                                <div class="small text-dark" style="line-height: 1.5;">
+                                    <strong>Mohon cek kembali bukti pembayaran transfer yang diunggah oleh pengguna!</strong><br>
+                                    Pastikan nominal transfer pada foto bukti dan mutasi rekening desa <strong>benar-benar sama</strong> dengan nominal <strong>Subtotal pada Bukti Transaksi yang dicetak oleh SegiDaerah (Rp {{ number_format($request->subtotalAmount(), 0, ',', '.') }})</strong>. Jika berbeda atau kurang bayar, jangan konfirmasi lunas — catat selisih / tolak bukti agar warga melunasi kekurangannya.
+                                </div>
+                            </div>
+                            <div class="position-relative text-center">
                                 <img src="{{ asset('storage/' . $proof) }}" 
                                      alt="Bukti Pembayaran" 
                                      class="img-fluid rounded shadow-sm mb-3" 
                                      style="max-height: 500px; width: 100%; object-fit: contain;">
-                                <div class="mt-2">
+                                <div class="mt-2 d-flex flex-wrap justify-content-center gap-2">
                                      <a href="{{ asset('storage/' . $proof) }}" target="_blank" class="btn btn-outline-primary rounded-pill px-4">
                                         <i class="bx bx-fullscreen me-2"></i>Lihat Ukuran Penuh
                                     </a>
-                                    <a href="{{ asset('storage/' . $proof) }}" download class="btn btn-primary rounded-pill px-4 ms-2">
-                                        <i class="bx bx-download me-2"></i>Unduh
+                                    <a href="{{ asset('storage/' . $proof) }}" download class="btn btn-primary rounded-pill px-4">
+                                        <i class="bx bx-download me-2"></i>Unduh Bukti
                                     </a>
+                                    @if($detailReceiptUrl)
+                                    <a href="{{ $detailReceiptUrl }}" target="_blank" class="btn btn-outline-info rounded-pill px-4">
+                                        <i class="bx bx-receipt me-2"></i>Bandingkan dgn Bukti Transaksi SegiDaerah
+                                    </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
-                            @endif
+                    @endif
                     </div>
 
                 <!-- RIGHT COLUMN -->

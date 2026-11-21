@@ -8,6 +8,13 @@
     $bIsCash = in_array($bMethod, ['tunai', 'cash'], true);
     $bProof = $payment->paymentProofPath();
     $bProofUrl = $bProof ? asset('storage/' . $bProof) : '';
+    $bReceiptRoute = match ($bType) {
+        'rental' => route('receipt.rental.view', $payment->id),
+        'gas' => route('receipt.gas.view', $payment->id),
+        'mobil' => route('receipt.mobil.view', $payment->id),
+        'fasilitas' => route('receipt.fasilitas.view', $payment->id),
+        default => '',
+    };
     $bScan = $payment->proofScanSummary();
     $bClosed = in_array($payment->status, ['completed', 'cancelled', 'rejected'], true) || ($payment->cancellation_status ?? '') === 'pending';
 @endphp
@@ -30,6 +37,7 @@
                 data-is-cash="{{ $bIsCash ? '1' : '0' }}"
                 data-can-reject="{{ (!$bIsCash && $bProof && $payment->status === 'pending') ? '1' : '0' }}"
                 data-proof-url="{{ $bProofUrl }}"
+                data-receipt-url="{{ $bReceiptRoute }}"
                 data-scan-status="{{ $bScan['status'] ?? '' }}"
                 data-scan-amount="{{ isset($bScan['detected_amount']) && $bScan['detected_amount'] !== null ? (int) round($bScan['detected_amount']) : '' }}"
                 data-scan-message="{{ $bScan['message'] ?? '' }}"

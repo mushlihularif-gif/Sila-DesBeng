@@ -118,9 +118,9 @@
                     <i class="bx bx-check-shield fs-4"></i>
                 </div>
                 <div>
-                    <h6 class="fw-bold mb-1 text-primary">Validasi Pembayaran Warga (Transfer &amp; Tunai)</h6>
-                    <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.5;">
-                        Cocokkan <strong>nominal pada foto bukti transfer &amp; mutasi rekening</strong> dengan <strong>Subtotal Tagihan</strong> sebelum mengesahkan pembayaran. Bila warga transfer kurang (misal Rp 20.000 dari Rp 200.000), sistem akan mengunci pengesahan lunas sehingga Anda dapat mencatat kurang bayar atau menolak bukti untuk meminta pelunasan.
+                    <h6 class="fw-bold mb-1 text-primary">Wajib Cek Ulang Bukti Pembayaran Transfer Pengguna</h6>
+                    <p class="mb-0 text-primary small" style="opacity: 0.92; line-height: 1.55;">
+                        <strong>Mohon cek kembali bukti pembayaran transfer yang diunggah oleh pengguna</strong>, lalu cocokkan nominalnya dengan <strong>Bukti Transaksi yang dicetak oleh SegiDaerah</strong> serta mutasi rekening desa. Bila nominal transfer kurang (misal Rp 20.000 dari subtotal Rp 200.000), sistem otomatis mengunci tombol lunas agar Anda dapat mencatat kurang bayar atau menolak bukti untuk meminta pelunasan.
                     </p>
                 </div>
             </div>
@@ -898,13 +898,22 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body p-4">
+                <!-- Peringatan Wajib Cek Ulang Bukti Transfer vs Bukti Transaksi SegiDaerah -->
+                <div class="alert alert-warning border-warning-subtle rounded-3 py-2.5 px-3 mb-3 d-flex align-items-start gap-2.5" id="vpReminderBanner">
+                    <i class="bx bx-error-circle fs-4 text-warning flex-shrink-0 mt-1"></i>
+                    <div class="small text-dark" style="line-height: 1.45;">
+                        <strong>Mohon cek kembali bukti pembayaran transfer yang diunggah oleh pengguna!</strong><br>
+                        Periksa ulang apakah nominal pada foto bukti transfer &amp; mutasi rekening desa <strong>benar-benar sama</strong> dengan nominal pada <strong>Bukti Transaksi yang dicetak oleh SegiDaerah</strong> sebelum mengonfirmasi pembayaran.
+                    </div>
+                </div>
+
                 <div class="row g-4">
                     <!-- Kolom Kiri: Foto Bukti -->
                     <div class="col-12 col-md-5" id="vpProofCol">
                         <div class="border rounded-4 p-2.5 bg-light text-center h-100 d-flex flex-column justify-content-between">
                             <div>
-                                <div class="small fw-bold text-muted text-uppercase mb-2">Foto Bukti Transfer</div>
-                                <img id="vpProofImg" src="" alt="Bukti Transfer" class="img-fluid rounded-3 shadow-sm mb-2" style="max-height: 280px; object-fit: contain;">
+                                <div class="small fw-bold text-muted text-uppercase mb-2">Foto Bukti Transfer Pengguna</div>
+                                <img id="vpProofImg" src="" alt="Bukti Transfer" class="img-fluid rounded-3 shadow-sm mb-2" style="max-height: 260px; object-fit: contain;">
                             </div>
                             <div class="d-flex flex-wrap justify-content-center gap-2 mt-2">
                                 <a id="vpProofFullLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
@@ -913,6 +922,9 @@
                                 <button type="button" id="vpScanBtn" class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="triggerProofScanFromModal()">
                                     <i class="bx bx-scan me-1"></i>Pindai Nominal
                                 </button>
+                                <a id="vpReceiptLink" href="#" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 w-100">
+                                    <i class="bx bx-receipt me-1"></i>Lihat Bukti Transaksi SegiDaerah
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -1102,6 +1114,7 @@
             isCash: d.isCash === '1',
             canReject: d.canReject === '1',
             proofUrl: d.proofUrl || '',
+            receiptUrl: d.receiptUrl || '',
             scanStatus: d.scanStatus || '',
             scanAmount: d.scanAmount || '',
             scanMessage: d.scanMessage || ''
@@ -1120,6 +1133,23 @@
 
         const proofCol = document.getElementById('vpProofCol');
         const formCol = document.getElementById('vpFormCol');
+        const reminderBanner = document.getElementById('vpReminderBanner');
+        const receiptLink = document.getElementById('vpReceiptLink');
+        if (receiptLink) {
+            if (currentVerifyCtx.receiptUrl) {
+                receiptLink.href = currentVerifyCtx.receiptUrl;
+                receiptLink.classList.remove('d-none');
+            } else {
+                receiptLink.classList.add('d-none');
+            }
+        }
+        if (reminderBanner) {
+            if (currentVerifyCtx.isCash) {
+                reminderBanner.classList.add('d-none');
+            } else {
+                reminderBanner.classList.remove('d-none');
+            }
+        }
         if (currentVerifyCtx.proofUrl) {
             proofCol.classList.remove('d-none');
             formCol.className = 'col-12 col-md-7';

@@ -11,6 +11,13 @@
     $pProof = $request->paymentProofPath();
     $pScan = $request->proofScanSummary();
     $pUid = $pType . '-' . $request->id;
+    $pReceiptUrl = match ($pType) {
+        'rental' => route('receipt.rental.view', $request->id),
+        'gas' => route('receipt.gas.view', $request->id),
+        'mobil' => route('receipt.mobil.view', $request->id),
+        'fasilitas' => route('receipt.fasilitas.view', $request->id),
+        default => null,
+    };
 @endphp
 
 @if($pSubtotal > 0)
@@ -52,6 +59,17 @@
     @endif
 
     @if($pIsCash || $pProof)
+        @if(!$pIsCash)
+        <div class="alert alert-warning border-warning-subtle py-2 px-3 small rounded-3 mb-3">
+            <div class="fw-bold text-dark mb-1">
+                <i class="bx bx-shield-quarter text-warning me-1"></i>Wajib Cek Ulang Bukti Transfer
+            </div>
+            <div class="text-dark" style="line-height: 1.45;">
+                Mohon periksa kembali foto bukti pembayaran transfer yang diunggah oleh pengguna. Pastikan <strong>nominal pada bukti transfer &amp; mutasi rekening</strong> benar-benar sama dengan nominal pada <strong>Bukti Transaksi yang dicetak oleh SegiDaerah (Rp {{ number_format($pSubtotal, 0, ',', '.') }})</strong> sebelum mengonfirmasi pembayaran.
+            </div>
+        </div>
+        @endif
+
         <div class="border rounded-3 p-3 mb-3 bg-white" data-payment-verify-box
              data-subtotal="{{ (int) round($pSubtotal) }}"
              data-already-paid="{{ (int) round($pPaid) }}"
@@ -90,6 +108,17 @@
                             <i class="bx bx-scan me-1"></i>Pindai Nominal Bukti
                         </button>
                     </form>
+                    @if($pReceiptUrl)
+                        <a href="{{ $pReceiptUrl }}" target="_blank" class="btn btn-outline-secondary btn-sm w-100 rounded-pill">
+                            <i class="bx bx-receipt me-1"></i>Lihat Bukti Transaksi SegiDaerah
+                        </a>
+                    @endif
+                </div>
+            @elseif($pReceiptUrl)
+                <div class="mt-2">
+                    <a href="{{ $pReceiptUrl }}" target="_blank" class="btn btn-outline-secondary btn-sm w-100 rounded-pill">
+                        <i class="bx bx-receipt me-1"></i>Lihat Bukti Transaksi SegiDaerah
+                    </a>
                 </div>
             @endif
         </div>
