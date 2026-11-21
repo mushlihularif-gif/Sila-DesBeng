@@ -265,14 +265,21 @@
     }
     @media (max-width: 768px) {
         .service-chat-launcher {
-            bottom: 18px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 8px 16px;
-            font-size: 0.82rem;
+            bottom: 20px;
+            left: 14px;
+            right: auto;
+            transform: none;
+            padding: 9px 14px;
+            font-size: 0.78rem;
             gap: 6px;
-            max-width: calc(100vw - 120px);
+            max-width: calc(100vw - 96px);
             box-shadow: 0 6px 18px -3px rgba(2, 132, 199, 0.45);
+        }
+        .service-chat-launcher:hover {
+            transform: translateY(-2px);
+        }
+        .service-chat-launcher:active {
+            transform: translateY(0) scale(0.98);
         }
         .service-chat-launcher .launcher-icon svg {
             width: 18px;
@@ -284,13 +291,13 @@
             text-overflow: ellipsis;
         }
         .service-chat-widget {
-            bottom: 68px;
+            bottom: 72px;
             left: 50%;
             transform: translateX(-50%);
-            width: calc(100vw - 24px);
+            width: calc(100vw - 20px);
             max-width: 360px;
             height: 420px;
-            max-height: calc(100vh - 92px);
+            max-height: calc(100vh - 96px);
             border-radius: 1rem;
         }
         .service-chat-widget.is-expanded {
@@ -299,6 +306,17 @@
             max-width: calc(100vw - 16px);
             height: calc(100vh - 80px);
             max-height: calc(100vh - 80px);
+        }
+    }
+    @media (max-width: 420px) {
+        .service-chat-expand-btn span {
+            display: none;
+        }
+        .service-chat-expand-btn {
+            padding: 5px 7px;
+        }
+        .service-chat-title {
+            font-size: 0.84rem;
         }
     }
     .service-chat-header {

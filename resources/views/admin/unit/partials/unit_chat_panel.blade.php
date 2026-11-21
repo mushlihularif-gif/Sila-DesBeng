@@ -33,18 +33,18 @@
 
 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 wa-chat-container" id="adminUnitChatPanel_{{ $serviceType }}">
     <div class="card-header bg-white border-bottom py-2.5 py-sm-3 px-3 px-sm-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
-        <div class="d-flex align-items-center gap-2">
-            <div class="avatar avatar-sm bg-label-primary text-primary rounded-circle d-flex align-items-center justify-content-center">
+        <div class="d-flex align-items-center gap-2 flex-nowrap wa-no-wrap min-w-0">
+            <div class="avatar avatar-sm bg-label-primary text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0">
                 <i class="bx bx-chat fs-5"></i>
             </div>
-            <div>
-                <h5 class="fw-bold mb-0 fs-6 fs-sm-5 text-dark">Chat Warga &bull; {{ $chatServiceTitle }}</h5>
+            <div class="min-w-0">
+                <h5 class="fw-bold mb-0 fs-6 fs-sm-5 text-dark text-truncate">Chat Warga &bull; {{ $chatServiceTitle }}</h5>
                 <small class="text-muted d-none d-sm-block">Komunikasi langsung real-time seputar unit {{ strtolower($chatServiceTitle) }}</small>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-2 flex-shrink-0">
-            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" onclick="refreshAdminUnitSessions('{{ $serviceType }}', false)" title="Perbarui daftar obrolan">
-                <i class="bx bx-refresh me-1"></i>Segarkan
+        <div class="d-flex align-items-center gap-2 flex-wrap flex-shrink-0 w-100 w-sm-auto justify-content-between justify-content-sm-end">
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1" onclick="refreshAdminUnitSessions('{{ $serviceType }}', false)" title="Perbarui daftar obrolan">
+                <i class="bx bx-refresh"></i><span>Segarkan</span>
             </button>
             <span class="badge bg-label-primary px-3 py-1.5 py-sm-2 rounded-pill font-semibold text-nowrap" id="adminUnitTotalSessions_{{ $serviceType }}">
                 Total Sesi: {{ count($chats ?? []) }}
@@ -55,8 +55,8 @@
     <div class="card-body p-0">
         <div class="row g-0">
             <!-- Left Panel: Chat List -->
-            <div class="col-12 col-md-4 col-lg-4 border-end bg-white" style="min-height: 560px;">
-                <div class="p-3 border-bottom" style="background: #f8fafc;">
+            <div class="col-12 col-md-4 col-lg-4 bg-white wa-chat-sidebar">
+                <div class="p-2.5 p-sm-3 border-bottom" style="background: #f8fafc;">
                     <div class="input-group input-group-merge">
                         <span class="input-group-text bg-white border-0 ps-3"><i class="bx bx-search text-muted"></i></span>
                         <input type="text" id="searchUnitChatInput_{{ $serviceType }}" class="form-control bg-white border-0 ps-2 rounded-pill shadow-2xs" placeholder="Cari nama warga..." oninput="filterAdminUnitChats('{{ $serviceType }}')" style="font-size: 0.88rem;">
@@ -80,7 +80,7 @@
                             $displayUnread = $hasVisibleAfterClear ? (int) $chat->unread_admin_count : 0;
                             $needsReply = $hasVisibleAfterClear && $chat->status !== 'resolved' && ($displayUnread > 0 || ($chat->status === 'escalated' && $lastSender !== 'admin'));
                         @endphp
-                        <div class="admin-unit-chat-item-{{ $serviceType }} p-3 border-bottom d-flex align-items-center gap-3 cursor-pointer transition-all wa-chat-item"
+                        <div class="admin-unit-chat-item-{{ $serviceType }} p-2.5 p-sm-3 border-bottom d-flex align-items-center gap-2.5 gap-sm-3 flex-nowrap wa-no-wrap cursor-pointer transition-all wa-chat-item"
                              id="unitChatItem_{{ $serviceType }}_{{ $chat->id }}"
                              onclick="loadAdminUnitChat('{{ $serviceType }}', {{ $chat->id }})"
                              data-session-id="{{ $chat->id }}"
@@ -102,26 +102,26 @@
                             </div>
 
                             <div class="flex-grow-1 min-w-0">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <h6 class="mb-0 text-truncate fw-bold text-dark" style="font-size: 0.92rem;">
+                                <div class="d-flex justify-content-between align-items-center gap-2 flex-nowrap wa-no-wrap mb-1">
+                                    <h6 class="mb-0 text-truncate fw-bold text-dark" style="font-size: 0.9rem;">
                                         {{ $displayName }}
                                     </h6>
-                                    <span class="text-muted" style="font-size: 11px;">
+                                    <span class="text-muted flex-shrink-0" style="font-size: 11px;">
                                         {{ $chat->last_message_at ? $chat->last_message_at->format('H:i') : ($chat->updated_at ? $chat->updated_at->format('H:i') : '') }}
                                     </span>
                                 </div>
 
                                 @if($chat->item_reference)
-                                    <div class="badge bg-label-info py-0 px-2 mb-1 text-truncate" style="font-size: 10px; max-width: 175px;">
+                                    <div class="badge bg-label-info py-0 px-2 mb-1 text-truncate d-inline-block" style="font-size: 10px; max-width: 100%;">
                                         <i class="bx bx-bookmark me-1"></i>{{ $chat->item_label }}
                                     </div>
                                 @endif
 
-                                <p class="mb-0 text-muted small text-truncate" style="max-width: 180px; font-size: 0.8rem;" id="unitChatPreview_{{ $serviceType }}_{{ $chat->id }}">
+                                <p class="mb-0 text-muted small text-truncate" style="max-width: 100%; font-size: 0.8rem;" id="unitChatPreview_{{ $serviceType }}_{{ $chat->id }}">
                                     {{ $hasVisibleAfterClear ? ($chat->last_message ?? 'Memulai percakapan...') : 'Obrolan dibersihkan (tampilan Anda)' }}
                                 </p>
 
-                                <div class="d-flex align-items-center gap-1 mt-1.5">
+                                <div class="d-flex align-items-center gap-1 mt-1.5 flex-nowrap wa-no-wrap">
                                     @if($chat->status === 'resolved')
                                         <span class="badge bg-label-success py-0.5 px-2" style="font-size: 9.5px;" id="unitChatBadge_{{ $serviceType }}_{{ $chat->id }}">Selesai</span>
                                     @elseif($needsReply)
@@ -143,7 +143,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="text-center py-5 text-muted" id="adminUnitEmptyList_{{ $serviceType }}">
+                        <div class="text-center py-5 px-3 text-muted" id="adminUnitEmptyList_{{ $serviceType }}">
                             <i class="bx bx-message-rounded-x fs-1 opacity-50 mb-2"></i>
                             <p class="small mb-0">Belum ada obrolan dari warga untuk layanan ini.</p>
                         </div>
@@ -152,10 +152,10 @@
             </div>
 
             <!-- Right Panel: Active Chat Stream -->
-            <div class="col-12 col-md-8 col-lg-8 d-flex flex-column bg-white position-relative" style="min-height: 560px;">
+            <div class="col-12 col-md-8 col-lg-8 d-flex flex-column bg-white position-relative wa-chat-main">
 
                 <!-- 1. EMPTY STATE -->
-                <div id="adminUnitNoChatSelected_{{ $serviceType }}" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-center p-4 my-auto" style="background: #f8fafc; min-height: 560px;">
+                <div id="adminUnitNoChatSelected_{{ $serviceType }}" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-center p-4 my-auto wa-chat-empty" style="background: #f8fafc;">
                     <div class="avatar avatar-xl bg-label-primary rounded-circle mb-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 70px; height: 70px;">
                         <i class="bx bx-conversation text-primary" style="font-size: 36px;"></i>
                     </div>
@@ -163,7 +163,7 @@
                     <p class="text-muted small mb-3" style="max-width: 320px;">
                         Pilih salah satu percakapan di sebelah kiri untuk membaca dan membalas pesan warga secara langsung.
                     </p>
-                    <div class="badge bg-white border text-muted px-3 py-1.5 rounded-pill shadow-2xs font-normal" style="font-size: 11px;">
+                    <div class="badge bg-white border text-muted px-3 py-1.5 rounded-pill shadow-2xs font-normal text-wrap" style="font-size: 11px;">
                         <i class="bx bx-shield-quarter text-success me-1"></i> Terhubung langsung ke sistem layanan wilayah
                     </div>
                 </div>
@@ -172,63 +172,66 @@
                 <div id="adminUnitActiveChatWrapper_{{ $serviceType }}" class="d-none flex-column flex-grow-1 w-100">
 
                     <!-- Chat Header -->
-                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white" style="min-height: 68px;">
-                        <div class="d-flex align-items-center gap-3">
+                    <div class="p-2.5 p-sm-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2 bg-white wa-active-header">
+                        <div class="d-flex align-items-center gap-2 gap-sm-3 flex-nowrap wa-no-wrap min-w-0">
+                            <button type="button" class="btn btn-sm btn-icon btn-light border rounded-circle d-md-none flex-shrink-0 wa-mobile-back-btn" onclick="closeAdminUnitMobileChat('{{ $serviceType }}')" title="Kembali ke daftar obrolan" aria-label="Kembali ke daftar obrolan">
+                                <i class="bx bx-arrow-back fs-5"></i>
+                            </button>
                             <div class="position-relative flex-shrink-0">
-                                <div class="avatar avatar-md" id="unitActiveChatAvatarWrap_{{ $serviceType }}">
+                                <div class="avatar wa-active-avatar" id="unitActiveChatAvatarWrap_{{ $serviceType }}">
                                     <div class="avatar-initial rounded-circle bg-label-primary fw-bold" id="unitActiveChatAvatar_{{ $serviceType }}">-</div>
                                 </div>
                                 <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle" id="unitActiveChatOnlineDot_{{ $serviceType }}" style="width: 10px; height: 10px;"></span>
                             </div>
-                            <div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <h6 class="mb-0 fw-bold text-dark fs-6" id="unitActiveChatUserName_{{ $serviceType }}">-</h6>
-                                    <span class="badge py-0.5 px-2 fw-semibold d-none" style="font-size: 10px;" id="unitActiveChatStatusBadge_{{ $serviceType }}"></span>
+                            <div class="min-w-0 flex-grow-1">
+                                <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                    <h6 class="mb-0 fw-bold text-dark text-truncate wa-active-name" id="unitActiveChatUserName_{{ $serviceType }}">-</h6>
+                                    <span class="badge py-0.5 px-2 fw-semibold d-none flex-shrink-0" style="font-size: 10px;" id="unitActiveChatStatusBadge_{{ $serviceType }}"></span>
                                 </div>
-                                <div class="d-flex align-items-center gap-1.5 mt-0.5" id="unitActiveChatSubtitleWrap_{{ $serviceType }}">
-                                    <span class="text-success small fw-medium" style="font-size: 11.5px;">
-                                        <i class="bx bxs-circle me-1" style="font-size: 7px;"></i>Online
+                                <div class="d-flex align-items-center gap-1 mt-0.5 flex-nowrap wa-no-wrap" id="unitActiveChatSubtitleWrap_{{ $serviceType }}">
+                                    <span class="text-success small fw-medium text-nowrap" style="font-size: 11px;">
+                                        <i class="bx bxs-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>Online
                                     </span>
                                     <span class="text-muted opacity-50">&bull;</span>
-                                    <span class="text-muted small" style="font-size: 11.5px;">Warga Terhubung</span>
+                                    <span class="text-muted small text-truncate" style="font-size: 11px;">Warga Terhubung</span>
                                 </div>
                             </div>
                         </div>
-                        <div id="adminUnitChatActions_{{ $serviceType }}" class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
-                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 shadow-2xs d-inline-flex align-items-center gap-1 fw-semibold" onclick="clearAdminUnitActiveChat('{{ $serviceType }}')" title="Bersihkan chat hanya di tampilan Anda (tidak menghapus riwayat warga)">
-                                <i class="bx bx-trash fs-6"></i>
-                                <span class="d-none d-sm-inline">Bersihkan</span>
+                        <div id="adminUnitChatActions_{{ $serviceType }}" class="d-flex align-items-center gap-1.5 gap-sm-2 flex-nowrap wa-no-wrap justify-content-end flex-shrink-0 wa-active-actions">
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2.5 px-sm-3 py-1 shadow-2xs d-inline-flex align-items-center justify-content-center gap-1 fw-semibold flex-fill flex-md-grow-0 text-nowrap" onclick="clearAdminUnitActiveChat('{{ $serviceType }}')" title="Bersihkan chat hanya di tampilan Anda (tidak menghapus riwayat warga)">
+                                <i class="bx bx-trash"></i>
+                                <span>Bersihkan</span>
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1.5 shadow-2xs d-inline-flex align-items-center gap-1.5 fw-semibold" onclick="resolveAdminUnitActiveChat('{{ $serviceType }}')">
-                                <i class="bx bx-check-double fs-6"></i>
-                                <span>Tandai Selesai</span>
+                            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-2.5 px-sm-3 py-1 shadow-2xs d-inline-flex align-items-center justify-content-center gap-1 fw-semibold flex-fill flex-md-grow-0 text-nowrap" onclick="resolveAdminUnitActiveChat('{{ $serviceType }}')">
+                                <i class="bx bx-check-double"></i>
+                                <span>Selesai</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Chat Stream Messages -->
-                    <div class="flex-grow-1 p-3 p-sm-4 overflow-auto d-flex flex-column gap-2" id="adminUnitChatMessagesStream_{{ $serviceType }}"
-                         style="height: 460px; min-height: 400px; background-color: #efeae2; background-image: radial-gradient(rgba(17, 27, 33, 0.06) 1px, transparent 0); background-size: 18px 18px;">
+                    <div class="flex-grow-1 p-2.5 p-sm-4 overflow-auto d-flex flex-column gap-2 wa-chat-stream" id="adminUnitChatMessagesStream_{{ $serviceType }}"
+                         style="background-color: #efeae2; background-image: radial-gradient(rgba(17, 27, 33, 0.06) 1px, transparent 0); background-size: 18px 18px;">
                     </div>
 
                     <!-- Inline Reply Error Banner -->
                     <div id="adminUnitChatError_{{ $serviceType }}" class="alert alert-danger rounded-0 border-0 py-2 px-3 mb-0 small d-none" role="alert"></div>
 
                     <!-- Chat Input Area -->
-                    <div class="p-2.5 p-sm-3 border-top" id="adminUnitChatInputContainer_{{ $serviceType }}" style="background: #f0f2f5;">
+                    <div class="p-2 p-sm-3 border-top" id="adminUnitChatInputContainer_{{ $serviceType }}" style="background: #f0f2f5;">
                         <!-- Quick reply template chips -->
-                        <div class="d-flex align-items-center gap-1.5 mb-2 overflow-auto pb-1" style="white-space: nowrap;">
-                            <span class="text-muted small me-1 flex-shrink-0" style="font-size: 11px;"><i class="bx bx-zap text-warning me-1"></i>Balasan Cepat:</span>
+                        <div class="d-flex align-items-center gap-1.5 mb-2 overflow-auto pb-1 flex-nowrap wa-no-wrap" style="white-space: nowrap; scrollbar-width: none;">
+                            <span class="text-muted small me-1 flex-shrink-0" style="font-size: 11px;"><i class="bx bx-zap text-warning me-1"></i>Cepat:</span>
                             @foreach($adminQuickReplies as $qr)
-                                <button type="button" class="btn btn-xs btn-white bg-white border rounded-pill shadow-2xs text-secondary px-2.5 py-1" onclick="insertAdminQuickReply('{{ $serviceType }}', '{{ addslashes($qr['text']) }}')" style="font-size: 11px;">{{ $qr['label'] }}</button>
+                                <button type="button" class="btn btn-xs btn-white bg-white border rounded-pill shadow-2xs text-secondary px-2.5 py-1 flex-shrink-0 text-nowrap" onclick="insertAdminQuickReply('{{ $serviceType }}', '{{ addslashes($qr['text']) }}')" style="font-size: 11px;">{{ $qr['label'] }}</button>
                             @endforeach
                         </div>
 
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="flex-grow-1 position-relative">
-                                <input type="text" id="adminUnitReplyInput_{{ $serviceType }}" class="form-control rounded-pill px-3 py-2 bg-white border shadow-2xs" placeholder="Ketik balasan untuk warga (tekan Enter untuk kirim)..." autocomplete="off" onkeypress="if(event.key === 'Enter') sendAdminUnitReply('{{ $serviceType }}')" style="font-size: 0.92rem; border-color: #d1d7db;">
+                        <div class="d-flex align-items-center gap-2 flex-nowrap wa-no-wrap">
+                            <div class="flex-grow-1 min-w-0 position-relative">
+                                <input type="text" id="adminUnitReplyInput_{{ $serviceType }}" class="form-control rounded-pill px-3 py-2 bg-white border shadow-2xs" placeholder="Ketik balasan untuk warga..." autocomplete="off" onkeypress="if(event.key === 'Enter') sendAdminUnitReply('{{ $serviceType }}')" style="font-size: 0.9rem; border-color: #d1d7db;">
                             </div>
-                            <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" id="adminUnitReplyBtn_{{ $serviceType }}" type="button" onclick="sendAdminUnitReply('{{ $serviceType }}')" style="width: 42px; height: 42px;" title="Kirim Pesan">
+                            <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm p-0" id="adminUnitReplyBtn_{{ $serviceType }}" type="button" onclick="sendAdminUnitReply('{{ $serviceType }}')" style="width: 40px; height: 40px;" title="Kirim Pesan">
                                 <i class="bx bx-send fs-5"></i>
                             </button>
                         </div>
@@ -248,19 +251,107 @@
 .wa-chat-item:hover {
     background-color: #f8fafc !important;
 }
+.wa-active-avatar {
+    width: 40px;
+    height: 40px;
+}
+.wa-active-name {
+    font-size: 0.95rem;
+    max-width: 100%;
+}
+.wa-chat-stream {
+    height: 460px;
+    min-height: 380px;
+}
+.wa-msg-bubble-wrap {
+    max-width: 78%;
+    min-width: 0;
+}
+.wa-msg-text {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.wa-system-notice {
+    max-width: 82%;
+    font-size: 11.5px;
+    color: #54656f;
+    line-height: 1.45;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 12px !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+@media (min-width: 768px) {
+    .wa-chat-sidebar {
+        min-height: 540px;
+        border-right: 1px solid #eceef1;
+    }
+    .wa-chat-main,
+    .wa-chat-empty {
+        min-height: 540px;
+    }
+}
+@media (max-width: 767.98px) {
+    .wa-chat-container:not(.wa-mobile-chat-open) .wa-chat-main {
+        display: none !important;
+    }
+    .wa-chat-container.wa-mobile-chat-open .wa-chat-sidebar {
+        display: none !important;
+    }
+    .wa-chat-container.wa-mobile-chat-open .wa-chat-main {
+        display: flex !important;
+    }
+    .wa-contact-list {
+        max-height: 430px !important;
+    }
+    .wa-mobile-back-btn {
+        width: 34px !important;
+        height: 34px !important;
+        padding: 0 !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    .wa-active-avatar {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    .wa-active-name {
+        font-size: 0.88rem !important;
+    }
+    .wa-active-actions {
+        padding-top: 0.45rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    .wa-active-actions .btn {
+        font-size: 0.76rem !important;
+        padding: 0.35rem 0.65rem !important;
+    }
+    .wa-chat-stream {
+        height: 370px !important;
+        min-height: 300px !important;
+    }
+    .wa-msg-bubble-wrap {
+        max-width: 88% !important;
+    }
+    .wa-system-notice {
+        max-width: 94% !important;
+        font-size: 11px !important;
+    }
+}
 .admin-unit-msg-bubble {
     opacity: 1 !important;
     visibility: visible !important;
     transform: none !important;
 }
 .unit-chat-user-bubble {
-    padding: 14px 16px 10px;
+    padding: 11px 13px 9px;
 }
 .unit-chat-product-quote {
     width: 100%;
     box-sizing: border-box;
-    padding: 12px;
-    margin-bottom: 12px;
+    padding: 10px;
+    margin-bottom: 10px;
     background: rgba(105, 108, 255, 0.08);
     border-left: 4px solid #696cff;
 }
@@ -367,7 +458,7 @@
                 : `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca); font-size: 14px;">${escapeHtml(initial)}</div>`;
 
             const itemBadgeHtml = chat.item_label
-                ? `<div class="badge bg-label-info py-0 px-2 mb-1 text-truncate" style="font-size: 10px; max-width: 175px;"><i class="bx bx-bookmark me-1"></i>${escapeHtml(chat.item_label)}</div>`
+                ? `<div class="badge bg-label-info py-0 px-2 mb-1 text-truncate d-inline-block" style="font-size: 10px; max-width: 100%;"><i class="bx bx-bookmark me-1"></i>${escapeHtml(chat.item_label)}</div>`
                 : '';
 
             let statusBadgeHtml = `<span class="badge bg-label-secondary py-0.5 px-2" style="font-size: 9.5px;" id="unitChatBadge_${service}_${chat.id}">Aktif</span>`;
@@ -385,7 +476,7 @@
                 : `<span class="badge bg-success rounded-pill ms-auto py-0.5 px-2 d-none" style="font-size: 10px;" id="unitChatUnread_${service}_${chat.id}"></span>`;
 
             return `
-                <div class="admin-unit-chat-item-${service} p-3 border-bottom d-flex align-items-center gap-3 cursor-pointer transition-all wa-chat-item"
+                <div class="admin-unit-chat-item-${service} p-2.5 p-sm-3 border-bottom d-flex align-items-center gap-2.5 gap-sm-3 flex-nowrap wa-no-wrap cursor-pointer transition-all wa-chat-item"
                      id="unitChatItem_${service}_${chat.id}"
                      onclick="loadAdminUnitChat('${service}', ${chat.id})"
                      data-session-id="${chat.id}"
@@ -396,13 +487,13 @@
                         <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle" style="width: 10px; height: 10px;"></span>
                     </div>
                     <div class="flex-grow-1 min-w-0">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <h6 class="mb-0 text-truncate fw-bold text-dark" style="font-size: 0.92rem;">${escapeHtml(name)}</h6>
-                            <span class="text-muted" style="font-size: 11px;">${escapeHtml(chat.last_message_time || '')}</span>
+                        <div class="d-flex justify-content-between align-items-center gap-2 flex-nowrap wa-no-wrap mb-1">
+                            <h6 class="mb-0 text-truncate fw-bold text-dark" style="font-size: 0.9rem;">${escapeHtml(name)}</h6>
+                            <span class="text-muted flex-shrink-0" style="font-size: 11px;">${escapeHtml(chat.last_message_time || '')}</span>
                         </div>
                         ${itemBadgeHtml}
-                        <p class="mb-0 text-muted small text-truncate" style="max-width: 180px; font-size: 0.8rem;" id="unitChatPreview_${service}_${chat.id}">${escapeHtml(chat.last_message || 'Memulai percakapan...')}</p>
-                        <div class="d-flex align-items-center gap-1 mt-1.5">
+                        <p class="mb-0 text-muted small text-truncate" style="max-width: 100%; font-size: 0.8rem;" id="unitChatPreview_${service}_${chat.id}">${escapeHtml(chat.last_message || 'Memulai percakapan...')}</p>
+                        <div class="d-flex align-items-center gap-1 mt-1.5 flex-nowrap wa-no-wrap">
                             ${statusBadgeHtml}
                             ${unreadHtml}
                         </div>
@@ -413,6 +504,13 @@
 
         container.innerHTML = html;
         filterAdminUnitChats(service);
+    }
+
+    function closeAdminUnitMobileChat(service) {
+        const panel = document.getElementById(`adminUnitChatPanel_${service}`);
+        if (panel) {
+            panel.classList.remove('wa-mobile-chat-open');
+        }
     }
 
     function refreshAdminUnitSessions(service, autoSelectIfVisible = false) {
@@ -442,7 +540,7 @@
                 updateAdminUnitTabBadge(service, res.data.total_unread ?? 0);
                 renderAdminUnitSessionList(service, sessions);
 
-                if (autoSelectIfVisible && !state.activeSessionId && sessions.length > 0 && isAdminUnitChatVisible(service)) {
+                if (autoSelectIfVisible && window.innerWidth >= 768 && !state.activeSessionId && sessions.length > 0 && isAdminUnitChatVisible(service)) {
                     loadAdminUnitChat(service, sessions[0].id, false);
                 }
             }
@@ -461,6 +559,10 @@
 
         if (!isSilent) {
             showAdminUnitError(service, '');
+            const panel = document.getElementById(`adminUnitChatPanel_${service}`);
+            if (panel) {
+                panel.classList.add('wa-mobile-chat-open');
+            }
         }
 
         const emptyState = document.getElementById(`adminUnitNoChatSelected_${service}`);
@@ -636,24 +738,24 @@
 
             if (msg.sender_type === 'admin') {
                 const senderLabel = msg.sender_name ? `<div class="fw-semibold mb-1" style="font-size: 10.5px; color: #0f766e;">${escapeHtml(msg.sender_name)}</div>` : '';
-                bubble.className = 'admin-unit-msg-bubble chat-bubble-pop d-flex justify-content-end align-items-end gap-2 mb-2';
+                bubble.className = 'admin-unit-msg-bubble chat-bubble-pop d-flex justify-content-end align-items-end gap-2 flex-nowrap wa-no-wrap mb-2';
                 bubble.innerHTML = `
-                    <div style="max-width: 78%;">
+                    <div class="wa-msg-bubble-wrap">
                         <div class="p-2.5 px-3 rounded-3 shadow-xs text-dark" style="background: #d9fdd3; border-bottom-right-radius: 2px !important; border: 1px solid rgba(0,0,0,0.04);">
                             ${senderLabel}
-                            <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
-                            <div class="d-flex align-items-center justify-content-end gap-1 mt-1" style="font-size: 10px; color: #667781;">
+                            <p class="mb-0 wa-msg-text" style="font-size: 0.88rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
+                            <div class="d-flex align-items-center justify-content-end gap-1 mt-1 flex-nowrap wa-no-wrap" style="font-size: 10px; color: #667781;">
                                 <span>${time}</span>
                                 <i class="bx bx-check-double text-primary" style="font-size: 15px;"></i>
                             </div>
                         </div>
                     </div>
-                    <div class="avatar avatar-xs flex-shrink-0 mb-1">
+                    <div class="avatar avatar-xs flex-shrink-0 mb-1 d-none d-sm-flex">
                         <div class="avatar-initial rounded-circle bg-primary text-white fw-bold shadow-2xs" style="font-size: 10px;">AD</div>
                     </div>
                 `;
             } else if (msg.sender_type === 'user') {
-                bubble.className = 'admin-unit-msg-bubble chat-bubble-pop d-flex justify-content-start align-items-end gap-2 mb-2';
+                bubble.className = 'admin-unit-msg-bubble chat-bubble-pop d-flex justify-content-start align-items-end gap-2 flex-nowrap wa-no-wrap mb-2';
 
                 let userAvatarHtml = userPhoto
                     ? `<img src="${escapeHtml(userPhoto)}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.style.display='none'">`
@@ -667,13 +769,13 @@
                     const prodUrl = escapeHtml(safeChatProductUrl(productInfo.url));
 
                     quotedHtml = `
-                        <div class="unit-chat-product-quote rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-2xs">
-                            <div class="d-flex align-items-center gap-3 overflow-hidden min-w-0">
-                                ${prodImg ? `<img src="${prodImg}" alt="${prodTitle}" class="rounded flex-shrink-0 shadow-2xs" style="width: 48px; height: 48px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
+                        <div class="unit-chat-product-quote rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-2xs">
+                            <div class="d-flex align-items-center gap-2 overflow-hidden min-w-0 flex-nowrap wa-no-wrap">
+                                ${prodImg ? `<img src="${prodImg}" alt="${prodTitle}" class="rounded flex-shrink-0 shadow-2xs" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
                                 <div class="overflow-hidden min-w-0">
-                                    <div class="text-uppercase text-muted fw-bold mb-1" style="font-size: 9.5px; letter-spacing: 0.5px;">Unit Layanan yang Ditanyakan</div>
-                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.9rem;">${prodTitle}</div>
-                                    ${prodPrice ? `<div class="text-success fw-bold small mt-1" style="font-size: 0.84rem;">${prodPrice}</div>` : ''}
+                                    <div class="text-uppercase text-muted fw-bold mb-0.5" style="font-size: 9px; letter-spacing: 0.4px;">Unit Layanan yang Ditanyakan</div>
+                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;">${prodTitle}</div>
+                                    ${prodPrice ? `<div class="text-success fw-bold small mt-0.5" style="font-size: 0.8rem;">${prodPrice}</div>` : ''}
                                 </div>
                             </div>
                             ${prodUrl ? `
@@ -688,13 +790,13 @@
                 }
 
                 bubble.innerHTML = `
-                    <div class="avatar avatar-xs flex-shrink-0 mb-1">
+                    <div class="avatar avatar-xs flex-shrink-0 mb-1 d-none d-sm-flex">
                         ${userAvatarHtml}
                     </div>
-                    <div style="max-width: 80%;">
+                    <div class="wa-msg-bubble-wrap">
                         <div class="unit-chat-user-bubble bg-white text-dark rounded-3 shadow-xs border" style="border-bottom-left-radius: 2px !important; border-color: rgba(0,0,0,0.06) !important;">
                             ${quotedHtml}
-                            <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
+                            <p class="mb-0 wa-msg-text" style="font-size: 0.88rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
                             <div class="text-end mt-1" style="font-size: 10px; color: #667781;">
                                 <span>${time}</span>
                             </div>
@@ -704,9 +806,9 @@
             } else {
                 bubble.className = 'admin-unit-msg-bubble chat-bubble-pop d-flex justify-content-center my-2';
                 bubble.innerHTML = `
-                    <div class="bg-white border rounded-pill px-3 py-1.5 shadow-2xs d-flex align-items-center gap-1.5 text-center text-wrap" style="max-width: 82%; font-size: 11.5px; color: #54656f; line-height: 1.4; background: rgba(255,255,255,0.95) !important;">
-                        <i class="bx bx-info-circle text-primary flex-shrink-0" style="font-size: 14px;"></i>
-                        <span>${msgText}</span>
+                    <div class="bg-white border px-3 py-2 shadow-2xs d-flex align-items-start gap-2 flex-nowrap wa-no-wrap text-start wa-system-notice">
+                        <i class="bx bx-info-circle text-primary flex-shrink-0 mt-0.5" style="font-size: 15px;"></i>
+                        <span class="min-w-0">${msgText}</span>
                     </div>
                 `;
             }
@@ -948,9 +1050,9 @@
             }
         }, 5000);
 
-        // Jika tab Chat sedang aktif sejak awal, langsung buka sesi pertama
+        // Jika tab Chat sedang aktif sejak awal di desktop, langsung buka sesi pertama (di HP tampilkan daftar dulu)
         @if($firstChatId)
-        if (isAdminUnitChatVisible(svc)) {
+        if (window.innerWidth >= 768 && isAdminUnitChatVisible(svc)) {
             loadAdminUnitChat(svc, {{ $firstChatId }}, false);
         }
         @endif

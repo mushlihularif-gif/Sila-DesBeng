@@ -382,6 +382,17 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
         }
     }
+    @media (max-width: 420px) {
+        .chatbot-expand-btn span {
+            display: none;
+        }
+        .chatbot-expand-btn {
+            padding: 5px 7px;
+        }
+        .chatbot-title {
+            font-size: 14px;
+        }
+    }
 </style>
 @endpush
 

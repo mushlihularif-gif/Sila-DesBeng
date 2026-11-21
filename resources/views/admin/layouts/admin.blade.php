@@ -1245,15 +1245,68 @@
         }
 
         @media (max-width: 575.98px) {
+            #layout-navbar.layout-navbar {
+                margin-left: 0.75rem !important;
+                margin-right: 0.75rem !important;
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
             .container-xxl.container-p-y {
-                padding-left: 0.85rem !important;
-                padding-right: 0.85rem !important;
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
             }
             .container-xxl h4.fw-bold {
-                font-size: 1.12rem !important;
+                font-size: 1.08rem !important;
                 line-height: 1.35 !important;
                 word-break: break-word;
             }
+            /* Cegah badge panjang (nama lokasi/pangkalan/unit) memotong kanan layar HP */
+            .container-xxl .badge:not(.rounded-circle):not(.badge-center) {
+                white-space: normal !important;
+                max-width: 100% !important;
+                line-height: 1.3 !important;
+                overflow-wrap: anywhere !important;
+                text-align: left;
+            }
+            /* Banner panduan info (bg-label-primary / bg-label-info) tetap rapi ikon di samping teks */
+            .container-xxl .card.bg-label-primary > .card-body,
+            .container-xxl .card.bg-label-info > .card-body {
+                padding: 0.85rem !important;
+                gap: 0.7rem !important;
+                flex-wrap: nowrap !important;
+            }
+            .container-xxl .card.bg-label-primary > .card-body > .rounded-circle,
+            .container-xxl .card.bg-label-info > .card-body > .rounded-circle {
+                width: 38px !important;
+                height: 38px !important;
+                min-width: 38px !important;
+            }
+            .container-xxl .card.bg-label-primary > .card-body > .rounded-circle i,
+            .container-xxl .card.bg-label-info > .card-body > .rounded-circle i {
+                font-size: 1.15rem !important;
+            }
+            .container-xxl .card.bg-label-primary h6,
+            .container-xxl .card.bg-label-info h6 {
+                font-size: 0.88rem !important;
+            }
+            .container-xxl .card.bg-label-primary p.small,
+            .container-xxl .card.bg-label-info p.small {
+                font-size: 0.76rem !important;
+                line-height: 1.45 !important;
+            }
+            /* Tab pill admin nyaman di layar 320px - 575px */
+            .container-xxl .nav-pills .nav-link {
+                padding: 0.4rem 0.72rem !important;
+                font-size: 0.78rem !important;
+            }
+        }
+        @media (max-width: 399.98px) {
+            .container-xxl .nav-pills .nav-link {
+                padding: 0.36rem 0.6rem !important;
+                font-size: 0.74rem !important;
+            }
+        }
+        @media (max-width: 575.98px) {
             /* Kartu KPI 2 kolom (col-6): cegah teks terpotong titik-titik & sesuaikan ukuran ikon */
             .req-stat-card,
             .proof-stat-card,
@@ -1293,26 +1346,38 @@
                 font-size: 1.15rem !important;
             }
 
-            /* Kartu KPI 3 kolom (col-4): proporsional & sama tinggi di layar 360px */
+            /* Kartu KPI 3 kolom (col-4): proporsional & sama tinggi di layar 320px - 575px */
             .partner-stat-card,
             .supir-stat-card,
             .loc-stat-card,
-            .staff-stat-pill {
-                padding: 0.65rem 0.4rem !important;
+            .staff-stat-pill,
+            .unit-stat-card,
+            .rs-stat-card,
+            .st-kpi-card .card-body {
+                padding: 0.6rem 0.35rem !important;
             }
             .partner-stat-card > span,
             .supir-stat-card > span,
             .loc-stat-card > span,
-            .staff-stat-pill > span {
-                font-size: 0.66rem !important;
+            .staff-stat-pill > span,
+            .unit-stat-card > span,
+            .rs-stat-card > span,
+            .st-kpi-card .st-kpi-label {
+                font-size: 0.63rem !important;
                 line-height: 1.2 !important;
+                display: block;
+                overflow-wrap: break-word;
             }
             .partner-stat-card h4,
             .supir-stat-card h4,
             .loc-stat-card h4,
-            .staff-stat-pill h4 {
-                font-size: 1.15rem !important;
+            .staff-stat-pill h4,
+            .unit-stat-card h4,
+            .rs-stat-card h4,
+            .st-kpi-card h4 {
+                font-size: 1.05rem !important;
                 margin-top: 2px;
+                overflow-wrap: break-word;
             }
 
             /* Proteksi kartu mobile agar email/alamat/teks panjang tidak pernah keluar batas kartu */

@@ -23,49 +23,49 @@
             <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4 mb-6 items-stretch">
                 <!-- Penyewaan Card -->
                 <div class="activity-menu-card active cursor-pointer w-full" role="button" tabindex="0" data-type="rental">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                    <div class="bg-white rounded-xl sm:rounded-2xl py-2.5 px-1.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
                             <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Penyewaan" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Penyewaan</p>
+                        <p class="font-bold text-[11px] sm:text-lg text-gray-800 leading-tight">Penyewaan</p>
                     </div>
                 </div>
 
                 <!-- Pesanan Gas Card -->
                 <div class="activity-menu-card cursor-pointer w-full" role="button" tabindex="0" data-type="gas">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                    <div class="bg-white rounded-xl sm:rounded-2xl py-2.5 px-1.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
                             <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Pesanan Gas" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Pesanan Gas</p>
+                        <p class="font-bold text-[11px] sm:text-lg text-gray-800 leading-tight">Pesanan Gas</p>
                     </div>
                 </div>
 
                 <!-- Penyewaan Transportasi Card -->
                 <div class="activity-menu-card cursor-pointer w-full" role="button" tabindex="0" data-type="mobil">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                    <div class="bg-white rounded-xl sm:rounded-2xl py-2.5 px-1.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
                             <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Transportasi" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Transportasi</p>
+                        <p class="font-bold text-[11px] sm:text-lg text-gray-800 leading-tight">Transportasi</p>
                     </div>
                 </div>
 
                 <!-- Fasilitas Umum Card -->
                 <div class="activity-menu-card cursor-pointer w-full" role="button" tabindex="0" data-type="fasilitas">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                    <div class="bg-white rounded-xl sm:rounded-2xl py-2.5 px-1.5 sm:p-4 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
                             <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas Umum" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Fasilitas Umum</p>
+                        <p class="font-bold text-[11px] sm:text-lg text-gray-800 leading-tight">Fasilitas Umum</p>
                     </div>
                 </div>
 
                 
                 <div class="activity-menu-card cursor-pointer w-full" role="button" tabindex="0" data-type="berita">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-md w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
-                        <img src="{{ asset('Admin/img/kabardaerah/Berita.png') }}" alt="" class="w-9 h-9 sm:w-16 sm:h-16 object-contain mb-2">
-                        <p class="font-bold text-xs sm:text-lg text-gray-800">Berita Daerah</p>
+                    <div class="bg-white rounded-xl sm:rounded-2xl py-2.5 px-1.5 sm:p-4 shadow-md w-full text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                        <img src="{{ asset('Admin/img/kabardaerah/Berita.png') }}" alt="" class="w-9 h-9 sm:w-16 sm:h-16 object-contain mb-1.5 sm:mb-2">
+                        <p class="font-bold text-[11px] sm:text-lg text-gray-800 leading-tight">Berita Daerah</p>
                     </div>
                 </div>
             </div>

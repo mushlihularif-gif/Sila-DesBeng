@@ -37,11 +37,18 @@
             --card-border: rgba(226, 232, 240, 0.8);
         }
 
+        html {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-page);
             color: var(--text-dark);
             min-height: 100vh;
+            width: 100%;
+            max-width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -53,12 +60,14 @@
 
         /* Ambient Background Glow */
         .ambient-blob {
-            position: absolute;
+            position: fixed;
             border-radius: 9999px;
             filter: blur(80px);
             opacity: 0.45;
             pointer-events: none;
             z-index: 0;
+            max-width: 75vw;
+            max-height: 75vw;
         }
         .blob-1 {
             width: 380px;

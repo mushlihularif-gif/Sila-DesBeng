@@ -97,5 +97,6 @@
         .product-image-wrapper { border-radius: .75rem; }
         .catalog-filter-btn { min-height: 2.25rem; padding: .45rem .75rem; font-size: .8rem; }
         .catalog-card-cta { min-height: 2.2rem; margin-top: .75rem; padding: .45rem .5rem; font-size: .75rem; }
+        .product-info .text-right { flex-shrink: 0; white-space: nowrap; }
     }
 </style>

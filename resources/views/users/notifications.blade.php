@@ -6,25 +6,25 @@
     @include('partials.abstract-bg')
 
     <section class="relative z-10 min-h-screen pt-32 pb-16">
-        <div class="max-w-5xl mx-auto px-6 relative z-20">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 relative z-20">
             <!-- Header with Gradient Text (Centered) -->
-            <div class="text-center mb-12 mt-8">
+            <div class="text-center mb-8 sm:mb-12 mt-4 sm:mt-8">
                 <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">
                     Notifikasi
                 </h1>
                 @if($unreadCount > 0)
-                <p class="text-gray-600 mt-2">Anda memiliki <span class="font-bold text-blue-600">{{ $unreadCount }}</span> notifikasi belum dibaca</p>
+                <p class="text-gray-600 text-sm sm:text-base mt-2">Anda memiliki <span class="font-bold text-blue-600">{{ $unreadCount }}</span> notifikasi belum dibaca</p>
                 @endif
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex flex-wrap justify-end mb-6 gap-4">
-                <a href="{{ route('notification-settings.index') }}" class="px-5 py-2.5 border border-blue-500 text-blue-700 bg-white rounded-lg text-sm font-semibold">Atur WhatsApp dan Notifikasi Aplikasi</a>
+            <div class="flex flex-wrap justify-center sm:justify-end mb-6 gap-2.5 sm:gap-4">
+                <a href="{{ route('notification-settings.index') }}" class="px-4 sm:px-5 py-2 sm:py-2.5 border border-blue-500 text-blue-700 bg-white rounded-lg text-xs sm:text-sm font-semibold text-center">Atur WhatsApp &amp; Notifikasi</a>
                 @if($unreadCount > 0)
                 <form action="{{ route('user.notifications.readAll') }}" method="POST">
                     @csrf
-                    <button type="submit" class="px-6 py-2.5 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-all duration-300 shadow-md hover:shadow-lg">
-                        <i class="fas fa-check-double mr-2"></i>Tandai Semua Sudah Dibaca
+                    <button type="submit" class="px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-600 transition-all duration-300 shadow-md hover:shadow-lg">
+                        <i class="fas fa-check-double mr-1.5"></i>Tandai Semua Dibaca
                     </button>
                 </form>
                 @endif
@@ -32,23 +32,23 @@
                 @if($notifications->count() > 0)
                 <button type="button" 
                         id="delete-all-notifications-btn"
-                        class="px-6 py-2.5 bg-red-100 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-200 transition-all duration-300 shadow-md hover:shadow-lg">
-                    <i class="fas fa-trash-alt mr-2"></i>Hapus Semua Notifikasi
+                        class="px-4 sm:px-6 py-2 sm:py-2.5 bg-red-100 text-red-600 rounded-lg text-xs sm:text-sm font-semibold hover:bg-red-200 transition-all duration-300 shadow-md hover:shadow-lg">
+                    <i class="fas fa-trash-alt mr-1.5"></i>Hapus Semua
                 </button>
                 @endif
             </div>
 
             <!-- Notifications List -->
-            <div class="space-y-6">
+            <div class="space-y-4 sm:space-y-6">
                 @forelse($notifications as $notification)
                 <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-300 border-opacity-50">
-                    <div class="p-6">
-                        <div class="flex gap-6">
+                    <div class="p-4 sm:p-6">
+                        <div class="flex items-start gap-3.5 sm:gap-6">
                             <!-- Icon/Image -->
                             <div class="flex-shrink-0">
                                 @if($notification->image)
                                     <!-- Custom uploaded image -->
-                                    <div class="w-20 h-20 rounded-xl overflow-hidden shadow-md">
+                                    <div class="w-12 h-12 sm:w-20 sm:h-20 rounded-xl overflow-hidden shadow-md">
                                         <img src="{{ asset('storage/' . $notification->image) }}" 
                                              alt="{{ $notification->title }}" 
                                              class="w-full h-full object-cover">
@@ -115,7 +115,7 @@
                                                 $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C10.9 22 10 21.1 10 20H14C14 21.1 13.1 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z" fill="url(#grad6)"/><defs><linearGradient id="grad6" x1="4" y1="2.5" x2="20" y2="22"><stop offset="0%" stop-color="#3B82F6"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>';
                                         }
                                     @endphp
-                                    <div class="w-20 h-20 rounded-xl {{ $bgClass }} flex items-center justify-center shadow-md">
+                                    <div class="w-12 h-12 sm:w-20 sm:h-20 rounded-xl {{ $bgClass }} flex items-center justify-center shadow-md [&>svg]:w-7 [&>svg]:h-7 sm:[&>svg]:w-12 sm:[&>svg]:h-12">
                                         {!! $iconSvg !!}
                                     </div>
                                 @endif
@@ -123,26 +123,26 @@
                             
                             <!-- Content -->
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-start justify-between gap-4 mb-2">
-                                    <h3 class="text-xl font-bold text-gray-900">
+                                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-4 mb-2">
+                                    <h3 class="text-base sm:text-xl font-bold text-gray-900 leading-snug break-words">
                                         {{ $notification->title }}
                                         @if(!$notification->is_read)
-                                        <span class="inline-block w-2 h-2 bg-blue-500 rounded-full ml-2 animate-pulse"></span>
+                                        <span class="inline-block w-2 h-2 bg-blue-500 rounded-full ml-1.5 align-middle animate-pulse"></span>
                                         @endif
                                     </h3>
-                                    <span class="text-sm font-medium text-gray-500 whitespace-nowrap">
+                                    <span class="text-xs sm:text-sm font-medium text-gray-500 sm:whitespace-nowrap flex-shrink-0">
                                         {{ \Carbon\Carbon::parse($notification->created_at)->locale('id')->isoFormat('DD MMMM YYYY HH:mm') }} WIB
                                     </span>
                                 </div>
                                 
-                                <p class="text-gray-600 text-sm mb-3 leading-relaxed">
+                                <p class="text-gray-600 text-xs sm:text-sm mb-3 leading-relaxed break-words">
                                     {{ $notification->message }}
                                 </p>
 
                                 <!-- Action Buttons -->
-                                <div class="flex flex-wrap items-center gap-3 mt-4">
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
                                     @if(!empty($notification->link))
-                                    <a href="{{ $notification->link }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors duration-200 inline-flex items-center gap-1.5 shadow-sm">
+                                    <a href="{{ $notification->link }}" class="px-3.5 sm:px-4 py-1.5 sm:py-2 bg-blue-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-600 transition-colors duration-200 inline-flex items-center gap-1.5 shadow-sm">
                                         <span>Buka Detail</span>
                                     </a>
                                     @endif
@@ -150,12 +150,12 @@
                                     @if(!$notification->is_read)
                                     <form action="{{ route('user.notifications.read', $notification->id) }}" method="POST" class="inline-block">
                                         @csrf
-                                        <button type="submit" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors duration-200">
+                                        <button type="submit" class="px-3.5 sm:px-4 py-1.5 sm:py-2 bg-blue-50 text-blue-600 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-100 transition-colors duration-200">
                                             <i class="fas fa-check mr-1"></i>Tandai Sudah Dibaca
                                         </button>
                                     </form>
                                     @else
-                                    <span class="px-4 py-2 bg-gray-50 text-gray-500 rounded-lg text-sm font-semibold">
+                                    <span class="px-3.5 sm:px-4 py-1.5 sm:py-2 bg-gray-50 text-gray-500 rounded-lg text-xs sm:text-sm font-semibold">
                                         <i class="fas fa-check-double mr-1"></i>Sudah Dibaca
                                     </span>
                                     @endif

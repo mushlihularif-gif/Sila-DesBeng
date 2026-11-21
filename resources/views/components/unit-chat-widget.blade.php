@@ -116,11 +116,13 @@
     }
     @media (max-width: 768px) {
         .toko-chat-widget {
-            bottom: 16px;
-            right: 12px;
-            width: calc(100vw - 24px);
-            max-width: 360px;
-            height: 440px;
+            bottom: 14px;
+            right: 10px;
+            left: 10px;
+            width: auto;
+            max-width: calc(100vw - 20px);
+            height: 430px;
+            max-height: calc(100vh - 28px);
         }
         .toko-chat-widget.is-expanded {
             bottom: 10px;
@@ -130,6 +132,17 @@
             max-width: calc(100vw - 16px);
             height: calc(100vh - 20px);
             max-height: calc(100vh - 20px);
+        }
+    }
+    @media (max-width: 420px) {
+        .toko-chat-expand-btn span {
+            display: none;
+        }
+        .toko-chat-expand-btn {
+            padding: 5px 7px;
+        }
+        .toko-chat-header-title {
+            font-size: 0.84rem;
         }
     }
     .toko-chat-widget.active {

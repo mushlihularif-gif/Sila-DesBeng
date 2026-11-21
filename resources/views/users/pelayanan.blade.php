@@ -2,26 +2,26 @@
 
 @section('page')
     {{-- SECTION PELAYANAN --}}
-    <section id="pelayanan" class="relative min-h-screen py-20">
+    <section id="pelayanan" class="relative min-h-screen py-20 overflow-hidden">
         {{-- Background Decorations --}}
-        <div class="absolute top-0 right-0 w-96 h-96 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 max-w-full h-96 pointer-events-none overflow-hidden">
             <div class="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-blue-200/40 via-blue-300/30 to-transparent"
                 style="clip-path: polygon(100% 0, 100% 100%, 40% 100%, 0 0);"></div>
         </div>
 
-        <div class="absolute bottom-0 left-0 w-96 h-64 pointer-events-none">
+        <div class="absolute bottom-0 left-0 w-96 max-w-full h-64 pointer-events-none overflow-hidden">
             <div
                 class="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-blue-300/30 via-yellow-200/20 to-transparent rounded-tr-full">
             </div>
         </div>
 
-        <div class="absolute bottom-0 right-0 w-80 h-80 pointer-events-none">
+        <div class="absolute bottom-0 right-0 w-80 max-w-full h-80 pointer-events-none overflow-hidden">
             <div
                 class="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-yellow-200/30 via-blue-200/20 to-transparent rounded-tl-full">
             </div>
         </div>
 
-        <div class="relative z-10 max-w-6xl mx-auto px-6">
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
             {{-- Header --}}
             <div class="text-left mb-16 mt-16 md:mt-20 animate-section">
                 <h1 class="text-5xl font-bold mb-2">

@@ -29,7 +29,7 @@
 .segi-table-scroll:focus-visible{outline:2px solid var(--segi-primary);outline-offset:2px}
 @media(max-width:639px){
  .segi-citizen main :where(.grid)>*,.segi-admin .row>*{min-width:0}
- .segi-citizen main :where(h1,h2,h3,p,label,a),.segi-admin .content-wrapper :where(h1,h2,h3,p,label){overflow-wrap:anywhere}
+ .segi-citizen main :where(h1,h2,h3,p,label,a),.segi-admin .content-wrapper :where(h1,h2,h3,p,label){overflow-wrap:break-word}
  .segi-delivery-choices{gap:.75rem}
  .segi-delivery-choices>.delivery-method-card{padding:1rem .5rem;border-width:2px;border-radius:1rem}
  .segi-delivery-choices>.delivery-method-card img{width:3rem;height:3rem}
@@ -43,9 +43,10 @@
  .segi-citizen :where(main,section).pt-36,.segi-citizen :where(main,section).pt-40,.segi-citizen :where(main,section).pt-48{padding-top:5.5rem!important}
  .segi-partner-form-body{padding:1rem 1rem 2rem}
  .segi-admin .container-p-y{padding:1rem .75rem!important}
- .segi-admin .card-header,.segi-admin .card-body,.segi-admin .card-footer{padding:1rem}
- .segi-admin .card-header.d-flex,.segi-admin .content-wrapper .d-flex.gap-2,.segi-admin .content-wrapper .d-flex.gap-3{flex-wrap:wrap}
- .segi-admin .content-wrapper .btn{white-space:normal;max-width:100%}
+ .segi-admin .card-header:not(.p-0),.segi-admin .card-body:not(.p-0),.segi-admin .card-footer:not(.p-0){padding:.9rem}
+ .segi-admin .card-header.d-flex:not(.flex-nowrap):not(.wa-no-wrap){flex-wrap:wrap}
+ .segi-admin .content-wrapper .d-flex > :not(.flex-shrink-0):not(.avatar):not(i):not(svg){min-width:0}
+ .segi-admin .content-wrapper .btn:not(.btn-icon):not(.rounded-circle){white-space:normal;max-width:100%}
  .segi-admin .content-wrapper :where(input:not([type=checkbox]):not([type=radio]),select,textarea){min-width:0;max-width:100%;font-size:16px}
  .segi-admin .modal-dialog{margin:.5rem;max-width:calc(100% - 1rem)}
  .segi-admin .modal-body{padding:1rem}
