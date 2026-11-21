@@ -120,6 +120,16 @@ class GasOrdering
                     'quantity' => $order->quantity, 'total_amount' => $total, 'payment_method' => $data['payment_method'],
                 ]);
                 WalletTransaction::catatPemasukan($gas->region_id, 'gas', $order->id, $total, $data['payment_method'], $path);
+                if ($path) {
+                    $orderId = $order->id;
+                    DB::afterCommit(function () use ($orderId, $path, $total) {
+                        try {
+                            app(PaymentProofAnalyzerService::class)->analyzeAndStore('gas', $orderId, $path, (float) $total);
+                        } catch (\Throwable $e) {
+                            \Illuminate\Support\Facades\Log::warning('Gas proof scan skipped: '.$e->getMessage());
+                        }
+                    });
+                }
                 AdminNotification::create([
                     'type' => 'gas_order', 'reference_id' => $order->id, 'region_id' => $gas->region_id,
                     'title' => 'Pesanan Gas Baru', 'message' => 'Pesanan '.$order->order_number.' menunggu pemeriksaan.', 'is_read' => false,

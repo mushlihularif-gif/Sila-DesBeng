@@ -6,7 +6,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class MobilBooking extends Model
 {
-    use \Illuminate\Database\Eloquent\SoftDeletes;
+    use \Illuminate\Database\Eloquent\SoftDeletes, \App\Models\Concerns\HasPaymentSummary;
+
+    public function walletReferenceType(): string
+    {
+        return 'mobil';
+    }
+
+    public function subtotalAmount(): float
+    {
+        return round((float) ($this->total_amount ?? 0), 2);
+    }
+
+    public function getLamaSewaAttribute(): int
+    {
+        if ($this->start_date && $this->end_date) {
+            return max(1, (int) $this->start_date->diffInDays($this->end_date) + 1);
+        }
+
+        return 1;
+    }
 
     protected $table = 'mobil_bookings';
 

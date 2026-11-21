@@ -155,12 +155,39 @@ Route::get('/validasi/transaksi/{type}/{id}', function ($type, $id) {
         $expectedToken = hash_hmac('sha256', $transaksi->id . $transaksi->order_number, config('app.key'));
         $valid = hash_equals($expectedToken, $token);
     }
-    
+
+    $subtotal = 0.0;
+    $paidAmount = 0.0;
+    $remainingAmount = 0.0;
+    $paymentStatusLabel = '-';
+
+    if ($valid && $transaksi) {
+        if ($type === 'pasar-daerah' || $type === 'pasar') {
+            $subtotal = (float) ($transaksi->grand_total ?? $transaksi->total_amount ?? 0);
+            $paid = \App\Models\WalletTransaction::where('reference_type', 'pasar')
+                ->where('reference_id', $transaksi->id)
+                ->where('status', 'verified')
+                ->sum('amount');
+            $paidAmount = (float) $paid;
+            $remainingAmount = max(0.0, round($subtotal - $paidAmount, 2));
+            $paymentStatusLabel = $subtotal <= 0 ? 'Gratis' : ($remainingAmount <= 0.01 ? 'Lunas' : ($paidAmount > 0 ? 'Kurang Bayar' : 'Belum Lunas'));
+        } else {
+            $subtotal = $transaksi->subtotalAmount();
+            $paidAmount = $transaksi->paidAmount();
+            $remainingAmount = $transaksi->remainingAmount();
+            $paymentStatusLabel = $transaksi->paymentStatusLabel();
+        }
+    }
+
     return view('pages.validasi.transaksi', [
         'valid' => $valid,
         'transaksi' => $valid ? $transaksi : null,
         'type' => $type,
         'title' => $title,
+        'subtotal' => $subtotal,
+        'paidAmount' => $paidAmount,
+        'remainingAmount' => $remainingAmount,
+        'paymentStatusLabel' => $paymentStatusLabel,
     ]);
 })->name('validasi.transaksi');
 
@@ -715,6 +742,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         // admin.aktivitas.permintaan-pengajuan.show.
         Route::post('/bukti-transaksi/{id}/{type}/verify', [\App\Http\Controllers\Admin\TransactionController::class, 'verify'])->name('admin.aktivitas.bukti-transaksi.verify');
         Route::post('/bukti-transaksi/{id}/{type}/reject', [\App\Http\Controllers\Admin\TransactionController::class, 'reject'])->name('admin.aktivitas.bukti-transaksi.reject');
+        Route::post('/bukti-transaksi/{id}/{type}/scan-proof', [\App\Http\Controllers\Admin\TransactionController::class, 'scanProof'])->name('admin.aktivitas.bukti-transaksi.scan-proof');
         Route::post('/bukti-transaksi/{id}/{type}/update-status/{status}', [\App\Http\Controllers\Admin\TransactionController::class, 'updateStatus'])->name('admin.aktivitas.bukti-transaksi.update-status');
         Route::get('/bukti-transaksi/{id}/{type}/download', [\App\Http\Controllers\Admin\TransactionController::class, 'downloadProof'])->name('admin.aktivitas.bukti-transaksi.download');
     });

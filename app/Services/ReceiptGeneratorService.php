@@ -172,20 +172,32 @@ class ReceiptGeneratorService
         $y += 60;
         $this->drawLine($image, 530, $y, $imageWidth - 130, $y, $black);
         
-        // Total Pemesanan
+        // Subtotal Pesanan
         $y += 60;
-        $this->addText($image, 'Total Pemesanan', 530, $y, $normalSize, $black, $fontPath);
-        $this->addText($image, 'Rp. ' . number_format($booking->total_amount, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
+        $subtotal = $booking->subtotalAmount();
+        $received = $booking->paidAmount();
+        $remaining = $booking->remainingAmount();
+        $this->addText($image, 'Subtotal Pesanan', 530, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Rp. ' . number_format($subtotal, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
         
         // Evidence of an order is not evidence that money has been received.
         $y += $lineHeight;
         $this->addText($image, 'Uang Diterima', 530, $y, $headerSize, $black, $fontPath, true);
-        $received = $booking->paymentReceived() ? (float)$booking->total_amount : 0;
-        $this->addText($image, 'Rp. ' . number_format($received, 0, ',', '.'), 980, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Rp. ' . number_format($received, 0, ',', '.'), 980, $y, $headerSize, $received >= $subtotal && $subtotal > 0 ? $green : $black, $fontPath, true);
+
+        // Sisa Tagihan / Status Pembayaran
+        $y += $lineHeight;
+        if ($remaining > 0.01) {
+            $this->addText($image, 'Sisa Tagihan', 530, $y, $normalSize, $red, $fontPath, true);
+            $this->addText($image, 'Rp. ' . number_format($remaining, 0, ',', '.') . ' (' . $booking->paymentStatusLabel() . ')', 980, $y, $normalSize, $red, $fontPath, true);
+        } else {
+            $this->addText($image, 'Status Pembayaran', 530, $y, $normalSize, $green, $fontPath, true);
+            $this->addText($image, 'LUNAS', 980, $y, $normalSize, $green, $fontPath, true);
+        }
 
         // Tanda tangan footer
         // Jarak footer sebelum blok tanda tangan ditambahkan
-        $y += 150;
+        $y += 110;
         $location = 'Bengkalis';
         $date = $booking->created_at->locale('id')->isoFormat('DD MMMM YYYY');
         $this->addText($image, $location . ', ' . $date, 130, $y, $normalSize, $black, $fontPath, true);
@@ -368,19 +380,31 @@ class ReceiptGeneratorService
         $y += 60;
         $this->drawLine($image, 530, $y, $imageWidth - 130, $y, $black);
         
-        // Total Pemesanan
+        // Subtotal Pesanan
         $y += 60;
-        $this->addText($image, 'Total Pemesanan', 530, $y, $normalSize, $black, $fontPath);
+        $receivedGas = $order->paidAmount();
+        $remainingGas = $order->remainingAmount();
+        $this->addText($image, 'Subtotal Pesanan', 530, $y, $normalSize, $black, $fontPath);
         $this->addText($image, 'Rp. ' . number_format($totalPrice, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
         
-        // Total Dibayar
+        // Nominal Dibayarkan / Uang Diterima (berdasarkan ledger terverifikasi, bukan harga katalog semata)
         $y += $lineHeight;
-        $this->addText($image, 'Total Dibayar', 530, $y, $headerSize, $black, $fontPath, true);
-        $this->addText($image, 'Rp. ' . number_format($totalPrice, 0, ',', '.'), 980, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Uang Diterima', 530, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Rp. ' . number_format($receivedGas, 0, ',', '.'), 980, $y, $headerSize, $receivedGas >= $totalPrice && $totalPrice > 0 ? $green : $black, $fontPath, true);
+
+        // Sisa Tagihan / Status Pembayaran
+        $y += $lineHeight;
+        if ($remainingGas > 0.01) {
+            $this->addText($image, 'Sisa Tagihan', 530, $y, $normalSize, $red, $fontPath, true);
+            $this->addText($image, 'Rp. ' . number_format($remainingGas, 0, ',', '.') . ' (' . $order->paymentStatusLabel() . ')', 980, $y, $normalSize, $red, $fontPath, true);
+        } else {
+            $this->addText($image, 'Status Pembayaran', 530, $y, $normalSize, $green, $fontPath, true);
+            $this->addText($image, 'LUNAS', 980, $y, $normalSize, $green, $fontPath, true);
+        }
         
         // Tanda tangan footer
         // Jarak footer sebelum blok tanda tangan ditambahkan
-        $y += 150;
+        $y += 120;
         $location = 'Bengkalis';
         $date = $order->created_at->locale('id')->isoFormat('DD MMMM YYYY');
         $this->addText($image, $location . ', ' . $date, 130, $y, $normalSize, $black, $fontPath, true);
@@ -394,8 +418,8 @@ class ReceiptGeneratorService
         
         $y += 420; // Ruang untuk tanda tangan
         
-        // Simpan bukti transaksi
-        $filename = 'receipt_gas_' . $order->order_number . '_' . time() . '.png';
+        // Simpan bukti transaksi (nama deterministik agar tidak menumpuk file duplikat)
+        $filename = 'receipt_gas_' . hash_hmac('sha256', (string) $order->id, config('app.key')) . '.png';
         $path = 'receipts/gas/' . $filename;
         
         $fullPath = storage_path('app/public/' . dirname($path));
@@ -501,9 +525,13 @@ class ReceiptGeneratorService
         $this->addText($image, 'Metode Pembayaran', $labelX, $y, $normalSize, $black, $fontPath, true);
         $this->addText($image, ': ' . $this->getPaymentMethodLabel($booking->payment_method), $valueX, $y, $normalSize, $black, $fontPath);
         
+        $mobilSubtotal = $booking->subtotalAmount();
+        $mobilReceived = $booking->paidAmount();
+        $mobilRemaining = $booking->remainingAmount();
+
         $y += $lineHeight;
-        $this->addText($image, 'Total Pembayaran', $labelX, $y, $normalSize, $black, $fontPath, true);
-        $this->addText($image, ': Rp. ' . number_format($booking->total_harga ?? 0, 0, ',', '.'), $valueX, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Total Tagihan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': Rp. ' . number_format($mobilSubtotal, 0, ',', '.'), $valueX, $y, $normalSize, $black, $fontPath);
         
         $y += $lineHeight;
         $this->addText($image, 'Status', $labelX, $y, $normalSize, $black, $fontPath, true);
@@ -544,8 +572,9 @@ class ReceiptGeneratorService
         $y += 60;
         $itemName = $booking->mobil->nama_mobil ?? 'Sewa Transportasi';
         $quantity = $booking->lama_sewa . ' Hari';
-        $unitPrice = 'Rp. ' . number_format($booking->mobil->harga_sewa ?? 0, 0, ',', '.');
-        $total = 'Rp. ' . number_format($booking->total_harga ?? 0, 0, ',', '.');
+        $unitPriceVal = $booking->mobil->harga_sewa ?? ($booking->lama_sewa > 0 ? $mobilSubtotal / $booking->lama_sewa : $mobilSubtotal);
+        $unitPrice = 'Rp. ' . number_format($unitPriceVal, 0, ',', '.');
+        $total = 'Rp. ' . number_format($mobilSubtotal, 0, ',', '.');
         
         $this->addText($image, substr($itemName, 0, 20), $col1, $y, $normalSize, $black, $fontPath);
         $this->addText($image, $quantity, $col2, $y, $normalSize, $black, $fontPath);
@@ -556,14 +585,23 @@ class ReceiptGeneratorService
         $this->drawLine($image, 530, $y, $imageWidth - 130, $y, $black);
         
         $y += 60;
-        $this->addText($image, 'Total Pemesanan', 530, $y, $normalSize, $black, $fontPath);
-        $this->addText($image, 'Rp. ' . number_format($booking->total_harga ?? 0, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Subtotal Pesanan', 530, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Rp. ' . number_format($mobilSubtotal, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
         
         $y += $lineHeight;
-        $this->addText($image, 'Total Dibayar', 530, $y, $headerSize, $black, $fontPath, true);
-        $this->addText($image, 'Rp. ' . number_format($booking->total_harga ?? 0, 0, ',', '.'), 980, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Uang Diterima', 530, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Rp. ' . number_format($mobilReceived, 0, ',', '.'), 980, $y, $headerSize, $mobilReceived >= $mobilSubtotal && $mobilSubtotal > 0 ? $green : $black, $fontPath, true);
+
+        $y += $lineHeight;
+        if ($mobilRemaining > 0.01) {
+            $this->addText($image, 'Sisa Tagihan', 530, $y, $normalSize, $red, $fontPath, true);
+            $this->addText($image, 'Rp. ' . number_format($mobilRemaining, 0, ',', '.') . ' (' . $booking->paymentStatusLabel() . ')', 980, $y, $normalSize, $red, $fontPath, true);
+        } else {
+            $this->addText($image, 'Status Pembayaran', 530, $y, $normalSize, $green, $fontPath, true);
+            $this->addText($image, $mobilSubtotal > 0 ? 'LUNAS' : 'GRATIS', 980, $y, $normalSize, $green, $fontPath, true);
+        }
         
-        $y += 150;
+        $y += 120;
         $location = 'Bengkalis';
         $date = $booking->created_at->locale('id')->isoFormat('DD MMMM YYYY');
         $this->addText($image, $location . ', ' . $date, 130, $y, $normalSize, $black, $fontPath, true);
@@ -577,7 +615,7 @@ class ReceiptGeneratorService
         
         $y += 420;
         
-        $filename = 'receipt_mobil_' . $booking->order_number . '_' . time() . '.png';
+        $filename = 'receipt_mobil_' . hash_hmac('sha256', (string) $booking->id, config('app.key')) . '.png';
         $path = 'receipts/mobil/' . $filename;
         
         $fullPath = storage_path('app/public/' . dirname($path));
@@ -700,7 +738,12 @@ class ReceiptGeneratorService
         $y += 60;
         $itemName = $booking->fasilitas->nama_fasilitas ?? 'Fasilitas Umum';
         $quantity = $booking->lama_sewa . ' Hari';
-        $keterangan = 'Gratis';
+        $fasilitasSubtotal = $booking->subtotalAmount();
+        $fasilitasReceived = $booking->paidAmount();
+        $fasilitasRemaining = $booking->remainingAmount();
+        $keterangan = $fasilitasSubtotal > 0
+            ? ('Rp. ' . number_format($fasilitasSubtotal, 0, ',', '.'))
+            : 'Gratis (Sosial)';
         
         $this->addText($image, substr($itemName, 0, 20), $col1, $y, $normalSize, $black, $fontPath);
         $this->addText($image, $quantity, $col2, $y, $normalSize, $black, $fontPath);
@@ -708,8 +751,28 @@ class ReceiptGeneratorService
         
         $y += 60;
         $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
-        
-        $y += 150;
+
+        if ($fasilitasSubtotal > 0) {
+            $y += 55;
+            $this->addText($image, 'Subtotal Peminjaman', 530, $y, $normalSize, $black, $fontPath);
+            $this->addText($image, 'Rp. ' . number_format($fasilitasSubtotal, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
+
+            $y += $lineHeight;
+            $this->addText($image, 'Uang Diterima', 530, $y, $headerSize, $black, $fontPath, true);
+            $this->addText($image, 'Rp. ' . number_format($fasilitasReceived, 0, ',', '.'), 980, $y, $headerSize, $fasilitasReceived >= $fasilitasSubtotal ? $green : $black, $fontPath, true);
+
+            $y += $lineHeight;
+            if ($fasilitasRemaining > 0.01) {
+                $this->addText($image, 'Sisa Tagihan', 530, $y, $normalSize, $red, $fontPath, true);
+                $this->addText($image, 'Rp. ' . number_format($fasilitasRemaining, 0, ',', '.') . ' (' . $booking->paymentStatusLabel() . ')', 980, $y, $normalSize, $red, $fontPath, true);
+            } else {
+                $this->addText($image, 'Status Pembayaran', 530, $y, $normalSize, $green, $fontPath, true);
+                $this->addText($image, 'LUNAS', 980, $y, $normalSize, $green, $fontPath, true);
+            }
+            $y += 90;
+        } else {
+            $y += 140;
+        }
         $location = 'Bengkalis';
         $date = $booking->created_at->locale('id')->isoFormat('DD MMMM YYYY');
         $this->addText($image, $location . ', ' . $date, 130, $y, $normalSize, $black, $fontPath, true);
@@ -723,7 +786,7 @@ class ReceiptGeneratorService
         
         $y += 420;
         
-        $filename = 'receipt_fasilitas_' . $booking->order_number . '_' . time() . '.png';
+        $filename = 'receipt_fasilitas_' . hash_hmac('sha256', (string) $booking->id, config('app.key')) . '.png';
         $path = 'receipts/fasilitas/' . $filename;
         
         $fullPath = storage_path('app/public/' . dirname($path));

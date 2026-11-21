@@ -18,23 +18,50 @@ class GasOrderActions
             abort_if(in_array($order->status, ['completed', 'cancelled', 'rejected'], true), 409, 'Pesanan sudah selesai atau dibatalkan.');
             abort_if($order->cancellation_status === 'pending', 409, 'Tangani permintaan pembatalan terlebih dahulu.');
             $ledger = WalletTransaction::where('reference_type', 'gas')->where('reference_id', $id)->lockForUpdate()->get();
-            $paid = $ledger->isNotEmpty() && $ledger->every(fn ($entry) => $entry->status === 'verified');
+            $expectedTotal = $order->subtotalAmount();
+            $matches = abs((float)$ledger->sum('amount') - $expectedTotal) < 0.005;
+            $paid = $matches && $ledger->isNotEmpty() && $ledger->every(fn ($entry) => $entry->status === 'verified');
             $cash = strtolower($order->payment_method) === 'tunai';
             switch ($action) {
                 case 'verify':
+                    abort_unless($matches, 409, 'Nilai catatan pembayaran tidak sesuai pesanan. Periksa catatan sebelum konfirmasi.');
                     abort_unless($cash || $order->proof_of_payment, 422, 'Bukti pembayaran belum diunggah.');
                     abort_if($ledger->isEmpty() || $ledger->contains(fn ($row) => $row->source !== 'manual' || $row->status === 'rejected'), 409, 'Catatan pembayaran tidak dapat diverifikasi.');
                     if ($paid) return $order;
-                    WalletTransaction::tandaiPembayaranManualDiterima('gas', $id, $user->id);
-                    $message = 'Pembayaran gas telah dikonfirmasi diterima. Status pengiriman tetap mengikuti proses pesanan.';
+                    $confirmedAmount = \App\Support\PaymentVerificationGuard::validateConfirmedAmount(
+                        $request,
+                        $expectedTotal,
+                        $order->paidAmount()
+                    );
+                    WalletTransaction::tandaiPembayaranManualDiterima('gas', $id, $user->id, $confirmedAmount);
+                    $message = 'Pembayaran gas sebesar Rp '.number_format($confirmedAmount, 0, ',', '.').' telah dikonfirmasi diterima (Lunas). Status pengiriman tetap mengikuti proses pesanan.';
                     break;
                 case 'reject-payment':
                     abort_unless(!$cash && !$paid && $order->proof_of_payment && $order->status === 'pending', 409, 'Bukti ini tidak dapat dikembalikan untuk diperbaiki.');
+                    $receivedPartial = \App\Support\PaymentVerificationGuard::parsePartialReceivedAmount($request, $expectedTotal);
                     $oldProof = $order->proof_of_payment;
                     DB::afterCommit(fn () => \Illuminate\Support\Facades\Storage::disk('public')->delete($oldProof));
                     $order->proof_of_payment = null;
-                    WalletTransaction::whereKey($ledger->modelKeys())->where('status', 'pending')->update(['proof_path' => null, 'notes' => $request->reason]);
-                    $message = 'Bukti pembayaran perlu diganti: '.$request->reason.'. Buka rincian pesanan untuk mengirim ulang.';
+                    if ($receivedPartial !== null && $receivedPartial > 0) {
+                        $remaining = max(0, round($expectedTotal - $receivedPartial, 2));
+                        WalletTransaction::catatKurangBayar('gas', $id, $receivedPartial, $request->reason, $user->id);
+                        $message = sprintf(
+                            'Pembayaran kurang — baru diterima Rp %s dari subtotal Rp %s (kurang Rp %s). %s Silakan lunasi sisa tagihan lalu unggah bukti pelunasan.',
+                            number_format($receivedPartial, 0, ',', '.'),
+                            number_format($expectedTotal, 0, ',', '.'),
+                            number_format($remaining, 0, ',', '.'),
+                            $request->reason
+                        );
+                    } else {
+                        $updatePayload = ['proof_path' => null, 'notes' => $request->reason];
+                        if (WalletTransaction::hasVerificationColumns()) {
+                            $updatePayload['detected_proof_amount'] = null;
+                            $updatePayload['proof_scan_status'] = null;
+                            $updatePayload['proof_scan_meta'] = null;
+                        }
+                        WalletTransaction::whereKey($ledger->modelKeys())->where('status', 'pending')->update($updatePayload);
+                        $message = 'Bukti pembayaran perlu diganti: '.$request->reason.'. Buka rincian pesanan untuk mengirim ulang.';
+                    }
                     break;
                 case 'reject':
                     abort_unless($order->status === 'pending', 409, 'Hanya pesanan yang belum diproses dapat ditolak.');

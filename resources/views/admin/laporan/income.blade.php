@@ -90,7 +90,8 @@
     $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
     $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
 
-    $totalTrxYear = ($rentalCount ?? 0) + ($gasCount ?? 0) + ($mobilCount ?? 0) + ($fasilitasCount ?? 0) + $manualReports->count();
+    // Gunakan total transaksi akurat dari FinanceRecords::summary($year) agar catatan manual tidak terhitung ganda.
+    $totalTrxYear = $totalTrxYear ?? (($rentalCount ?? 0) + ($gasCount ?? 0) + ($mobilCount ?? 0) + ($fasilitasCount ?? 0) + ($pasarCount ?? 0));
 @endphp
 
 <div class="container-xxl flex-grow-1 container-p-y">

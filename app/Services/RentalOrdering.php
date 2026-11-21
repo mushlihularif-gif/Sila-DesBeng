@@ -91,6 +91,16 @@ class RentalOrdering
                         'user_id'=>$user->id,'region_id'=>$provider,'item_name'=>$barang->nama_barang,'quantity'=>$order->quantity,
                         'total_amount'=>$total,'payment_method'=>$data['payment_method']]);
                     WalletTransaction::catatPemasukan($provider, 'rental', $order->id, $total, $data['payment_method'], $path);
+                    if ($path) {
+                        $orderId = $order->id;
+                        DB::afterCommit(function () use ($orderId, $path, $total) {
+                            try {
+                                app(PaymentProofAnalyzerService::class)->analyzeAndStore('rental', $orderId, $path, (float) $total);
+                            } catch (\Throwable $e) {
+                                \Illuminate\Support\Facades\Log::warning('Rental proof scan skipped: '.$e->getMessage());
+                            }
+                        });
+                    }
                     AdminNotification::create(['type'=>'rental_request','reference_id'=>$order->id,'region_id'=>$provider,
                         'title'=>'Pemesanan Alat Baru','message'=>'Pesanan '.$order->order_number.' menunggu pemeriksaan.','is_read'=>false]);
                     \App\Models\Notification::create(['user_id'=>$user->id,'type'=>'order_created','title'=>'Permintaan Sewa Alat Terkirim',

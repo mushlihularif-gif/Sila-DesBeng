@@ -35,6 +35,26 @@
                 </a>
             </div>
 
+            <!-- FLASH MESSAGES -->
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                    <i class="bx bx-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                    <i class="bx bx-error-circle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                    <i class="bx bx-error-circle me-2"></i><strong>Periksa Pembayaran:</strong> {{ $errors->first() }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <!-- ALERT CANCELLATION -->
             @if($request->cancellation_status === 'pending')
             <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3" role="alert">
@@ -77,29 +97,81 @@
                             </div>
                         </div>
                         <div class="card-body p-4">
-    <div class="d-flex align-items-start gap-4 mb-4">
+                            <div class="d-flex flex-column flex-sm-row align-items-start gap-4 mb-4">
                                 @php
                                     $imgSrc = null;
-                                    if($type === 'rental' && $request->barang && $request->barang->foto) {
+                                    if ($type === 'rental' && $request->barang && $request->barang->foto) {
                                         $imgSrc = asset('storage/' . $request->barang->foto);
-                                    } elseif($type === 'gas' && $request->gas && $request->gas->foto) {
+                                    } elseif ($type === 'gas' && $request->gas && $request->gas->foto) {
                                         $imgSrc = asset('storage/' . $request->gas->foto);
+                                    } elseif ($type === 'mobil' && $request->mobil && $request->mobil->foto) {
+                                        $imgSrc = asset('storage/' . $request->mobil->foto);
+                                    } elseif ($type === 'fasilitas' && $request->fasilitas && $request->fasilitas->foto) {
+                                        $imgSrc = asset('storage/' . $request->fasilitas->foto);
                                     }
+
+                                    $detailItemTitle = match ($type) {
+                                        'rental' => $request->barang->nama_barang ?? 'Alat',
+                                        'gas' => $request->item_name ?? ($request->gas->jenis_gas ?? 'Gas LPG'),
+                                        'mobil' => $request->mobil->nama_mobil ?? 'Transportasi',
+                                        'fasilitas' => $request->fasilitas->nama_fasilitas ?? 'Fasilitas Umum',
+                                        default => 'Layanan',
+                                    };
+                                    $detailServiceLabel = match ($type) {
+                                        'rental' => 'Penyewaan Alat',
+                                        'gas' => 'Pembelian Gas LPG',
+                                        'mobil' => 'Penyewaan Transportasi',
+                                        'fasilitas' => 'Peminjaman Fasilitas Umum',
+                                        default => 'Layanan Desa',
+                                    };
+                                    $detailSubtotal = $request->subtotalAmount();
+                                    $detailPaid = $request->paidAmount();
+                                    $detailRemaining = $request->remainingAmount();
+                                    $detailPayLabel = $request->paymentStatusLabel();
+                                    $detailPayBadge = $request->paymentStatusBadgeClass();
                                 @endphp
                                 
                                 @if($imgSrc)
-                                    <img src="{{ $imgSrc }}" alt="Product" class="rounded-3 object-fit-cover shadow-sm" style="width: 100px; height: 100px;">
+                                    <img src="{{ $imgSrc }}" alt="Product" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 100px; height: 100px;">
                                 @else
-                                    <div class="rounded-3 shadow-sm bg-light border d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                    <div class="rounded-3 shadow-sm bg-light border d-flex align-items-center justify-content-center flex-shrink-0" style="width: 100px; height: 100px;">
                                         <i class="bx bx-image text-muted fs-1"></i>
                                     </div>
                                 @endif
-                                <div>
-                                    <h4 class="fw-bold mb-1">{{ $type === 'rental' ? ($request->barang->nama_barang ?? 'Alat') : ($request->item_name ?? 'Gas') }}</h4>
-                                    <p class="text-muted mb-2">{{ $type === 'rental' ? 'Penyewaan Alat' : 'Pembelian Gas' }}</p>
-                                    <h5 class="text-primary fw-bold">Rp {{ number_format($request->total_amount ?? $request->price, 0, ',', '.') }}</h5>
+                                <div class="flex-grow-1 min-w-0">
+                                    <h4 class="fw-bold mb-1">{{ $detailItemTitle }}</h4>
+                                    <p class="text-muted mb-2">{{ $detailServiceLabel }}</p>
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        @if($detailSubtotal > 0)
+                                            <h5 class="text-primary fw-bold mb-0">Rp {{ number_format($detailSubtotal, 0, ',', '.') }}</h5>
+                                            <span class="badge {{ $detailPayBadge }} rounded-pill px-3">{{ $detailPayLabel }}</span>
+                                        @else
+                                            <span class="badge bg-label-info rounded-pill px-3 py-2 fw-bold">Gratis (Acara Sosial)</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
+
+                            @if($detailSubtotal > 0)
+                            <div class="row g-2 mb-4 p-3 rounded-3 bg-light border">
+                                <div class="col-4">
+                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Subtotal Tagihan</small>
+                                    <div class="fw-bold text-dark">Rp {{ number_format($detailSubtotal, 0, ',', '.') }}</div>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Nominal Dibayarkan</small>
+                                    <div class="fw-bold {{ $detailPaid >= $detailSubtotal ? 'text-success' : ($detailPaid > 0 ? 'text-danger' : 'text-secondary') }}">
+                                        Rp {{ number_format($detailPaid, 0, ',', '.') }}
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Sisa Tagihan</small>
+                                    <div class="fw-bold {{ $detailRemaining > 0.01 ? 'text-danger' : 'text-success' }}">
+                                        Rp {{ number_format($detailRemaining, 0, ',', '.') }}
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
 
                             <div class="row g-4">
                                 <div class="col-md-6">
@@ -155,6 +227,7 @@
                                 </div>
                             </div>
 
+                            @if($type !== 'gas' && ($request->start_date || $request->end_date))
                             <hr class="my-4 border-light">
 
                             <h6 class="fw-bold mb-3">Jadwal Sewa</h6>
@@ -181,6 +254,7 @@
                                 </div>
                                 @endif
                             </div>
+                            @endif
 
                         </div>
                     </div>
@@ -350,21 +424,29 @@
                                         <i class="bx bx-x-circle me-2"></i>Tolak Pembatalan
                                     </button>
                                 </div>
-                            @elseif($request->status === 'pending')
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-success rounded-pill py-2" onclick="confirmApprove({{ $request->id }}, '{{ $type }}')">
-                                        <i class="bx bx-check me-2"></i>Setujui Pengajuan
-                                    </button>
-                                    <button class="btn btn-outline-danger rounded-pill py-2" onclick="showRejectModal({{ $request->id }}, '{{ $type }}')">
-                                        <i class="bx bx-x me-2"></i>Tolak Pengajuan
-                                    </button>
-                                </div>
-                            @elseif($type === 'gas' && in_array($request->status, ['confirmed', 'approved', 'processed']))
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-success rounded-pill py-2" onclick="updateStatus('completed')">
-                                        <i class="bx bx-check-double me-2"></i>Selesaikan Pesanan
-                                    </button>
-                                </div>
+                            @elseif(!in_array($request->status, ['completed', 'cancelled', 'rejected']))
+                                @include('admin.aktivitas.partials.payment-verify-controls', ['verifyType' => $type])
+                                @if($request->status === 'pending')
+                                    @php
+                                        $canApproveOther = $request->subtotalAmount() <= 0
+                                            || strtolower((string) $request->payment_method) === 'tunai'
+                                            || $request->paymentReceived();
+                                    @endphp
+                                    <div class="d-grid gap-2">
+                                        @if($canApproveOther)
+                                            <button class="btn btn-success rounded-pill py-2" onclick="confirmApprove({{ $request->id }}, '{{ $type }}')">
+                                                <i class="bx bx-check me-2"></i>Setujui Pengajuan
+                                            </button>
+                                        @else
+                                            <div class="alert alert-info py-2 px-3 small rounded-3 mb-0">
+                                                <i class="bx bx-lock-alt me-1"></i>Konfirmasi pembayaran lunas terlebih dahulu sebelum menyetujui pengajuan ini.
+                                            </div>
+                                        @endif
+                                        <button class="btn btn-outline-danger rounded-pill py-2" onclick="showRejectModal({{ $request->id }}, '{{ $type }}')">
+                                            <i class="bx bx-x me-2"></i>Tolak Pengajuan
+                                        </button>
+                                    </div>
+                                @endif
                             @elseif($request->status === 'rejected')
                                 <div class="alert alert-danger mb-0">
                                     <small class="fw-bold d-block mb-1">Alasan Penolakan:</small>

@@ -11,6 +11,10 @@ class WalletTransaction extends Model
         'type',
         'source',
         'amount',
+        'verified_amount',
+        'detected_proof_amount',
+        'proof_scan_status',
+        'proof_scan_meta',
         'reference_type',
         'reference_id',
         'status',
@@ -20,8 +24,18 @@ class WalletTransaction extends Model
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2', 'refunded_at' => 'datetime',
+        'amount' => 'decimal:2',
+        'verified_amount' => 'decimal:2',
+        'detected_proof_amount' => 'decimal:2',
+        'proof_scan_meta' => 'array',
+        'refunded_at' => 'datetime',
     ];
+
+    public static function hasVerificationColumns(): bool
+    {
+        return \Illuminate\Support\Facades\Schema::hasTable('wallet_transactions')
+            && \Illuminate\Support\Facades\Schema::hasColumn('wallet_transactions', 'verified_amount');
+    }
 
     public function region()
     {
@@ -97,12 +111,74 @@ class WalletTransaction extends Model
         string $referenceType,
         int $referenceId,
         ?int $verifiedBy = null,
+        ?float $verifiedAmount = null,
     ): void {
+        $payload = ['status' => 'verified', 'verified_by' => $verifiedBy];
+        if (self::hasVerificationColumns()) {
+            $payload['verified_amount'] = $verifiedAmount !== null
+                ? round($verifiedAmount, 2)
+                : \Illuminate\Support\Facades\DB::raw('amount');
+        }
+
         self::where('reference_type', $referenceType)
             ->where('reference_id', $referenceId)
             ->where('source', 'manual')
             ->where('status', 'pending')
-            ->update(['status' => 'verified', 'verified_by' => $verifiedBy]);
+            ->update($payload);
+    }
+
+    /**
+     * Catat pembayaran kurang (misal warga baru transfer Rp 20.000 dari tagihan Rp 200.000).
+     * Status ledger TETAP 'pending' agar pendapatan desa tidak terhitung penuh sebelum lunas,
+     * sementara verified_amount menyimpan nominal parsial yang benar-benar sudah masuk.
+     */
+    public static function catatKurangBayar(
+        string $referenceType,
+        int $referenceId,
+        float $receivedAmount,
+        string $alasan,
+        ?int $reviewedBy = null,
+    ): void {
+        $payload = [
+            'proof_path' => null,
+            'notes' => $alasan,
+            'verified_by' => $reviewedBy,
+        ];
+
+        if (self::hasVerificationColumns()) {
+            $payload['verified_amount'] = round(max(0.0, $receivedAmount), 2);
+            $payload['detected_proof_amount'] = null;
+            $payload['proof_scan_status'] = null;
+            $payload['proof_scan_meta'] = null;
+        }
+
+        self::where('reference_type', $referenceType)
+            ->where('reference_id', $referenceId)
+            ->where('source', 'manual')
+            ->where('status', 'pending')
+            ->update($payload);
+    }
+
+    /**
+     * Simpan hasil pindai otomatis (AI/OCR) terhadap bukti transfer warga.
+     */
+    public static function simpanHasilPindaiBukti(
+        string $referenceType,
+        int $referenceId,
+        array $scanResult,
+    ): void {
+        if (! self::hasVerificationColumns()) {
+            return;
+        }
+
+        self::where('reference_type', $referenceType)
+            ->where('reference_id', $referenceId)
+            ->where('status', 'pending')
+            ->update([
+                'detected_proof_amount' => $scanResult['detected_amount'] ?? null,
+                'proof_scan_status' => $scanResult['status'] ?? 'unreadable',
+                'proof_scan_meta' => json_encode($scanResult, JSON_UNESCAPED_UNICODE),
+            ]);
     }
 
     /**

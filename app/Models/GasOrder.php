@@ -8,7 +8,17 @@ use Illuminate\Support\Str;
 
 class GasOrder extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, \App\Models\Concerns\HasPaymentSummary;
+
+    public function walletReferenceType(): string
+    {
+        return 'gas';
+    }
+
+    public function subtotalAmount(): float
+    {
+        return round((float) ($this->price ?? 0) * (int) ($this->quantity ?? 1), 2);
+    }
 
     /**
      * KEAMANAN: Auto-generate UUID saat membuat record baru.
@@ -104,16 +114,6 @@ class GasOrder extends Model
     /**
      * Ambil admin/staf yang memproses pesanan
      */
-    public function walletEntries()
-    {
-        return $this->hasMany(WalletTransaction::class, 'reference_id')->where('reference_type', 'gas');
-    }
-
-    public function paymentReceived(): bool
-    {
-        return $this->walletEntries->isNotEmpty() && $this->walletEntries->every(fn ($entry) => $entry->status === 'verified');
-    }
-
     public function handler()
     {
         return $this->belongsTo(User::class, 'handled_by');

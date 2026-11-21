@@ -25,16 +25,16 @@ class ReportController extends Controller
         $endDate = $request->get('end_date');
 
         // Query Penyewaan
-        $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->with('user')->orderByDesc('created_at');
+        $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->with(['user', 'barang', 'walletEntries'])->orderByDesc('created_at');
 
         // Query Gas
-        $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->with('user')->orderByDesc('created_at');
+        $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->with(['user', 'gas', 'walletEntries'])->orderByDesc('created_at');
 
         // Query Mobil
-        $mobilQuery = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->with(['user', 'mobil'])->orderByDesc('created_at');
+        $mobilQuery = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->with(['user', 'mobil', 'walletEntries'])->orderByDesc('created_at');
 
         // Query Fasilitas Umum
-        $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->orderByDesc('created_at');
+        $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas', 'walletEntries'])->orderByDesc('created_at');
 
         $user = auth()->user();
         if ($user->isStaff()) {
@@ -101,6 +101,7 @@ class ReportController extends Controller
         $totalPasar = $current['pasar']['revenue']; // Historical transactions remain available.
         $manualLainnya = $current['lainnya']['revenue'];
         $totalPendapatan = $current['total']['revenue'];
+        $totalTrxYear = $current['total']['transactions'];
         $rentalCount = $current['rental']['transactions'];
         $gasCount = $current['gas']['transactions'];
         $mobilCount = $current['mobil']['transactions'];
@@ -131,7 +132,7 @@ class ReportController extends Controller
         $activeServices = $this->getActivatedServices();
 
         return view('admin.laporan.income', compact('totalPenyewaan', 'totalGas', 'totalMobil', 'totalFasilitas', 'totalPasar',
-            'totalPendapatan', 'monthlyIncome', 'dataPoints', 'rentalRequests', 'gasOrders', 'manualReports', 'manualLainnya',
+            'totalPendapatan', 'totalTrxYear', 'monthlyIncome', 'dataPoints', 'rentalRequests', 'gasOrders', 'manualReports', 'manualLainnya',
             'rentalCount', 'gasCount', 'mobilCount', 'fasilitasCount', 'pasarCount', 'year', 'totalPendapatanData',
             'unitPopulerData', 'growth', 'availableYears', 'activeServices'));
     }

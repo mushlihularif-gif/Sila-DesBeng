@@ -110,13 +110,14 @@ class TransactionController extends Controller
               ->orWhereIn('status', $activeStatuses);
         });
 
-        $mobilQuery = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->with(['user', 'mobil'])->where(function($q) use ($activeStatuses) {
+        $mobilQuery = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->with(['user', 'mobil', 'walletEntries'])->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('payment_proof')
               ->orWhereIn('status', $activeStatuses);
         });
 
-        $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->where(function($q) use ($activeStatuses) {
-            $q->whereIn('status', $activeStatuses);
+        $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas', 'walletEntries'])->where(function($q) use ($activeStatuses) {
+            $q->whereNotNull('payment_proof')
+              ->orWhereIn('status', $activeStatuses);
         });
 
 
@@ -214,7 +215,8 @@ class TransactionController extends Controller
         $mobilCount = (clone $baseMobil)->count();
 
         $baseFasilitas = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->where(function($q) use ($activeStatuses) {
-            $q->whereIn('status', $activeStatuses);
+            $q->whereNotNull('payment_proof')
+              ->orWhereIn('status', $activeStatuses);
         });
         if (!$canViewFasilitas) $baseFasilitas->whereRaw('1 = 0');
         $fasilitasCount = (clone $baseFasilitas)->count();
@@ -277,7 +279,8 @@ class TransactionController extends Controller
     private function reviewPayment(Request $request, int $id, string $type, bool $reject)
     {
         $this->pastikanBolehMenangani($type, $id);
-        \DB::transaction(function () use ($request, $id, $type, $reject) {
+        $shortfallRecorded = false;
+        \DB::transaction(function () use ($request, $id, $type, $reject, &$shortfallRecorded) {
             [$model] = self::WILAYAH_PER_TIPE[$type];
             $order = $model::lockForUpdate()->findOrFail($id);
             abort_if(in_array($order->status,['completed','cancelled','rejected','returned'],true),409,'Pesanan sudah ditutup.');
@@ -287,20 +290,92 @@ class TransactionController extends Controller
             $paid=$rows->every(fn($r)=>$r->status==='verified');
             if ($reject) {
                 abort_if($paid || $rows->contains('status','verified') || !$order->payment_proof,409,'Pembayaran ini tidak dapat dikembalikan untuk diperbaiki.');
+                $receivedPartial = \App\Support\PaymentVerificationGuard::parsePartialReceivedAmount($request, (float) $order->total_amount);
+                $oldProof = $order->payment_proof;
+                \DB::afterCommit(fn () => Storage::disk('public')->delete($oldProof));
                 $order->payment_proof=null;
                 $order->save();
-                \App\Models\WalletTransaction::whereKey($rows->modelKeys())->update(['proof_path'=>null,'notes'=>$request->reason]);
+                if ($receivedPartial !== null && $receivedPartial > 0) {
+                    $shortfallRecorded = true;
+                    $remaining = max(0, round((float) $order->total_amount - $receivedPartial, 2));
+                    \App\Models\WalletTransaction::catatKurangBayar($type, $id, $receivedPartial, $request->reason, auth()->id());
+                    $notifTitle = 'Pembayaran Kurang — Perlu Pelunasan';
+                    $notifMsg = sprintf(
+                        'Baru diterima Rp %s dari subtotal Rp %s (kurang Rp %s) untuk pesanan #%d. %s Silakan lunasi kekurangan dan unggah bukti pelunasan.',
+                        number_format($receivedPartial, 0, ',', '.'),
+                        number_format((float) $order->total_amount, 0, ',', '.'),
+                        number_format($remaining, 0, ',', '.'),
+                        $id,
+                        $request->reason
+                    );
+                } else {
+                    $updatePayload = ['proof_path'=>null,'notes'=>$request->reason];
+                    if (\App\Models\WalletTransaction::hasVerificationColumns()) {
+                        $updatePayload['detected_proof_amount'] = null;
+                        $updatePayload['proof_scan_status'] = null;
+                        $updatePayload['proof_scan_meta'] = null;
+                    }
+                    \App\Models\WalletTransaction::whereKey($rows->modelKeys())->update($updatePayload);
+                    $notifTitle = 'Perbaiki Bukti Pembayaran';
+                    $notifMsg = 'Bukti pembayaran perlu diperbaiki: '.$request->reason;
+                }
             } else {
-                abort_unless($order->payment_method==='tunai' || $order->payment_proof,422,'Unggah bukti pembayaran terlebih dahulu.');
+                abort_unless(strtolower((string) $order->payment_method)==='tunai' || $order->payment_proof,422,'Unggah bukti pembayaran terlebih dahulu.');
                 if ($paid) return;
-                \App\Models\WalletTransaction::tandaiPembayaranManualDiterima($type,$id,auth()->id());
+                $confirmedAmount = \App\Support\PaymentVerificationGuard::validateConfirmedAmount(
+                    $request,
+                    (float) $order->total_amount,
+                    $order->paidAmount()
+                );
+                \App\Models\WalletTransaction::tandaiPembayaranManualDiterima($type,$id,auth()->id(),$confirmedAmount);
+                $notifTitle = 'Pembayaran Diterima (Lunas)';
+                $notifMsg = 'Pembayaran pesanan #'.$id.' sebesar Rp '.number_format($confirmedAmount, 0, ',', '.').' telah diterima. Proses layanan dilanjutkan pengelola.';
             }
-            ActivityLog::create(['user_id'=>auth()->id(),'action'=>$reject?'reject_payment':'verify_payment',
-                'description'=>$type.' #'.$id.($reject ? ': '.$request->reason : ': pembayaran diterima'),'ip_address'=>$request->ip()]);
-            Notification::create(['user_id'=>$order->user_id,'type'=>'status_berubah','title'=>$reject?'Perbaiki Bukti Pembayaran':'Pembayaran Diterima',
-                'message'=>$reject?'Bukti pembayaran perlu diperbaiki: '.$request->reason:'Pembayaran pesanan #'.$id.' diterima. Proses layanan dilanjutkan pengelola.']);
+            ActivityLog::create(['user_id'=>auth()->id(),'action'=>$reject?($shortfallRecorded?'record_shortfall_payment':'reject_payment'):'verify_payment',
+                'description'=>$type.' #'.$id.': '.$notifMsg,'ip_address'=>$request->ip()]);
+            Notification::create(['user_id'=>$order->user_id,'type'=>'status_berubah','title'=>$notifTitle,
+                'message'=>$notifMsg]);
         });
-        return back()->with('success',$reject?'Bukti dikembalikan untuk diperbaiki.':'Pembayaran dikonfirmasi. Status layanan tidak berubah.');
+        $flash = $reject
+            ? ($shortfallRecorded ? 'Nominal kurang bayar dicatat dan warga diminta mengunggah bukti pelunasan.' : 'Bukti dikembalikan untuk diperbaiki.')
+            : 'Pembayaran dikonfirmasi lunas. Status layanan tidak berubah.';
+        return $request->expectsJson()
+            ? response()->json(['success' => true, 'message' => $flash])
+            : back()->with('success', $flash);
+    }
+
+    /**
+     * Pindai ulang nominal pada foto bukti transfer menggunakan AI Vision / OCR
+     * untuk membantu Admin/Staf mendeteksi transfer kurang bayar.
+     */
+    public function scanProof(Request $request, $id, $type)
+    {
+        $this->pastikanBolehMenangani($type, $id);
+        [$model] = self::WILAYAH_PER_TIPE[$type];
+        $order = $model::withTrashed()->findOrFail($id);
+
+        $proofPath = $order->paymentProofPath();
+        abort_unless($proofPath, 422, 'Pesanan ini belum memiliki file bukti pembayaran.');
+
+        $result = app(\App\Services\PaymentProofAnalyzerService::class)->analyzeAndStore(
+            $type,
+            (int) $order->id,
+            $proofPath,
+            $order->subtotalAmount(),
+            $order->paidAmount(),
+            true
+        );
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'scan' => $result,
+            ]);
+        }
+
+        $flashType = ($result['status'] ?? '') === 'mismatch' ? 'error' : 'success';
+
+        return back()->with($flashType, $result['message'] ?? 'Pemindaian bukti selesai.');
     }
 
     public function updateStatus(Request $request, $id, $type, $status)

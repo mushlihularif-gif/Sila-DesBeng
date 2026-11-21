@@ -316,13 +316,13 @@ class RequestController extends Controller
         $this->pastikanBolehMenangani($type, $id);
 
         if ($type === 'rental') {
-            $request = RentalBooking::withTrashed()->with(['user', 'barang'])->findOrFail($id);
+            $request = RentalBooking::withTrashed()->with(['user', 'barang', 'walletEntries'])->findOrFail($id);
         } elseif ($type === 'mobil') {
-            $request = MobilBooking::withTrashed()->with(['user', 'mobil'])->findOrFail($id);
+            $request = MobilBooking::withTrashed()->with(['user', 'mobil', 'walletEntries'])->findOrFail($id);
         } elseif ($type === 'fasilitas') {
-            $request = FasilitasUmumBooking::withTrashed()->with(['user', 'fasilitas'])->findOrFail($id);
+            $request = FasilitasUmumBooking::withTrashed()->with(['user', 'fasilitas', 'walletEntries'])->findOrFail($id);
         } else {
-            $request = GasOrder::withTrashed()->with('user')->findOrFail($id);
+            $request = GasOrder::withTrashed()->with(['user', 'gas', 'walletEntries'])->findOrFail($id);
         }
 
         return view('admin.aktivitas.request-detail', compact('request', 'type'));
@@ -390,6 +390,9 @@ class RequestController extends Controller
                 $model = MobilBooking::with('mobil')->lockForUpdate()->findOrFail($id);
                 abort_if($model->cancellation_status === 'pending', 409, 'Tanggapi permintaan pembatalan terlebih dahulu.');
                 abort_unless($model->status === 'pending', 409, 'Permintaan sudah diproses sebelumnya.');
+                if ($model->subtotalAmount() > 0 && strtolower((string) $model->payment_method) !== 'tunai') {
+                    abort_unless($model->paymentReceived(), 409, 'Periksa dan konfirmasi pembayaran warga terlebih dahulu sebelum menyetujui pesanan.');
+                }
 
                 // PESSIMISTIC LOCK
                 $mobil = \App\Models\Mobil::where('id', $model->mobil_id)->lockForUpdate()->firstOrFail();
@@ -405,6 +408,9 @@ class RequestController extends Controller
                 $model = FasilitasUmumBooking::with('fasilitas')->lockForUpdate()->findOrFail($id);
                 abort_if($model->cancellation_status === 'pending', 409, 'Tanggapi permintaan pembatalan terlebih dahulu.');
                 abort_unless($model->status === 'pending', 409, 'Permintaan sudah diproses sebelumnya.');
+                if ($model->subtotalAmount() > 0 && strtolower((string) $model->payment_method) !== 'tunai') {
+                    abort_unless($model->paymentReceived(), 409, 'Periksa dan konfirmasi pembayaran warga terlebih dahulu sebelum menyetujui pesanan.');
+                }
 
                 // PESSIMISTIC LOCK
                 $fasilitas = \App\Models\FasilitasUmum::where('id', $model->fasilitas_id)->lockForUpdate()->firstOrFail();

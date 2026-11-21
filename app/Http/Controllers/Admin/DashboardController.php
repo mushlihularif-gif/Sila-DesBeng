@@ -245,16 +245,16 @@ public function index(Request $request)
     // Pengeluaran - setel ke 0 untuk saat ini
     $monthlyExpenses = array_fill(0, 12, 0);
     
-    // Hitung statistik item populer (data nyata dari database) - Filter Tahun Ini
+    // Hitung statistik item populer (data nyata dari database, hanya pesanan terproses/selesai) - Filter Tahun Ini
     $popularItems = [
-        'gas_lpg_3kg' => $baseGas->clone()->whereYear('created_at', $selectedYear)->where('item_name', 'LIKE', '%3%')->count(),
-        'sound_system' => $baseRental->clone()->whereYear('created_at', $selectedYear)->whereHas('barang', function($q) {
+        'gas_lpg_3kg' => $baseGas->clone()->whereYear('created_at', $selectedYear)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->where('item_name', 'LIKE', '%3%')->count(),
+        'sound_system' => $baseRental->clone()->whereYear('created_at', $selectedYear)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->whereHas('barang', function($q) {
                 $q->where('nama_barang', 'LIKE', '%Sound%');
             })->count(),
-        'tenda_komplit' => $baseRental->clone()->whereYear('created_at', $selectedYear)->whereHas('barang', function($q) {
+        'tenda_komplit' => $baseRental->clone()->whereYear('created_at', $selectedYear)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->whereHas('barang', function($q) {
                 $q->where('nama_barang', 'LIKE', '%Tenda%');
             })->count(),
-        'meja_kursi' => $baseRental->clone()->whereYear('created_at', $selectedYear)->whereHas('barang', function($q) {
+        'meja_kursi' => $baseRental->clone()->whereYear('created_at', $selectedYear)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->whereHas('barang', function($q) {
                 $q->where('nama_barang', 'LIKE', '%Meja%')
                   ->orWhere('nama_barang', 'LIKE', '%Kursi%');
             })->count(),

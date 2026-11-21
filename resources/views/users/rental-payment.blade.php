@@ -8,7 +8,9 @@
     <section class="max-w-2xl mx-auto">
         <div class="rounded-3xl bg-white shadow-lg border border-slate-100 p-6 sm:p-10">
             <div class="text-center mb-8">
-                @php($statusLabel = ['pending'=>'Menunggu Konfirmasi', 'confirmed'=>'Pesanan Disetujui', 'approved'=>'Pesanan Disetujui', 'being_prepared'=>'Sedang Disiapkan', 'in_delivery'=>'Sedang Diantar', 'arrived'=>'Alat Diserahkan kepada Penyewa', 'completed'=>'Pesanan Selesai', 'rejected'=>'Pesanan Ditolak', 'cancelled'=>'Pesanan Dibatalkan'][$order->status] ?? 'Status Pesanan')
+                @php
+                    $statusLabel = ['pending'=>'Menunggu Konfirmasi', 'confirmed'=>'Pesanan Disetujui', 'approved'=>'Pesanan Disetujui', 'being_prepared'=>'Sedang Disiapkan', 'in_delivery'=>'Sedang Diantar', 'arrived'=>'Alat Diserahkan kepada Penyewa', 'completed'=>'Pesanan Selesai', 'rejected'=>'Pesanan Ditolak', 'cancelled'=>'Pesanan Dibatalkan'][$order->status] ?? 'Status Pesanan';
+                @endphp
                 <h1 class="text-2xl sm:text-3xl font-black text-slate-900">{{ $statusLabel }}</h1>
                 <p class="mt-2 text-sm text-slate-500">Nomor pesanan {{ $order->order_number }}</p>
             </div>
@@ -27,11 +29,40 @@
                     <span class="text-slate-500">Pembayaran</span>
                     <span class="font-semibold text-slate-900">{{ ucfirst($order->payment_method) }}</span>
                 </div>
+                @php
+                    $rentalSubtotal = $order->subtotalAmount();
+                    $rentalPaidAmt = $order->paidAmount();
+                    $rentalRemaining = $order->remainingAmount();
+                    $rentalPayLabel = $order->paymentStatusLabel();
+                    $rentalPayNote = $order->latestPaymentNote();
+                @endphp
                 <div class="flex justify-between gap-4 border-t border-slate-200 pt-3">
-                    <span class="font-bold text-slate-700">Total</span>
-                    <span class="font-black text-slate-900">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                    <span class="font-bold text-slate-700">Subtotal Pesanan</span>
+                    <span class="font-black text-slate-900">Rp {{ number_format($rentalSubtotal, 0, ',', '.') }}</span>
                 </div>
+                <div class="flex justify-between gap-4 text-sm">
+                    <span class="text-slate-600">Nominal Dibayarkan (Terverifikasi)</span>
+                    <span class="font-bold {{ $paid ? 'text-green-700' : ($rentalPaidAmt > 0 ? 'text-amber-700' : 'text-slate-700') }}">
+                        Rp {{ number_format($rentalPaidAmt, 0, ',', '.') }}
+                    </span>
+                </div>
+                @if($rentalRemaining > 0.01 && !in_array($order->status, ['cancelled', 'rejected']))
+                <div class="flex justify-between gap-4 text-sm">
+                    <span class="font-semibold text-red-600">Sisa Tagihan ({{ $rentalPayLabel }})</span>
+                    <span class="font-black text-red-600">Rp {{ number_format($rentalRemaining, 0, ',', '.') }}</span>
+                </div>
+                @endif
             </div>
+
+            @if($rentalPaidAmt > 0 && $rentalRemaining > 0.01 && !$paid && !in_array($order->status, ['cancelled', 'rejected']))
+            <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+                <p class="font-bold">Pembayaran Kurang — Perlu Pelunasan</p>
+                <p class="mt-1">Pengelola baru mencatat penerimaan sebesar <strong>Rp {{ number_format($rentalPaidAmt, 0, ',', '.') }}</strong> dari subtotal <strong>Rp {{ number_format($rentalSubtotal, 0, ',', '.') }}</strong>. Mohon transfer sisa kekurangan sebesar <strong>Rp {{ number_format($rentalRemaining, 0, ',', '.') }}</strong> lalu unggah bukti pelunasan di bawah.</p>
+                @if($rentalPayNote)
+                    <p class="mt-1 text-xs text-red-700">Catatan petugas: {{ $rentalPayNote }}</p>
+                @endif
+            </div>
+            @endif
 
             <p class="mt-4 text-sm">Jadwal: {{ $order->start_date->format('d/m/Y') }} – {{ $order->end_date->format('d/m/Y') }}. Tarif pesanan: {{ $order->billing_basis === 'per_day' ? 'Harian ('.$order->days_count.' hari)' : ($order->billing_basis === 'per_activity' ? 'Sekali pakai' : 'Sesuai transaksi lama') }}. Total mengikuti nilai pesanan saat dibuat.</p>
             @if($order->return_time)

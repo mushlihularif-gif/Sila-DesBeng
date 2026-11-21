@@ -1,29 +1,10 @@
 @php($rentalPaid = $request->paymentReceived())
-<p class="small">Pembayaran: <strong>{{ $rentalPaid ? 'Diterima' : 'Belum dikonfirmasi' }}</strong>. Penyerahan alat dan pembayaran diperiksa terpisah.</p>
+<p class="small mb-2">Pembayaran: <strong>{{ $rentalPaid ? 'Diterima (Lunas)' : $request->paymentStatusLabel() }}</strong>. Penyerahan alat dan pembayaran diperiksa terpisah.</p>
 @if($request->cancellation_status === 'pending')
     <button class="btn btn-danger mb-2" onclick="handleCancellation({{ $request->id }}, 'rental', 'approve')">Setujui Pembatalan</button>
     <button class="btn btn-secondary" onclick="showCancellationRejectModal({{ $request->id }}, 'rental')">Tolak Pembatalan</button>
 @elseif(!in_array($request->status, ['completed','cancelled','rejected']))
-    @if(!$rentalPaid)
-        @if(strtolower($request->payment_method) === 'tunai' || $request->payment_proof)
-            <form method="POST" action="{{ route('admin.aktivitas.bukti-transaksi.verify', [$request->id, 'rental']) }}" class="mb-3">
-                @csrf
-                <button type="submit" class="btn btn-success w-100" onclick="return confirm('Pastikan uang benar-benar sudah diterima. Konfirmasi pembayaran?')">Konfirmasi Uang Diterima</button>
-            </form>
-        @else
-            <p class="alert alert-warning">Warga belum mengirim bukti pembayaran.</p>
-        @endif
-        @if($request->payment_proof && $request->status === 'pending')
-            <details class="mb-3"><summary>Bukti tidak sesuai? Minta ganti bukti</summary>
-                <form method="POST" action="{{ route('admin.aktivitas.bukti-transaksi.reject', [$request->id, 'rental']) }}">
-                    @csrf
-                    <label for="rental-proof-reason">Alasan dan petunjuk untuk warga</label>
-                    <textarea id="rental-proof-reason" name="reason" required maxlength="500" class="form-control"></textarea>
-                    <button type="submit" class="btn btn-warning mt-2">Minta Ganti Bukti</button>
-                </form>
-            </details>
-        @endif
-    @endif
+    @include('admin.aktivitas.partials.payment-verify-controls', ['verifyType' => 'rental'])
     <div class="d-grid gap-2">
         @if($request->status === 'pending')
             @if($rentalPaid || strtolower($request->payment_method) === 'tunai')

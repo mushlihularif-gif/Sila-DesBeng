@@ -76,6 +76,25 @@
         </div>
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bx bx-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bx bx-error-circle me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bx bx-error-circle me-2"></i><strong>Verifikasi Ditolak:</strong> {{ $errors->first() }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     @if($totalActive === 0)
         <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
             <div class="avatar avatar-lg bg-label-warning text-warning rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
@@ -101,7 +120,7 @@
                 <div>
                     <h6 class="fw-bold mb-1 text-primary">Validasi Pembayaran Warga (Transfer &amp; Tunai)</h6>
                     <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.5;">
-                        Periksa foto bukti transfer atau penerimaan uang tunai sebelum menyerahkan barang/layanan. Klik <strong>Periksa</strong> untuk membuka rincian pesanan atau langsung klik <strong>Konfirmasi Uang Diterima</strong>.
+                        Cocokkan <strong>nominal pada foto bukti transfer &amp; mutasi rekening</strong> dengan <strong>Subtotal Tagihan</strong> sebelum mengesahkan pembayaran. Bila warga transfer kurang (misal Rp 20.000 dari Rp 200.000), sistem akan mengunci pengesahan lunas sehingga Anda dapat mencatat kurang bayar atau menolak bukti untuk meminta pelunasan.
                     </p>
                 </div>
             </div>
@@ -139,8 +158,11 @@
                         <i class="bx bx-transfer fs-4"></i>
                     </div>
                     <div class="min-w-0">
+                        @php
+                            $nonCashCount = ($stats['transfer_total'] ?? 0) + ($stats['digital_total'] ?? 0);
+                        @endphp
                         <small class="text-muted text-uppercase fw-bold d-block text-truncate" style="font-size: 0.68rem;">Transfer / E-Wallet</small>
-                        <h4 class="fw-bold mb-0 text-info"><span class="count-up" data-value="{{ $stats['transfer_total'] }}">{{ $stats['transfer_total'] }}</span></h4>
+                        <h4 class="fw-bold mb-0 text-info"><span class="count-up" data-value="{{ $nonCashCount }}">{{ $nonCashCount }}</span></h4>
                     </div>
                 </div>
             </div>
@@ -272,16 +294,17 @@
                                         <tr>
                                             <th class="ps-4">Penyewa</th>
                                             <th>Item Sewa</th>
-                                            <th>Total Bayar</th>
+                                            <th>Subtotal / Dibayar</th>
                                             <th>Metode</th>
                                             <th>Status Pesanan</th>
-                                            <th class="text-end pe-4">Status Uang &amp; Aksi</th>
+                                            <th class="text-end pe-4">Verifikasi &amp; Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($rentalPayments as $payment)
                                         @php
                                             $pName = $payment->full_name ?? $payment->recipient_name ?? $payment->user->name ?? 'Warga';
+                                            $pItem = $payment->barang->nama_barang ?? 'Alat';
                                         @endphp
                                         <tr class="proof-filter-item">
                                             <td class="ps-4">
@@ -302,11 +325,11 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="fw-semibold text-dark">{{ $payment->barang->nama_barang ?? 'Alat' }}</div>
+                                                <div class="fw-semibold text-dark">{{ $pItem }}</div>
                                                 <small class="text-muted">{{ $payment->quantity ?? 1 }} Unit</small>
                                             </td>
                                             <td>
-                                                <span class="fw-bold text-dark">Rp {{ number_format($payment->total_amount ?? 0, 0, ',', '.') }}</span>
+                                                @include('admin.aktivitas.partials.proof-amount-cell', ['payment' => $payment])
                                             </td>
                                             <td>
                                                 @if(strtolower($payment->payment_method) == 'tunai')
@@ -322,10 +345,7 @@
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
-                                                    <span class="badge {{ $payment->paymentReceived() ? 'bg-label-success' : 'bg-label-warning' }} rounded-pill">
-                                                        <i class="bx {{ $payment->paymentReceived() ? 'bx-check-circle' : 'bx-time-five' }} me-1"></i>
-                                                        {{ $payment->paymentReceived() ? 'Uang diterima' : 'Belum dikonfirmasi' }}
-                                                    </span>
+                                                    @include('admin.aktivitas.partials.proof-verify-button', ['payment' => $payment, 'verifyType' => 'rental', 'buyerName' => $pName, 'itemLabel' => $pItem])
                                                     <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'rental']) }}">
                                                         <i class="bx bx-show me-1"></i>Periksa
                                                     </a>
@@ -352,6 +372,7 @@
                                     @foreach($rentalPayments as $payment)
                                         @php
                                             $pName = $payment->full_name ?? $payment->recipient_name ?? $payment->user->name ?? 'Warga';
+                                            $pItem = $payment->barang->nama_barang ?? 'Alat';
                                         @endphp
                                         <div class="proof-mobile-card p-3 shadow-sm proof-filter-item">
                                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2 pb-2 border-bottom">
@@ -361,38 +382,40 @@
                                                     </div>
                                                     <div class="min-w-0">
                                                         <h6 class="fw-bold text-dark mb-0 text-truncate" style="font-size: 0.9rem;">{{ $pName }}</h6>
-                                                        <small class="text-muted d-block text-truncate">{{ $payment->barang->nama_barang ?? 'Alat' }} ({{ $payment->quantity ?? 1 }} Unit)</small>
+                                                        <small class="text-muted d-block text-truncate">{{ $pItem }} ({{ $payment->quantity ?? 1 }} Unit)</small>
                                                     </div>
                                                 </div>
                                                 @include('admin.partials.status-badge', ['status' => $payment->status])
                                             </div>
-                                            <div class="bg-light rounded-3 p-2.5 mb-2.5 d-flex justify-content-between align-items-center">
+                                            <div class="bg-light rounded-3 p-2.5 mb-2.5 d-flex justify-content-between align-items-start gap-2">
                                                 <div>
-                                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Total Pembayaran</small>
-                                                    <span class="fw-bold text-dark">Rp {{ number_format($payment->total_amount ?? 0, 0, ',', '.') }}</span>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Subtotal &amp; Dibayar</small>
+                                                    @include('admin.aktivitas.partials.proof-amount-cell', ['payment' => $payment])
                                                 </div>
-                                                <div class="text-end">
-                                                    <span class="badge {{ strtolower($payment->payment_method) == 'tunai' ? 'bg-label-success' : 'bg-label-info' }} rounded-pill d-block mb-1">
+                                                <div class="text-end flex-shrink-0">
+                                                    <span class="badge {{ strtolower($payment->payment_method) == 'tunai' ? 'bg-label-success' : 'bg-label-info' }} rounded-pill d-block">
                                                         {{ ucfirst($payment->payment_method) }}
-                                                    </span>
-                                                    <span class="badge {{ $payment->paymentReceived() ? 'bg-label-success' : 'bg-label-warning' }} rounded-pill" style="font-size: 0.68rem;">
-                                                        {{ $payment->paymentReceived() ? 'Uang diterima' : 'Belum dikonfirmasi' }}
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div class="d-flex align-items-center justify-content-between gap-2">
-                                                @if($payment->payment_proof)
-                                                    <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'rental']) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                                                        <i class="bx bx-image me-1"></i>Bukti Foto
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                                <div class="d-flex gap-1.5">
+                                                    @if($payment->payment_proof)
+                                                        <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'rental']) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5">
+                                                            <i class="bx bx-image me-1"></i>Bukti
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('receipt.rental.view', $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5">
+                                                            <i class="bx bx-receipt me-1"></i>Struk
+                                                        </a>
+                                                    @endif
+                                                    <a class="btn btn-sm btn-outline-primary rounded-pill px-2.5" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'rental']) }}">
+                                                        <i class="bx bx-show me-1"></i>Detail
                                                     </a>
-                                                @else
-                                                    <a href="{{ route('receipt.rental.view', $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                                                        <i class="bx bx-receipt me-1"></i>Struk
-                                                    </a>
-                                                @endif
-                                                <a class="btn btn-sm btn-primary rounded-pill px-3 ms-auto" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'rental']) }}">
-                                                    <i class="bx bx-show me-1"></i>Periksa Pesanan
-                                                </a>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-1.5 ms-auto">
+                                                    @include('admin.aktivitas.partials.proof-verify-button', ['payment' => $payment, 'verifyType' => 'rental', 'buyerName' => $pName, 'itemLabel' => $pItem])
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -421,7 +444,7 @@
                                         <tr>
                                             <th class="ps-4">Pembeli</th>
                                             <th>Produk Gas</th>
-                                            <th>Total Bayar</th>
+                                            <th>Subtotal / Dibayar</th>
                                             <th>Metode</th>
                                             <th>Status Pesanan</th>
                                             <th class="text-end pe-4">Verifikasi &amp; Aksi</th>
@@ -431,7 +454,7 @@
                                         @foreach($gasPayments as $payment)
                                         @php
                                             $gName = $payment->full_name ?? $payment->user->name ?? 'Warga';
-                                            $gTotal = ($payment->price ?? 0) * ($payment->quantity ?? 1);
+                                            $gItem = ($payment->item_name ?? 'Gas LPG') . ' (' . ($payment->quantity ?? 1) . ' Tabung)';
                                         @endphp
                                         <tr class="proof-filter-item">
                                             <td class="ps-4">
@@ -456,7 +479,7 @@
                                                 <small class="text-muted">{{ $payment->quantity }} Tabung</small>
                                             </td>
                                             <td>
-                                                <span class="fw-bold text-dark">Rp {{ number_format($gTotal, 0, ',', '.') }}</span>
+                                                @include('admin.aktivitas.partials.proof-amount-cell', ['payment' => $payment])
                                             </td>
                                             <td>
                                                 @if(strtolower($payment->payment_method) == 'tunai')
@@ -472,25 +495,7 @@
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
-                                                    @if(!in_array($payment->status, ['completed', 'cancelled', 'rejected']) && $payment->cancellation_status !== 'pending')
-                                                        @if($payment->paymentReceived())
-                                                            <span class="badge bg-label-success rounded-pill"><i class="bx bx-check-circle me-1"></i>Pembayaran diterima</span>
-                                                        @elseif(strtolower($payment->payment_method) === 'tunai' || $payment->proof_of_payment)
-                                                            <form method="POST" action="{{ route('admin.aktivitas.bukti-transaksi.verify', [$payment->id, 'gas']) }}" class="d-inline">
-                                                                @csrf
-                                                                <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" type="submit" onclick="return confirm('Pastikan uang benar-benar sudah diterima. Konfirmasi pembayaran ini?')">
-                                                                    <i class="bx bx-check me-1"></i>Konfirmasi Uang Diterima
-                                                                </button>
-                                                            </form>
-                                                            @if($payment->proof_of_payment && $payment->status === 'pending')
-                                                                <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3" onclick="openRejectGasProofModal({{ $payment->id }}, '{{ addslashes($gName) }}')">
-                                                                    <i class="bx bx-error-circle me-1"></i>Bukti Tidak Sesuai
-                                                                </button>
-                                                            @endif
-                                                        @else
-                                                            <span class="badge bg-label-secondary rounded-pill">Menunggu bukti pembayaran</span>
-                                                        @endif
-                                                    @endif
+                                                    @include('admin.aktivitas.partials.proof-verify-button', ['payment' => $payment, 'verifyType' => 'gas', 'buyerName' => $gName, 'itemLabel' => $gItem])
 
                                                     <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'gas']) }}">
                                                         <i class="bx bx-show me-1"></i>Detail
@@ -519,7 +524,7 @@
                                     @foreach($gasPayments as $payment)
                                         @php
                                             $gName = $payment->full_name ?? $payment->user->name ?? 'Warga';
-                                            $gTotal = ($payment->price ?? 0) * ($payment->quantity ?? 1);
+                                            $gItem = ($payment->item_name ?? 'Gas LPG') . ' (' . ($payment->quantity ?? 1) . ' Tabung)';
                                         @endphp
                                         <div class="proof-mobile-card p-3 shadow-sm proof-filter-item">
                                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2 pb-2 border-bottom">
@@ -529,25 +534,20 @@
                                                     </div>
                                                     <div class="min-w-0">
                                                         <h6 class="fw-bold text-dark mb-0 text-truncate" style="font-size: 0.9rem;">{{ $gName }}</h6>
-                                                        <small class="text-muted d-block text-truncate">{{ $payment->item_name ?? 'Gas LPG' }} ({{ $payment->quantity }} Tabung)</small>
+                                                        <small class="text-muted d-block text-truncate">{{ $gItem }}</small>
                                                     </div>
                                                 </div>
                                                 @include('admin.partials.status-badge', ['status' => $payment->status])
                                             </div>
-                                            <div class="bg-light rounded-3 p-2.5 mb-2.5 d-flex justify-content-between align-items-center">
+                                            <div class="bg-light rounded-3 p-2.5 mb-2.5 d-flex justify-content-between align-items-start gap-2">
                                                 <div>
-                                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Total Pembayaran</small>
-                                                    <span class="fw-bold text-dark">Rp {{ number_format($gTotal, 0, ',', '.') }}</span>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Subtotal &amp; Dibayar</small>
+                                                    @include('admin.aktivitas.partials.proof-amount-cell', ['payment' => $payment])
                                                 </div>
-                                                <div class="text-end">
-                                                    <span class="badge {{ strtolower($payment->payment_method) == 'tunai' ? 'bg-label-success' : 'bg-label-info' }} rounded-pill d-block mb-1">
+                                                <div class="text-end flex-shrink-0">
+                                                    <span class="badge {{ strtolower($payment->payment_method) == 'tunai' ? 'bg-label-success' : 'bg-label-info' }} rounded-pill d-block">
                                                         {{ ucfirst($payment->payment_method) }}
                                                     </span>
-                                                    @if($payment->paymentReceived())
-                                                        <span class="badge bg-label-success rounded-pill" style="font-size: 0.68rem;">Pembayaran diterima</span>
-                                                    @else
-                                                        <span class="badge bg-label-warning rounded-pill" style="font-size: 0.68rem;">Belum dikonfirmasi</span>
-                                                    @endif
                                                 </div>
                                             </div>
                                             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
@@ -565,24 +565,9 @@
                                                         <i class="bx bx-show me-1"></i>Detail
                                                     </a>
                                                 </div>
-
-                                                @if(!in_array($payment->status, ['completed', 'cancelled', 'rejected']) && $payment->cancellation_status !== 'pending' && !$payment->paymentReceived())
-                                                    @if(strtolower($payment->payment_method) === 'tunai' || $payment->proof_of_payment)
-                                                        <div class="d-flex gap-1.5 ms-auto">
-                                                            @if($payment->proof_of_payment && $payment->status === 'pending')
-                                                                <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5" onclick="openRejectGasProofModal({{ $payment->id }}, '{{ addslashes($gName) }}')">
-                                                                    Tolak Bukti
-                                                                </button>
-                                                            @endif
-                                                            <form method="POST" action="{{ route('admin.aktivitas.bukti-transaksi.verify', [$payment->id, 'gas']) }}" class="d-inline">
-                                                                @csrf
-                                                                <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" type="submit" onclick="return confirm('Pastikan uang benar-benar sudah diterima. Konfirmasi pembayaran ini?')">
-                                                                    <i class="bx bx-check me-1"></i>Terima Uang
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    @endif
-                                                @endif
+                                                <div class="d-flex flex-wrap gap-1.5 ms-auto">
+                                                    @include('admin.aktivitas.partials.proof-verify-button', ['payment' => $payment, 'verifyType' => 'gas', 'buyerName' => $gName, 'itemLabel' => $gItem])
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -611,16 +596,17 @@
                                         <tr>
                                             <th class="ps-4">Penyewa</th>
                                             <th>Unit Transportasi</th>
-                                            <th>Total Bayar</th>
+                                            <th>Subtotal / Dibayar</th>
                                             <th>Metode</th>
                                             <th>Status Pesanan</th>
-                                            <th class="text-end pe-4">Aksi</th>
+                                            <th class="text-end pe-4">Verifikasi &amp; Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($mobilPayments as $payment)
                                         @php
-                                            $mName = $payment->user->name ?? 'Warga';
+                                            $mName = $payment->recipient_name ?? $payment->user->name ?? 'Warga';
+                                            $mItem = $payment->mobil->nama_mobil ?? 'Transportasi';
                                         @endphp
                                         <tr class="proof-filter-item">
                                             <td class="ps-4">
@@ -641,11 +627,11 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="fw-semibold text-dark">{{ $payment->mobil->nama_mobil ?? 'Transportasi' }}</div>
+                                                <div class="fw-semibold text-dark">{{ $mItem }}</div>
                                                 <small class="text-muted">{{ $payment->lama_sewa }} Hari</small>
                                             </td>
                                             <td>
-                                                <span class="fw-bold text-dark">Rp {{ number_format($payment->total_harga ?? 0, 0, ',', '.') }}</span>
+                                                @include('admin.aktivitas.partials.proof-amount-cell', ['payment' => $payment])
                                             </td>
                                             <td>
                                                 @if(strtolower($payment->payment_method ?? 'tunai') == 'tunai')
@@ -661,6 +647,7 @@
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+                                                    @include('admin.aktivitas.partials.proof-verify-button', ['payment' => $payment, 'verifyType' => 'mobil', 'buyerName' => $mName, 'itemLabel' => $mItem])
                                                     <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'mobil']) }}">
                                                         <i class="bx bx-show me-1"></i>Periksa
                                                     </a>
@@ -686,7 +673,8 @@
                                 <div class="d-flex flex-column gap-3">
                                     @foreach($mobilPayments as $payment)
                                         @php
-                                            $mName = $payment->user->name ?? 'Warga';
+                                            $mName = $payment->recipient_name ?? $payment->user->name ?? 'Warga';
+                                            $mItem = $payment->mobil->nama_mobil ?? 'Transportasi';
                                         @endphp
                                         <div class="proof-mobile-card p-3 shadow-sm proof-filter-item">
                                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2 pb-2 border-bottom">
@@ -696,33 +684,38 @@
                                                     </div>
                                                     <div class="min-w-0">
                                                         <h6 class="fw-bold text-dark mb-0 text-truncate" style="font-size: 0.9rem;">{{ $mName }}</h6>
-                                                        <small class="text-muted d-block text-truncate">{{ $payment->mobil->nama_mobil ?? 'Transportasi' }} ({{ $payment->lama_sewa }} Hari)</small>
+                                                        <small class="text-muted d-block text-truncate">{{ $mItem }} ({{ $payment->lama_sewa }} Hari)</small>
                                                     </div>
                                                 </div>
                                                 @include('admin.partials.status-badge', ['status' => $payment->status])
                                             </div>
-                                            <div class="bg-light rounded-3 p-2.5 mb-2.5 d-flex justify-content-between align-items-center">
+                                            <div class="bg-light rounded-3 p-2.5 mb-2.5 d-flex justify-content-between align-items-start gap-2">
                                                 <div>
-                                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Total Pembayaran</small>
-                                                    <span class="fw-bold text-dark">Rp {{ number_format($payment->total_harga ?? 0, 0, ',', '.') }}</span>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Subtotal &amp; Dibayar</small>
+                                                    @include('admin.aktivitas.partials.proof-amount-cell', ['payment' => $payment])
                                                 </div>
-                                                <span class="badge {{ strtolower($payment->payment_method ?? 'tunai') == 'tunai' ? 'bg-label-success' : 'bg-label-info' }} rounded-pill">
+                                                <span class="badge {{ strtolower($payment->payment_method ?? 'tunai') == 'tunai' ? 'bg-label-success' : 'bg-label-info' }} rounded-pill flex-shrink-0">
                                                     {{ ucfirst($payment->payment_method ?? 'Tunai') }}
                                                 </span>
                                             </div>
-                                            <div class="d-flex align-items-center justify-content-between gap-2">
-                                                @if($payment->payment_proof)
-                                                    <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'mobil']) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                                                        <i class="bx bx-image me-1"></i>Bukti Foto
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                                <div class="d-flex gap-1.5">
+                                                    @if($payment->payment_proof)
+                                                        <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'mobil']) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5">
+                                                            <i class="bx bx-image me-1"></i>Bukti
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('receipt.mobil.view', $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5">
+                                                            <i class="bx bx-receipt me-1"></i>Struk
+                                                        </a>
+                                                    @endif
+                                                    <a class="btn btn-sm btn-outline-primary rounded-pill px-2.5" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'mobil']) }}">
+                                                        <i class="bx bx-show me-1"></i>Detail
                                                     </a>
-                                                @else
-                                                    <a href="{{ route('receipt.mobil.view', $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                                                        <i class="bx bx-receipt me-1"></i>Struk
-                                                    </a>
-                                                @endif
-                                                <a class="btn btn-sm btn-primary rounded-pill px-3 ms-auto" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'mobil']) }}">
-                                                    <i class="bx bx-show me-1"></i>Periksa Pesanan
-                                                </a>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-1.5 ms-auto">
+                                                    @include('admin.aktivitas.partials.proof-verify-button', ['payment' => $payment, 'verifyType' => 'mobil', 'buyerName' => $mName, 'itemLabel' => $mItem])
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -751,16 +744,17 @@
                                         <tr>
                                             <th class="ps-4">Penyewa</th>
                                             <th>Fasilitas</th>
-                                            <th>Total Bayar</th>
+                                            <th>Subtotal / Dibayar</th>
                                             <th>Metode</th>
                                             <th>Status Pesanan</th>
-                                            <th class="text-end pe-4">Aksi</th>
+                                            <th class="text-end pe-4">Verifikasi &amp; Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($fasilitasPayments as $payment)
                                         @php
-                                            $fName = $payment->user->name ?? 'Warga';
+                                            $fName = $payment->recipient_name ?? $payment->user->name ?? 'Warga';
+                                            $fItem = $payment->fasilitas->nama_fasilitas ?? 'Fasilitas';
                                         @endphp
                                         <tr class="proof-filter-item">
                                             <td class="ps-4">
@@ -781,14 +775,16 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="fw-semibold text-dark">{{ $payment->fasilitas->nama_fasilitas ?? 'Fasilitas' }}</div>
+                                                <div class="fw-semibold text-dark">{{ $fItem }}</div>
                                                 <small class="text-muted">{{ $payment->lama_sewa }} Hari</small>
                                             </td>
                                             <td>
-                                                <span class="fw-bold text-dark">Rp {{ number_format($payment->total_harga ?? 0, 0, ',', '.') }}</span>
+                                                @include('admin.aktivitas.partials.proof-amount-cell', ['payment' => $payment])
                                             </td>
                                             <td>
-                                                @if(strtolower($payment->payment_method ?? 'tunai') == 'tunai')
+                                                @if($payment->subtotalAmount() <= 0)
+                                                    <span class="badge bg-label-info rounded-pill px-3">Gratis</span>
+                                                @elseif(strtolower($payment->payment_method ?? 'tunai') == 'tunai')
                                                     <span class="badge bg-label-success rounded-pill px-3"><i class="bx bx-money me-1"></i>Tunai</span>
                                                 @elseif(strtolower($payment->payment_method ?? '') == 'transfer')
                                                     <span class="badge bg-label-info rounded-pill px-3"><i class="bx bx-transfer me-1"></i>Transfer</span>
@@ -801,6 +797,7 @@
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+                                                    @include('admin.aktivitas.partials.proof-verify-button', ['payment' => $payment, 'verifyType' => 'fasilitas', 'buyerName' => $fName, 'itemLabel' => $fItem])
                                                     <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'fasilitas']) }}">
                                                         <i class="bx bx-show me-1"></i>Periksa
                                                     </a>
@@ -826,7 +823,8 @@
                                 <div class="d-flex flex-column gap-3">
                                     @foreach($fasilitasPayments as $payment)
                                         @php
-                                            $fName = $payment->user->name ?? 'Warga';
+                                            $fName = $payment->recipient_name ?? $payment->user->name ?? 'Warga';
+                                            $fItem = $payment->fasilitas->nama_fasilitas ?? 'Fasilitas';
                                         @endphp
                                         <div class="proof-mobile-card p-3 shadow-sm proof-filter-item">
                                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2 pb-2 border-bottom">
@@ -836,33 +834,38 @@
                                                     </div>
                                                     <div class="min-w-0">
                                                         <h6 class="fw-bold text-dark mb-0 text-truncate" style="font-size: 0.9rem;">{{ $fName }}</h6>
-                                                        <small class="text-muted d-block text-truncate">{{ $payment->fasilitas->nama_fasilitas ?? 'Fasilitas' }} ({{ $payment->lama_sewa }} Hari)</small>
+                                                        <small class="text-muted d-block text-truncate">{{ $fItem }} ({{ $payment->lama_sewa }} Hari)</small>
                                                     </div>
                                                 </div>
                                                 @include('admin.partials.status-badge', ['status' => $payment->status])
                                             </div>
-                                            <div class="bg-light rounded-3 p-2.5 mb-2.5 d-flex justify-content-between align-items-center">
+                                            <div class="bg-light rounded-3 p-2.5 mb-2.5 d-flex justify-content-between align-items-start gap-2">
                                                 <div>
-                                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Total Pembayaran</small>
-                                                    <span class="fw-bold text-dark">Rp {{ number_format($payment->total_harga ?? 0, 0, ',', '.') }}</span>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Subtotal &amp; Dibayar</small>
+                                                    @include('admin.aktivitas.partials.proof-amount-cell', ['payment' => $payment])
                                                 </div>
-                                                <span class="badge {{ strtolower($payment->payment_method ?? 'tunai') == 'tunai' ? 'bg-label-success' : 'bg-label-info' }} rounded-pill">
-                                                    {{ ucfirst($payment->payment_method ?? 'Tunai') }}
+                                                <span class="badge {{ $payment->subtotalAmount() <= 0 ? 'bg-label-info' : (strtolower($payment->payment_method ?? 'tunai') == 'tunai' ? 'bg-label-success' : 'bg-label-info') }} rounded-pill flex-shrink-0">
+                                                    {{ $payment->subtotalAmount() <= 0 ? 'Gratis' : ucfirst($payment->payment_method ?? 'Tunai') }}
                                                 </span>
                                             </div>
-                                            <div class="d-flex align-items-center justify-content-between gap-2">
-                                                @if($payment->payment_proof)
-                                                    <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'fasilitas']) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                                                        <i class="bx bx-image me-1"></i>Bukti Foto
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                                <div class="d-flex gap-1.5">
+                                                    @if($payment->payment_proof)
+                                                        <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'fasilitas']) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5">
+                                                            <i class="bx bx-image me-1"></i>Bukti
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('receipt.fasilitas.view', $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5">
+                                                            <i class="bx bx-receipt me-1"></i>Struk
+                                                        </a>
+                                                    @endif
+                                                    <a class="btn btn-sm btn-outline-primary rounded-pill px-2.5" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'fasilitas']) }}">
+                                                        <i class="bx bx-show me-1"></i>Detail
                                                     </a>
-                                                @else
-                                                    <a href="{{ route('receipt.fasilitas.view', $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                                                        <i class="bx bx-receipt me-1"></i>Struk
-                                                    </a>
-                                                @endif
-                                                <a class="btn btn-sm btn-primary rounded-pill px-3 ms-auto" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'fasilitas']) }}">
-                                                    <i class="bx bx-show me-1"></i>Periksa Pesanan
-                                                </a>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-1.5 ms-auto">
+                                                    @include('admin.aktivitas.partials.proof-verify-button', ['payment' => $payment, 'verifyType' => 'fasilitas', 'buyerName' => $fName, 'itemLabel' => $fItem])
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -878,31 +881,130 @@
     @endif
 </div>
 
-<!-- Modal Tolak Bukti Pembayaran Gas (Menggantikan <details> mentah di dalam tabel) -->
-<div class="modal fade" id="rejectGasProofModal" tabindex="-1" aria-hidden="true">
+<!-- Modal Verifikasi Nominal Pembayaran (Anti Kurang Bayar) -->
+<div class="modal fade" id="verifyPaymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <form id="verifyPaymentForm" method="POST" action="" class="modal-content border-0 shadow-lg rounded-4">
+            @csrf
+            <input type="hidden" name="amount_mode" id="vpAmountMode" value="total">
+            <div class="modal-header border-bottom px-4 py-3">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2 mb-0">
+                        <i class="bx bx-check-shield text-success fs-4"></i>
+                        <span>Verifikasi Pembayaran Nyata</span>
+                    </h5>
+                    <small class="text-muted" id="vpOrderMeta">Cocokkan nominal bukti transfer dengan subtotal tagihan</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <!-- Kolom Kiri: Foto Bukti -->
+                    <div class="col-12 col-md-5" id="vpProofCol">
+                        <div class="border rounded-4 p-2.5 bg-light text-center h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="small fw-bold text-muted text-uppercase mb-2">Foto Bukti Transfer</div>
+                                <img id="vpProofImg" src="" alt="Bukti Transfer" class="img-fluid rounded-3 shadow-sm mb-2" style="max-height: 280px; object-fit: contain;">
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-center gap-2 mt-2">
+                                <a id="vpProofFullLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <i class="bx bx-fullscreen me-1"></i>Perbesar
+                                </a>
+                                <button type="button" id="vpScanBtn" class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="triggerProofScanFromModal()">
+                                    <i class="bx bx-scan me-1"></i>Pindai Nominal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kolom Kanan: Rincian & Input Nominal Nyata -->
+                    <div class="col-12 col-md-7" id="vpFormCol">
+                        <div class="rounded-3 bg-light border p-3 mb-3">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-muted">Subtotal Pesanan</span>
+                                <strong class="text-dark" id="vpSubtotalText">Rp 0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-muted">Sudah Diterima Sebelumnya</span>
+                                <strong class="text-dark" id="vpPaidText">Rp 0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between small pt-1 border-top">
+                                <span class="fw-semibold text-dark">Sisa Tagihan Harus Masuk</span>
+                                <strong class="text-primary fs-6" id="vpRemainingText">Rp 0</strong>
+                            </div>
+                        </div>
+
+                        <div id="vpScanAlert" class="d-none mb-3 small rounded-3 p-2.5"></div>
+
+                        <div class="mb-3">
+                            <label for="vpConfirmedAmount" id="vpAmountLabel" class="form-label fw-bold text-dark small mb-1">
+                                Nominal Uang Benar-Benar Diterima (Rp) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white fw-bold">Rp</span>
+                                <input type="text" inputmode="numeric" id="vpConfirmedAmount" name="confirmed_amount" class="form-control fw-bold" required placeholder="Ketik nominal sesuai bukti / mutasi">
+                            </div>
+                            <div class="form-text small">
+                                Periksa mutasi rekening / uang tunai terlebih dahulu. Sistem mengunci pengesahan lunas jika nominal kurang dari subtotal.
+                            </div>
+                        </div>
+
+                        <div id="vpLiveFeedback" class="small mb-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top px-4 py-3 rounded-bottom-4 d-flex flex-wrap justify-content-between gap-2">
+                <button type="button" id="vpSwitchShortfallBtn" class="btn btn-warning rounded-pill px-3 d-none" onclick="switchToShortfallModal()">
+                    <i class="bx bx-error-circle me-1"></i>Catat Kurang Bayar &amp; Minta Pelunasan
+                </button>
+                <div class="d-flex gap-2 ms-auto">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" id="vpSubmitBtn" class="btn btn-success rounded-pill px-4 shadow-sm">
+                        <i class="bx bx-check-circle me-1"></i>Konfirmasi Uang Diterima (Lunas)
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Tolak Bukti / Catat Kurang Bayar (Semua Unit Layanan) -->
+<div class="modal fade" id="rejectProofModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form id="rejectGasProofForm" method="POST" action="" class="modal-content border-0 shadow-lg rounded-4">
+        <form id="rejectProofForm" method="POST" action="" class="modal-content border-0 shadow-lg rounded-4">
             @csrf
             <div class="modal-header border-bottom px-4 py-3">
                 <h5 class="modal-title fw-bold text-warning d-flex align-items-center gap-2">
                     <i class="bx bx-error-circle fs-4"></i>
-                    <span>Minta Warga Ganti Bukti Pembayaran</span>
+                    <span>Tolak Bukti / Catat Kurang Bayar</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
                 <p class="small text-muted mb-3">
-                    Bukti pembayaran dari <strong class="text-dark" id="rejectGasBuyerName">Warga</strong> akan ditandai belum sesuai agar warga dapat mengunggah ulang bukti yang benar.
+                    Bukti pembayaran dari <strong class="text-dark" id="rejectBuyerName">Warga</strong> akan ditandai belum sesuai agar warga dapat mengunggah bukti baru / bukti pelunasan.
                 </p>
+                <div class="mb-3">
+                    <label for="rejectReceivedAmountInput" class="form-label fw-semibold small text-dark">
+                        Total Nominal yang Benar-Benar Sudah Masuk (Rp) <span class="text-muted fw-normal">(Opsional)</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">Rp</span>
+                        <input type="text" inputmode="numeric" id="rejectReceivedAmountInput" name="received_amount" class="form-control" placeholder="0 jika belum ada uang masuk, atau ketik misal 20000">
+                    </div>
+                    <div class="form-text small" id="rejectSubtotalHint">
+                        Bila warga baru transfer sebagian (misal Rp 20.000 dari Rp 200.000), ketik angka yang sudah masuk agar tercatat kurang bayar dan warga diminta melunasi sisanya.
+                    </div>
+                </div>
                 <div class="mb-2">
-                    <label for="rejectGasReasonInput" class="form-label fw-semibold small text-dark">Alasan dan Petunjuk untuk Warga <span class="text-danger">*</span></label>
-                    <textarea id="rejectGasReasonInput" name="reason" class="form-control rounded-3" rows="3" required maxlength="500" placeholder="Contoh: Foto struk buram / nominal transfer tidak terlihat jelas, mohon unggah ulang foto yang terang."></textarea>
+                    <label for="rejectReasonInput" class="form-label fw-semibold small text-dark">Alasan dan Petunjuk untuk Warga <span class="text-danger">*</span></label>
+                    <textarea id="rejectReasonInput" name="reason" class="form-control rounded-3" rows="3" required maxlength="500" placeholder="Contoh: Nominal transfer Rp 20.000 kurang Rp 180.000 dari subtotal tagihan Rp 200.000. Mohon transfer sisa kekurangan dan unggah bukti pelunasan."></textarea>
                 </div>
             </div>
             <div class="modal-footer bg-light border-top px-4 py-3 rounded-bottom-4">
                 <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
                 <button type="submit" class="btn btn-warning rounded-pill px-4 shadow-sm">
-                    <i class="bx bx-send me-1"></i>Minta Ganti Bukti
+                    <i class="bx bx-send me-1"></i>Kirim ke Warga
                 </button>
             </div>
         </form>
@@ -911,20 +1013,212 @@
 
 @push('scripts')
 <script>
-    function openRejectGasProofModal(paymentId, buyerName) {
-        const form = document.getElementById('rejectGasProofForm');
-        const nameEl = document.getElementById('rejectGasBuyerName');
-        const reasonEl = document.getElementById('rejectGasReasonInput');
-        if (form) {
-            form.action = `{{ url('admin/aktivitas/bukti-transaksi') }}/${paymentId}/gas/reject`;
+    let currentVerifyCtx = null;
+
+    function parseRupiahDigits(val) {
+        if (val === null || val === undefined) return null;
+        const digits = String(val).replace(/[^\d]/g, '');
+        if (!digits) return null;
+        return parseInt(digits, 10);
+    }
+
+    function fmtRupiah(num) {
+        return 'Rp ' + new Intl.NumberFormat('id-ID').format(Math.max(0, Math.round(num || 0)));
+    }
+
+    function renderModalScanAlert(status, message) {
+        const alertEl = document.getElementById('vpScanAlert');
+        if (!alertEl) return;
+        if (!status || !message) {
+            alertEl.className = 'd-none mb-3 small rounded-3 p-2.5';
+            alertEl.innerHTML = '';
+            return;
         }
-        if (nameEl) nameEl.textContent = buyerName || 'Warga';
-        if (reasonEl) reasonEl.value = '';
-        const modal = new bootstrap.Modal(document.getElementById('rejectGasProofModal'));
+        if (status === 'mismatch') {
+            alertEl.className = 'alert alert-danger mb-3 small rounded-3 p-2.5';
+            alertEl.innerHTML = '<div class="fw-bold mb-1"><i class="bx bx-error-alt me-1"></i>Peringatan Pindai Bukti</div><div>' + message + '</div>';
+        } else if (status === 'matched') {
+            alertEl.className = 'alert alert-success mb-3 small rounded-3 p-2.5';
+            alertEl.innerHTML = '<div class="fw-bold mb-1"><i class="bx bx-check-shield me-1"></i>Hasil Pindai Cocok</div><div>' + message + '</div>';
+        } else {
+            alertEl.className = 'alert alert-info mb-3 small rounded-3 p-2.5';
+            alertEl.innerHTML = '<i class="bx bx-info-circle me-1"></i>' + message;
+        }
+    }
+
+    function evaluateVerifyModalInput() {
+        if (!currentVerifyCtx) return;
+        const input = document.getElementById('vpConfirmedAmount');
+        const fb = document.getElementById('vpLiveFeedback');
+        const submitBtn = document.getElementById('vpSubmitBtn');
+        const shortBtn = document.getElementById('vpSwitchShortfallBtn');
+        const val = parseRupiahDigits(input.value);
+
+        if (val === null) {
+            fb.className = 'small text-muted mb-2';
+            fb.innerHTML = 'Masukkan nominal uang nyata yang diterima (<strong>' + fmtRupiah(currentVerifyCtx.remaining) + '</strong>).';
+            submitBtn.disabled = false;
+            shortBtn.classList.add('d-none');
+            return;
+        }
+
+        const totalReceived = currentVerifyCtx.paid > 0 ? (currentVerifyCtx.paid + val) : val;
+        if (totalReceived < currentVerifyCtx.subtotal) {
+            const kurang = currentVerifyCtx.subtotal - totalReceived;
+            fb.className = 'alert alert-danger py-2 px-3 small rounded-3 mb-2';
+            fb.innerHTML = '<strong><i class="bx bx-x-circle me-1"></i>KURANG BAYAR ' + fmtRupiah(kurang) + '!</strong><br>' +
+                'Total diterima <strong>' + fmtRupiah(totalReceived) + '</strong> dari subtotal <strong>' + fmtRupiah(currentVerifyCtx.subtotal) + '</strong>. Tombol Lunas dikunci agar laporan pendapatan desa tetap akurat.';
+            submitBtn.disabled = true;
+            if (currentVerifyCtx.canReject) {
+                shortBtn.classList.remove('d-none');
+                shortBtn.dataset.totalReceived = totalReceived;
+                shortBtn.dataset.shortfall = kurang;
+            }
+        } else if (totalReceived > currentVerifyCtx.subtotal) {
+            const lebih = totalReceived - currentVerifyCtx.subtotal;
+            fb.className = 'alert alert-warning py-2 px-3 small rounded-3 mb-2';
+            fb.innerHTML = '<strong>Nominal melebihi tagihan sebesar ' + fmtRupiah(lebih) + '.</strong> Periksa kembali nominal yang diketik.';
+            submitBtn.disabled = true;
+            shortBtn.classList.add('d-none');
+        } else {
+            fb.className = 'alert alert-success py-2 px-3 small rounded-3 mb-2';
+            fb.innerHTML = '<i class="bx bx-check-circle me-1"></i><strong>Cocok!</strong> Total diterima ' + fmtRupiah(totalReceived) + ' sesuai subtotal tagihan (Lunas).';
+            submitBtn.disabled = false;
+            shortBtn.classList.add('d-none');
+        }
+    }
+
+    function openVerifyPaymentModal(btn) {
+        const d = btn.dataset;
+        currentVerifyCtx = {
+            id: d.id,
+            type: d.type,
+            buyer: d.buyer || 'Warga',
+            item: d.item || 'Layanan',
+            orderNumber: d.orderNumber || '',
+            subtotal: parseInt(d.subtotal || '0', 10),
+            paid: parseInt(d.paid || '0', 10),
+            remaining: parseInt(d.remaining || '0', 10),
+            isCash: d.isCash === '1',
+            canReject: d.canReject === '1',
+            proofUrl: d.proofUrl || '',
+            scanStatus: d.scanStatus || '',
+            scanAmount: d.scanAmount || '',
+            scanMessage: d.scanMessage || ''
+        };
+
+        const form = document.getElementById('verifyPaymentForm');
+        form.action = `{{ url('admin/aktivitas/bukti-transaksi') }}/${currentVerifyCtx.id}/${currentVerifyCtx.type}/verify`;
+        document.getElementById('vpAmountMode').value = currentVerifyCtx.paid > 0 ? 'delta' : 'total';
+        document.getElementById('vpOrderMeta').textContent = `${currentVerifyCtx.buyer} • ${currentVerifyCtx.item} (${currentVerifyCtx.orderNumber})`;
+        document.getElementById('vpSubtotalText').textContent = fmtRupiah(currentVerifyCtx.subtotal);
+        document.getElementById('vpPaidText').textContent = fmtRupiah(currentVerifyCtx.paid);
+        document.getElementById('vpRemainingText').textContent = fmtRupiah(currentVerifyCtx.remaining);
+        document.getElementById('vpAmountLabel').innerHTML = (currentVerifyCtx.paid > 0
+            ? 'Nominal Pelunasan yang Baru Masuk (Rp)'
+            : 'Nominal Uang Benar-Benar Diterima (Rp)') + ' <span class="text-danger">*</span>';
+
+        const proofCol = document.getElementById('vpProofCol');
+        const formCol = document.getElementById('vpFormCol');
+        if (currentVerifyCtx.proofUrl) {
+            proofCol.classList.remove('d-none');
+            formCol.className = 'col-12 col-md-7';
+            document.getElementById('vpProofImg').src = currentVerifyCtx.proofUrl;
+            document.getElementById('vpProofFullLink').href = currentVerifyCtx.proofUrl;
+        } else {
+            proofCol.classList.add('d-none');
+            formCol.className = 'col-12';
+        }
+
+        const amountInput = document.getElementById('vpConfirmedAmount');
+        if (currentVerifyCtx.isCash) {
+            amountInput.value = new Intl.NumberFormat('id-ID').format(currentVerifyCtx.remaining);
+        } else if (currentVerifyCtx.scanAmount) {
+            amountInput.value = new Intl.NumberFormat('id-ID').format(parseInt(currentVerifyCtx.scanAmount, 10));
+        } else {
+            amountInput.value = '';
+        }
+
+        renderModalScanAlert(currentVerifyCtx.scanStatus, currentVerifyCtx.scanMessage);
+        evaluateVerifyModalInput();
+
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('verifyPaymentModal'));
         modal.show();
     }
 
+    async function triggerProofScanFromModal() {
+        if (!currentVerifyCtx) return;
+        const btn = document.getElementById('vpScanBtn');
+        const origHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Memindai...';
+        try {
+            const res = await fetch(`{{ url('admin/aktivitas/bukti-transaksi') }}/${currentVerifyCtx.id}/${currentVerifyCtx.type}/scan-proof`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await res.json();
+            if (data && data.scan) {
+                renderModalScanAlert(data.scan.status, data.scan.message);
+                if (data.scan.detected_amount !== null && data.scan.detected_amount !== undefined) {
+                    const input = document.getElementById('vpConfirmedAmount');
+                    input.value = new Intl.NumberFormat('id-ID').format(Math.round(Number(data.scan.detected_amount)));
+                    evaluateVerifyModalInput();
+                }
+            }
+        } catch (err) {
+            renderModalScanAlert('unreadable', 'Pemindaian otomatis tidak tersedia saat ini. Periksa nominal bukti secara manual.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+        }
+    }
+
+    function switchToShortfallModal() {
+        if (!currentVerifyCtx) return;
+        const shortBtn = document.getElementById('vpSwitchShortfallBtn');
+        const totalRec = parseInt(shortBtn.dataset.totalReceived || '0', 10);
+        const kurang = parseInt(shortBtn.dataset.shortfall || '0', 10);
+        const reason = `Nominal transfer baru diterima ${fmtRupiah(totalRec)} dari subtotal ${fmtRupiah(currentVerifyCtx.subtotal)} (kurang ${fmtRupiah(kurang)}). Mohon transfer sisa kekurangan lalu unggah bukti pelunasan.`;
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('verifyPaymentModal')).hide();
+        openRejectProofModal(currentVerifyCtx.id, currentVerifyCtx.type, currentVerifyCtx.buyer, currentVerifyCtx.subtotal, totalRec, reason);
+    }
+
+    function openRejectProofModal(paymentId, type, buyerName, subtotal, receivedSoFar, prefillReason) {
+        const form = document.getElementById('rejectProofForm');
+        const nameEl = document.getElementById('rejectBuyerName');
+        const recEl = document.getElementById('rejectReceivedAmountInput');
+        const reasonEl = document.getElementById('rejectReasonInput');
+        const hintEl = document.getElementById('rejectSubtotalHint');
+
+        if (form) form.action = `{{ url('admin/aktivitas/bukti-transaksi') }}/${paymentId}/${type}/reject`;
+        if (nameEl) nameEl.textContent = buyerName || 'Warga';
+        if (recEl) recEl.value = receivedSoFar > 0 ? receivedSoFar : '';
+        if (reasonEl) reasonEl.value = prefillReason || '';
+        if (hintEl && subtotal > 0) {
+            hintEl.textContent = `Subtotal tagihan: ${fmtRupiah(subtotal)}. Isi angka yang sudah benar-benar masuk bila warga transfer sebagian, atau kosongkan bila Rp 0 masuk.`;
+        }
+
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('rejectProofModal'));
+        modal.show();
+    }
+
+    // Alias backward-compatibility
+    function openRejectGasProofModal(paymentId, buyerName) {
+        openRejectProofModal(paymentId, 'gas', buyerName, 0, 0, '');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        const vpInput = document.getElementById('vpConfirmedAmount');
+        if (vpInput) {
+            vpInput.addEventListener('input', evaluateVerifyModalInput);
+        }
+
         const searchInput = document.getElementById('searchProofInput');
         if (searchInput) {
             searchInput.addEventListener('input', function() {

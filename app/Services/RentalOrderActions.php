@@ -29,16 +29,40 @@ class RentalOrderActions
                     abort_unless($cash || $order->payment_proof, 422, 'Bukti pembayaran belum diunggah.');
                     abort_if($ledger->isEmpty() || $ledger->contains(fn ($row) => $row->source !== 'manual' || $row->status === 'rejected'), 409, 'Catatan pembayaran tidak dapat diverifikasi.');
                     if ($paid) return $order;
-                    WalletTransaction::tandaiPembayaranManualDiterima('rental', $id, $user->id);
-                    $message = 'Pembayaran sewa alat telah dikonfirmasi diterima. Status pengiriman tetap mengikuti proses pesanan.';
+                    $confirmedAmount = \App\Support\PaymentVerificationGuard::validateConfirmedAmount(
+                        $request,
+                        (float) $order->total_amount,
+                        $order->paidAmount()
+                    );
+                    WalletTransaction::tandaiPembayaranManualDiterima('rental', $id, $user->id, $confirmedAmount);
+                    $message = 'Pembayaran sewa alat sebesar Rp '.number_format($confirmedAmount, 0, ',', '.').' telah dikonfirmasi diterima (Lunas). Status pengiriman tetap mengikuti proses pesanan.';
                     break;
                 case 'reject-payment':
                     abort_unless(!$cash && !$paid && $order->payment_proof && $order->status === 'pending', 409, 'Bukti ini tidak dapat dikembalikan untuk diperbaiki.');
+                    $receivedPartial = \App\Support\PaymentVerificationGuard::parsePartialReceivedAmount($request, (float) $order->total_amount);
                     $oldProof = $order->payment_proof;
                     DB::afterCommit(fn () => \Illuminate\Support\Facades\Storage::disk('public')->delete($oldProof));
                     $order->payment_proof = null;
-                    WalletTransaction::whereKey($ledger->modelKeys())->where('status', 'pending')->update(['proof_path' => null, 'notes' => $request->reason]);
-                    $message = 'Bukti pembayaran perlu diganti: '.$request->reason.'. Buka rincian pesanan untuk mengirim ulang.';
+                    if ($receivedPartial !== null && $receivedPartial > 0) {
+                        $remaining = max(0, round((float) $order->total_amount - $receivedPartial, 2));
+                        WalletTransaction::catatKurangBayar('rental', $id, $receivedPartial, $request->reason, $user->id);
+                        $message = sprintf(
+                            'Pembayaran kurang — baru diterima Rp %s dari subtotal Rp %s (kurang Rp %s). %s Silakan lunasi sisa tagihan lalu unggah bukti pelunasan.',
+                            number_format($receivedPartial, 0, ',', '.'),
+                            number_format((float) $order->total_amount, 0, ',', '.'),
+                            number_format($remaining, 0, ',', '.'),
+                            $request->reason
+                        );
+                    } else {
+                        $updatePayload = ['proof_path' => null, 'notes' => $request->reason];
+                        if (WalletTransaction::hasVerificationColumns()) {
+                            $updatePayload['detected_proof_amount'] = null;
+                            $updatePayload['proof_scan_status'] = null;
+                            $updatePayload['proof_scan_meta'] = null;
+                        }
+                        WalletTransaction::whereKey($ledger->modelKeys())->where('status', 'pending')->update($updatePayload);
+                        $message = 'Bukti pembayaran perlu diganti: '.$request->reason.'. Buka rincian pesanan untuk mengirim ulang.';
+                    }
                     break;
                 case 'reject':
                     abort_unless($order->status === 'pending', 409, 'Hanya pesanan yang belum diproses dapat ditolak.');

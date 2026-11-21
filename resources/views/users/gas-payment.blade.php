@@ -8,7 +8,9 @@
     <section class="max-w-2xl mx-auto">
         <div class="rounded-3xl bg-white shadow-lg border border-slate-100 p-6 sm:p-10">
             <div class="text-center mb-8">
-                @php($statusLabel = ['pending'=>'Menunggu Konfirmasi', 'confirmed'=>'Pesanan Disetujui', 'approved'=>'Pesanan Disetujui', 'being_prepared'=>'Sedang Disiapkan', 'in_delivery'=>'Sedang Diantar', 'arrived'=>'Sudah Tiba / Siap Diambil', 'completed'=>'Pesanan Selesai', 'rejected'=>'Pesanan Ditolak', 'cancelled'=>'Pesanan Dibatalkan'][$order->status] ?? 'Status Pesanan')
+                @php
+                    $statusLabel = ['pending'=>'Menunggu Konfirmasi', 'confirmed'=>'Pesanan Disetujui', 'approved'=>'Pesanan Disetujui', 'being_prepared'=>'Sedang Disiapkan', 'in_delivery'=>'Sedang Diantar', 'arrived'=>'Sudah Tiba / Siap Diambil', 'completed'=>'Pesanan Selesai', 'rejected'=>'Pesanan Ditolak', 'cancelled'=>'Pesanan Dibatalkan'][$order->status] ?? 'Status Pesanan';
+                @endphp
                 <h1 class="text-2xl sm:text-3xl font-black text-slate-900">{{ $statusLabel }}</h1>
                 <p class="mt-2 text-sm text-slate-500">Nomor pesanan {{ $order->order_number }}</p>
             </div>
@@ -27,11 +29,40 @@
                     <span class="text-slate-500">Pembayaran</span>
                     <span class="font-semibold text-slate-900">{{ ucfirst($order->payment_method) }}</span>
                 </div>
+                @php
+                    $gasSubtotal = $order->subtotalAmount();
+                    $gasPaidAmt = $order->paidAmount();
+                    $gasRemaining = $order->remainingAmount();
+                    $gasPayLabel = $order->paymentStatusLabel();
+                    $gasPayNote = $order->latestPaymentNote();
+                @endphp
                 <div class="flex justify-between gap-4 border-t border-slate-200 pt-3">
-                    <span class="font-bold text-slate-700">Total</span>
-                    <span class="font-black text-slate-900">Rp {{ number_format($order->price * $order->quantity, 0, ',', '.') }}</span>
+                    <span class="font-bold text-slate-700">Subtotal Pesanan</span>
+                    <span class="font-black text-slate-900">Rp {{ number_format($gasSubtotal, 0, ',', '.') }}</span>
                 </div>
+                <div class="flex justify-between gap-4 text-sm">
+                    <span class="text-slate-600">Nominal Dibayarkan (Terverifikasi)</span>
+                    <span class="font-bold {{ $paid ? 'text-green-700' : ($gasPaidAmt > 0 ? 'text-amber-700' : 'text-slate-700') }}">
+                        Rp {{ number_format($gasPaidAmt, 0, ',', '.') }}
+                    </span>
+                </div>
+                @if($gasRemaining > 0.01 && !in_array($order->status, ['cancelled', 'rejected']))
+                <div class="flex justify-between gap-4 text-sm">
+                    <span class="font-semibold text-red-600">Sisa Tagihan ({{ $gasPayLabel }})</span>
+                    <span class="font-black text-red-600">Rp {{ number_format($gasRemaining, 0, ',', '.') }}</span>
+                </div>
+                @endif
             </div>
+
+            @if($gasPaidAmt > 0 && $gasRemaining > 0.01 && !$paid && !in_array($order->status, ['cancelled', 'rejected']))
+            <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+                <p class="font-bold">Pembayaran Kurang — Perlu Pelunasan</p>
+                <p class="mt-1">Pengelola baru mencatat penerimaan sebesar <strong>Rp {{ number_format($gasPaidAmt, 0, ',', '.') }}</strong> dari subtotal <strong>Rp {{ number_format($gasSubtotal, 0, ',', '.') }}</strong>. Mohon transfer sisa kekurangan sebesar <strong>Rp {{ number_format($gasRemaining, 0, ',', '.') }}</strong> lalu unggah bukti pelunasan di bawah.</p>
+                @if($gasPayNote)
+                    <p class="mt-1 text-xs text-red-700">Catatan petugas: {{ $gasPayNote }}</p>
+                @endif
+            </div>
+            @endif
 
             <div class="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-5 text-sm text-blue-900">
                 <p class="font-bold">Pembayaran: {{ $paid ? 'Sudah dikonfirmasi diterima' : (in_array($order->status, ['cancelled','rejected']) ? 'Pesanan tidak dilanjutkan' : 'Belum dikonfirmasi') }}</p>

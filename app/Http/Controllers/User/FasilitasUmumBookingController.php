@@ -150,6 +150,13 @@ class FasilitasUmumBookingController extends Controller
                 paymentMethod: $metodeBayar,
                 proofPath: $buktiBayar,
             );
+            if ($buktiBayar) {
+                try {
+                    app(\App\Services\PaymentProofAnalyzerService::class)->analyzeAndStore('fasilitas', $booking->id, $buktiBayar, (float) $totalAmount);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Fasilitas proof scan skipped: '.$e->getMessage());
+                }
+            }
         }
 
         // Buat notifikasi admin

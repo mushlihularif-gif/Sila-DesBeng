@@ -39,6 +39,17 @@ class GasBookingController extends Controller
                 $order->update(['proof_of_payment' => $storedPath]);
                 // Uploading evidence never verifies payment or changes the amount/status.
                 \App\Models\WalletTransaction::whereKey($ledger->modelKeys())->update(['proof_path' => $storedPath]);
+                $orderId = $order->id;
+                $subtotal = $order->subtotalAmount();
+                $alreadyPaid = $order->paidAmount();
+                $proofToScan = $storedPath;
+                DB::afterCommit(function () use ($orderId, $proofToScan, $subtotal, $alreadyPaid) {
+                    try {
+                        app(\App\Services\PaymentProofAnalyzerService::class)->analyzeAndStore('gas', $orderId, $proofToScan, $subtotal, $alreadyPaid);
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::warning('Gas re-upload proof scan skipped: '.$e->getMessage());
+                    }
+                });
                 AdminNotification::create([
                     'type' => 'gas_order', 'reference_id' => $order->id, 'region_id' => $order->gas?->region_id,
                     'title' => 'Bukti Pembayaran Gas Dikirim',

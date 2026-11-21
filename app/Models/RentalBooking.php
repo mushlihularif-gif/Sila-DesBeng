@@ -9,7 +9,17 @@ use Illuminate\Support\Str;
 
 class RentalBooking extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Models\Concerns\HasPaymentSummary;
+
+    public function walletReferenceType(): string
+    {
+        return 'rental';
+    }
+
+    public function subtotalAmount(): float
+    {
+        return round((float) ($this->total_amount ?? 0), 2);
+    }
 
     /**
      * KEAMANAN: Auto-generate UUID saat membuat record baru.
@@ -204,17 +214,6 @@ class RentalBooking extends Model
     public function handler()
     {
         return $this->belongsTo(\App\Models\User::class, 'handled_by');
-    }
-    public function walletEntries()
-    {
-        return $this->hasMany(WalletTransaction::class, 'reference_id')->where('reference_type', 'rental');
-    }
-
-    public function paymentReceived(): bool
-    {
-        $entries = $this->walletEntries;
-        return $entries->isNotEmpty() && abs((float)$entries->sum('amount') - (float)$this->total_amount) < 0.005
-            && $entries->every(fn ($entry) => $entry->status === 'verified' && (int)$entry->region_id === (int)($this->region_id ?? $this->barang?->region_id));
     }
 
     public function getBookedUnitPriceAttribute(): float

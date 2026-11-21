@@ -162,7 +162,7 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Pesanan &amp; Tanggal</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Alat</th>
-                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Total</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Subtotal / Dibayar</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
                                         <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold no-print">Aksi</th>
                                     </tr>
@@ -171,8 +171,12 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                     @foreach($rentalRequests as $req)
                                     @php
                                         $custName = $req->recipient_name ?? $req->user->name ?? 'Warga';
-                                        $showSensitive = auth()->user()->role === 'super_admin' || (auth()->user()->region_id && $req->user && $req->user->region_id == auth()->user()->region_id);
-                                        $searchKey = strtolower(($req->order_number ?? $req->id) . ' ' . $custName . ' ' . ($req->item_name ?? 'Alat'));
+                                        $itemLabel = $req->barang->nama_barang ?? $req->item_name ?? 'Alat';
+                                        $subAmt = $req->subtotalAmount();
+                                        $paidAmt = $req->paidAmount();
+                                        $payLabel = $req->paymentStatusLabel();
+                                        $payBadge = $req->paymentStatusBadgeClass();
+                                        $searchKey = strtolower(($req->order_number ?? $req->id) . ' ' . $custName . ' ' . $itemLabel);
                                     @endphp
                                     <tr class="trx-searchable-item" data-search="{{ $searchKey }}">
                                         <td class="ps-4">
@@ -188,15 +192,18 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="fw-medium text-dark">{{ $req->item_name ?? 'Alat' }}</div>
+                                            <div class="fw-medium text-dark">{{ $itemLabel }}</div>
                                             <small class="text-muted">{{ $req->quantity }} Unit</small>
                                         </td>
                                         <td>
-                                            @if($showSensitive)
-                                                <span class="fw-bold text-primary">Rp {{ number_format($req->price ?? $req->total_amount, 0, ',', '.') }}</span>
-                                            @else
-                                                <span class="fw-semibold text-muted fst-italic">Privasi</span>
-                                            @endif
+                                            <div class="fw-bold text-dark">Rp {{ number_format($subAmt, 0, ',', '.') }}</div>
+                                            <div class="small mt-1 d-flex flex-wrap align-items-center gap-1">
+                                                <span class="text-muted">Dibayar:</span>
+                                                <span class="fw-semibold {{ $paidAmt >= $subAmt && $subAmt > 0 ? 'text-success' : ($paidAmt > 0 ? 'text-danger' : 'text-muted') }}">
+                                                    Rp {{ number_format($paidAmt, 0, ',', '.') }}
+                                                </span>
+                                                <span class="badge {{ $payBadge }} rounded-pill" style="font-size: 0.65rem;">{{ $payLabel }}</span>
+                                            </div>
                                         </td>
                                         <td>@include('admin.partials.status-badge', ['status' => $req->status])</td>
                                         <td class="text-end pe-4 no-print">
@@ -214,8 +221,12 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                             @foreach($rentalRequests as $req)
                             @php
                                 $custName = $req->recipient_name ?? $req->user->name ?? 'Warga';
-                                $showSensitive = auth()->user()->role === 'super_admin' || (auth()->user()->region_id && $req->user && $req->user->region_id == auth()->user()->region_id);
-                                $searchKey = strtolower(($req->order_number ?? $req->id) . ' ' . $custName . ' ' . ($req->item_name ?? 'Alat'));
+                                $itemLabel = $req->barang->nama_barang ?? $req->item_name ?? 'Alat';
+                                $subAmt = $req->subtotalAmount();
+                                $paidAmt = $req->paidAmount();
+                                $payLabel = $req->paymentStatusLabel();
+                                $payBadge = $req->paymentStatusBadgeClass();
+                                $searchKey = strtolower(($req->order_number ?? $req->id) . ' ' . $custName . ' ' . $itemLabel);
                             @endphp
                             <div class="trx-mobile-card shadow-xs trx-searchable-item" data-search="{{ $searchKey }}">
                                 <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
@@ -226,18 +237,18 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                     <div>@include('admin.partials.status-badge', ['status' => $req->status])</div>
                                 </div>
                                 <div class="mb-2">
-                                    <div class="fw-semibold text-dark">{{ $req->item_name ?? 'Alat' }} <span class="text-muted fw-normal">({{ $req->quantity }} Unit)</span></div>
+                                    <div class="fw-semibold text-dark">{{ $itemLabel }} <span class="text-muted fw-normal">({{ $req->quantity }} Unit)</span></div>
                                     <small class="text-muted"><i class="bx bx-user me-1"></i>{{ $custName }}</small>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div class="fw-bold text-primary">
-                                        @if($showSensitive)
-                                            Rp {{ number_format($req->price ?? $req->total_amount, 0, ',', '.') }}
-                                        @else
-                                            <span class="text-muted fst-italic">Privasi</span>
-                                        @endif
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top gap-2">
+                                    <div>
+                                        <div class="fw-bold text-dark">Subtotal: Rp {{ number_format($subAmt, 0, ',', '.') }}</div>
+                                        <small class="d-block">
+                                            Dibayar: <strong class="{{ $paidAmt >= $subAmt && $subAmt > 0 ? 'text-success' : ($paidAmt > 0 ? 'text-danger' : 'text-muted') }}">Rp {{ number_format($paidAmt, 0, ',', '.') }}</strong>
+                                            <span class="badge {{ $payBadge }} rounded-pill ms-1" style="font-size: 0.64rem;">{{ $payLabel }}</span>
+                                        </small>
                                     </div>
-                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$req->id, 'rental']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print">
+                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$req->id, 'rental']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print flex-shrink-0">
                                         Detail <i class="bx bx-right-arrow-alt"></i>
                                     </a>
                                 </div>
@@ -268,7 +279,7 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Pesanan &amp; Tanggal</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Pembeli</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Produk</th>
-                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Total</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Subtotal / Dibayar</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
                                         <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold no-print">Aksi</th>
                                     </tr>
@@ -277,7 +288,10 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                     @foreach($gasOrders as $order)
                                     @php
                                         $custName = $order->full_name ?? $order->user->name ?? 'Warga';
-                                        $showSensitive = auth()->user()->role === 'super_admin' || (auth()->user()->region_id && $order->user && $order->user->region_id == auth()->user()->region_id);
+                                        $subAmt = $order->subtotalAmount();
+                                        $paidAmt = $order->paidAmount();
+                                        $payLabel = $order->paymentStatusLabel();
+                                        $payBadge = $order->paymentStatusBadgeClass();
                                         $searchKey = strtolower(($order->order_number ?? $order->id) . ' ' . $custName . ' ' . ($order->item_name ?? 'Gas LPG'));
                                     @endphp
                                     <tr class="trx-searchable-item" data-search="{{ $searchKey }}">
@@ -295,14 +309,17 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                         </td>
                                         <td>
                                             <div class="fw-medium text-dark">{{ $order->item_name ?? 'Gas LPG' }}</div>
-                                            <small class="text-muted">{{ $order->quantity }} Tabung</small>
+                                            <small class="text-muted">{{ $order->quantity }} Tabung &times; Rp {{ number_format($order->price ?? 0, 0, ',', '.') }}</small>
                                         </td>
                                         <td>
-                                            @if($showSensitive)
-                                                <span class="fw-bold text-primary">Rp {{ number_format($order->price ?? $order->total_amount, 0, ',', '.') }}</span>
-                                            @else
-                                                <span class="fw-semibold text-muted fst-italic">Privasi</span>
-                                            @endif
+                                            <div class="fw-bold text-dark">Rp {{ number_format($subAmt, 0, ',', '.') }}</div>
+                                            <div class="small mt-1 d-flex flex-wrap align-items-center gap-1">
+                                                <span class="text-muted">Dibayar:</span>
+                                                <span class="fw-semibold {{ $paidAmt >= $subAmt && $subAmt > 0 ? 'text-success' : ($paidAmt > 0 ? 'text-danger' : 'text-muted') }}">
+                                                    Rp {{ number_format($paidAmt, 0, ',', '.') }}
+                                                </span>
+                                                <span class="badge {{ $payBadge }} rounded-pill" style="font-size: 0.65rem;">{{ $payLabel }}</span>
+                                            </div>
                                         </td>
                                         <td>@include('admin.partials.status-badge', ['status' => $order->status])</td>
                                         <td class="text-end pe-4 no-print">
@@ -320,7 +337,10 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                             @foreach($gasOrders as $order)
                             @php
                                 $custName = $order->full_name ?? $order->user->name ?? 'Warga';
-                                $showSensitive = auth()->user()->role === 'super_admin' || (auth()->user()->region_id && $order->user && $order->user->region_id == auth()->user()->region_id);
+                                $subAmt = $order->subtotalAmount();
+                                $paidAmt = $order->paidAmount();
+                                $payLabel = $order->paymentStatusLabel();
+                                $payBadge = $order->paymentStatusBadgeClass();
                                 $searchKey = strtolower(($order->order_number ?? $order->id) . ' ' . $custName . ' ' . ($order->item_name ?? 'Gas LPG'));
                             @endphp
                             <div class="trx-mobile-card shadow-xs trx-searchable-item" data-search="{{ $searchKey }}">
@@ -335,15 +355,15 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                     <div class="fw-semibold text-dark">{{ $order->item_name ?? 'Gas LPG' }} <span class="text-muted fw-normal">({{ $order->quantity }} Tabung)</span></div>
                                     <small class="text-muted"><i class="bx bx-user me-1"></i>{{ $custName }}</small>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div class="fw-bold text-primary">
-                                        @if($showSensitive)
-                                            Rp {{ number_format($order->price ?? $order->total_amount, 0, ',', '.') }}
-                                        @else
-                                            <span class="text-muted fst-italic">Privasi</span>
-                                        @endif
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top gap-2">
+                                    <div>
+                                        <div class="fw-bold text-dark">Subtotal: Rp {{ number_format($subAmt, 0, ',', '.') }}</div>
+                                        <small class="d-block">
+                                            Dibayar: <strong class="{{ $paidAmt >= $subAmt && $subAmt > 0 ? 'text-success' : ($paidAmt > 0 ? 'text-danger' : 'text-muted') }}">Rp {{ number_format($paidAmt, 0, ',', '.') }}</strong>
+                                            <span class="badge {{ $payBadge }} rounded-pill ms-1" style="font-size: 0.64rem;">{{ $payLabel }}</span>
+                                        </small>
                                     </div>
-                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'gas']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print">
+                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'gas']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print flex-shrink-0">
                                         Detail <i class="bx bx-right-arrow-alt"></i>
                                     </a>
                                 </div>
@@ -374,7 +394,7 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Pesanan &amp; Tanggal</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Kendaraan</th>
-                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Total</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Subtotal / Dibayar</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
                                         <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold no-print">Aksi</th>
                                     </tr>
@@ -383,7 +403,10 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                     @foreach($mobilBookings as $order)
                                     @php
                                         $custName = $order->recipient_name ?? $order->user->name ?? 'Warga';
-                                        $showSensitive = auth()->user()->role === 'super_admin' || (auth()->user()->region_id && $order->user && $order->user->region_id == auth()->user()->region_id);
+                                        $subAmt = $order->subtotalAmount();
+                                        $paidAmt = $order->paidAmount();
+                                        $payLabel = $order->paymentStatusLabel();
+                                        $payBadge = $order->paymentStatusBadgeClass();
                                         $searchKey = strtolower(($order->order_number ?? $order->id) . ' ' . $custName . ' ' . ($order->mobil->nama_mobil ?? 'Sewa Transportasi'));
                                     @endphp
                                     <tr class="trx-searchable-item" data-search="{{ $searchKey }}">
@@ -404,11 +427,14 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                             <small class="text-muted">{{ $order->lama_sewa }} Hari</small>
                                         </td>
                                         <td>
-                                            @if($showSensitive)
-                                                <span class="fw-bold text-primary">Rp {{ number_format($order->total_amount ?? 0, 0, ',', '.') }}</span>
-                                            @else
-                                                <span class="fw-semibold text-muted fst-italic">Privasi</span>
-                                            @endif
+                                            <div class="fw-bold text-dark">Rp {{ number_format($subAmt, 0, ',', '.') }}</div>
+                                            <div class="small mt-1 d-flex flex-wrap align-items-center gap-1">
+                                                <span class="text-muted">Dibayar:</span>
+                                                <span class="fw-semibold {{ $paidAmt >= $subAmt && $subAmt > 0 ? 'text-success' : ($paidAmt > 0 ? 'text-danger' : 'text-muted') }}">
+                                                    Rp {{ number_format($paidAmt, 0, ',', '.') }}
+                                                </span>
+                                                <span class="badge {{ $payBadge }} rounded-pill" style="font-size: 0.65rem;">{{ $payLabel }}</span>
+                                            </div>
                                         </td>
                                         <td>@include('admin.partials.status-badge', ['status' => $order->status])</td>
                                         <td class="text-end pe-4 no-print">
@@ -426,7 +452,10 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                             @foreach($mobilBookings as $order)
                             @php
                                 $custName = $order->recipient_name ?? $order->user->name ?? 'Warga';
-                                $showSensitive = auth()->user()->role === 'super_admin' || (auth()->user()->region_id && $order->user && $order->user->region_id == auth()->user()->region_id);
+                                $subAmt = $order->subtotalAmount();
+                                $paidAmt = $order->paidAmount();
+                                $payLabel = $order->paymentStatusLabel();
+                                $payBadge = $order->paymentStatusBadgeClass();
                                 $searchKey = strtolower(($order->order_number ?? $order->id) . ' ' . $custName . ' ' . ($order->mobil->nama_mobil ?? 'Sewa Transportasi'));
                             @endphp
                             <div class="trx-mobile-card shadow-xs trx-searchable-item" data-search="{{ $searchKey }}">
@@ -441,15 +470,15 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                     <div class="fw-semibold text-dark">{{ $order->mobil->nama_mobil ?? 'Sewa Transportasi' }} <span class="text-muted fw-normal">({{ $order->lama_sewa }} Hari)</span></div>
                                     <small class="text-muted"><i class="bx bx-user me-1"></i>{{ $custName }}</small>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div class="fw-bold text-primary">
-                                        @if($showSensitive)
-                                            Rp {{ number_format($order->total_amount ?? 0, 0, ',', '.') }}
-                                        @else
-                                            <span class="text-muted fst-italic">Privasi</span>
-                                        @endif
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top gap-2">
+                                    <div>
+                                        <div class="fw-bold text-dark">Subtotal: Rp {{ number_format($subAmt, 0, ',', '.') }}</div>
+                                        <small class="d-block">
+                                            Dibayar: <strong class="{{ $paidAmt >= $subAmt && $subAmt > 0 ? 'text-success' : ($paidAmt > 0 ? 'text-danger' : 'text-muted') }}">Rp {{ number_format($paidAmt, 0, ',', '.') }}</strong>
+                                            <span class="badge {{ $payBadge }} rounded-pill ms-1" style="font-size: 0.64rem;">{{ $payLabel }}</span>
+                                        </small>
                                     </div>
-                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'mobil']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print">
+                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'mobil']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print flex-shrink-0">
                                         Detail <i class="bx bx-right-arrow-alt"></i>
                                     </a>
                                 </div>
@@ -480,6 +509,7 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Pesanan &amp; Tanggal</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Peminjam</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Fasilitas</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Subtotal / Dibayar</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
                                         <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold no-print">Aksi</th>
                                     </tr>
@@ -488,6 +518,10 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                     @foreach($fasilitasBookings as $order)
                                     @php
                                         $custName = $order->recipient_name ?? $order->user->name ?? 'Warga';
+                                        $subAmt = $order->subtotalAmount();
+                                        $paidAmt = $order->paidAmount();
+                                        $payLabel = $order->paymentStatusLabel();
+                                        $payBadge = $order->paymentStatusBadgeClass();
                                         $searchKey = strtolower(($order->order_number ?? $order->id) . ' ' . $custName . ' ' . ($order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum'));
                                     @endphp
                                     <tr class="trx-searchable-item" data-search="{{ $searchKey }}">
@@ -507,6 +541,20 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                             <div class="fw-medium text-dark">{{ $order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum' }}</div>
                                             <small class="text-muted">{{ $order->lama_sewa }} Hari</small>
                                         </td>
+                                        <td>
+                                            @if($subAmt > 0)
+                                                <div class="fw-bold text-dark">Rp {{ number_format($subAmt, 0, ',', '.') }}</div>
+                                                <div class="small mt-1 d-flex flex-wrap align-items-center gap-1">
+                                                    <span class="text-muted">Dibayar:</span>
+                                                    <span class="fw-semibold {{ $paidAmt >= $subAmt ? 'text-success' : ($paidAmt > 0 ? 'text-danger' : 'text-muted') }}">
+                                                        Rp {{ number_format($paidAmt, 0, ',', '.') }}
+                                                    </span>
+                                                    <span class="badge {{ $payBadge }} rounded-pill" style="font-size: 0.65rem;">{{ $payLabel }}</span>
+                                                </div>
+                                            @else
+                                                <span class="badge bg-label-info rounded-pill">Gratis</span>
+                                            @endif
+                                        </td>
                                         <td>@include('admin.partials.status-badge', ['status' => $order->status])</td>
                                         <td class="text-end pe-4 no-print">
                                             <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'fasilitas']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
@@ -523,6 +571,10 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                             @foreach($fasilitasBookings as $order)
                             @php
                                 $custName = $order->recipient_name ?? $order->user->name ?? 'Warga';
+                                $subAmt = $order->subtotalAmount();
+                                $paidAmt = $order->paidAmount();
+                                $payLabel = $order->paymentStatusLabel();
+                                $payBadge = $order->paymentStatusBadgeClass();
                                 $searchKey = strtolower(($order->order_number ?? $order->id) . ' ' . $custName . ' ' . ($order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum'));
                             @endphp
                             <div class="trx-mobile-card shadow-xs trx-searchable-item" data-search="{{ $searchKey }}">
@@ -537,8 +589,19 @@ $firstTab = $isRentalActive ? 'rental' : ($isGasActive ? 'gas' : ($isMobilActive
                                     <div class="fw-semibold text-dark">{{ $order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum' }} <span class="text-muted fw-normal">({{ $order->lama_sewa }} Hari)</span></div>
                                     <small class="text-muted"><i class="bx bx-user me-1"></i>{{ $custName }}</small>
                                 </div>
-                                <div class="d-flex justify-content-end pt-2 border-top">
-                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'fasilitas']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print">
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top gap-2">
+                                    <div>
+                                        @if($subAmt > 0)
+                                            <div class="fw-bold text-dark">Subtotal: Rp {{ number_format($subAmt, 0, ',', '.') }}</div>
+                                            <small class="d-block">
+                                                Dibayar: <strong class="{{ $paidAmt >= $subAmt ? 'text-success' : ($paidAmt > 0 ? 'text-danger' : 'text-muted') }}">Rp {{ number_format($paidAmt, 0, ',', '.') }}</strong>
+                                                <span class="badge {{ $payBadge }} rounded-pill ms-1" style="font-size: 0.64rem;">{{ $payLabel }}</span>
+                                            </small>
+                                        @else
+                                            <span class="badge bg-label-info rounded-pill">Gratis</span>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'fasilitas']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print flex-shrink-0">
                                         Detail <i class="bx bx-right-arrow-alt"></i>
                                     </a>
                                 </div>

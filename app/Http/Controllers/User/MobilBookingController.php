@@ -183,6 +183,16 @@ class MobilBookingController extends Controller
                 paymentMethod: $validated['payment_method'],
                 proofPath: $paymentProofPath,
             );
+            if ($paymentProofPath) {
+                $bookingId = $booking->id;
+                \Illuminate\Support\Facades\DB::afterCommit(function () use ($bookingId, $paymentProofPath, $totalAmount) {
+                    try {
+                        app(\App\Services\PaymentProofAnalyzerService::class)->analyzeAndStore('mobil', $bookingId, $paymentProofPath, (float) $totalAmount);
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::warning('Mobil proof scan skipped: '.$e->getMessage());
+                    }
+                });
+            }
 
             // Buat notifikasi admin
             \App\Models\AdminNotification::create([
