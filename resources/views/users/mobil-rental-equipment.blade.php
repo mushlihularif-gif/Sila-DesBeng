@@ -128,7 +128,14 @@
             @endif
         </div>
     </section>
-    @include('users.partials.service_chat_widget', ['serviceType' => 'mobil', 'serviceTitle' => 'Layanan Sewa Transportasi'])
+    @include('users.partials.service_chat_widget', [
+        'serviceType' => 'mobil',
+        'serviceTitle' => 'Layanan Sewa Transportasi',
+        'targetRegionId' => $filterRegionId ?? $targetRegionId ?? null,
+        'targetRegion' => $targetRegion ?? null,
+        'catalogItems' => $items ?? collect(),
+        'filterRegions' => $filterRegions ?? collect(),
+    ])
 </main>
 @endsection
 

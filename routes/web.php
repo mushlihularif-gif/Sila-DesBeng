@@ -668,22 +668,19 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         
         // Chat Layanan Terpisah (Gas, Sewa Alat, Sewa Transportasi, Fasilitas Umum)
         Route::prefix('chat-service')->group(function () {
+            Route::get('{service}/sessions', [\App\Http\Controllers\Admin\UnitChatController::class, 'getSessions'])->name('admin.unit.chat.sessions');
             Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages'])->name('admin.unit.chat.messages');
             Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat'])->name('admin.unit.chat.reply');
             Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat'])->name('admin.unit.chat.resolve');
-        });
-        Route::prefix('unit/chat-service')->group(function () {
-            Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages']);
-            Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat']);
-            Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat']);
         });
     });
 
     // Chat Service Alias (dapat diakses lewat /admin/chat-service/ maupun /admin/unit/chat-service/)
     Route::prefix('chat-service')->group(function () {
-        Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages']);
-        Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat']);
-        Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat']);
+        Route::get('{service}/sessions', [\App\Http\Controllers\Admin\UnitChatController::class, 'getSessions'])->name('admin.unit.chat.alias.sessions');
+        Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages'])->name('admin.unit.chat.alias.messages');
+        Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat'])->name('admin.unit.chat.alias.reply');
+        Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat'])->name('admin.unit.chat.alias.resolve');
     });
     
     // Route Aktivitas
@@ -829,6 +826,14 @@ Route::get('/api/geocode/reverse', function (\Illuminate\Http\Request $request) 
 
 // Chatbot API Route
 Route::post('/chatbot/ask', [\App\Http\Controllers\User\ChatbotController::class, 'ask'])->middleware('throttle:chat-write');
+
+// Chat Unit Layanan untuk browser web (memakai sesi login web & CSRF agar identitas warga terbaca)
+Route::prefix('unit-chat')->name('unit-chat.')->group(function () {
+    Route::get('/unread-counts', [\App\Http\Controllers\Api\UnitChatApiController::class, 'getUnreadCounts'])->name('unread-counts');
+    Route::get('/{service}/history', [\App\Http\Controllers\Api\UnitChatApiController::class, 'getChatHistory'])->name('history');
+    Route::post('/{service}/send', [\App\Http\Controllers\Api\UnitChatApiController::class, 'sendChatMessage'])->middleware('throttle:chat-write')->name('send');
+    Route::post('/{service}/escalate', [\App\Http\Controllers\Api\UnitChatApiController::class, 'escalateChat'])->middleware('throttle:chat-write')->name('escalate');
+});
 
 // Fallback Route untuk aset Storage jika symlink dinonaktifkan oleh shared hosting
 Route::get('/storage/{path}', function ($path) {

@@ -3,36 +3,115 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\UnitChatSession;
 use App\Models\UnitChatMessage;
+use App\Models\UnitChatSession;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class UnitChatController extends Controller
 {
+    private const SERVICE_PERMISSIONS = [
+        'gas' => 'gas',
+        'penyewaan' => 'sewa_alat',
+        'mobil' => 'sewa_mobil',
+        'fasilitas_umum' => 'fasilitas_umum',
+    ];
+
     /**
-     * Cari session dengan otorisasi wilayah yang fleksibel dan aman
+     * Validasi akses Admin Desa / Staf untuk unit layanan terkait.
      */
-    private function findSession($service, $sessionId)
+    private function authorizeUnitAdmin(string $service): ?User
     {
         $admin = Auth::user();
+        $permission = self::SERVICE_PERMISSIONS[$service] ?? null;
+
+        if (!$admin || !$permission || !$admin->isAdmin() || !$admin->region_id || !$admin->hasUnitPermission($permission)) {
+            return null;
+        }
+
+        return $admin;
+    }
+
+    /**
+     * Cari session dengan otorisasi wilayah dan unit yang ketat.
+     */
+    private function findSession(string $service, $sessionId): ?UnitChatSession
+    {
+        $admin = $this->authorizeUnitAdmin($service);
         if (!$admin) {
             return null;
         }
 
-        $permissions = ['gas' => 'gas', 'penyewaan' => 'sewa_alat',
-            'mobil' => 'sewa_mobil', 'fasilitas_umum' => 'fasilitas_umum'];
-        $permission = $permissions[$service] ?? null;
-        if (!$permission || !$admin->isAdmin() || !$admin->region_id || !$admin->hasUnitPermission($permission)) {
-            return null;
-        }
-        $query = UnitChatSession::where('service_type', $service)->where('region_id', $admin->region_id);
-
-        return $query->find($sessionId);
+        return UnitChatSession::where('service_type', $service)
+            ->where('region_id', $admin->region_id)
+            ->find($sessionId);
     }
 
     /**
-     * Detail Pesan Chat untuk Admin
+     * Daftar sesi chat warga secara real-time untuk panel Admin Desa & Staf.
+     */
+    public function getSessions(Request $request, $service)
+    {
+        if (!array_key_exists($service, self::SERVICE_PERMISSIONS)) {
+            return response()->json(['status' => 'error', 'message' => 'Unit layanan tidak ditemukan.'], 404);
+        }
+
+        $admin = $this->authorizeUnitAdmin($service);
+        if (!$admin) {
+            return response()->json(['status' => 'error', 'message' => 'Anda tidak memiliki akses ke chat layanan ini.'], 403);
+        }
+
+        $sessions = UnitChatSession::visibleForAdmin($service, (int) $admin->region_id)
+            ->with(['user', 'latestMessage'])
+            ->get();
+
+        $payload = $sessions->map(function (UnitChatSession $chat) {
+            $displayName = $chat->displayUserName();
+            $userPhoto = null;
+            if ($chat->user) {
+                try {
+                    $userPhoto = $chat->user->profile_photo_url;
+                } catch (\Throwable $e) {
+                    $userPhoto = null;
+                }
+            }
+
+            $lastSenderType = $chat->latestMessage?->sender_type;
+            $unread = (int) $chat->unread_admin_count;
+            $needsReply = $chat->status !== 'resolved' && (
+                $unread > 0 || ($chat->status === 'escalated' && $lastSenderType !== 'admin')
+            );
+
+            return [
+                'id' => $chat->id,
+                'user_id' => $chat->user_id,
+                'user_name' => $displayName,
+                'user_photo' => $userPhoto,
+                'status' => $chat->status,
+                'item_label' => !empty($chat->item_reference) ? $chat->item_label : null,
+                'last_message' => $chat->last_message ?: 'Memulai percakapan...',
+                'last_message_time' => $chat->last_message_at
+                    ? $chat->last_message_at->format('H:i')
+                    : ($chat->updated_at ? $chat->updated_at->format('H:i') : ''),
+                'unread_admin_count' => $unread,
+                'last_sender_type' => $lastSenderType,
+                'needs_reply' => $needsReply,
+            ];
+        })->values()->all();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'sessions' => $payload,
+                'total_sessions' => count($payload),
+                'total_unread' => (int) $sessions->sum('unread_admin_count'),
+            ],
+        ]);
+    }
+
+    /**
+     * Detail Pesan Chat untuk Admin Desa & Staf
      */
     public function getMessages($service, $sessionId)
     {
@@ -40,15 +119,17 @@ class UnitChatController extends Controller
         if (!$session) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Sesi percakapan tidak ditemukan atau Anda tidak memiliki akses.'
+                'message' => 'Sesi percakapan tidak ditemukan atau Anda tidak memiliki akses.',
             ], 404);
         }
 
-        // Reset unread count for admin
-        $session->update(['unread_admin_count' => 0]);
+        // Reset unread count for admin when opened
+        if ((int) $session->unread_admin_count > 0) {
+            $session->update(['unread_admin_count' => 0]);
+        }
 
         $session->load('user:id,name,avatar');
-        $messages = $session->messages()->with('sender')->get()->map(function ($msg) {
+        $messages = $session->messages()->with('sender:id,name,role')->get()->map(function ($msg) {
             return [
                 'id' => $msg->id,
                 'session_id' => $msg->session_id,
@@ -77,14 +158,30 @@ class UnitChatController extends Controller
             }
         }
 
+        $displayName = $session->displayUserName();
+        $lastMsg = end($messages);
+        $lastSenderType = is_array($lastMsg) ? ($lastMsg['sender_type'] ?? null) : null;
+
         return response()->json([
             'status' => 'success',
             'data' => [
-                'session' => $session,
+                'session' => [
+                    'id' => $session->id,
+                    'service_type' => $session->service_type,
+                    'region_id' => $session->region_id,
+                    'user_id' => $session->user_id,
+                    'user_name' => $displayName,
+                    'status' => $session->status,
+                    'item_reference' => $session->item_reference,
+                    'item_label' => !empty($session->item_reference) ? $session->item_label : null,
+                    'last_message' => $session->last_message,
+                    'last_sender_type' => $lastSenderType,
+                    'unread_admin_count' => 0,
+                ],
                 'messages' => $messages,
                 'user_photo' => $userPhoto,
                 'product_info' => $productInfo,
-            ]
+            ],
         ]);
     }
 
@@ -113,7 +210,7 @@ class UnitChatController extends Controller
                 if ($item) {
                     $info['title'] = $item->nama_mobil;
                     $info['image'] = $item->foto ? asset('storage/' . $item->foto) : asset('User/img/elemen/mobil.png');
-                    $info['price'] = 'Rp ' . number_format($item->harga_sewa ?? $item->harga_dalam_desa ?? 0, 0, ',', '.') . ' / hari';
+                    $info['price'] = 'Rp ' . number_format($item->harga_mulai ?? $item->harga_sewa ?? $item->harga_dalam_desa ?? 0, 0, ',', '.') . ' / hari';
                     $info['category'] = ucfirst($item->kategori ?? 'Transportasi');
                     $info['status'] = $item->status ?? 'Tersedia';
                     if (\Route::has('admin.unit.mobil.show')) {
@@ -130,8 +227,8 @@ class UnitChatController extends Controller
                     $info['price'] = 'Rp ' . number_format($item->harga_satuan ?? 0, 0, ',', '.') . ' / tabung';
                     $info['category'] = 'Pangkalan Gas';
                     $info['status'] = $item->status ?? 'Tersedia';
-                    if (\Route::has('admin.unit.penjualan_gas.edit')) {
-                        $info['url'] = route('admin.unit.penjualan_gas.edit', $item->id);
+                    if (\Route::has('admin.unit.penjualan_gas.show')) {
+                        $info['url'] = route('admin.unit.penjualan_gas.show', $item->id);
                     }
                 } else {
                     $info['image'] = asset('User/img/elemen/F2.png');
@@ -144,8 +241,8 @@ class UnitChatController extends Controller
                     $info['price'] = 'Rp ' . number_format($item->harga_sewa ?? 0, 0, ',', '.') . ($item->billing_basis === 'per_day' ? ' / hari' : ' / kegiatan');
                     $info['category'] = ucfirst($item->kategori ?? 'Alat & Mesin');
                     $info['status'] = $item->status ?? 'Tersedia';
-                    if (\Route::has('admin.unit.penyewaan.edit')) {
-                        $info['url'] = route('admin.unit.penyewaan.edit', $item->id);
+                    if (\Route::has('admin.unit.penyewaan.show')) {
+                        $info['url'] = route('admin.unit.penyewaan.show', $item->id);
                     }
                 } else {
                     $info['image'] = asset('User/img/elemen/F1.png');
@@ -158,8 +255,8 @@ class UnitChatController extends Controller
                     $info['price'] = $item->harga_sewa ? 'Rp ' . number_format($item->harga_sewa, 0, ',', '.') . ' / hari' : 'Gratis / Kebijakan Desa';
                     $info['category'] = ucfirst($item->kategori ?? 'Fasilitas Umum');
                     $info['status'] = $item->status ?? 'Tersedia';
-                    if (\Route::has('admin.unit.fasilitas_umum.edit')) {
-                        $info['url'] = route('admin.unit.fasilitas_umum.edit', $item->id);
+                    if (\Route::has('admin.unit.fasilitas_umum.show')) {
+                        $info['url'] = route('admin.unit.fasilitas_umum.show', $item->id);
                     }
                 } else {
                     $info['image'] = asset('User/img/elemen/fasilitas.png');
@@ -173,13 +270,13 @@ class UnitChatController extends Controller
     }
 
     /**
-     * Balas Chat dari Admin ke Warga
+     * Balas Chat dari Admin Desa / Staf ke Warga
      */
     public function replyChat(Request $request, $service, $sessionId)
     {
-        $admin = Auth::user();
+        $admin = $this->authorizeUnitAdmin($service);
         if (!$admin) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            return response()->json(['status' => 'error', 'message' => 'Anda tidak memiliki izin membalas obrolan layanan ini.'], 403);
         }
 
         $request->validate([
@@ -190,7 +287,7 @@ class UnitChatController extends Controller
         if (!$session) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Sesi percakapan tidak ditemukan.'
+                'message' => 'Sesi percakapan tidak ditemukan.',
             ], 404);
         }
 
@@ -205,6 +302,7 @@ class UnitChatController extends Controller
         $session->update([
             'last_message' => $request->message,
             'last_message_at' => now(),
+            'unread_admin_count' => 0,
             'unread_user_count' => $session->unread_user_count + 1,
             'status' => 'escalated',
         ]);
@@ -218,11 +316,13 @@ class UnitChatController extends Controller
                     'session_id' => $msg->session_id,
                     'sender_type' => 'admin',
                     'sender_id' => $admin->id,
+                    'sender_name' => $admin->name,
                     'message' => (string) $msg->message,
                     'time_formatted' => $msg->created_at ? $msg->created_at->format('H:i') : '',
                     'created_at' => $msg->created_at ? $msg->created_at->toISOString() : null,
                 ],
-            ]
+                'session_status' => $session->status,
+            ],
         ]);
     }
 
@@ -235,19 +335,20 @@ class UnitChatController extends Controller
         if (!$session) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Sesi percakapan tidak ditemukan.'
+                'message' => 'Sesi percakapan tidak ditemukan.',
             ], 404);
         }
 
         $session->update([
             'status' => 'resolved',
+            'unread_admin_count' => 0,
         ]);
 
         UnitChatMessage::create([
             'session_id' => $session->id,
             'sender_type' => 'bot',
             'sender_id' => null,
-            'message' => 'Sesi obrolan ini telah ditandai selesai oleh Petugas Layanan BUMDes. Terima kasih sudah menghubungi kami.',
+            'message' => 'Sesi obrolan ini telah ditandai selesai oleh Petugas Layanan. Terima kasih sudah menghubungi kami.',
             'is_read' => true,
         ]);
 

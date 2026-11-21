@@ -46,10 +46,8 @@ class GasController extends Controller
 
         $tab = $request->get('tab', 'katalog');
         $admin = auth()->user();
-        $chats = \App\Models\UnitChatSession::where('region_id', $admin ? $admin->region_id : null)
-            ->where('service_type', 'gas')
-            ->with('user')
-            ->orderBy('last_message_at', 'desc')
+        $chats = \App\Models\UnitChatSession::visibleForAdmin('gas', $admin ? (int) $admin->region_id : null)
+            ->with(['user', 'latestMessage'])
             ->get();
         $totalUnreadChats = $chats->sum('unread_admin_count');
 

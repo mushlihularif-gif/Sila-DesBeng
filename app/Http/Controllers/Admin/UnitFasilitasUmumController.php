@@ -61,10 +61,8 @@ class UnitFasilitasUmumController extends Controller
         $default_ditanggung = $this->defaultSopDitanggung;
         $default_tidak_ditanggung = $this->defaultSopTidakDitanggung;
 
-        $chats = \App\Models\UnitChatSession::where('region_id', $user ? $user->region_id : null)
-            ->where('service_type', 'fasilitas_umum')
-            ->with('user')
-            ->orderBy('last_message_at', 'desc')
+        $chats = \App\Models\UnitChatSession::visibleForAdmin('fasilitas_umum', $user ? (int) $user->region_id : null)
+            ->with(['user', 'latestMessage'])
             ->get();
         $totalUnreadChats = $chats->sum('unread_admin_count');
         

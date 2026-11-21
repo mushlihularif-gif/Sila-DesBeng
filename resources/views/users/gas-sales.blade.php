@@ -233,7 +233,14 @@
     }
 </script>
 @endif
-@include('users.partials.service_chat_widget', ['serviceType' => 'gas', 'serviceTitle' => 'Layanan Gas'])
+@include('users.partials.service_chat_widget', [
+    'serviceType' => 'gas',
+    'serviceTitle' => 'Layanan Gas',
+    'targetRegionId' => $filterRegionId ?? $targetRegionId ?? null,
+    'targetRegion' => $targetRegion ?? null,
+    'catalogItems' => $items ?? collect(),
+    'filterRegions' => $filterRegions ?? collect(),
+])
 
 </main>
 @endsection

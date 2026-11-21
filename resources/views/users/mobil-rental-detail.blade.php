@@ -143,8 +143,8 @@
         title="Layanan Sewa Transportasi" 
         :regionId="$item->region_id" 
         :regionName="$item->region->name ?? ''"
-        :itemName="$item->nama_kendaraan"
-        :itemPrice="'Rp ' . number_format($item->harga_sewa, 0, ',', '.') . ' / ' . $item->satuan"
+        :itemName="$item->nama_mobil"
+        :itemPrice="$item->harga_mulai > 0 ? 'Rp ' . number_format($item->harga_mulai, 0, ',', '.') . ' / ' . ($item->satuan ?: 'hari') : 'Gratis'"
         :itemImage="$item->foto ? url('storage/' . $item->foto) : ''"
     />
 @endsection

@@ -200,9 +200,7 @@
                 <li class="nav-item flex-shrink-0">
                     <button type="button" class="nav-link rounded-pill px-3 py-2 fw-semibold {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-gas-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
                         <i class="bx bx-chat me-1"></i>Layanan Pesan
-                        @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
-                            <span class="badge rounded-pill bg-danger ms-1">{{ $totalUnreadChats }}</span>
-                        @endif
+                        <span class="badge rounded-pill bg-danger ms-1 {{ ($totalUnreadChats ?? 0) > 0 ? '' : 'd-none' }}" data-unit-chat-tab-badge="gas">{{ (int) ($totalUnreadChats ?? 0) }}</span>
                     </button>
                 </li>
             </ul>

@@ -198,7 +198,7 @@
         :regionId="$item->region_id" 
         :regionName="$item->region->name ?? ''"
         :itemName="$item->nama_fasilitas"
-        :itemPrice="'Rp ' . number_format($item->harga_sewa, 0, ',', '.') . ' / ' . $item->satuan"
+        :itemPrice="$item->harga_sewa > 0 ? 'Rp ' . number_format($item->harga_sewa, 0, ',', '.') . ' / kegiatan' : 'Gratis / Fasilitas Publik'"
         :itemImage="$item->foto ? url('storage/' . $item->foto) : ''"
     />
 @endsection

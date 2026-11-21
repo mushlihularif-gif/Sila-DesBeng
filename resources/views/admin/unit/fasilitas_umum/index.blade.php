@@ -147,9 +147,7 @@
                 <li class="nav-item flex-shrink-0">
                     <button type="button" class="nav-link rounded-pill px-3 py-2 fw-semibold text-nowrap {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
                         <i class="bx bx-chat me-1"></i>Layanan Pesan
-                        @if($unreadChatsCount > 0)
-                            <span class="badge rounded-pill bg-danger ms-1">{{ $unreadChatsCount }}</span>
-                        @endif
+                        <span class="badge rounded-pill bg-danger ms-1 {{ $unreadChatsCount > 0 ? '' : 'd-none' }}" data-unit-chat-tab-badge="fasilitas_umum">{{ $unreadChatsCount }}</span>
                     </button>
                 </li>
             </ul>

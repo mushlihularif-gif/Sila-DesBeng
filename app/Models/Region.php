@@ -155,5 +155,49 @@ class Region extends Model
         
         return $this->name;
     }
+
+    /**
+     * Normalisasi region_id warga/produk (misalnya RT, RW, Dusun) naik ke tingkat
+     * desa/kelurahan pemilik layanan agar chat dan layanan selalu terhubung ke
+     * Admin Desa & Staf unit yang tepat.
+     */
+    public static function resolveServiceRegionId(?int $regionId): ?int
+    {
+        if (! $regionId) {
+            return null;
+        }
+
+        $current = self::find($regionId);
+        $depth = 0;
+
+        while ($current && $current->parent_id && $depth++ < 20
+            && in_array(strtolower((string) $current->type), ['rt', 'rw', 'dusun', 'lingkungan'], true)) {
+            $parent = self::find($current->parent_id);
+            if (! $parent) {
+                break;
+            }
+            $current = $parent;
+        }
+
+        return $current ? (int) $current->id : null;
+    }
+
+    /**
+     * Wilayah desa/kelurahan bawaan ketika konteks wilayah belum dipilih secara eksplisit.
+     */
+    public static function defaultServiceVillageId(): int
+    {
+        $village = self::whereIn('type', ['desa', 'kelurahan'])
+            ->orderBy('id')
+            ->first();
+
+        if ($village) {
+            return (int) $village->id;
+        }
+
+        $first = self::orderBy('id')->first();
+
+        return $first ? (int) $first->id : 1;
+    }
 }
 

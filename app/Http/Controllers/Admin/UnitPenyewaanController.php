@@ -56,10 +56,8 @@ class UnitPenyewaanController extends Controller
 
         if (\Illuminate\Support\Facades\Schema::hasTable('unit_chat_sessions')) {
             try {
-                $chats = \App\Models\UnitChatSession::where('region_id', $user ? $user->region_id : null)
-                    ->where('service_type', 'penyewaan')
-                    ->with('user')
-                    ->orderBy('last_message_at', 'desc')
+                $chats = \App\Models\UnitChatSession::visibleForAdmin('penyewaan', $user ? (int) $user->region_id : null)
+                    ->with(['user', 'latestMessage'])
                     ->get();
                 $totalUnreadChats = $chats->sum('unread_admin_count');
             } catch (\Throwable $e) {

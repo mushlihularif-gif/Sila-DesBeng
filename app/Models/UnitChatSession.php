@@ -58,4 +58,34 @@ class UnitChatSession extends Model
     {
         return $query->where('service_type', $serviceType);
     }
+
+    public function scopeVisibleForAdmin($query, string $serviceType, ?int $regionId)
+    {
+        return $query->where('region_id', $regionId)
+            ->where('service_type', $serviceType)
+            ->where(function ($q) {
+                $q->whereNotNull('last_message_at')
+                    ->orWhere('status', 'escalated')
+                    ->orWhere('unread_admin_count', '>', 0)
+                    ->orWhereHas('messages', fn ($m) => $m->whereIn('sender_type', ['user', 'admin']));
+            })
+            ->orderByRaw('COALESCE(last_message_at, updated_at) DESC');
+    }
+
+    public function latestMessage()
+    {
+        return $this->hasOne(UnitChatMessage::class, 'session_id')->latestOfMany('id');
+    }
+
+    public function displayUserName(): string
+    {
+        $fromUser = trim((string) ($this->user?->name ?? ''));
+        if ($fromUser !== '') {
+            return $fromUser;
+        }
+
+        $stored = trim((string) ($this->user_name ?? ''));
+
+        return $stored !== '' ? $stored : 'Warga';
+    }
 }

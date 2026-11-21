@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\UnitChatSession;
-use App\Models\UnitChatMessage;
 use App\Models\Region;
+use App\Models\UnitChatMessage;
+use App\Models\UnitChatSession;
+use App\Models\User;
+use App\Services\ChatSessionToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -18,34 +20,15 @@ class UnitChatApiController extends Controller
     public function getChatHistory(Request $request, $service)
     {
         $this->validateChat($request, $service);
-        $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
-        $sessionToken = \App\Services\ChatSessionToken::read($request);
-        $regionId = $request->get('region_id') ?: ($user ? $user->region_id : null);
+        $user = $this->resolveAuthenticatedUser();
+        $sessionToken = ChatSessionToken::read($request);
+        $regionId = $this->resolveRegionId($request, $user);
 
-        if (!$regionId) {
-            // Default ke region pertama jika tidak ditentukan
-            $firstRegion = Region::first();
-            $regionId = $firstRegion ? $firstRegion->id : 1;
-        }
-
-        $session = null;
-        if ($user) {
-            $session = UnitChatSession::where('service_type', $service)
-                ->where('region_id', $regionId)
-                ->where('user_id', $user->id)
-                ->first();
-        }
-
-        if (!$user && !$session && $sessionToken) {
-            $session = UnitChatSession::where('service_type', $service)
-                ->where('region_id', $regionId)
-                ->whereNull('user_id')->where('session_token', $sessionToken)
-                ->first();
-        }
+        $session = $this->findExistingSession($service, $regionId, $user, $sessionToken);
 
         if (!$session) {
             $newToken = Str::random(64);
-            $userName = $user ? $user->name : 'Warga';
+            $userName = $this->displayUserName($user);
 
             $session = UnitChatSession::create([
                 'service_type' => $service,
@@ -58,7 +41,6 @@ class UnitChatApiController extends Controller
                 'unread_user_count' => 0,
             ]);
 
-            // Pesan sambutan awal dari bot sesuai layanan
             $greeting = $this->getWelcomeMessage($service, $userName);
             UnitChatMessage::create([
                 'session_id' => $session->id,
@@ -68,8 +50,14 @@ class UnitChatApiController extends Controller
                 'is_read' => true,
             ]);
         } else {
-            // Reset unread untuk user saat membuka
-            $session->update(['unread_user_count' => 0]);
+            $updates = ['unread_user_count' => 0];
+            if ($user) {
+                $freshName = $this->displayUserName($user);
+                if ($freshName !== '' && $session->user_name !== $freshName) {
+                    $updates['user_name'] = $freshName;
+                }
+            }
+            $session->update($updates);
         }
 
         $messages = $session->messages()->with('sender:id,name,avatar')->get()->map(function ($msg) {
@@ -81,13 +69,18 @@ class UnitChatApiController extends Controller
             return $msg;
         });
 
+        $region = Region::find($regionId);
+
         return response()->json([
             'status' => 'success',
             'data' => [
                 'session' => $session,
+                'session_token' => $session->session_token,
+                'region_id' => $regionId,
+                'region_name' => $region ? $region->name : null,
                 'messages' => $messages,
                 'is_escalated' => ($session->status === 'escalated'),
-            ]
+            ],
         ]);
     }
 
@@ -99,50 +92,46 @@ class UnitChatApiController extends Controller
         $this->validateChat($request, $service);
         $request->validate([
             'message' => 'required|string|max:1000',
-            'item_data' => 'nullable|string|max:4000',
+            'item_data' => 'nullable|max:4000',
             'item_reference' => 'nullable|string|max:4000',
         ]);
 
-        $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
-        $sessionToken = \App\Services\ChatSessionToken::read($request);
-        $regionId = $request->get('region_id') ?: ($user ? $user->region_id : null);
-        $itemRef = $request->get('item_reference');
+        $user = $this->resolveAuthenticatedUser();
+        $sessionToken = ChatSessionToken::read($request);
+        $regionId = $this->resolveRegionId($request, $user);
+        $itemData = $this->normalizeItemData($request->input('item_data'));
+        $itemRef = $this->sanitizeItemReference($request->input('item_reference'), $itemData);
 
-        if (!$regionId) {
-            $firstRegion = Region::first();
-            $regionId = $firstRegion ? $firstRegion->id : 1;
-        }
-
-        $session = null;
-        if ($user) {
-            $session = UnitChatSession::where('service_type', $service)
-                ->where('region_id', $regionId)
-                ->where('user_id', $user->id)
-                ->first();
-        }
-
-        if (!$user && !$session && $sessionToken) {
-            $session = UnitChatSession::where('service_type', $service)
-                ->where('region_id', $regionId)
-                ->whereNull('user_id')->where('session_token', $sessionToken)
-                ->first();
-        }
+        $session = $this->findExistingSession($service, $regionId, $user, $sessionToken);
 
         if (!$session) {
-            $sessionToken = Str::random(64);
+            $newToken = Str::random(64);
+            $userName = $this->displayUserName($user);
             $session = UnitChatSession::create([
                 'service_type' => $service,
                 'region_id' => $regionId,
                 'user_id' => $user ? $user->id : null,
-                'session_token' => $sessionToken,
-                'user_name' => $user ? $user->name : 'Warga',
+                'session_token' => $newToken,
+                'user_name' => $userName,
                 'status' => 'bot',
                 'item_reference' => $itemRef,
                 'unread_admin_count' => 0,
                 'unread_user_count' => 0,
             ]);
-        } elseif ($itemRef && !$session->item_reference) {
-            $session->update(['item_reference' => $itemRef]);
+        } else {
+            $metaUpdates = [];
+            if ($itemRef) {
+                $metaUpdates['item_reference'] = $itemRef;
+            }
+            if ($user) {
+                $freshName = $this->displayUserName($user);
+                if ($freshName !== '' && $session->user_name !== $freshName) {
+                    $metaUpdates['user_name'] = $freshName;
+                }
+            }
+            if (!empty($metaUpdates)) {
+                $session->update($metaUpdates);
+            }
         }
 
         // Simpan pesan user
@@ -151,15 +140,20 @@ class UnitChatApiController extends Controller
             'sender_type' => 'user',
             'sender_id' => $user ? $user->id : null,
             'message' => $request->message,
-            'item_data' => $request->get('item_data'),
+            'item_data' => $itemData,
             'is_read' => false,
         ]);
 
-        $session->update([
+        // Jika sesi sebelumnya sudah selesai/ditutup dan warga mengirim pesan baru, buka kembali untuk petugas
+        $sessionUpdates = [
             'last_message' => $request->message,
             'last_message_at' => now(),
             'unread_admin_count' => $session->unread_admin_count + 1,
-        ]);
+        ];
+        if (in_array($session->status, ['resolved', 'closed'], true)) {
+            $sessionUpdates['status'] = 'escalated';
+        }
+        $session->update($sessionUpdates);
 
         $lowerMsg = strtolower($request->message);
         $isEscalateRequest = Str::contains($lowerMsg, ['chat admin', 'petugas', 'pengelola', 'hubungi admin', 'bicara dengan admin', 'manusia']);
@@ -168,7 +162,7 @@ class UnitChatApiController extends Controller
         if ($isEscalateRequest && $session->status !== 'escalated') {
             $session->update(['status' => 'escalated']);
 
-            $botReply = "Petugas akan segera membalas chat ini.";
+            $botReply = 'Pesan Anda sudah diteruskan ke Petugas Layanan. Petugas akan segera membalas chat ini.';
             $botMsg = UnitChatMessage::create([
                 'session_id' => $session->id,
                 'sender_type' => 'bot',
@@ -181,14 +175,15 @@ class UnitChatApiController extends Controller
                 'status' => 'success',
                 'data' => [
                     'session_token' => $session->session_token,
+                    'region_id' => $regionId,
                     'user_message' => $userMsg,
                     'bot_message' => $botMsg,
                     'is_escalated' => true,
-                ]
+                ],
             ]);
         }
 
-        // Jika masih dalam status bot, sediakan respons asisten cerdas otomatis
+        // Jika masih dalam status bot, sediakan respons asisten otomatis (pesan warga tetap masuk ke panel Admin Desa & Staf)
         if ($session->status === 'bot') {
             $botReply = $this->generateBotAnswer($service, $request->message);
             $botMsg = UnitChatMessage::create([
@@ -203,10 +198,11 @@ class UnitChatApiController extends Controller
                 'status' => 'success',
                 'data' => [
                     'session_token' => $session->session_token,
+                    'region_id' => $regionId,
                     'user_message' => $userMsg,
                     'bot_message' => $botMsg,
                     'is_escalated' => false,
-                ]
+                ],
             ]);
         }
 
@@ -214,10 +210,11 @@ class UnitChatApiController extends Controller
             'status' => 'success',
             'data' => [
                 'session_token' => $session->session_token,
+                'region_id' => $regionId,
                 'user_message' => $userMsg,
                 'bot_message' => null,
                 'is_escalated' => ($session->status === 'escalated'),
-            ]
+            ],
         ]);
     }
 
@@ -227,55 +224,56 @@ class UnitChatApiController extends Controller
     public function escalateChat(Request $request, $service)
     {
         $this->validateChat($request, $service);
-        $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
-        $sessionToken = \App\Services\ChatSessionToken::read($request);
-        $regionId = $request->get('region_id') ?: ($user ? $user->region_id : null);
+        $user = $this->resolveAuthenticatedUser();
+        $sessionToken = ChatSessionToken::read($request);
+        $regionId = $this->resolveRegionId($request, $user);
 
-        if (!$regionId) {
-            $firstRegion = Region::first();
-            $regionId = $firstRegion ? $firstRegion->id : 1;
-        }
+        $session = $this->findExistingSession($service, $regionId, $user, $sessionToken);
 
-        $session = null;
-        if ($user) {
-            $session = UnitChatSession::where('service_type', $service)
-                ->where('region_id', $regionId)
-                ->where('user_id', $user->id)
-                ->first();
-        }
-
-        if (!$user && !$session && $sessionToken) {
-            $session = UnitChatSession::where('service_type', $service)
-                ->where('region_id', $regionId)
-                ->whereNull('user_id')->where('session_token', $sessionToken)
-                ->first();
-        }
-
-        if ($session) {
+        if (!$session) {
+            $newToken = Str::random(64);
+            $userName = $this->displayUserName($user);
+            $session = UnitChatSession::create([
+                'service_type' => $service,
+                'region_id' => $regionId,
+                'user_id' => $user ? $user->id : null,
+                'session_token' => $newToken,
+                'user_name' => $userName,
+                'status' => 'escalated',
+                'last_message' => 'Warga meminta terhubung dengan Petugas Layanan.',
+                'last_message_at' => now(),
+                'unread_admin_count' => 1,
+                'unread_user_count' => 0,
+            ]);
+        } else {
+            $wasEscalated = $session->status === 'escalated';
             $session->update([
                 'status' => 'escalated',
-                'unread_admin_count' => $session->unread_admin_count + 1,
-            ]);
-
-            $botMsg = UnitChatMessage::create([
-                'session_id' => $session->id,
-                'sender_type' => 'bot',
-                'sender_id' => null,
-                'message' => "Petugas akan segera membalas chat ini.",
-                'is_read' => true,
-            ]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Chat berhasil dialihkan ke admin.',
-                'data' => [
-                    'session' => $session,
-                    'bot_message' => $botMsg,
-                ]
+                'last_message' => $session->last_message ?: 'Warga meminta terhubung dengan Petugas Layanan.',
+                'last_message_at' => $session->last_message_at ?: now(),
+                'unread_admin_count' => $wasEscalated ? max(1, (int) $session->unread_admin_count) : ((int) $session->unread_admin_count + 1),
             ]);
         }
 
-        return response()->json(['status' => 'error', 'message' => 'Sesi chat tidak ditemukan'], 404);
+        $botMsg = UnitChatMessage::create([
+            'session_id' => $session->id,
+            'sender_type' => 'bot',
+            'sender_id' => null,
+            'message' => 'Terhubung dengan Petugas Layanan. Silakan tulis pertanyaan Anda, petugas akan segera membalas di sini.',
+            'is_read' => true,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Chat berhasil dialihkan ke petugas layanan.',
+            'data' => [
+                'session' => $session,
+                'session_token' => $session->session_token,
+                'region_id' => $regionId,
+                'bot_message' => $botMsg,
+                'is_escalated' => true,
+            ],
+        ]);
     }
 
     /**
@@ -283,8 +281,12 @@ class UnitChatApiController extends Controller
      */
     public function getUnreadCounts(Request $request)
     {
-        $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
-        $sessionToken = \App\Services\ChatSessionToken::read($request);
+        $request->validate(['region_id' => 'nullable|integer|exists:regions,id']);
+        $user = $this->resolveAuthenticatedUser();
+        $sessionToken = ChatSessionToken::read($request);
+        $filterRegionId = $request->filled('region_id')
+            ? Region::resolveServiceRegionId((int) $request->input('region_id'))
+            : null;
 
         $counts = [
             'gas' => 0,
@@ -294,27 +296,29 @@ class UnitChatApiController extends Controller
             'total' => 0,
         ];
 
+        $query = null;
         if ($user) {
-            $sessions = UnitChatSession::where('user_id', $user->id)->get();
-            foreach ($sessions as $s) {
-                if (isset($counts[$s->service_type])) {
-                    $counts[$s->service_type] = $s->unread_user_count;
-                    $counts['total'] += $s->unread_user_count;
-                }
-            }
+            $query = UnitChatSession::where('user_id', $user->id);
         } elseif ($sessionToken) {
-            $sessions = UnitChatSession::whereNull('user_id')->where('session_token', $sessionToken)->get();
-            foreach ($sessions as $s) {
+            $query = UnitChatSession::whereNull('user_id')->where('session_token', $sessionToken);
+        }
+
+        if ($query) {
+            if ($filterRegionId) {
+                $query->where('region_id', $filterRegionId);
+            }
+            foreach ($query->get() as $s) {
                 if (isset($counts[$s->service_type])) {
-                    $counts[$s->service_type] = $s->unread_user_count;
-                    $counts['total'] += $s->unread_user_count;
+                    $unread = (int) $s->unread_user_count;
+                    $counts[$s->service_type] += $unread;
+                    $counts['total'] += $unread;
                 }
             }
         }
 
         return response()->json([
             'status' => 'success',
-            'data' => $counts
+            'data' => $counts,
         ]);
     }
 
@@ -322,19 +326,120 @@ class UnitChatApiController extends Controller
     // HELPER METHODS
     // ==========================================
 
+    private function resolveAuthenticatedUser(): ?User
+    {
+        return Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
+    }
+
+    private function displayUserName(?User $user): string
+    {
+        $name = trim((string) ($user?->name ?? ''));
+
+        return $name !== '' ? $name : 'Warga';
+    }
+
+    private function resolveRegionId(Request $request, ?User $user): int
+    {
+        $requestedRaw = $request->input('region_id');
+        if ($requestedRaw !== null && $requestedRaw !== '' && is_numeric($requestedRaw)) {
+            $resolved = Region::resolveServiceRegionId((int) $requestedRaw);
+            if ($resolved) {
+                $region = Region::find($resolved);
+                // Jika yang dikirim adalah wilayah induk (kabupaten/kecamatan) dan warga punya desa sendiri di bawahnya,
+                // arahkan ke desa warga supaya masuk ke inbox Admin Desa / Staf.
+                if ($region && in_array(strtolower((string) $region->type), ['kabupaten', 'kecamatan'], true) && $user?->region_id) {
+                    $userVillageId = Region::resolveServiceRegionId((int) $user->region_id);
+                    if ($userVillageId) {
+                        $userVillage = Region::find($userVillageId);
+                        if ($userVillage && in_array(strtolower((string) $userVillage->type), ['desa', 'kelurahan'], true)) {
+                            return $userVillageId;
+                        }
+                    }
+                }
+
+                return $resolved;
+            }
+        }
+
+        if ($user && $user->region_id) {
+            $userRegionId = Region::resolveServiceRegionId((int) $user->region_id);
+            if ($userRegionId) {
+                return $userRegionId;
+            }
+        }
+
+        return Region::defaultServiceVillageId();
+    }
+
+    private function findExistingSession(string $service, int $regionId, ?User $user, ?string $sessionToken): ?UnitChatSession
+    {
+        if ($user) {
+            return UnitChatSession::where('service_type', $service)
+                ->where('region_id', $regionId)
+                ->where('user_id', $user->id)
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        if ($sessionToken) {
+            return UnitChatSession::where('service_type', $service)
+                ->where('region_id', $regionId)
+                ->whereNull('user_id')
+                ->where('session_token', $sessionToken)
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        return null;
+    }
+
+    private function normalizeItemData(mixed $raw): ?array
+    {
+        if (is_array($raw)) {
+            return $raw;
+        }
+        if (is_string($raw) && trim($raw) !== '') {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
+
+    private function sanitizeItemReference(?string $raw, ?array $itemData = null): ?string
+    {
+        $clean = trim((string) $raw);
+        if ($clean === '' && is_array($itemData) && !empty($itemData['name'])) {
+            $clean = trim((string) $itemData['name']);
+        }
+        if ($clean === '') {
+            return null;
+        }
+        if (str_starts_with($clean, '{') || str_starts_with($clean, '[')) {
+            $decoded = json_decode($clean, true);
+            if (is_array($decoded) && is_string($decoded['name'] ?? null) && trim($decoded['name']) !== '') {
+                $clean = trim($decoded['name']);
+            }
+        }
+
+        return Str::limit($clean, 240, '');
+    }
+
     private function getWelcomeMessage($service, $userName)
     {
         switch ($service) {
             case 'gas':
-                return "Halo {$userName}! Selamat datang di Layanan Gas. Ada yang bisa kami bantu? Anda bisa menanyakan ketersediaan stok, pengantaran, atau informasi tukar tabung. Untuk bantuan lebih lanjut, silakan klik 'Chat Petugas'.";
+                return "Halo {$userName}! Selamat datang di Layanan Gas. Silakan tanyakan ketersediaan stok, pengantaran, atau informasi tukar tabung. Pesan Anda langsung masuk ke Petugas Layanan, atau klik 'Chat Petugas' untuk terhubung tanpa asisten otomatis.";
             case 'penyewaan':
-                return "Halo {$userName}! Selamat datang di Layanan Sewa Alat. Silakan tanyakan ketersediaan alat, ketentuan sewa, atau durasi peminjaman. Jika butuh bantuan langsung dari admin, silakan klik 'Chat Petugas'.";
+                return "Halo {$userName}! Selamat datang di Layanan Sewa Alat. Silakan tanyakan ketersediaan alat, ketentuan sewa, atau durasi peminjaman. Pesan Anda langsung masuk ke Petugas Layanan, atau klik 'Chat Petugas' untuk terhubung langsung.";
             case 'mobil':
-                return "Halo {$userName}! Selamat datang di Layanan Penyewaan Transportasi. Anda bisa bertanya seputar ketersediaan kendaraan transportasi, jadwal, dan syarat penyewaan. Klik 'Chat Petugas' untuk langsung terhubung dengan admin.";
+                return "Halo {$userName}! Selamat datang di Layanan Penyewaan Transportasi. Anda bisa bertanya seputar ketersediaan armada, jadwal, dan syarat penyewaan. Pesan Anda langsung masuk ke Petugas Layanan.";
             case 'fasilitas_umum':
-                return "Halo {$userName}! Selamat datang di Layanan Fasilitas Umum. Silakan tanyakan jadwal kosong, kapasitas ruangan, atau detail fasilitas lainnya. Untuk pemesanan langsung, Anda bisa klik 'Chat Petugas'.";
+                return "Halo {$userName}! Selamat datang di Layanan Fasilitas Umum. Silakan tanyakan jadwal kosong, kapasitas ruangan, atau detail fasilitas lainnya. Pesan Anda langsung masuk ke Petugas Layanan.";
             default:
-                return "Halo {$userName}! Selamat datang. Ada yang bisa kami bantu seputar layanan ini? Silakan klik 'Chat Petugas' jika butuh bantuan admin.";
+                return "Halo {$userName}! Selamat datang. Ada yang bisa kami bantu seputar layanan ini? Pesan Anda akan langsung masuk ke Petugas Layanan.";
         }
     }
 
@@ -344,7 +449,7 @@ class UnitChatApiController extends Controller
 
         if ($service === 'gas') {
             if (Str::contains($q, ['stok', 'ada', 'ready', 'tersedia'])) {
-                return "Ketersediaan tabung gas selalu kami perbarui di halaman produk. Anda bisa langsung memesan jika stoknya masih ada. Jika butuh dalam jumlah banyak, silakan klik 'Chat Petugas' ya.";
+                return "Ketersediaan tabung gas selalu kami perbarui di halaman produk. Anda bisa langsung memesan jika stoknya masih ada. Pesan Anda juga sudah kami teruskan ke Petugas Layanan jika butuh konfirmasi langsung.";
             }
             if (Str::contains($q, ['antar', 'kirim', 'ongkir', 'sampai rumah'])) {
                 return "Kami menyediakan layanan antar jemput gas ke rumah Anda. Biaya pengiriman akan disesuaikan dengan jarak lokasi Anda. Pastikan alamat pengiriman sudah benar saat memesan ya.";
@@ -352,7 +457,7 @@ class UnitChatApiController extends Controller
             if (Str::contains($q, ['tukar', 'kosong', 'bawa'])) {
                 return "Untuk pembelian isi ulang, mohon pastikan Anda sudah menyiapkan tabung kosong dengan ukuran yang sama dan dalam kondisi baik saat petugas kami datang atau saat Anda mengambil pesanan.";
             }
-            return "Pesan Anda sudah kami catat. Agar bisa dijawab lebih lengkap oleh admin, silakan tekan tombol 'Chat Petugas' ya.";
+            return "Pesan Anda sudah masuk ke Petugas Layanan. Petugas akan segera membalas di sini, atau klik 'Chat Petugas' untuk mode obrolan langsung.";
         }
 
         if ($service === 'penyewaan') {
@@ -360,33 +465,34 @@ class UnitChatApiController extends Controller
                 return "Sebagai informasi, penyewa diharapkan menjaga kondisi alat tetap baik selama masa sewa. Jika terjadi kerusakan akibat kelalaian, biaya perbaikan akan menjadi tanggung jawab penyewa.";
             }
             if (Str::contains($q, ['tarif', 'harga', 'biaya', 'ongkos'])) {
-                return "Biaya penyewaan dihitung berdasarkan lama hari penyewaan. Harga detailnya sudah tertera langsung di halaman detail alat tersebut ya.";
+                return "Biaya penyewaan dihitung berdasarkan lama hari atau kegiatan penyewaan. Harga detailnya sudah tertera langsung di halaman detail alat tersebut ya.";
             }
-            return "Pertanyaan Anda sudah masuk ke sistem kami. Untuk konfirmasi ketersediaan alat atau info lainnya, silakan tekan tombol 'Chat Petugas'.";
+            return "Pertanyaan Anda sudah masuk ke Petugas Layanan. Petugas akan segera membalas konfirmasi ketersediaan alat atau info lainnya di sini.";
         }
 
         if ($service === 'mobil') {
             if (Str::contains($q, ['supir', 'driver', 'petugas'])) {
-                return "Layanan penyewaan transportasi kami sudah termasuk supir (driver) dari petugas pengelola untuk memastikan keamanan dan kenyamanan perjalanan Anda.";
+                return "Layanan penyewaan transportasi kami tersedia dengan supir dari petugas pengelola untuk memastikan keamanan dan kenyamanan perjalanan Anda.";
             }
             if (Str::contains($q, ['syarat', 'dokumen', 'jaminan'])) {
-                return "Persyaratan utama untuk penyewaan transportasi adalah KTP warga setempat yang masih berlaku dan persetujuan surat tanggung jawab penggunaan kendaraan.";
+                return "Persyaratan utama untuk penyewaan transportasi adalah identitas warga yang masih berlaku dan persetujuan ketentuan penggunaan kendaraan.";
             }
-            return "Pesan Anda telah kami terima. Untuk memastikan ketersediaan jadwal transportasi atau melakukan pemesanan, silakan tekan tombol 'Chat Petugas' ya.";
+            return "Pesan Anda sudah masuk ke Petugas Layanan. Petugas akan segera membalas untuk memastikan ketersediaan jadwal transportasi Anda.";
         }
 
         if ($service === 'fasilitas_umum') {
             if (Str::contains($q, ['jadwal', 'kosong', 'tanggal', 'booking'])) {
-                return "Anda dapat melihat ketersediaan tanggal langsung dari halaman fasilitas ini. Jika ingin memastikan jadwal yang spesifik, silakan pilih tanggalnya atau hubungi admin kami.";
+                return "Anda dapat melihat ketersediaan tanggal langsung dari halaman fasilitas ini. Pesan Anda juga sudah masuk ke Petugas Layanan untuk konfirmasi jadwal.";
             }
             if (Str::contains($q, ['kapasitas', 'muat', 'orang'])) {
-                return "Setiap fasilitas memiliki kapasitas yang berbeda-beda, mulai dari rapat kecil hingga acara pernikahan yang bisa menampung ratusan orang. Informasi detail ada di deskripsi fasilitas ya.";
+                return "Setiap fasilitas memiliki kapasitas yang berbeda-beda. Informasi detail ada di deskripsi fasilitas, dan Petugas Layanan juga sudah menerima pesan Anda.";
             }
-            return "Pesan Anda tentang fasilitas umum sudah kami terima. Silakan tekan tombol 'Chat Petugas' agar admin kami bisa langsung membantu kebutuhan acara Anda.";
+            return "Pesan Anda tentang fasilitas umum sudah masuk ke Petugas Layanan. Petugas kami akan segera membalas di sini.";
         }
 
-        return "Pesan Anda telah kami terima. Untuk respon cepat langsung dari petugas pengelola, silakan klik tombol 'Chat Petugas'.";
+        return "Pesan Anda sudah masuk ke Petugas Layanan. Mohon tunggu balasan dari petugas kami di sini.";
     }
+
     private function validateChat(Request $request, string $service): void
     {
         abort_unless(in_array($service, ['gas', 'penyewaan', 'mobil', 'fasilitas_umum'], true), 404);
