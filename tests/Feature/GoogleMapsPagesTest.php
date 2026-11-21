@@ -54,6 +54,16 @@ class GoogleMapsPagesTest extends TestCase
         $this->assertStringContainsString('https://www.google.com/maps?q=', $html);
     }
 
+    public function test_super_admin_maps_check_renders_without_other_provider_secrets(): void
+    {
+        config(['services.google_maps.api_key'=>'test-key']);
+        $html = \Illuminate\Support\Facades\Blade::render("@include('admin.super_sistem.partials.maps-check') @stack('scripts')");
+        $this->assertStringContainsString('Uji Pencarian Alamat', $html);
+        $this->assertStringContainsString('SegiMaps.checkGeocoding()', $html);
+        $this->assertSame(1, substr_count($html, 'data-google-maps-key='));
+        $this->export('admin.maps-check', $html);
+    }
+
     private function export(string $name, string $html): void
     {
         if ($directory = getenv('SEGI_MAPS_TEST_EXPORT')) {

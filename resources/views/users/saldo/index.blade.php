@@ -12,7 +12,7 @@
 <main class="flex-grow relative w-full">
     @include('partials.abstract-bg')
 
-    <section class="relative z-10 min-h-screen pt-32 pb-16">
+    <section class="relative z-10 min-h-screen pt-32 pb-28">
         <div class="relative max-w-3xl mx-auto px-4">
             <h1 class="text-3xl md:text-4xl font-bold text-center mb-8">
                 <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Alamat </span>

@@ -83,7 +83,9 @@ return [
         'console_url' => 'https://console.cloud.google.com/google/maps-apis/credentials',
         'notes'       => [
             'Ini API key biasa, bukan OAuth client — dibuat lewat menu "Create credentials > API key".',
-            'Batasi key lewat Application restrictions supaya tidak bisa dipakai domain lain.',
+            'Aktifkan Maps JavaScript API dan Geocoding API di proyek Google Cloud yang sama; peta yang tampil belum membuktikan pencarian alamat sudah aktif.',
+            'Pada API restrictions, izinkan kedua API tersebut. Pastikan billing aktif dan kuota pencarian tersedia.',
+            'Gunakan pembatasan Websites (HTTP referrers) untuk kunci browser dan izinkan https://siladesbeng.inovasia.site/* serta domain produksi yang digunakan.',
         ],
         'fields' => [
             'api_key' => [

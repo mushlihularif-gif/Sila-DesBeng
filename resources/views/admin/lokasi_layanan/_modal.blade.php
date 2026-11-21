@@ -101,9 +101,11 @@
 <script>
     const RUTE_SIMPAN = @json(route('admin.lokasi-layanan.store'));
     const RUTE_UBAH   = @json(url('admin/lokasi-layanan'));
-    const TITIK_AWAL  = { lat: 1.4854, lng: 102.1512 };
 
     let locationPicker;
+    ['latitude', 'longitude'].forEach(name => {
+        document.getElementById('formLokasi')?.elements[name]?.addEventListener('input', () => locationPicker?.sync());
+    });
 
     function siapkanFormulir(data) {
         const f = document.getElementById('formLokasi');

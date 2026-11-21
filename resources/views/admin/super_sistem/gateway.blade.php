@@ -185,6 +185,10 @@
                             </div>
                         @endif
 
+                        @if($category === 'google_maps')
+                            @include('admin.super_sistem.partials.maps-check')
+                        @endif
+
                         {{-- Collapsible Guide --}}
                         @if(! empty($provider['notes']))
                             <div class="mb-3">
