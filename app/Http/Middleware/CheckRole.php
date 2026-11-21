@@ -82,6 +82,24 @@ class CheckRole
         $user = Auth::guard($guard)->user();
         abort_unless($user->hasSupportedRole(), 403, 'Peran akun tidak didukung. Hubungi pengelola.');
         abort_if($user->status === 'non_aktif', 403, 'Akun tidak aktif.');
+
+        $requiredRoles = array_filter($roles, fn($role) => $role !== 'guest' && $role !== 'sanctum');
+        $isAdminUser = in_array($user->role, ['super_admin', 'admin_desa', 'staff'], true);
+
+        // Jika akun admin/staf membuka halaman frontend warga (/beranda, katalog warga, dll.),
+        // arahkan otomatis ke dashboard admin (sebelum StaffAccess menolak halaman non-admin dengan 403).
+        if ($isAdminUser && (in_array('user', $requiredRoles, true) || ($allowGuest && !in_array('admin', $requiredRoles, true)))) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Admin harus menggunakan halaman admin',
+                    'redirect' => route('admin.dashboard')
+                ], 403);
+            }
+
+            return redirect()->route('admin.dashboard');
+        }
+
         if ($user->isStaff()) abort_unless(\App\Support\StaffAccess::allows($user, $request), 403, 'Halaman ini bukan bagian dari tugas layanan Anda.');
         if (in_array($user->role, ['admin_desa', 'admin_rw', 'admin_rt'], true)) {
             abort_unless($user->region_id && (\App\Models\User::REGION_ROLES[$user->region?->type] ?? null) === $user->role,
@@ -92,9 +110,6 @@ class CheckRole
         if (empty($roles) || (count($roles) === 1 && $roles[0] === 'sanctum')) {
             return $next($request);
         }
-        
-        // Check if user has one of the required roles (excluding 'guest' and 'sanctum' from check)
-        $requiredRoles = array_filter($roles, fn($role) => $role !== 'guest' && $role !== 'sanctum');
         
         // If no required roles (only 'guest' was specified), allow authenticated user too
         if (empty($requiredRoles)) {

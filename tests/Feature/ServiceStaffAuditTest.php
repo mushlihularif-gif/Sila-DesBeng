@@ -243,4 +243,19 @@ class ServiceStaffAuditTest extends TestCase
         $this->actingAs($alatStaff)->postJson('/kelola-kabar', ['category' => 'Berita'])->assertForbidden();
     }
 
+    public function test_staff_visiting_root_or_beranda_redirects_to_admin_dashboard_and_can_logout(): void
+    {
+        $staff = $this->createStaff();
+        $this->actingAs($staff);
+
+        // Membuka / atau /beranda saat masih login sebagai staf harus langsung dialihkan ke dashboard admin, bukan 403
+        $this->get('/')->assertRedirect(route('admin.dashboard'));
+        $this->get('/beranda')->assertRedirect(route('admin.dashboard'));
+
+        // Staf tetap diizinkan keluar dari akun (auth.logout)
+        $this->assertTrue(StaffAccess::allows($staff, $this->routeRequest('auth.logout')));
+        $logoutResp = app(CheckRole::class)->handle($this->routeRequest('auth.logout'), fn () => response('ok'));
+        $this->assertSame(200, $logoutResp->getStatusCode());
+    }
+
 }

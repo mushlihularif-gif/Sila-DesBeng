@@ -30,6 +30,10 @@ Route::get('/media/secure/face/{filename}', [MediaController::class, 'secureFace
     ->middleware('auth');
 
 Route::get('/', function () {
+    if (auth()->check() && in_array(auth()->user()->role, ['super_admin', 'admin_desa', 'staff'], true)) {
+        return redirect()->route('admin.dashboard');
+    }
+
     return redirect('beranda');
 });
 

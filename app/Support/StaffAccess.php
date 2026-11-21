@@ -26,7 +26,8 @@ class StaffAccess
         }
         if (in_array($name, ['admin.dashboard', 'admin.profile', 'admin.profile.update', 'admin.profile.delete-avatar',
             'admin.notifications.index', 'admin.notifications.mark-as-read', 'admin.notifications.mark-all-read',
-            'admin.profile.change-password', 'admin.profile.verify-otp', 'admin.profile.resend-otp'], true)) {
+            'admin.profile.change-password', 'admin.profile.verify-otp', 'admin.profile.resend-otp',
+            'auth.logout'], true)) {
             return true;
         }
         if (str_starts_with($name, 'admin.announcements.') || str_starts_with($name, 'content.')) {

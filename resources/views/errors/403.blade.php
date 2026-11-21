@@ -12,9 +12,21 @@
 @endsection
 
 @section('actions')
-    <x-home-link href="{{ route('beranda') }}" />
-    <a href="{{ route('login') }}" class="btn btn-secondary">
-        <i class="bx bx-log-in"></i>
-        <span>Masuk ke Akun</span>
-    </a>
+    @php
+        $isAdminPanelUser = auth()->check()
+            && in_array(auth()->user()->role, ['super_admin', 'admin_desa', 'staff'], true)
+            && auth()->user()->hasSupportedRole();
+    @endphp
+    @if($isAdminPanelUser)
+        <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">
+            <i class="bx bx-home-alt"></i>
+            <span>Kembali ke Dashboard</span>
+        </a>
+    @else
+        <x-home-link href="{{ route('beranda') }}" />
+        <a href="{{ route('login') }}" class="btn btn-secondary">
+            <i class="bx bx-log-in"></i>
+            <span>Masuk ke Akun</span>
+        </a>
+    @endif
 @endsection
