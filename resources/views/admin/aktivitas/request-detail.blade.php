@@ -23,29 +23,31 @@
     <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
             <!-- HEADER -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
                 <div>
-                    <h2 class="text-primary fw-bold mb-1">Detail Pengajuan</h2>
-                    <p class="text-muted">Kelola status dan informasi pesanan</p>
+                    <h4 class="fw-bold mb-1 text-dark">
+                        <span class="text-muted fw-normal">Pesanan &amp; Booking /</span> Detail Pengajuan
+                    </h4>
+                    <p class="text-muted small mb-0">Kelola status, pembayaran, dan informasi lengkap pesanan warga</p>
                 </div>
-                <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="segi-back btn btn-outline-secondary rounded-pill px-4">
+                <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="segi-back btn btn-outline-secondary rounded-pill px-4 w-100 w-sm-auto">
                      Kembali
                 </a>
             </div>
 
             <!-- ALERT CANCELLATION -->
             @if($request->cancellation_status === 'pending')
-            <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center" role="alert">
-                <i class="bx bx-error-circle fs-1 me-3"></i>
+            <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3" role="alert">
+                <i class="bx bx-error-circle fs-1 flex-shrink-0"></i>
                 <div class="flex-grow-1">
-                    <h5 class="alert-heading fw-bold mb-1">Permintaan Pembatalan Diajukan</h5>
-                    <p class="mb-0">User mengajukan pembatalan dengan alasan: <strong>"{{ $request->cancellation_reason ?? $request->cancellation_reason_user }}"</strong></p>
+                    <h6 class="alert-heading fw-bold mb-1">Permintaan Pembatalan Diajukan</h6>
+                    <p class="mb-0 small">User mengajukan pembatalan dengan alasan: <strong>"{{ $request->cancellation_reason ?? $request->cancellation_reason_user }}"</strong></p>
                 </div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-danger" onclick="handleCancellation({{ $request->id }}, '{{ $type }}', 'approve')">
+                <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
+                    <button class="btn btn-sm btn-danger rounded-pill px-3 flex-grow-1 flex-md-grow-0" onclick="handleCancellation({{ $request->id }}, '{{ $type }}', 'approve')">
                         Setujui Pembatalan
                     </button>
-                    <button class="btn btn-secondary" onclick="showCancellationRejectModal({{ $request->id }}, '{{ $type }}')">
+                    <button class="btn btn-sm btn-secondary rounded-pill px-3 flex-grow-1 flex-md-grow-0" onclick="showCancellationRejectModal({{ $request->id }}, '{{ $type }}')">
                         Tolak Pembatalan
                     </button>
                 </div>
