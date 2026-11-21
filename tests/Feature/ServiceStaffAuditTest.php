@@ -258,4 +258,42 @@ class ServiceStaffAuditTest extends TestCase
         $this->assertSame(200, $logoutResp->getStatusCode());
     }
 
+    public function test_updating_staff_unit_permissions_preserves_active_session_unless_disabled_or_password_changed(): void
+    {
+        $staff = $this->createStaff(['units' => ['gas', 'kabar_informasi']]);
+        $staff->setRememberToken('token-awal-tetap-aktif');
+        $staff->save();
+        DB::table('sessions')->insert(['id' => 'staff-live-session', 'user_id' => $staff->id]);
+
+        // 1. Ubah izin unit saja (aktif, tanpa ubah password) -> sesi & remember_token TIDAK dihapus
+        $this->actingAs($this->user(4));
+        app(ServiceStaffController::class)->update(Request::create('/', 'PUT', [
+            'name' => 'Petugas Alat',
+            'enabled' => 1,
+            'units' => ['sewa_alat', 'fasilitas_umum', 'kabar_informasi'],
+        ]), $staff->id);
+
+        $fresh = $staff->fresh();
+        $this->assertSame(1, DB::table('sessions')->where('user_id', $staff->id)->count());
+        $this->assertSame('token-awal-tetap-aktif', $fresh->remember_token);
+        $this->assertTrue($fresh->hasUnitPermission('sewa_alat'));
+        $this->assertTrue($fresh->hasUnitPermission('fasilitas_umum'));
+        $this->assertTrue($fresh->hasUnitPermission('kabar_informasi'));
+        $this->assertFalse($fresh->hasUnitPermission('gas'));
+        $this->assertTrue(StaffAccess::allows($fresh, $this->routeRequest('admin.unit.penyewaan.index')));
+        $this->assertFalse(StaffAccess::allows($fresh, $this->routeRequest('admin.unit.penjualan_gas.index')));
+
+        // 2. Ubah kata sandi -> sesi & remember_token HARUS direset demi keamanan
+        app(ServiceStaffController::class)->update(Request::create('/', 'PUT', [
+            'name' => 'Petugas Alat',
+            'enabled' => 1,
+            'units' => ['sewa_alat', 'fasilitas_umum', 'kabar_informasi'],
+            'password' => 'password-baru-kuat-123',
+            'password_confirmation' => 'password-baru-kuat-123',
+        ]), $staff->id);
+
+        $this->assertSame(0, DB::table('sessions')->where('user_id', $staff->id)->count());
+        $this->assertNotSame('token-awal-tetap-aktif', $staff->fresh()->remember_token);
+    }
+
 }

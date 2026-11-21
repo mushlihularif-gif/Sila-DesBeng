@@ -83,31 +83,48 @@ class ServiceStaffController extends Controller
             'password.min' => 'Kata sandi baru minimal harus 12 karakter.',
             'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
         ]);
-        DB::transaction(function () use ($manager, $data, $id, $request) {
+        $isEnabled = (bool) $data['enabled'];
+        $passwordChanged = ! empty($data['password']);
+        $shouldRevokeSessions = ! $isEnabled || $passwordChanged;
+
+        DB::transaction(function () use ($manager, $data, $id, $request, $isEnabled, $passwordChanged, $shouldRevokeSessions) {
             $staff = User::where('role', 'staff')->where('region_id', $manager->region_id)->lockForUpdate()->findOrFail($id);
             $staff->name = $data['name'];
-            $staff->staff_enabled = (bool) $data['enabled'];
-            $staff->status = $data['enabled'] ? 'aktif' : 'non_aktif';
+            $staff->staff_enabled = $isEnabled;
+            $staff->status = $isEnabled ? 'aktif' : 'non_aktif';
             $staff->created_by = $manager->id;
-            if (! empty($data['password'])) {
+            if ($passwordChanged) {
                 $staff->password = Hash::make($data['password']);
             }
-            $staff->setRememberToken(Str::random(60));
+            if ($shouldRevokeSessions) {
+                $staff->setRememberToken(Str::random(60));
+            }
             $staff->save();
             $staff->staffPermissions()->delete();
             foreach (($data['units'] ?? []) as $unit) {
                 $staff->staffPermissions()->create(['unit_key' => $unit]);
             }
-            if (Schema::hasTable('sessions')) {
-                DB::table('sessions')->where('user_id', $staff->id)->delete();
-            }
-            if (Schema::hasTable('personal_access_tokens')) {
-                $staff->tokens()->delete();
+            if ($shouldRevokeSessions) {
+                $sessionTable = config('session.table', 'sessions');
+                if (Schema::hasTable($sessionTable)) {
+                    DB::table($sessionTable)->where('user_id', $staff->id)->delete();
+                }
+                if (Schema::hasTable('personal_access_tokens')) {
+                    $staff->tokens()->delete();
+                }
             }
             $this->audit($request, $staff, 'Mengubah izin/status staf layanan');
         });
 
-        return back()->with('success', 'Izin staf diperbarui. Petugas perlu masuk kembali.');
+        if (! $isEnabled) {
+            return back()->with('success', 'Akun staf berhasil dinonaktifkan dan sesi loginnya telah diakhiri.');
+        }
+
+        if ($passwordChanged) {
+            return back()->with('success', 'Data dan kata sandi staf diperbarui. Petugas perlu masuk kembali menggunakan kata sandi baru.');
+        }
+
+        return back()->with('success', 'Izin dan data staf diperbarui. Perubahan langsung berlaku tanpa perlu login ulang.');
     }
 
     private function audit(Request $request, User $staff, string $action): void

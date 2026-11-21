@@ -421,8 +421,8 @@
 
                         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mt-4 pt-3 border-top">
                             <small class="text-muted">
-                                <i class="bx bx-info-circle me-1 text-warning"></i>
-                                Perubahan izin akan mengakhiri sesi login staf saat ini. Riwayat pekerjaan tetap tersimpan.
+                                <i class="bx bx-info-circle me-1 text-primary"></i>
+                                Perubahan izin unit langsung berlaku saat staf memuat ulang halaman tanpa mengakhiri sesi login. Sesi hanya diakhiri jika akun dinonaktifkan atau kata sandi diubah.
                             </small>
                             <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm w-100 w-sm-auto flex-shrink-0">
                                 <i class="bx bx-save me-1"></i> Simpan Izin dan Status
