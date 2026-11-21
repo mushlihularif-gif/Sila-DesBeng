@@ -23,13 +23,13 @@
         user-select: none;
     }
     .staff-perm-option:hover {
-        border-color: #a5a6ff;
-        background: #f9faff;
+        border-color: #93c5fd;
+        background: #f8fbff;
     }
     .staff-perm-option:has(input:checked) {
-        border-color: #696cff;
-        background: rgba(105, 108, 255, 0.07);
-        box-shadow: 0 2px 8px rgba(105, 108, 255, 0.12);
+        border-color: #0d6efd;
+        background: #f0f6ff;
+        box-shadow: 0 2px 10px rgba(13, 110, 253, 0.12);
     }
     .staff-card {
         border-radius: 16px;
@@ -73,11 +73,11 @@
     $inactiveStaff = $totalStaff - $activeStaff;
 
     $unitIcons = [
-        'gas' => ['bx-gas-pump', 'danger'],
-        'sewa_alat' => ['bx-wrench', 'warning'],
-        'sewa_mobil' => ['bx-car', 'info'],
-        'fasilitas_umum' => ['bx-buildings', 'success'],
-        'kabar_informasi' => ['bx-news', 'primary'],
+        'gas' => ['bx-gas-pump', 'danger', 'Stok tabung, pesanan & chat gas'],
+        'sewa_alat' => ['bx-wrench', 'warning', 'Katalog alat, booking & pengantaran'],
+        'sewa_mobil' => ['bx-car', 'info', 'Armada, supir & booking transportasi'],
+        'fasilitas_umum' => ['bx-buildings', 'success', 'Gedung, aula & pemegang kunci'],
+        'kabar_informasi' => ['bx-news', 'primary', 'Berita, dokumentasi & pengumuman'],
     ];
 @endphp
 
@@ -141,7 +141,7 @@
                     <div>
                         <h6 class="fw-bold text-primary mb-1">Batasan Hak Akses Staf Layanan</h6>
                         <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.55;">
-                            Staf hanya dapat mengelola produk, pesanan, verifikasi bukti pembayaran, dan chat pada unit layanan yang Anda centang.
+                            Staf hanya dapat mengelola produk, pesanan, verifikasi pembayaran, chat, atau <strong>Kabar &amp; Informasi Daerah (berita, dokumentasi &amp; pengumuman)</strong> sesuai unit yang Anda centang.
                             <strong>Rekening desa, verifikasi warga, akun admin, serta pengaturan wilayah tetap hanya dipegang Admin Desa.</strong>
                         </p>
                     </div>
@@ -217,42 +217,59 @@
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold small text-dark" for="staff_password">Kata Sandi <span class="text-danger">*</span></label>
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <label class="form-label fw-semibold small text-dark mb-0" for="staff_password">Kata Sandi <span class="text-danger">*</span></label>
+                                <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-0.5" onclick="generateStaffPassword()" title="Buat kata sandi acak yang aman (14 karakter)">
+                                    <i class="bx bx-key me-0.5"></i>Buat Sandi Acak
+                                </button>
+                            </div>
                             <div class="input-group">
                                 <span class="input-group-text bg-light"><i class="bx bx-lock-alt text-muted"></i></span>
-                                <input id="staff_password" class="form-control" name="password" type="password" required minlength="12" autocomplete="new-password" placeholder="Minimal 12 karakter">
-                                <button class="btn btn-outline-secondary" type="button" onclick="toggleStaffPassword('staff_password', this)" title="Tampilkan/Sembunyikan">
+                                <input id="staff_password" class="form-control" name="password" type="password" required minlength="12" autocomplete="new-password" placeholder="Minimal 12 karakter (contoh: DesaBengkalis2026)">
+                                <button class="btn btn-outline-secondary" type="button" id="toggle_staff_password" onclick="toggleStaffPassword('staff_password', this)" title="Tampilkan/Sembunyikan">
                                     <i class="bx bx-show"></i>
                                 </button>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-1 gap-2">
+                                <small id="staff_password_hint" class="text-muted" style="font-size: 0.74rem;">
+                                    <i class="bx bx-info-circle me-0.5"></i>Wajib minimal <strong>12 karakter</strong> (kombinasi huruf &amp; angka disarankan).
+                                </small>
+                                <span id="staff_password_count" class="badge bg-label-secondary rounded-pill flex-shrink-0" style="font-size: 0.68rem;">0 / 12</span>
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold small text-dark" for="staff_password_confirmation">Ulangi Kata Sandi <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold small text-dark mb-1" for="staff_password_confirmation">Ulangi Kata Sandi <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light"><i class="bx bx-lock-alt text-muted"></i></span>
-                                <input id="staff_password_confirmation" class="form-control" name="password_confirmation" type="password" required minlength="12" autocomplete="new-password" placeholder="Ketik ulang kata sandi">
-                                <button class="btn btn-outline-secondary" type="button" onclick="toggleStaffPassword('staff_password_confirmation', this)" title="Tampilkan/Sembunyikan">
+                                <input id="staff_password_confirmation" class="form-control" name="password_confirmation" type="password" required minlength="12" autocomplete="new-password" placeholder="Ketik ulang kata sandi yang sama">
+                                <button class="btn btn-outline-secondary" type="button" id="toggle_staff_password_confirmation" onclick="toggleStaffPassword('staff_password_confirmation', this)" title="Tampilkan/Sembunyikan">
                                     <i class="bx bx-show"></i>
                                 </button>
                             </div>
+                            <small id="staff_password_match" class="text-muted d-block mt-1" style="font-size: 0.74rem;">Harus sama persis dengan kata sandi di sebelah kiri.</small>
                         </div>
                     </div>
 
                     <fieldset class="mt-4 pt-3 border-top">
                         <legend class="fs-6 fw-bold text-dark mb-1">Unit Layanan yang Boleh Dikelola <span class="text-danger">*</span></legend>
-                        <p class="text-muted small mb-3">Pilih minimal satu unit layanan yang menjadi tanggung jawab petugas ini.</p>
+                        <p class="text-muted small mb-3">Pilih minimal satu unit layanan (termasuk <strong>Kabar &amp; Informasi Daerah</strong> untuk petugas berita/dokumentasi).</p>
                         <div class="row g-2">
                             @foreach($units as $key => $label)
                                 @php
-                                    [$uIcon, $uColor] = $unitIcons[$key] ?? ['bx-grid-alt', 'primary'];
+                                    [$uIcon, $uColor, $uSub] = $unitIcons[$key] ?? ['bx-grid-alt', 'primary', ''];
                                 @endphp
                                 <div class="col-12 col-sm-6 col-lg-4">
-                                    <label class="staff-perm-option w-100">
+                                    <label class="staff-perm-option w-100 h-100">
                                         <input type="checkbox" class="form-check-input mt-0 flex-shrink-0" name="units[]" value="{{ $key }}" @checked(in_array($key, old('units', [])))>
                                         <span class="badge bg-label-{{ $uColor }} rounded-3 p-2 d-inline-flex align-items-center justify-content-center flex-shrink-0">
                                             <i class="bx {{ $uIcon }} fs-6"></i>
                                         </span>
-                                        <span class="fw-semibold text-dark small">{{ $label }}</span>
+                                        <span class="min-w-0">
+                                            <span class="fw-semibold text-dark small d-block">{{ $label }}</span>
+                                            @if($uSub)
+                                                <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.25;">{{ $uSub }}</small>
+                                            @endif
+                                        </span>
                                     </label>
                                 </div>
                             @endforeach
@@ -393,8 +410,8 @@
 
                         <div class="row g-3 mt-1">
                             <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold small text-dark">Kata Sandi Baru <span class="text-muted fw-normal">(Opsional)</span></label>
-                                <input type="password" name="password" minlength="12" class="form-control" autocomplete="new-password" placeholder="Kosongkan jika tidak ingin mengubah">
+                                <label class="form-label fw-semibold small text-dark">Kata Sandi Baru <span class="text-muted fw-normal">(Opsional · Min. 12 karakter)</span></label>
+                                <input type="password" name="password" minlength="12" class="form-control js-staff-edit-pass" autocomplete="new-password" placeholder="Kosongkan jika tidak ingin mengubah">
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold small text-dark">Ulangi Kata Sandi Baru</label>
@@ -435,13 +452,112 @@
         if (!input) return;
         const isPass = input.type === 'password';
         input.type = isPass ? 'text' : 'password';
-        const icon = btn.querySelector('i');
+        const icon = btn?.querySelector('i');
         if (icon) {
             icon.className = isPass ? 'bx bx-hide' : 'bx bx-show';
         }
     }
 
+    function generateStaffPassword() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+        const randomChunk = (len) => {
+            let out = '';
+            for (let i = 0; i < len; i++) {
+                out += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return out;
+        };
+        const generated = 'Desa-' + randomChunk(4) + '-' + randomChunk(4);
+        const passEl = document.getElementById('staff_password');
+        const confEl = document.getElementById('staff_password_confirmation');
+        if (passEl && confEl) {
+            passEl.type = 'text';
+            confEl.type = 'text';
+            passEl.value = generated;
+            confEl.value = generated;
+            const icon1 = document.querySelector('#toggle_staff_password i');
+            const icon2 = document.querySelector('#toggle_staff_password_confirmation i');
+            if (icon1) icon1.className = 'bx bx-hide';
+            if (icon2) icon2.className = 'bx bx-hide';
+            passEl.dispatchEvent(new Event('input'));
+            confEl.dispatchEvent(new Event('input'));
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        const passEl = document.getElementById('staff_password');
+        const confEl = document.getElementById('staff_password_confirmation');
+        const countEl = document.getElementById('staff_password_count');
+        const hintEl = document.getElementById('staff_password_hint');
+        const matchEl = document.getElementById('staff_password_match');
+
+        function validateStaffPasswords() {
+            if (!passEl || !confEl) return;
+            const len = passEl.value.length;
+
+            if (countEl) {
+                countEl.textContent = len + ' / 12';
+                countEl.className = 'badge rounded-pill flex-shrink-0 ' + (len >= 12 ? 'bg-label-success' : (len > 0 ? 'bg-label-warning' : 'bg-label-secondary'));
+            }
+            if (hintEl) {
+                if (len >= 12) {
+                    hintEl.className = 'text-success fw-semibold';
+                    hintEl.innerHTML = '<i class="bx bx-check-circle me-0.5"></i>Panjang kata sandi memenuhi syarat minimal 12 karakter.';
+                } else if (len > 0) {
+                    hintEl.className = 'text-warning fw-semibold';
+                    hintEl.innerHTML = '<i class="bx bx-error-circle me-0.5"></i>Kurang ' + (12 - len) + ' karakter lagi (minimal 12 karakter).';
+                } else {
+                    hintEl.className = 'text-muted';
+                    hintEl.innerHTML = '<i class="bx bx-info-circle me-0.5"></i>Wajib minimal <strong>12 karakter</strong> (kombinasi huruf &amp; angka disarankan).';
+                }
+            }
+
+            if (len === 0) {
+                passEl.setCustomValidity('Kata sandi wajib diisi (minimal 12 karakter).');
+            } else if (len < 12) {
+                passEl.setCustomValidity('Kata sandi minimal 12 karakter (saat ini baru ' + len + ' karakter).');
+            } else {
+                passEl.setCustomValidity('');
+            }
+
+            const confVal = confEl.value;
+            if (confVal.length === 0) {
+                confEl.setCustomValidity('Silakan ketik ulang kata sandi.');
+                if (matchEl) {
+                    matchEl.className = 'text-muted d-block mt-1';
+                    matchEl.textContent = 'Harus sama persis dengan kata sandi di sebelah kiri.';
+                }
+            } else if (confVal !== passEl.value) {
+                confEl.setCustomValidity('Konfirmasi kata sandi tidak sama.');
+                if (matchEl) {
+                    matchEl.className = 'text-danger fw-semibold d-block mt-1';
+                    matchEl.innerHTML = '<i class="bx bx-x-circle me-0.5"></i>Kata sandi belum sama.';
+                }
+            } else {
+                confEl.setCustomValidity('');
+                if (matchEl) {
+                    matchEl.className = 'text-success fw-semibold d-block mt-1';
+                    matchEl.innerHTML = '<i class="bx bx-check-circle me-0.5"></i>Kata sandi cocok.';
+                }
+            }
+        }
+
+        if (passEl && confEl) {
+            passEl.addEventListener('input', validateStaffPasswords);
+            confEl.addEventListener('input', validateStaffPasswords);
+            validateStaffPasswords();
+        }
+
+        document.querySelectorAll('.js-staff-edit-pass').forEach(function(el) {
+            el.addEventListener('input', function() {
+                if (this.value.length > 0 && this.value.length < 12) {
+                    this.setCustomValidity('Kata sandi baru minimal 12 karakter (saat ini baru ' + this.value.length + ' karakter).');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        });
+
         const searchInput = document.getElementById('searchStaffInput');
         if (!searchInput) return;
         searchInput.addEventListener('input', function() {

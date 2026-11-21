@@ -5,29 +5,41 @@
             'route' => 'admin.unit.penjualan_gas.index',
             'icon'  => 'bxs-gas-pump',
             'color' => 'text-danger',
-            'match' => 'admin/unit/gas*',
+            'active' => request()->is('admin/unit/gas*'),
         ],
         'sewa_alat' => [
             'route' => 'admin.unit.penyewaan.index',
             'icon'  => 'bx-wrench',
             'color' => 'text-warning',
-            'match' => 'admin/unit/penyewaan*',
+            'active' => request()->is('admin/unit/penyewaan*'),
         ],
         'sewa_mobil' => [
             'route' => 'admin.unit.mobil.index',
             'icon'  => 'bx-car',
             'color' => 'text-info',
-            'match' => 'admin/unit/mobil*',
+            'active' => request()->is('admin/unit/mobil*'),
         ],
         'fasilitas_umum' => [
             'route' => 'admin.unit.fasilitas_umum.index',
             'icon'  => 'bx-building-house',
             'color' => 'text-success',
-            'match' => 'admin/unit/fasilitas_umum*',
+            'active' => request()->is('admin/unit/fasilitas_umum*'),
+        ],
+        'kabar_informasi' => [
+            'route' => 'admin.announcements.index',
+            'icon'  => 'bx-news',
+            'color' => 'text-primary',
+            'active' => request()->routeIs('admin.announcements.*') || request()->routeIs('content.*'),
         ],
     ];
     $assignedStaffUnits = collect(\App\Support\StaffAccess::UNITS)
         ->filter(fn ($label, $key) => $staffUser && $staffUser->hasUnitPermission($key));
+    $hasCommerceUnits = $staffUser && (
+        $staffUser->hasUnitPermission('gas')
+        || $staffUser->hasUnitPermission('sewa_alat')
+        || $staffUser->hasUnitPermission('sewa_mobil')
+        || $staffUser->hasUnitPermission('fasilitas_umum')
+    );
 @endphp
 
 <!-- UTAMA -->
@@ -48,7 +60,7 @@
 </li>
 @foreach($assignedStaffUnits as $key => $label)
     @php $meta = $staffUnitsMeta[$key]; @endphp
-    <li class="menu-item {{ request()->is($meta['match']) ? 'active' : '' }}">
+    <li class="menu-item {{ $meta['active'] ? 'active' : '' }}">
         <a class="menu-link" href="{{ route($meta['route']) }}">
             <i class="menu-icon tf-icons bx {{ $meta['icon'] }} {{ $meta['color'] }}"></i>
             <div>{{ $label }}</div>
@@ -57,6 +69,7 @@
 @endforeach
 @endif
 
+@if($hasCommerceUnits)
 <!-- OPERASIONAL HARIAN -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Operasional Harian</span>
@@ -80,6 +93,7 @@
         <div>Sopir &amp; Pengurus</div>
     </a>
 </li>
+@endif
 @endif
 
 <!-- AKUN -->

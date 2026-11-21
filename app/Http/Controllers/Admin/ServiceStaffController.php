@@ -41,6 +41,19 @@ class ServiceStaffController extends Controller
             'username' => 'required|alpha_dash|max:50|unique:users,username',
             'password' => 'required|string|min:12|confirmed',
             'units' => 'required|array|min:1', 'units.*' => ['required', 'distinct', Rule::in(array_keys(StaffAccess::UNITS))],
+        ], [
+            'name.required' => 'Nama lengkap petugas wajib diisi.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format alamat email tidak valid.',
+            'email.unique' => 'Alamat email ini sudah digunakan akun lain.',
+            'username.required' => 'Username login wajib diisi.',
+            'username.alpha_dash' => 'Username hanya boleh berisi huruf, angka, garis bawah (_), atau tanda hubung (-) tanpa spasi.',
+            'username.unique' => 'Username ini sudah digunakan akun lain.',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.min' => 'Kata sandi minimal harus 12 karakter demi keamanan akun.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+            'units.required' => 'Pilih minimal satu unit layanan yang dikelola petugas.',
+            'units.min' => 'Pilih minimal satu unit layanan yang dikelola petugas.',
         ]);
         DB::transaction(function () use ($manager, $data, $request) {
             $staff = new User(['name' => $data['name'], 'email' => $data['email'], 'username' => $data['username'],
@@ -63,7 +76,13 @@ class ServiceStaffController extends Controller
         $manager = $this->manager();
         $data = $request->validate(['name' => 'required|string|max:255', 'enabled' => 'required|boolean',
             'units' => ['nullable', 'array', Rule::requiredIf($request->boolean('enabled')), 'min:1'], 'units.*' => ['required', 'distinct', Rule::in(array_keys(StaffAccess::UNITS))],
-            'password' => 'nullable|string|min:12|confirmed']);
+            'password' => 'nullable|string|min:12|confirmed'], [
+            'name.required' => 'Nama petugas wajib diisi.',
+            'units.required' => 'Staf yang aktif wajib memiliki minimal satu izin unit layanan.',
+            'units.min' => 'Staf yang aktif wajib memiliki minimal satu izin unit layanan.',
+            'password.min' => 'Kata sandi baru minimal harus 12 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+        ]);
         DB::transaction(function () use ($manager, $data, $id, $request) {
             $staff = User::where('role', 'staff')->where('region_id', $manager->region_id)->lockForUpdate()->findOrFail($id);
             $staff->name = $data['name'];

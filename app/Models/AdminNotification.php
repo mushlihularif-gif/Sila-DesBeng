@@ -60,7 +60,13 @@ class AdminNotification extends Model
 
         if ($pengguna->isStaff()) {
             $types = [];
-            foreach (['gas'=>['gas_order'], 'sewa_alat'=>['rental_request'], 'sewa_mobil'=>['mobil_order'], 'fasilitas_umum'=>['fasilitas_order']] as $unit=>$list) {
+            foreach ([
+                'gas' => ['gas_order'],
+                'sewa_alat' => ['rental_request'],
+                'sewa_mobil' => ['mobil_order'],
+                'fasilitas_umum' => ['fasilitas_order'],
+                'kabar_informasi' => ['kabar_status', 'announcement_submission'],
+            ] as $unit => $list) {
                 if ($pengguna->hasUnitPermission($unit)) $types = array_merge($types, $list);
             }
             return $query->where('region_id', $pengguna->region_id)->whereIn('type', $types);

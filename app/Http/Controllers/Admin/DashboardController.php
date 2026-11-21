@@ -915,6 +915,28 @@ public function index(Request $request)
             $totals['pending'] += $orderPending;
         }
 
+        if ($staff->hasUnitPermission('kabar_informasi') && $regionId && \Illuminate\Support\Facades\Schema::hasTable('announcements')) {
+            $areaIds = array_map('intval', [$regionId, ...\App\Models\Region::getDescendantIds($regionId)]);
+            $kabarBase = \App\Models\Announcement::where(function ($q) use ($areaIds, $staff) {
+                $q->where('admin_id', $staff->id)->orWhere(function ($sub) use ($areaIds) {
+                    $sub->where('workflow_state', '!=', 'draft')->where(function ($r) use ($areaIds) {
+                        $r->where(fn ($b) => $b->where('post_category', 'Berita')->whereIn('region_id', $areaIds))
+                          ->orWhere(fn ($p) => $p->where('post_category', 'Pengumuman')->whereIn('target_audience_id', $areaIds));
+                    });
+                });
+            });
+            $kabarTotal = (int) (clone $kabarBase)->count();
+            $kabarPublished = (int) (clone $kabarBase)->where('workflow_state', 'published')->count();
+            $kabarPending = (int) (clone $kabarBase)->whereIn('workflow_state', ['pending', 'review'])->count();
+
+            $unitStats['kabar_informasi'] = [
+                'catalog' => $kabarPublished,
+                'total'   => $kabarTotal,
+                'pending' => $kabarPending,
+            ];
+            $totals['pending'] += $kabarPending;
+        }
+
         return [
             'staffUnitStats' => $unitStats,
             'staffTotals'    => $totals,

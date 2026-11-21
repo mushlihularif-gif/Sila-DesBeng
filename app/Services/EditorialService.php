@@ -167,7 +167,7 @@ class EditorialService
     {
         $region = $item->post_category === 'Pengumuman' ? $item->target_audience_id : $item->region_id;
         $line = $region ? Region::garisLayananUntukWarga($region) : [];
-        User::whereIn('region_id', $line)->whereIn('role', ['admin_rt', 'admin_rw', 'admin_desa'])
+        User::whereIn('region_id', $line)->whereIn('role', ['admin_rt', 'admin_rw', 'admin_desa', 'staff'])
             ->each(function (User $recipient) use ($item, $title, $message) {
                 if ($this->access->canManage($recipient, $item)) $this->notify($item, $recipient->id, $title, $message);
             });

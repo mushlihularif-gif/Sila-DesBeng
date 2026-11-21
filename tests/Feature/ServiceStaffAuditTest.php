@@ -217,4 +217,30 @@ class ServiceStaffAuditTest extends TestCase
         if ($dir = getenv('SEGI_MAPS_TEST_EXPORT')) file_put_contents($dir.'/staff-dashboard.html', $html);
     }
 
+    public function test_staff_assigned_kabar_informasi_can_manage_village_news_and_notices_only(): void
+    {
+        $kabarStaff = $this->createStaff(['username' => 'petugas_kabar', 'email' => 'kabar@example.test', 'units' => ['kabar_informasi']]);
+        $alatStaff = $this->createStaff(['username' => 'petugas_alat2', 'email' => 'alat2@example.test', 'units' => ['sewa_alat']]);
+        $access = app(\App\Services\ContentAccess::class);
+
+        $this->assertTrue($kabarStaff->hasUnitPermission('kabar_informasi'));
+        $this->assertTrue($access->manager($kabarStaff));
+        $this->assertTrue(StaffAccess::allows($kabarStaff, $this->routeRequest('admin.announcements.index')));
+        $this->assertTrue(StaffAccess::allows($kabarStaff, $this->routeRequest('content.index')));
+
+        $this->assertFalse($alatStaff->hasUnitPermission('kabar_informasi'));
+        $this->assertFalse($access->manager($alatStaff));
+        $this->assertFalse(StaffAccess::allows($alatStaff, $this->routeRequest('admin.announcements.index')));
+        $this->assertFalse(StaffAccess::allows($alatStaff, $this->routeRequest('content.index')));
+
+        $this->actingAs($kabarStaff);
+        $menuHtml = view('admin.staff.menu')->render();
+        $this->assertStringContainsString(route('admin.announcements.index'), $menuHtml);
+        $this->assertStringNotContainsString(route('admin.aktivitas.permintaan-pengajuan.index'), $menuHtml);
+
+        $this->actingAs($kabarStaff)->postJson('/kelola-kabar', ['category' => 'Berita'])->assertCreated();
+        $this->actingAs($kabarStaff)->postJson('/kelola-kabar', ['category' => 'Pengumuman'])->assertCreated();
+        $this->actingAs($alatStaff)->postJson('/kelola-kabar', ['category' => 'Berita'])->assertForbidden();
+    }
+
 }

@@ -12,6 +12,9 @@ class ContentAccess
     public function manager(?User $user): bool
     {
         if (!$user || !$user->region_id || !($region = Region::find($user->region_id))) return false;
+        if ($user->isStaff()) {
+            return $user->hasUnitPermission('kabar_informasi') && in_array($region->type, ['desa', 'kelurahan'], true);
+        }
         $expectedTypes = ['admin_rt'=>['rt'],'admin_rw'=>['rw'],'admin_desa'=>['desa','kelurahan']];
         if (isset($expectedTypes[$user->role]) && !in_array($region->type, $expectedTypes[$user->role], true)) return false;
         return in_array($user->role, ['admin_rt', 'admin_rw', 'admin_desa', 'super_admin'], true);

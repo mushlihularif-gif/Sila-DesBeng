@@ -34,6 +34,13 @@
             'color' => 'success',
             'desc'  => 'Kelola daftar gedung/fasilitas desa, jadwal pemakaian, pengurus, dan booking.',
         ],
+        'kabar_informasi' => [
+            'route' => 'admin.announcements.index',
+            'tab'   => null,
+            'icon'  => 'bx-news',
+            'color' => 'primary',
+            'desc'  => 'Tulis berita desa, unggah dokumentasi kegiatan, tinjau kiriman warga, serta terbitkan pengumuman resmi.',
+        ],
     ];
 
     $assignedUnits = collect(\App\Support\StaffAccess::UNITS)
@@ -43,6 +50,13 @@
     $totalPendingStaff = (int) ($staffTotals['pending'] ?? 0);
     $totalOrdersStaff = (int) ($staffTotals['total'] ?? 0);
     $canManageSupir = $staffUser && ($staffUser->hasUnitPermission('sewa_mobil') || $staffUser->hasUnitPermission('fasilitas_umum'));
+    $hasCommerceUnits = $staffUser && (
+        $staffUser->hasUnitPermission('gas')
+        || $staffUser->hasUnitPermission('sewa_alat')
+        || $staffUser->hasUnitPermission('sewa_mobil')
+        || $staffUser->hasUnitPermission('fasilitas_umum')
+    );
+    $canManageKabar = $staffUser && $staffUser->hasUnitPermission('kabar_informasi');
 @endphp
 
 <style>
@@ -118,13 +132,23 @@
                 <span>Kelola operasional unit layanan yang ditugaskan kepada Anda.</span>
             </div>
         </div>
-        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="btn btn-primary rounded-pill px-4 shadow-sm w-100 w-sm-auto d-inline-flex align-items-center justify-content-center gap-1.5 flex-shrink-0">
-            <i class="bx bx-calendar-check fs-5"></i>
-            <span>Pesanan Masuk</span>
-            @if($totalPendingStaff > 0)
-                <span class="badge bg-white text-primary rounded-pill ms-1">{{ $totalPendingStaff }}</span>
-            @endif
-        </a>
+        @if($hasCommerceUnits)
+            <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="btn btn-primary rounded-pill px-4 shadow-sm w-100 w-sm-auto d-inline-flex align-items-center justify-content-center gap-1.5 flex-shrink-0">
+                <i class="bx bx-calendar-check fs-5"></i>
+                <span>Pesanan Masuk</span>
+                @if($totalPendingStaff > 0)
+                    <span class="badge bg-white text-primary rounded-pill ms-1">{{ $totalPendingStaff }}</span>
+                @endif
+            </a>
+        @elseif($canManageKabar)
+            <a href="{{ route('admin.announcements.index') }}" class="btn btn-primary rounded-pill px-4 shadow-sm w-100 w-sm-auto d-inline-flex align-items-center justify-content-center gap-1.5 flex-shrink-0">
+                <i class="bx bx-news fs-5"></i>
+                <span>Kelola Kabar &amp; Pengumuman</span>
+                @if($totalPendingStaff > 0)
+                    <span class="badge bg-white text-primary rounded-pill ms-1">{{ $totalPendingStaff }}</span>
+                @endif
+            </a>
+        @endif
     </div>
 
     {{-- Welcome Banner + 3 KPI Cards --}}
@@ -230,12 +254,21 @@
 
                                 @if(isset($uStat['catalog']))
                                     <div class="d-flex flex-wrap gap-2 mb-3">
-                                        <span class="badge bg-light text-secondary border fw-medium" style="font-size: 0.72rem;">
-                                            <i class="bx bx-package me-1 text-primary"></i>{{ number_format($uStat['catalog'], 0, ',', '.') }} item katalog
-                                        </span>
-                                        <span class="badge bg-light text-secondary border fw-medium" style="font-size: 0.72rem;">
-                                            <i class="bx bx-receipt me-1 text-success"></i>{{ number_format($uStat['total'] ?? 0, 0, ',', '.') }} pesanan tercatat
-                                        </span>
+                                        @if($key === 'kabar_informasi')
+                                            <span class="badge bg-light text-secondary border fw-medium" style="font-size: 0.72rem;">
+                                                <i class="bx bx-check-circle me-1 text-success"></i>{{ number_format($uStat['catalog'], 0, ',', '.') }} kabar terbit
+                                            </span>
+                                            <span class="badge bg-light text-secondary border fw-medium" style="font-size: 0.72rem;">
+                                                <i class="bx bx-file me-1 text-primary"></i>{{ number_format($uStat['total'] ?? 0, 0, ',', '.') }} total naskah
+                                            </span>
+                                        @else
+                                            <span class="badge bg-light text-secondary border fw-medium" style="font-size: 0.72rem;">
+                                                <i class="bx bx-package me-1 text-primary"></i>{{ number_format($uStat['catalog'], 0, ',', '.') }} item katalog
+                                            </span>
+                                            <span class="badge bg-light text-secondary border fw-medium" style="font-size: 0.72rem;">
+                                                <i class="bx bx-receipt me-1 text-success"></i>{{ number_format($uStat['total'] ?? 0, 0, ',', '.') }} pesanan tercatat
+                                            </span>
+                                        @endif
                                     </div>
                                 @endif
 
@@ -244,10 +277,17 @@
                                         <i class="bx bx-folder-open"></i>
                                         <span>Buka {{ $label }}</span>
                                     </a>
-                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => $meta['tab']]) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold flex-fill d-inline-flex align-items-center justify-content-center gap-1">
-                                        <i class="bx bx-calendar-check"></i>
-                                        <span>Pesanan Unit</span>
-                                    </a>
+                                    @if($key === 'kabar_informasi')
+                                        <a href="{{ route('announcements.index') }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold flex-fill d-inline-flex align-items-center justify-content-center gap-1">
+                                            <i class="bx bx-globe"></i>
+                                            <span>Portal Publik</span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => $meta['tab']]) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold flex-fill d-inline-flex align-items-center justify-content-center gap-1">
+                                            <i class="bx bx-calendar-check"></i>
+                                            <span>Pesanan Unit</span>
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -266,7 +306,8 @@
             </div>
 
             <div class="row g-2.5">
-                <div class="col-12 col-sm-6 {{ $canManageSupir ? 'col-lg-3' : 'col-lg-4' }}">
+                @if($hasCommerceUnits)
+                <div class="col-12 col-sm-6 col-lg-3">
                     <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="st-shortcut-card">
                         <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-warning flex-shrink-0" style="width: 40px; height: 40px;">
                             <i class="bx bx-calendar-check fs-5 text-warning"></i>
@@ -279,7 +320,7 @@
                     </a>
                 </div>
 
-                <div class="col-12 col-sm-6 {{ $canManageSupir ? 'col-lg-3' : 'col-lg-4' }}">
+                <div class="col-12 col-sm-6 col-lg-3">
                     <a href="{{ route('admin.aktivitas.bukti-transaksi.index') }}" class="st-shortcut-card">
                         <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-success flex-shrink-0" style="width: 40px; height: 40px;">
                             <i class="bx bx-check-shield fs-5 text-success"></i>
@@ -291,6 +332,22 @@
                         <i class="bx bx-chevron-right text-muted flex-shrink-0"></i>
                     </a>
                 </div>
+                @endif
+
+                @if($canManageKabar)
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <a href="{{ route('admin.announcements.index') }}" class="st-shortcut-card">
+                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-primary flex-shrink-0" style="width: 40px; height: 40px;">
+                                <i class="bx bx-news fs-5 text-primary"></i>
+                            </div>
+                            <div class="min-w-0 flex-grow-1">
+                                <div class="fw-bold small text-truncate">Kabar &amp; Pengumuman</div>
+                                <small class="text-muted d-block text-truncate" style="font-size: 0.72rem;">Berita, dokumentasi &amp; info</small>
+                            </div>
+                            <i class="bx bx-chevron-right text-muted flex-shrink-0"></i>
+                        </a>
+                    </div>
+                @endif
 
                 @if($canManageSupir)
                     <div class="col-12 col-sm-6 col-lg-3">
@@ -307,10 +364,10 @@
                     </div>
                 @endif
 
-                <div class="col-12 col-sm-6 {{ $canManageSupir ? 'col-lg-3' : 'col-lg-4' }}">
+                <div class="col-12 col-sm-6 col-lg-3">
                     <a href="{{ route('admin.profile') }}" class="st-shortcut-card">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-primary flex-shrink-0" style="width: 40px; height: 40px;">
-                            <i class="bx bx-user-circle fs-5 text-primary"></i>
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-label-secondary flex-shrink-0" style="width: 40px; height: 40px;">
+                            <i class="bx bx-user-circle fs-5 text-secondary"></i>
                         </div>
                         <div class="min-w-0 flex-grow-1">
                             <div class="fw-bold small text-truncate">Profil &amp; Keamanan</div>

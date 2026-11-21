@@ -7,7 +7,13 @@ use Illuminate\Http\Request;
 
 class StaffAccess
 {
-    public const UNITS = ['gas' => 'Gas Daerah', 'sewa_alat' => 'Sewa Alat', 'sewa_mobil' => 'Sewa Transportasi', 'fasilitas_umum' => 'Fasilitas Umum'];
+    public const UNITS = [
+        'gas' => 'Gas Daerah',
+        'sewa_alat' => 'Sewa Alat',
+        'sewa_mobil' => 'Sewa Transportasi',
+        'fasilitas_umum' => 'Fasilitas Umum',
+        'kabar_informasi' => 'Kabar & Informasi Daerah',
+    ];
 
     public static function allows(User $user, Request $request): bool
     {
@@ -22,6 +28,9 @@ class StaffAccess
             'admin.notifications.index', 'admin.notifications.mark-as-read', 'admin.notifications.mark-all-read',
             'admin.profile.change-password', 'admin.profile.verify-otp', 'admin.profile.resend-otp'], true)) {
             return true;
+        }
+        if (str_starts_with($name, 'admin.announcements.') || str_starts_with($name, 'content.')) {
+            return $user->hasUnitPermission('kabar_informasi');
         }
         if (str_starts_with($name, 'supir.')) return $user->hasUnitPermission('sewa_mobil') || $user->hasUnitPermission('fasilitas_umum');
         foreach (['admin.unit.penjualan_gas.' => 'gas', 'admin.unit.penyewaan.' => 'sewa_alat',
