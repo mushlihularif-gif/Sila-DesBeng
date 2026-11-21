@@ -89,6 +89,7 @@ class MobilBookingApiController extends Controller
                 'harga_luar_desa' => (float) $item->harga_luar_desa,
                 'batas_km_luar_desa' => $item->batas_km_luar_desa,
                 'harga_luar_kota' => (float) $item->harga_luar_kota,
+                'payment_info' => \App\Support\ProfilPembayaranWilayah::untuk($item->region_id)->publik(),
             ],
         ]);
     }

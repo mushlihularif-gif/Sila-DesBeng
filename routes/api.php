@@ -77,6 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Gas
     Route::get('/gas', [\App\Http\Controllers\Api\GasController::class, 'index']);
+    Route::get('/gas/{id}', [\App\Http\Controllers\Api\GasController::class, 'show'])->whereNumber('id');
     Route::post('/gas/booking', [\App\Http\Controllers\Api\GasBookingController::class, 'store']);
     Route::post('/gas/payment/{id}', [\App\Http\Controllers\Api\GasBookingController::class, 'uploadPayment']);
     Route::get('/gas/receipt/{id}', [\App\Http\Controllers\Api\GasBookingController::class, 'getReceipt']);

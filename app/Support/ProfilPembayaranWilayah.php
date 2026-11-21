@@ -155,4 +155,22 @@ class ProfilPembayaranWilayah
     {
         return $this->region;
     }
+
+    /**
+     * Informasi rekening dan e-wallet publik wilayah untuk instruksi pembayaran API mobile.
+     *
+     * @return array<string, mixed>
+     */
+    public function publik(): array
+    {
+        return [
+            'bank_name' => $this->bank_name,
+            'account_number' => $this->bank_account_number,
+            'account_name' => $this->bank_account_holder,
+            'ewallet_name' => $this->ewallet_name,
+            'ewallet_number' => $this->ewallet_number,
+            'ewallet_account_name' => $this->ewallet_account_holder,
+            'payment_methods' => $this->metodeTersedia(),
+        ];
+    }
 }

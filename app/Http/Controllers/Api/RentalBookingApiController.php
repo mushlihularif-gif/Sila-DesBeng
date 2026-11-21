@@ -43,9 +43,9 @@ class RentalBookingApiController extends Controller
     /**
      * Detail alat sewa
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $item = app(\App\Services\RentalOrdering::class)->visibleQuery(auth()->user())->find($id);
+        $item = app(\App\Services\RentalOrdering::class)->visibleQuery($request->user())->find($id);
 
         if (!$item) {
             return response()->json([
@@ -69,6 +69,7 @@ class RentalBookingApiController extends Controller
                 'image_2' => $item->foto_2 ? asset('storage/' . $item->foto_2) : null,
                 'image_3' => $item->foto_3 ? asset('storage/' . $item->foto_3) : null,
                 'type' => 'rental', 'billing_basis' => $item->billing_basis,
+                'payment_info' => \App\Support\ProfilPembayaranWilayah::untuk($item->region_id)->publik(),
             ],
         ]);
     }

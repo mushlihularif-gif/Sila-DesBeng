@@ -35,9 +35,9 @@ class GasController extends Controller
     /**
      * Get specific gas product details
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $gas = app(\App\Services\GasOrdering::class)->visibleQuery(auth()->user())->find($id);
+        $gas = app(\App\Services\GasOrdering::class)->visibleQuery($request->user())->find($id);
 
         if (!$gas) {
             return response()->json([
@@ -46,8 +46,13 @@ class GasController extends Controller
             ], 404);
         }
 
-        // Include region to get BUMDes info
+        // Include region & public payment instructions for mobile checkout
         $gas->load('region:id,name,type');
+        $paymentInfo = \App\Support\ProfilPembayaranWilayah::untuk($gas->region_id)->publik();
+        $gas->payment_info = $paymentInfo;
+        if ($gas->region) {
+            $gas->region->setAttribute('payment_info', $paymentInfo);
+        }
         
         $gas->image_url = asset('storage/' . $gas->foto);
 

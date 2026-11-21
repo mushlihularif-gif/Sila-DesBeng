@@ -83,6 +83,9 @@ class FasilitasBookingApiController extends Controller
                 'nama_supir' => $item->nama_supir,
                 'kontak_supir' => $item->kontak_supir,
                 'bbm_ditanggung' => $item->bbm_ditanggung,
+                'price' => (float) $item->harga_sewa,
+                'status_biaya' => $item->status_biaya,
+                'payment_info' => \App\Support\ProfilPembayaranWilayah::untuk($item->region_id)->publik(),
             ],
         ]);
     }
