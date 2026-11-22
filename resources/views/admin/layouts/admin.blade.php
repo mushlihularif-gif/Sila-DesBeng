@@ -1840,7 +1840,7 @@
                     </li>
 
                     {{-- Laporan Rekapitulasi (Dropdown) --}}
-                    <li class="menu-item {{ request()->routeIs('admin.laporan.transaksi') || request()->routeIs('admin.laporan.pendapatan*') || request()->routeIs('admin.laporan.wilayah') || request()->routeIs('admin.keuangan.*') || request()->routeIs('admin.refunds.*') ? 'open active show' : '' }}">
+                    <li class="menu-item {{ request()->routeIs('admin.laporan.transaksi') || request()->routeIs('admin.laporan.pendapatan*') || request()->routeIs('admin.laporan.wilayah') || request()->routeIs('admin.refunds.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-bar-chart-alt-2 text-primary"></i>
                             <div>Laporan</div>
@@ -1862,12 +1862,6 @@
                                 <a href="{{ route('admin.laporan.wilayah') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-pie-chart-alt me-2 text-muted"></i>
                                     <div>Evaluasi Aktivitas</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->routeIs('admin.keuangan.*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.keuangan.index') }}" class="menu-link d-flex align-items-center">
-                                    <i class="bx bx-wallet me-2 text-muted"></i>
-                                    <div>Keuangan &amp; Penarikan</div>
                                 </a>
                             </li>
                             <li class="menu-item {{ request()->routeIs('admin.refunds.*') ? 'active' : '' }}">
@@ -1964,14 +1958,6 @@
                         <a href="{{ route('admin.banners.index') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-image text-primary"></i>
                             <div>Banner Beranda</div>
-                        </a>
-                    </li>
-                    @endif
-                    @if(auth()->user()->hasPlatformPermission('platform_penarikan'))
-                    <li class="menu-item {{ request()->routeIs('admin.sistem-platform.penarikan.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.sistem-platform.penarikan.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-wallet-alt text-success"></i>
-                            <div>Penarikan Saldo Wilayah</div>
                         </a>
                     </li>
                     @endif
