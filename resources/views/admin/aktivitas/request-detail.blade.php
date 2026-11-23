@@ -360,15 +360,20 @@
                                 @endphp
 
                                 @if(is_numeric($tLat) && is_numeric($tLng) && abs((float) $tLat) <= 90 && abs((float) $tLng) <= 180)
-                                    <div class="mt-2">
+                                    <div class="mt-2 d-flex flex-wrap gap-2">
+                                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ $tLat }},{{ $tLng }}"
+                                           target="_blank" rel="noopener"
+                                           class="btn btn-sm btn-primary rounded-pill">
+                                            <i class="bx bx-navigation me-1"></i> Petunjuk Arah (Google Maps)
+                                        </a>
                                         <a href="https://www.google.com/maps/search/?api=1&query={{ $tLat }},{{ $tLng }}"
                                            target="_blank" rel="noopener"
                                            class="btn btn-sm btn-outline-primary rounded-pill">
-                                            <i class="bx bx-map-pin"></i> Buka Titik Antar di Peta
+                                            <i class="bx bx-map-pin me-1"></i> Buka Titik Antar di Peta
                                         </a>
-                                        <div class="small text-muted mt-1">
-                                            {{ number_format((float) $tLat, 6) }}, {{ number_format((float) $tLng, 6) }}
-                                        </div>
+                                    </div>
+                                    <div class="small text-muted mt-1">
+                                        {{ number_format((float) $tLat, 6) }}, {{ number_format((float) $tLng, 6) }}
                                     </div>
 
                                     @if(config('services.google_maps.api_key'))
