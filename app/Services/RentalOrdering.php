@@ -37,7 +37,7 @@ class RentalOrdering
             'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
             'delivery_method' => 'required|in:antar,jemput',
             'recipient_name' => 'required|string|max:255',
-            'delivery_address' => 'required|string|max:1000',
+            'delivery_address' => 'required_if:delivery_method,antar|nullable|string|max:1000',
             'rental_purpose' => 'required|string|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90', 'longitude' => 'nullable|numeric|between:-180,180',
             'payment_method' => 'required|in:tunai,transfer,ewallet',
@@ -81,7 +81,12 @@ class RentalOrdering
                         $path = $request->file('payment_proof')->store('payment_proofs/rental', 'public');
                         abort_unless($path, 503, 'Bukti gagal disimpan.'); $paths[] = $path;
                     }
-                    $order = new RentalBooking(array_intersect_key($data, array_flip(['start_date','end_date','delivery_method','recipient_name','delivery_address','rental_purpose','latitude','longitude','payment_method'])) + [
+                    $deliveryAddress = trim((string) ($data['delivery_address'] ?? ''));
+                    if ($data['delivery_method'] === 'jemput' && $deliveryAddress === '') {
+                        $deliveryAddress = \App\Support\ServiceLocation::pickupAddressText($barang);
+                    }
+                    $order = new RentalBooking(array_intersect_key($data, array_flip(['start_date','end_date','delivery_method','recipient_name','rental_purpose','latitude','longitude','payment_method'])) + [
+                        'delivery_address' => $deliveryAddress,
                         'user_id' => $user->id, 'barang_id' => $barang->id, 'region_id' => $provider,
                         'order_number' => 'RNT-'.Str::ulid(), 'quantity' => $item['quantity'], 'days_count' => $days,
                         'total_amount' => $total, 'payment_proof' => $path, 'status' => 'pending',

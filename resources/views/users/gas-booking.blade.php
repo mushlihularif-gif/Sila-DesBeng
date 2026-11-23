@@ -256,8 +256,11 @@
                     </div>
                 </div>
 
-                <!-- Kartu Informasi Pembeli -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <input type="hidden" name="buyer_name" id="buyer-name" value="{{ Auth::user()->name }}">
+                <input type="hidden" id="gas-pickup-address-default" value="{{ \App\Support\ServiceLocation::pickupAddressText($item) }}">
+
+                <!-- Kartu Alamat Pengantaran (Hanya tampil jika metode Diantar) -->
+                <div id="gas-antar-address-card" class="bg-white rounded-2xl shadow-lg p-6 mb-6 {{ $defaultDelivery == 'antar' ? '' : 'hidden' }}">
                     <div class="flex items-center gap-3 mb-4">
                         <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
@@ -266,23 +269,30 @@
                     </div>
                     
                     <div class="space-y-4">
-
                         @include('partials.pilih-alamat', [
-    'alamatTersimpan' => $alamatTersimpan ?? collect(),
-    'idNama'   => 'buyer-name',
-    'idAlamat' => 'buyer-address',
-])
-<input type="hidden"
-                               name="buyer_name" 
-                               id="buyer-name"
-                               value="{{ Auth::user()->name }}">
+                            'alamatTersimpan' => $alamatTersimpan ?? collect(),
+                            'idNama'   => 'buyer-name',
+                            'idAlamat' => 'buyer-address',
+                        ])
                         <textarea name="buyer_address" 
                                   id="buyer-address"
                                   rows="3" 
                                   placeholder="Alamat Lengkap" 
                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  required></textarea>
+                                  {{ $defaultDelivery == 'antar' ? 'required' : '' }}></textarea>
                     </div>
+                </div>
+
+                <!-- Kartu Lokasi Pengambilan (Hanya tampil jika metode Ambil Sendiri) -->
+                <div id="gas-jemput-location-card" class="bg-white rounded-2xl shadow-lg p-6 mb-6 {{ $defaultDelivery == 'jemput' ? '' : 'hidden' }}">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="bx bx-store-alt text-2xl text-blue-600"></i>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Lokasi Pengambilan Gas (Penyedia Layanan)</h3>
+                            <p class="text-xs text-gray-500">Pengambilan tabung gas dilakukan langsung di pangkalan / kantor penyedia layanan desa berikut.</p>
+                        </div>
+                    </div>
+                    <x-service-location :item="$item" />
                 </div>
 
                 <!-- Kartu Produk -->
@@ -771,6 +781,9 @@
         const deliveryMethodInput = document.getElementById('delivery-method-input');
         const antarNote = document.getElementById('antar-note');
         const jemputNote = document.getElementById('jemput-note');
+        const gasAntarAddressCard = document.getElementById('gas-antar-address-card');
+        const gasJemputLocationCard = document.getElementById('gas-jemput-location-card');
+        const buyerAddressInput = document.getElementById('buyer-address');
 
         if (deliveryCards.length > 0) {
             deliveryCards.forEach(card => {
@@ -784,13 +797,19 @@
                     // Update hidden input
                     deliveryMethodInput.value = method;
                     
-                    // Toggle notes
+                    // Toggle notes & location/address cards
                     if (method === 'antar') {
                         if(antarNote) antarNote.classList.remove('hidden');
                         if(jemputNote) jemputNote.classList.add('hidden');
+                        if(gasAntarAddressCard) gasAntarAddressCard.classList.remove('hidden');
+                        if(gasJemputLocationCard) gasJemputLocationCard.classList.add('hidden');
+                        if(buyerAddressInput) buyerAddressInput.required = true;
                     } else {
                         if(antarNote) antarNote.classList.add('hidden');
                         if(jemputNote) jemputNote.classList.remove('hidden');
+                        if(gasAntarAddressCard) gasAntarAddressCard.classList.add('hidden');
+                        if(gasJemputLocationCard) gasJemputLocationCard.classList.remove('hidden');
+                        if(buyerAddressInput) buyerAddressInput.required = false;
                     }
                 });
             });
@@ -921,14 +940,17 @@
         // Show confirmation modal
         if (confirmGasBookingBtn) {
             confirmGasBookingBtn.addEventListener('click', function() {
-                const buyerName = document.getElementById('buyer-name')?.value;
-                const buyerAddress = document.getElementById('buyer-address')?.value;
+                const deliveryMethod = deliveryMethodInput ? deliveryMethodInput.value : 'antar';
+                const buyerName = document.getElementById('buyer-name')?.value?.trim();
+                const buyerAddress = document.getElementById('buyer-address')?.value?.trim();
 
-                if (!buyerName || !buyerAddress) {
+                if (!buyerName || (deliveryMethod === 'antar' && !buyerAddress)) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Data Belum Lengkap',
-                        text: 'Mohon lengkapi Nama dan Alamat Pembeli',
+                        text: deliveryMethod === 'antar'
+                            ? 'Mohon lengkapi Nama dan Alamat Pengantaran'
+                            : 'Nama pembeli pada akun tidak tersedia.',
                         confirmButtonColor: '#3085d6',
                     });
                     return;
@@ -970,6 +992,11 @@
                 });
 
                 const formData = new FormData(gasBookingForm);
+                if ((deliveryMethodInput?.value || 'antar') === 'jemput') {
+                    formData.set('buyer_address', document.getElementById('gas-pickup-address-default')?.value || 'Ambil di lokasi layanan');
+                    formData.delete('latitude');
+                    formData.delete('longitude');
+                }
 
                 fetch('{{ route("gas.booking.store") }}', {
                     method: 'POST',

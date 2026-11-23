@@ -68,7 +68,7 @@ class GasOrdering
         $data = $request->validate([
             'gas_id' => 'required|integer|exists:gas,id', 'quantity' => 'required|integer|min:1|max:100',
             'delivery_method' => 'required|in:antar,jemput', 'buyer_name' => 'required|string|max:255',
-            'buyer_address' => 'required|string|max:255', 'latitude' => 'nullable|numeric|between:-90,90',
+            'buyer_address' => 'required_if:delivery_method,antar|nullable|string|max:255', 'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180', 'payment_method' => 'required|in:tunai,transfer,ewallet',
             'payment_proof' => 'required_if:payment_method,transfer,ewallet|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'idempotency_key' => 'nullable|uuid',
@@ -101,11 +101,15 @@ class GasOrdering
                     $path = $request->file('payment_proof')->store('payment_proofs/gas', 'public');
                     abort_unless($path, 503, 'Bukti pembayaran gagal disimpan.');
                 }
+                $buyerAddress = trim((string) ($data['buyer_address'] ?? ''));
+                if ($data['delivery_method'] === 'jemput' && $buyerAddress === '') {
+                    $buyerAddress = \Illuminate\Support\Str::limit(\App\Support\ServiceLocation::pickupAddressText($gas), 255, '');
+                }
                 $order = new GasOrder([
                     'order_number' => 'GAS-'.Str::ulid(), 'user_id' => $user->id, 'gas_id' => $gas->id,
                     'item_name' => $gas->jenis_gas, 'quantity' => $data['quantity'], 'price' => $gas->harga_satuan,
                     'order_date' => now(), 'delivery_method' => $data['delivery_method'], 'payment_method' => ucfirst($data['payment_method']),
-                    'address' => $data['buyer_address'], 'full_name' => $data['buyer_name'], 'email' => $user->email,
+                    'address' => $buyerAddress, 'full_name' => $data['buyer_name'], 'email' => $user->email,
                     'latitude' => $data['latitude'] ?? null, 'longitude' => $data['longitude'] ?? null,
                     'status' => 'pending', 'proof_of_payment' => $path,
                 ]);

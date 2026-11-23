@@ -75,7 +75,7 @@ class MobilBookingController extends Controller
             'payment_method' => 'required|in:tunai,transfer,ewallet',
             
             'recipient_name' => 'nullable|string|max:255',
-            'delivery_address' => 'required|string|max:1000',
+            'delivery_address' => 'nullable|string|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             
@@ -103,6 +103,17 @@ class MobilBookingController extends Controller
             || $request->boolean('dengan_supir') 
             || ($request->input('delivery_method') === 'antar');
         $deliveryMethod = $denganSupir ? 'antar' : 'jemput';
+
+        $deliveryAddress = trim((string) ($validated['delivery_address'] ?? ''));
+        if ($deliveryMethod === 'antar' && $deliveryAddress === '') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'delivery_address' => 'Alamat penjemputan wajib diisi jika menggunakan supir pengelola.',
+            ]);
+        }
+        if ($deliveryMethod === 'jemput' && $deliveryAddress === '') {
+            $deliveryAddress = \App\Support\ServiceLocation::pickupAddressText($item);
+        }
+        $validated['delivery_address'] = $deliveryAddress;
 
         // Hitung totalAmount berdasarkan jenis sewa
         if ($validated['jenis_sewa'] === 'harian') {

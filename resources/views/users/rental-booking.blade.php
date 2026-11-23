@@ -213,25 +213,26 @@
                 </div>
 
                 <p class="mb-6 rounded-xl bg-blue-50 p-4 text-blue-900">{{ $item->billing_basis === 'per_day' ? 'Tarif harian: harga alat × jumlah alat × jumlah hari. Tanggal mulai dan akhir ikut dihitung; 12–14 berarti 3 hari.' : 'Tarif sekali pakai: harga alat × jumlah alat. Tanggal menunjukkan jadwal pemakaian, tidak menambah tarif harian.' }} Pengelola akan memastikan ketersediaan sebelum menyetujui.</p>
-                <!-- Alamat digunakan untuk pengantaran maupun koordinasi penjemputan -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                    <div class="flex items-center gap-3 mb-4">
-                        <i class="bx bx-map-pin text-2xl text-red-600"></i>
-                        <h3 class="text-lg font-bold text-gray-800">Alamat / Titik Layanan</h3>
-                    </div>
-                    @include('partials.pilih-alamat', [
-                        'alamatTersimpan' => $alamatTersimpan ?? collect(),
-                        'idNama' => 'recipient-name',
-                        'idAlamat' => 'delivery-address',
-                    ])
-                    <input type="hidden" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}">
-                    <textarea name="delivery_address" id="delivery-address" rows="3"
-                              placeholder="Pilih alamat tersimpan atau tulis alamat baru"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
+                <input type="hidden" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}">
+                <input type="hidden" id="pickup-address-default" value="{{ \App\Support\ServiceLocation::pickupAddressText($item) }}">
 
                 <!-- Antar Method Form -->
                 <div id="antar-form" class="delivery-form-content {{ $defaultMethod == 'antar' ? '' : 'hidden' }}">
+                    <!-- Alamat Pengantaran (khusus metode Antar) -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i class="bx bx-map-pin text-2xl text-red-600"></i>
+                            <h3 class="text-lg font-bold text-gray-800">Alamat Pengantaran</h3>
+                        </div>
+                        @include('partials.pilih-alamat', [
+                            'alamatTersimpan' => $alamatTersimpan ?? collect(),
+                            'idNama' => 'recipient-name',
+                            'idAlamat' => 'delivery-address',
+                        ])
+                        <textarea name="delivery_address" id="delivery-address" rows="3"
+                                  placeholder="Pilih alamat tersimpan atau tulis alamat pengantaran baru"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
                     <!-- Important Note -->
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
                         <div class="flex">
@@ -578,7 +579,16 @@
                             </div>
                         </div>
                     </div>
-                    <x-service-location :item="$item" />
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="bx bx-store-alt text-2xl text-blue-600"></i>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Lokasi Pengambilan Alat (Penyedia Layanan)</h3>
+                                <p class="text-xs text-gray-500">Alat diambil dan dikembalikan langsung di lokasi penyedia layanan desa berikut.</p>
+                            </div>
+                        </div>
+                        <x-service-location :item="$item" />
+                    </div>
 
                     <!-- Keterangan / Tujuan Penyewaan Card -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-all duration-300">
@@ -1311,11 +1321,10 @@
                         const startDateVal = startDateJemput?.value;
                         const endDateVal = endDateJemput?.value;
                         const rentalPurposeJemput = getEl('rental-purpose-jemput')?.value;
-                        const deliveryAddress = getEl('delivery-address')?.value;
 
-                        if (!startDateVal || !endDateVal || !rentalPurposeJemput || !deliveryAddress) {
+                        if (!startDateVal || !endDateVal || !rentalPurposeJemput) {
                             isValid = false;
-                            errorMessage = 'Mohon pilih alamat, tanggal mulai dan selesai, serta tujuan sewa.';
+                            errorMessage = 'Mohon lengkapi tanggal mulai dan selesai, serta tujuan sewa.';
                         }
                     }
 
@@ -1410,6 +1419,11 @@
 
                 // Submit form via AJAX
                 const formData = new FormData(bookingForm);
+                if (deliveryMethod === 'jemput') {
+                    formData.set('delivery_address', getEl('pickup-address-default')?.value || 'Ambil di lokasi layanan');
+                    formData.delete('latitude');
+                    formData.delete('longitude');
+                }
                 formData.set('quantity', deliveryMethod === 'jemput' ? qtyDisplayJemput.value : qtyDisplay.value);
                 formData.set('idempotency_key', submissionKey);
                 formData.set('sop_accepted', getEl('agree-sop-' + deliveryMethod)?.checked ? '1' : '0');

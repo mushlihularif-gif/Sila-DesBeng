@@ -9,8 +9,13 @@
     $regionName = $item->region?->name ?? '';
     $query = $hasPoint ? $lat.','.$lng : trim($address.' '.$regionName);
 @endphp
-<div class="mt-4 rounded-xl border border-blue-100 bg-white p-4">
-    <h3 class="font-semibold text-[#115789]">Lokasi Layanan</h3>
+<div class="mt-4 rounded-xl border border-blue-100 bg-white p-4 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+        <h3 class="font-semibold text-[#115789]">Lokasi Layanan</h3>
+        @if($regionName)
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">{{ $regionName }}</span>
+        @endif
+    </div>
     @if($location->nama && $location->nama !== $address)<p class="font-semibold mt-2">{{ $location->nama }}</p>@endif
     <p class="text-gray-700 mt-1">{{ $address ?: ($regionName ?: 'Lokasi belum dilengkapi pengelola.') }}</p>
     @if($hasPoint || $address)

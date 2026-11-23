@@ -334,20 +334,24 @@
                         </div>
                     </div>
 
-                    <!-- Pemesan sudah teridentifikasi dari akun; pilih alamat tersimpan atau isi alamat baru. -->
-                    @include('partials.pilih-alamat', [
-                        'alamatTersimpan' => $alamatTersimpan ?? collect(),
-                        'idNama' => 'recipient-name',
-                        'idAlamat' => 'delivery-address',
-                    ])
                     <input type="hidden" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}">
-                    <label class="block text-xs md:text-sm font-bold text-gray-700 mb-1.5" for="delivery-address">
-                        Alamat / Titik Penjemputan <span class="text-red-500">*</span>
-                    </label>
-                    <textarea name="delivery_address" id="delivery-address" rows="3"
-                              placeholder="Pilih alamat tersimpan atau tulis alamat baru"
-                              class="w-full px-4 py-3 bg-gray-50/50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                              required></textarea>
+                    <input type="hidden" id="mobil-pickup-address-default" value="{{ \App\Support\ServiceLocation::pickupAddressText($item) }}">
+
+                    <!-- Alamat penjemputan (hanya tampil jika Dengan Supir Pengelola / metode Antar) -->
+                    <div id="mobil-user-address-box" class="hidden">
+                        @include('partials.pilih-alamat', [
+                            'alamatTersimpan' => $alamatTersimpan ?? collect(),
+                            'idNama' => 'recipient-name',
+                            'idAlamat' => 'delivery-address',
+                        ])
+                        <label id="label-delivery-address" class="block text-xs md:text-sm font-bold text-gray-700 mb-1.5" for="delivery-address">
+                            Alamat Lengkap Titik Penjemputan <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="delivery_address" id="delivery-address" rows="3"
+                                  placeholder="Pilih alamat tersimpan atau tulis alamat penjemputan rombongan"
+                                  class="w-full px-4 py-3 bg-gray-50/50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></textarea>
+                        <p id="address-help-text" class="text-xs text-gray-500 mt-1.5">Pastikan alamat penjemputan jelas dan dapat diakses oleh kendaraan roda empat.</p>
+                    </div>
                 </div>
 
                 <!-- 5. Keterangan / Tujuan Acara -->
@@ -900,6 +904,7 @@
     const lokasiHeaderIcon = document.getElementById('lokasi-header-icon');
     const kantorPengelolaBox = document.getElementById('kantor-pengelola-info-box');
     const supirAntarBox = document.getElementById('supir-antar-info-box');
+    const mobilUserAddressBox = document.getElementById('mobil-user-address-box');
     const labelRecipientName = document.getElementById('label-recipient-name');
     const labelDeliveryAddress = document.getElementById('label-delivery-address');
     const deliveryAddressInput = document.getElementById('delivery-address');
@@ -943,11 +948,8 @@
 
             kantorPengelolaBox?.classList.remove('hidden');
             supirAntarBox?.classList.add('hidden');
-
-            if (labelRecipientName) labelRecipientName.innerHTML = 'Nama Lengkap Penyewa <span class="text-red-500">*</span>';
-            if (labelDeliveryAddress) labelDeliveryAddress.innerHTML = 'Alamat Domisili / Tempat Tinggal Penyewa <span class="text-red-500">*</span>';
-            if (deliveryAddressInput) deliveryAddressInput.placeholder = 'Masukkan alamat lengkap domisili tempat tinggal Anda saat ini';
-            if (addressHelpText) addressHelpText.textContent = 'Alamat domisili digunakan untuk verifikasi data peminjam kendaraan saat serah terima.';
+            mobilUserAddressBox?.classList.add('hidden');
+            if (deliveryAddressInput) deliveryAddressInput.required = false;
 
         } else {
             denganSupirInput.value = '1';
@@ -968,6 +970,8 @@
 
             kantorPengelolaBox?.classList.add('hidden');
             supirAntarBox?.classList.remove('hidden');
+            mobilUserAddressBox?.classList.remove('hidden');
+            if (deliveryAddressInput) deliveryAddressInput.required = true;
 
             if (labelRecipientName) labelRecipientName.innerHTML = 'Nama Pemesan / Kontak Rombongan <span class="text-red-500">*</span>';
             if (labelDeliveryAddress) labelDeliveryAddress.innerHTML = 'Alamat Lengkap Titik Penjemputan <span class="text-red-500">*</span>';
@@ -1201,8 +1205,8 @@
             Swal.fire({ icon: 'warning', title: 'Profil Belum Lengkap', text: 'Nama pemesan harus tersedia di akun Anda.' });
             return;
         }
-        if (!deliveryAddress) {
-            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Silakan isi Alamat secara lengkap.' });
+        if (deliveryMethodInput?.value === 'antar' && !deliveryAddress) {
+            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Silakan isi Alamat Titik Penjemputan secara lengkap.' });
             return;
         }
         if (!rentalPurpose) {
@@ -1252,6 +1256,11 @@
 
         const form = document.getElementById('booking-form');
         const formData = new FormData(form);
+        if (deliveryMethodInput?.value === 'jemput') {
+            formData.set('delivery_address', document.getElementById('mobil-pickup-address-default')?.value || 'Ambil di kantor pengelola');
+            formData.delete('latitude');
+            formData.delete('longitude');
+        }
 
         fetch('{{ route("mobil.rental.booking.store") }}', {
             method: 'POST',
