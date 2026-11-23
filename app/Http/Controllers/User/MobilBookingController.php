@@ -87,6 +87,12 @@ class MobilBookingController extends Controller
         ], ['payment_proof.required_if'=>'Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.', 'payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
 
         $item = Mobil::inCatalog()->findOrFail($validated['mobil_id']);
+        $profile = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
+        if ($profile->region() && ! in_array($validated['payment_method'], $profile->metodeTersedia(), true)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'payment_method' => 'Metode pembayaran ini tidak diaktifkan oleh pengelola wilayah.',
+            ]);
+        }
         $validated['recipient_name'] = ($validated['recipient_name'] ?? null) ?: Auth::user()->name;
         $validated['end_date'] = $validated['end_date'] ?? $validated['start_date'];
         

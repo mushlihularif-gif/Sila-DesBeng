@@ -92,24 +92,16 @@
     }
     $adaLogoEwallet = $ewalletLogoPath !== null && is_file(public_path($ewalletLogoPath));
 
-    // Tentukan metode pembayaran yang tersedia dengan fallback yang lebih baik
-    $methods = $setting?->payment_methods ?? ['transfer', 'tunai'];
-    if (!is_array($methods) || empty($methods)) {
-        $methods = ['transfer', 'tunai'];
-    }
-    $hasTransfer = in_array('transfer', $methods);
-    $hasTunai = in_array('tunai', $methods);
-    $hasEwallet = in_array('ewallet', $methods)
+    // Tentukan metode pembayaran yang benar-benar diaktifkan wilayah
+    $methods = is_array($setting?->payment_methods) ? $setting->payment_methods : [];
+    $hasTransfer = in_array('transfer', $methods, true);
+    $hasTunai = in_array('tunai', $methods, true);
+    $hasEwallet = in_array('ewallet', $methods, true)
         && !empty($setting->ewallet_name) && !empty($setting->ewallet_number);
+    $hasAnyPayment = $hasTransfer || $hasTunai || $hasEwallet;
 
-    // Pastikan setidaknya satu metode tersedia
-    if (!$hasTransfer && !$hasTunai) {
-        $hasTransfer = true;
-        $hasTunai = true;
-    }
-
-    // Tentukan metode pembayaran aktif default
-    $defaultPaymentMethod = $hasTransfer ? 'transfer' : 'tunai';
+    // Tentukan metode pembayaran aktif default sesuai urutan yang tersedia
+    $defaultPaymentMethod = $hasTransfer ? 'transfer' : ($hasEwallet ? 'ewallet' : ($hasTunai ? 'tunai' : ''));
 
 @endphp
 
@@ -352,214 +344,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Metode Pembayaran -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Metode Pembayaran</h3>
-                        <input type="hidden" name="payment_method" id="payment-method-hidden"
-                               value="{{ $defaultPaymentMethod }}">
-
-                        @if($hasTransfer || $hasTunai || $hasEwallet)
-                        <div class="mb-5">
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Bayar Langsung ke Pengelola</span>
-                                <span class="flex-1 h-px bg-gray-200"></span>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            @if($hasTransfer)
-                            <button type="button"
-                                    onclick="pilihMetodeSewa('transfer')"
-                                    id="btn-sewa-transfer"
-                                    class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 {{ $defaultPaymentMethod === 'transfer' ? 'active ring-2 ring-blue-500 bg-blue-50 shadow-md transform scale-105' : 'bg-white text-gray-600 shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md' }}">
-                                <div class="flex flex-col items-center justify-center gap-2 text-center relative z-10">
-                                    <div class="w-10 h-10 rounded-full {{ $defaultPaymentMethod === 'transfer' ? 'bg-blue-500 text-white' : 'bg-indigo-100 text-indigo-600 group-hover:bg-blue-500 group-hover:text-white' }} flex items-center justify-center transition-colors shadow-inner">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                                        </svg>
-                                    </div>
-                                    <span class="text-[11px] uppercase tracking-wider {{ $defaultPaymentMethod === 'transfer' ? 'text-blue-700' : 'text-gray-600' }}">Transfer Bank</span>
-                                </div>
-                            </button>
-                            @endif
-                            @if($hasTunai)
-                            <!-- Tunai -->
-                            <button type="button" 
-                                    onclick="pilihMetodeSewa('tunai')"
-                                    id="btn-sewa-tunai"
-                                    class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 {{ $defaultPaymentMethod === 'tunai' ? 'active ring-2 ring-blue-500 bg-blue-50 shadow-md transform scale-105' : 'bg-white text-gray-600 shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md' }}">
-                                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <div class="flex flex-col items-center justify-center gap-2 text-center relative z-10">
-                                    <div class="w-10 h-10 rounded-full {{ $defaultPaymentMethod === 'tunai' ? 'bg-blue-500 text-white' : 'bg-green-100 text-green-600 group-hover:bg-blue-500 group-hover:text-white' }} flex items-center justify-center transition-colors shadow-inner">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                        </svg>
-                                    </div>
-                                    <span class="text-[11px] uppercase tracking-wider {{ $defaultPaymentMethod === 'tunai' ? 'text-blue-700' : 'text-gray-600' }}">Bayar Tunai</span>
-                                </div>
-                            </button>
-                            @endif
-                            @if($hasEwallet)
-                            <!-- E-Wallet milik pengelola -->
-                            <button type="button"
-                                    onclick="pilihMetodeSewa('ewallet')"
-                                    id="btn-sewa-ewallet"
-                                    class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 {{ $defaultPaymentMethod === 'ewallet' ? 'active ring-2 ring-blue-500 bg-blue-50 shadow-md transform scale-105' : 'bg-white text-gray-600 shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md' }}">
-                                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <div class="flex flex-col items-center justify-center gap-2 text-center relative z-10">
-                                    <div class="w-10 h-10 rounded-full {{ $adaLogoEwallet ? 'bg-white border border-gray-100' : ($defaultPaymentMethod === 'ewallet' ? 'bg-blue-500 text-white' : 'bg-sky-100 text-sky-600 group-hover:bg-blue-500 group-hover:text-white') }} flex items-center justify-center overflow-hidden shadow-inner transition-colors">
-                                        @if($adaLogoEwallet)
-                                            <img src="{{ asset($ewalletLogoPath) }}" alt="{{ $setting->ewallet_name }}" class="h-6 w-6 object-contain">
-                                        @else
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a2 2 0 00-2-2h-3a2 2 0 100 4h3a2 2 0 002-2zm0 0V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-4z"/>
-                                            </svg>
-                                        @endif
-                                    </div>
-                                    <span class="text-[11px] uppercase tracking-wider {{ $defaultPaymentMethod === 'ewallet' ? 'text-blue-700' : 'text-gray-600' }}">{{ $setting->ewallet_name }}</span>
-                                </div>
-                            </button>
-                            @endif
-                            </div>
-                        </div>
-                        @endif
-
-                        <!-- Transfer ke Rekening Wilayah -->
-                        @if($hasTransfer)
-                        <div id="transfer-payment-sewa" class="payment-content {{ $defaultPaymentMethod === 'transfer' ? '' : 'hidden' }}">
-                            <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
-                                <h4 class="font-bold text-gray-800 mb-4">Transfer ke Rekening Berikut</h4>
-                                <p class="font-bold text-blue-600 mb-4" id="total-amount-transfer"></p>
-
-                                <div class="flex items-center gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 mb-4">
-                                    @if(!empty($bankLogoPath))
-                                        <img src="{{ asset($bankLogoPath) }}" alt="{{ $setting->bank_name }}" class="h-8 object-contain">
-                                    @endif
-                                    <div class="min-w-0">
-                                        <div class="text-xs uppercase tracking-wider text-gray-500">{{ $setting->bank_name ?: 'Bank' }}</div>
-                                        <div class="text-xl font-black tracking-wide text-gray-900 select-all break-all">
-                                            {{ $setting->bank_account_number ?: 'Belum diatur' }}
-                                        </div>
-                                        <div class="text-sm text-gray-600">a.n. {{ $setting->bank_account_holder ?: '-' }}</div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-5">
-                                    <p class="text-sm text-amber-800">
-                                        <strong>Gunakan bank yang sama ({{ $setting->bank_name ?: 'bank tujuan' }})</strong>
-                                        agar tidak dikenai biaya admin antarbank. Transfer dari bank lain tetap diterima,
-                                        tetapi biayanya ditanggung Anda.
-                                    </p>
-                                </div>
-
-                                <label class="block text-sm font-bold text-gray-700 mb-2">
-                                    Unggah Bukti Transfer <span class="text-red-500">*</span>
-                                </label>
-                                <input type="file" name="payment_proof" id="payment-proof" accept=".jpg,.jpeg,.png,.pdf"
-                                       class="block w-full text-sm text-gray-600 border-2 border-dashed border-blue-200 rounded-xl p-3
-                                              file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
-                                              file:bg-blue-500 file:text-white file:font-semibold hover:file:bg-blue-600">
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Format JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda diperiksa petugas sebelum pesanan diproses.
-                                </p>
-                            </div>
-                        </div>
-                        @endif
-
-                        <!-- E-Wallet Manual ke Nomor Wilayah -->
-                        @if($hasEwallet)
-                        <div id="ewallet-payment-sewa" class="payment-content {{ $defaultPaymentMethod === 'ewallet' ? '' : 'hidden' }}">
-                            <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
-                                <h4 class="font-bold text-gray-800 mb-4">Kirim ke E-Wallet Berikut</h4>
-                                <p class="font-bold text-blue-600 mb-4" id="total-amount-ewallet"></p>
-
-                                <div class="flex items-center gap-4 bg-gradient-to-br from-sky-50 to-cyan-50 rounded-2xl p-5 mb-4">
-                                    @if($adaLogoEwallet)
-                                        <img src="{{ asset($ewalletLogoPath) }}" alt="{{ $setting->ewallet_name }}" class="h-8 object-contain">
-                                    @endif
-                                    <div class="min-w-0">
-                                        <div class="text-xs uppercase tracking-wider text-gray-500">{{ $setting->ewallet_name }}</div>
-                                        <div class="text-xl font-black tracking-wide text-gray-900 select-all break-all">
-                                            {{ $setting->ewallet_number }}
-                                        </div>
-                                        <div class="text-sm text-gray-600">a.n. {{ $setting->ewallet_account_holder ?: '-' }}</div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-5">
-                                    <p class="text-sm text-amber-800">
-                                        <strong>Kirim dari sesama {{ $setting->ewallet_name }}</strong>
-                                        agar tidak dikenai biaya transfer. Pengiriman dari aplikasi lain tetap diterima,
-                                        tetapi biayanya ditanggung Anda.
-                                    </p>
-                                </div>
-
-                                <label class="block text-sm font-bold text-gray-700 mb-2">
-                                    Unggah Bukti Pengiriman <span class="text-red-500">*</span>
-                                </label>
-                                <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
-                                       class="block w-full text-sm text-gray-600 border-2 border-dashed border-sky-200 rounded-xl p-3
-                                              file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
-                                              file:bg-sky-500 file:text-white file:font-semibold hover:file:bg-sky-600">
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Format JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda akan diperiksa petugas sebelum pesanan diproses.
-                                </p>
-                            </div>
-                        </div>
-                        @endif
-
-                        <!-- Cash Payment Card -->
-                        <div id="cash-payment" class="payment-content {{ $defaultPaymentMethod === 'tunai' ? '' : 'hidden' }}">
-                            <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
-                                <div class="flex flex-col items-center sm:flex-row sm:justify-between gap-6">
-                                    <div class="flex items-center gap-4 text-center sm:text-left">
-                                        <div class="hidden sm:flex flex-shrink-0 w-12 h-12 bg-blue-50 text-blue-500 rounded-full items-center justify-center">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="text-lg font-bold text-gray-800 mb-1">Bayar Di Tempat (COD)</h4>
-                                            <p class="text-sm text-gray-500">{{ $cashDescription }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="text-center sm:text-right">
-                                        <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Total Pembayaran</p>
-                                        <p class="text-2xl sm:text-3xl font-black text-blue-600" id="total-amount-cash">Rp. {{ number_format($item->harga_sewa * $quantity, 0, ',', '.') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    @if(!empty($sop_penyewaan_alat))
-                    <!-- SOP Section for Antar -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <div class="flex items-center gap-3 mb-4">
-                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                            </svg>
-                            <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
-                        </div>
-                        
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4">
-                            <x-service-terms :text="$sop_penyewaan_alat" />
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <input type="checkbox" id="agree-sop-antar" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                            <label for="agree-sop-antar" class="ml-2 text-sm text-gray-800 font-medium">Saya telah membaca dan menyetujui Ketentuan SOP</label>
-                        </div>
-                    </div>
-                    @endif
-
-                    <!-- Submit Button -->
-                    <div class="flex justify-end">
-                        <button type="button" 
-                                class="confirm-action-btn px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
-                            Konfirmasi
-                        </button>
-                    </div>
                 </div>
 
                 <!-- Jemput Method Form -->
@@ -691,63 +475,217 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Payment Method for Jemput (Fixed to Tunai) -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Metode Pembayaran</h3>
-                        <input type="hidden" name="payment_method_jemput" id="payment-method-jemput-hidden" value="tunai">
+                </div>
 
-                        <!-- Cash Payment Card for Jemput -->
-                        <div id="cash-payment-jemput" class="payment-content-jemput">
-                            <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8">
-                                <div class="flex flex-col items-center sm:flex-row sm:justify-between gap-6">
-                                    <div class="flex items-center gap-4 text-center sm:text-left">
-                                        <div class="hidden sm:flex flex-shrink-0 w-12 h-12 bg-blue-50 text-blue-500 rounded-full items-center justify-center">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="text-lg font-bold text-gray-800 mb-1">Bayar Di Tempat (COD)</h4>
-                                            <p class="text-sm text-gray-500">{{ $cashDescription }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="text-center sm:text-right">
-                                        <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Total Pembayaran</p>
-                                        <p class="text-2xl sm:text-3xl font-black text-blue-600" id="total-amount-cash-jemput">Rp. {{ number_format($item->harga_sewa * $quantity, 0, ',', '.') }}</p>
-                                    </div>
+                <!-- Metode Pembayaran Bersama (Berlaku untuk Antar & Jemput sesuai Pengaturan Pembayaran Wilayah) -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Metode Pembayaran</h3>
+                    <input type="hidden" name="payment_method" id="payment-method-hidden"
+                           value="{{ $defaultPaymentMethod }}">
+
+                    @if($hasAnyPayment)
+                    <div class="mb-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Bayar Langsung ke Pengelola</span>
+                            <span class="flex-1 h-px bg-gray-200"></span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        @if($hasTransfer)
+                        <button type="button"
+                                onclick="pilihMetodeSewa('transfer')"
+                                id="btn-sewa-transfer"
+                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 {{ $defaultPaymentMethod === 'transfer' ? 'active ring-2 ring-blue-500 bg-blue-50 shadow-md transform scale-105' : 'bg-white text-gray-600 shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md' }}">
+                            <div class="flex flex-col items-center justify-center gap-2 text-center relative z-10">
+                                <div class="w-10 h-10 rounded-full {{ $defaultPaymentMethod === 'transfer' ? 'bg-blue-500 text-white' : 'bg-indigo-100 text-indigo-600 group-hover:bg-blue-500 group-hover:text-white' }} flex items-center justify-center transition-colors shadow-inner">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                    </svg>
                                 </div>
+                                <span class="text-[11px] uppercase tracking-wider {{ $defaultPaymentMethod === 'transfer' ? 'text-blue-700' : 'text-gray-600' }}">Transfer Bank</span>
                             </div>
+                        </button>
+                        @endif
+                        @if($hasTunai)
+                        <button type="button"
+                                onclick="pilihMetodeSewa('tunai')"
+                                id="btn-sewa-tunai"
+                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 {{ $defaultPaymentMethod === 'tunai' ? 'active ring-2 ring-blue-500 bg-blue-50 shadow-md transform scale-105' : 'bg-white text-gray-600 shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md' }}">
+                            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="flex flex-col items-center justify-center gap-2 text-center relative z-10">
+                                <div class="w-10 h-10 rounded-full {{ $defaultPaymentMethod === 'tunai' ? 'bg-blue-500 text-white' : 'bg-green-100 text-green-600 group-hover:bg-blue-500 group-hover:text-white' }} flex items-center justify-center transition-colors shadow-inner">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                </div>
+                                <span class="text-[11px] uppercase tracking-wider {{ $defaultPaymentMethod === 'tunai' ? 'text-blue-700' : 'text-gray-600' }}">Bayar Tunai</span>
+                            </div>
+                        </button>
+                        @endif
+                        @if($hasEwallet)
+                        <button type="button"
+                                onclick="pilihMetodeSewa('ewallet')"
+                                id="btn-sewa-ewallet"
+                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 {{ $defaultPaymentMethod === 'ewallet' ? 'active ring-2 ring-blue-500 bg-blue-50 shadow-md transform scale-105' : 'bg-white text-gray-600 shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md' }}">
+                            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="flex flex-col items-center justify-center gap-2 text-center relative z-10">
+                                <div class="w-10 h-10 rounded-full {{ $adaLogoEwallet ? 'bg-white border border-gray-100' : ($defaultPaymentMethod === 'ewallet' ? 'bg-blue-500 text-white' : 'bg-sky-100 text-sky-600 group-hover:bg-blue-500 group-hover:text-white') }} flex items-center justify-center overflow-hidden shadow-inner transition-colors">
+                                    @if($adaLogoEwallet)
+                                        <img src="{{ asset($ewalletLogoPath) }}" alt="{{ $setting->ewallet_name }}" class="h-6 w-6 object-contain">
+                                    @else
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a2 2 0 00-2-2h-3a2 2 0 100 4h3a2 2 0 002-2zm0 0V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-4z"/>
+                                        </svg>
+                                    @endif
+                                </div>
+                                <span class="text-[11px] uppercase tracking-wider {{ $defaultPaymentMethod === 'ewallet' ? 'text-blue-700' : 'text-gray-600' }}">{{ $setting->ewallet_name }}</span>
+                            </div>
+                        </button>
+                        @endif
                         </div>
                     </div>
 
-                    @if(!empty($sop_penyewaan_alat))
-                    <!-- SOP Section for Jemput -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <div class="flex items-center gap-3 mb-4">
-                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                            </svg>
-                            <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
-                        </div>
-                        
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4">
-                            <x-service-terms :text="$sop_penyewaan_alat" />
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <input type="checkbox" id="agree-sop-jemput" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                            <label for="agree-sop-jemput" class="ml-2 text-sm text-gray-800 font-medium">Saya telah membaca dan menyetujui Ketentuan SOP</label>
+                    <!-- Transfer ke Rekening Wilayah -->
+                    @if($hasTransfer)
+                    <div id="transfer-payment-sewa" class="payment-content {{ $defaultPaymentMethod === 'transfer' ? '' : 'hidden' }}">
+                        <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
+                            <h4 class="font-bold text-gray-800 mb-4">Transfer ke Rekening Berikut</h4>
+                            <p class="font-bold text-blue-600 mb-4" id="total-amount-transfer"></p>
+
+                            <div class="flex items-center gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 mb-4">
+                                @if(!empty($bankLogoPath))
+                                    <img src="{{ asset($bankLogoPath) }}" alt="{{ $setting->bank_name }}" class="h-8 object-contain">
+                                @endif
+                                <div class="min-w-0">
+                                    <div class="text-xs uppercase tracking-wider text-gray-500">{{ $setting->bank_name ?: 'Bank' }}</div>
+                                    <div class="text-xl font-black tracking-wide text-gray-900 select-all break-all">
+                                        {{ $setting->bank_account_number ?: 'Belum diatur' }}
+                                    </div>
+                                    <div class="text-sm text-gray-600">a.n. {{ $setting->bank_account_holder ?: '-' }}</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-5">
+                                <p class="text-sm text-amber-800">
+                                    <strong>Gunakan bank yang sama ({{ $setting->bank_name ?: 'bank tujuan' }})</strong>
+                                    agar tidak dikenai biaya admin antarbank. Transfer dari bank lain tetap diterima,
+                                    tetapi biayanya ditanggung Anda.
+                                </p>
+                            </div>
+
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Unggah Bukti Transfer <span class="text-red-500">*</span>
+                            </label>
+                            <input type="file" name="payment_proof" id="payment-proof" accept=".jpg,.jpeg,.png,.pdf"
+                                   class="block w-full text-sm text-gray-600 border-2 border-dashed border-blue-200 rounded-xl p-3
+                                          file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                                          file:bg-blue-500 file:text-white file:font-semibold hover:file:bg-blue-600">
+                            <p class="text-xs text-gray-500 mt-2">
+                                Format JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda diperiksa petugas sebelum pesanan diproses.
+                            </p>
                         </div>
                     </div>
                     @endif
 
-                    <!-- Submit Button -->
-                    <div class="flex justify-end">
-                        <button type="button" 
-                                class="confirm-action-btn px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
-                            Konfirmasi
-                        </button>
+                    <!-- E-Wallet Manual ke Nomor Wilayah -->
+                    @if($hasEwallet)
+                    <div id="ewallet-payment-sewa" class="payment-content {{ $defaultPaymentMethod === 'ewallet' ? '' : 'hidden' }}">
+                        <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
+                            <h4 class="font-bold text-gray-800 mb-4">Kirim ke E-Wallet Berikut</h4>
+                            <p class="font-bold text-blue-600 mb-4" id="total-amount-ewallet"></p>
+
+                            <div class="flex items-center gap-4 bg-gradient-to-br from-sky-50 to-cyan-50 rounded-2xl p-5 mb-4">
+                                @if($adaLogoEwallet)
+                                    <img src="{{ asset($ewalletLogoPath) }}" alt="{{ $setting->ewallet_name }}" class="h-8 object-contain">
+                                @endif
+                                <div class="min-w-0">
+                                    <div class="text-xs uppercase tracking-wider text-gray-500">{{ $setting->ewallet_name }}</div>
+                                    <div class="text-xl font-black tracking-wide text-gray-900 select-all break-all">
+                                        {{ $setting->ewallet_number }}
+                                    </div>
+                                    <div class="text-sm text-gray-600">a.n. {{ $setting->ewallet_account_holder ?: '-' }}</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-5">
+                                <p class="text-sm text-amber-800">
+                                    <strong>Kirim dari sesama {{ $setting->ewallet_name }}</strong>
+                                    agar tidak dikenai biaya transfer. Pengiriman dari aplikasi lain tetap diterima,
+                                    tetapi biayanya ditanggung Anda.
+                                </p>
+                            </div>
+
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Unggah Bukti Pengiriman <span class="text-red-500">*</span>
+                            </label>
+                            <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
+                                   class="block w-full text-sm text-gray-600 border-2 border-dashed border-sky-200 rounded-xl p-3
+                                          file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                                          file:bg-sky-500 file:text-white file:font-semibold hover:file:bg-sky-600">
+                            <p class="text-xs text-gray-500 mt-2">
+                                Format JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda akan diperiksa petugas sebelum pesanan diproses.
+                            </p>
+                        </div>
                     </div>
+                    @endif
+
+                    <!-- Cash Payment Card -->
+                    @if($hasTunai)
+                    <div id="cash-payment" class="payment-content {{ $defaultPaymentMethod === 'tunai' ? '' : 'hidden' }}">
+                        <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
+                            <div class="flex flex-col items-center sm:flex-row sm:justify-between gap-6">
+                                <div class="flex items-center gap-4 text-center sm:text-left">
+                                    <div class="hidden sm:flex flex-shrink-0 w-12 h-12 bg-blue-50 text-blue-500 rounded-full items-center justify-center">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-bold text-gray-800 mb-1">Bayar Di Tempat (COD)</h4>
+                                        <p class="text-sm text-gray-500">{{ $cashDescription }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-center sm:text-right">
+                                    <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Total Pembayaran</p>
+                                    <p class="text-2xl sm:text-3xl font-black text-blue-600" id="total-amount-cash">Rp. {{ number_format($item->harga_sewa * $quantity, 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @else
+                    <div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+                        Wilayah ini belum mengaktifkan metode pembayaran apa pun. Silakan hubungi pengelola layanan.
+                    </div>
+                    @endif
+                </div>
+
+                @if(!empty($sop_penyewaan_alat))
+                <!-- SOP Section -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
+                    </div>
+
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4">
+                        <x-service-terms :text="$sop_penyewaan_alat" />
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="agree-sop" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="agree-sop" class="ml-2 text-sm text-gray-800 font-medium">Saya telah membaca dan menyetujui Ketentuan SOP</label>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="button"
+                            class="confirm-action-btn px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
+                        Konfirmasi
+                    </button>
                 </div>
             </form>
         </div>
@@ -828,8 +766,7 @@
     </div>
 </main>
 
-    {{-- Pemilih metode bayar sewa alat. Sengaja dipisah dari skrip pengiriman
-         form agar tidak mengganggu alur FormData yang sudah ada. --}}
+    {{-- Pemilih metode bayar sewa alat. Berlaku untuk Antar maupun Jemput. --}}
     <script>
         window.pilihMetodeSewa = function (metode) {
             var input = document.getElementById('payment-method-hidden');
@@ -839,15 +776,26 @@
             var panelTunai = document.getElementById('cash-payment');
             var panelEwallet = document.getElementById('ewallet-payment-sewa');
             [panelTransfer, panelTunai, panelEwallet].forEach(function (el) {
-                if (el) el.classList.add('hidden');
+                if (!el) return;
+                el.classList.add('hidden');
+                el.querySelectorAll('input[type="file"]').forEach(function (inp) {
+                    inp.disabled = true;
+                });
             });
 
+            var activePanel = null;
             if (metode === 'tunai') {
-                if (panelTunai) panelTunai.classList.remove('hidden');
+                activePanel = panelTunai;
             } else if (metode === 'transfer') {
-                if (panelTransfer) panelTransfer.classList.remove('hidden');
+                activePanel = panelTransfer;
             } else if (metode === 'ewallet') {
-                if (panelEwallet) panelEwallet.classList.remove('hidden');
+                activePanel = panelEwallet;
+            }
+            if (activePanel) {
+                activePanel.classList.remove('hidden');
+                activePanel.querySelectorAll('input[type="file"]').forEach(function (inp) {
+                    inp.disabled = false;
+                });
             }
 
             // Highlight active button
@@ -873,24 +821,11 @@
             }
         };
 
-        window.kunciMetodeBayarSewa = function (pengiriman) {
+        (function initMetodeSewa() {
             var input = document.getElementById('payment-method-hidden');
-            if (!input) return;
-
-            if (pengiriman === 'jemput') {
-                input.dataset.pilihanAntar = input.value;
-                input.value = 'tunai';
-                pilihMetodeSewa('tunai');
-                return;
+            if (input && input.value && typeof window.pilihMetodeSewa === 'function') {
+                window.pilihMetodeSewa(input.value);
             }
-
-            input.value = input.dataset.pilihanAntar || input.value;
-            pilihMetodeSewa(input.value);
-        };
-
-        (function () {
-            var input = document.getElementById('payment-method-hidden');
-            if (input) input.dataset.pilihanAntar = @json($hasTransfer ? 'transfer' : 'tunai');
         })();
     </script>
 @endsection
@@ -1077,37 +1012,37 @@
             const duration = (Date.parse(end?.value) - Date.parse(start?.value)) / 86400000;
             return Number.isFinite(duration) && duration >= 0 ? Math.floor(duration) + 1 : 1;
         }
+        function syncPaymentTotals(total) {
+            const formatted = 'Rp. ' + total.toLocaleString('id-ID');
+            const totalTransferEl = getEl('total-amount-transfer');
+            const totalCashEl = getEl('total-amount-cash');
+            const walletTotal = getEl('total-amount-ewallet');
+            if (totalTransferEl) totalTransferEl.textContent = formatted;
+            if (totalCashEl) totalCashEl.textContent = formatted;
+            if (walletTotal) walletTotal.textContent = formatted;
+        }
+
         // Define update functions FIRST before using them
         function updateTotals() {
             if (!qtyDisplay) return;
             const qty = parseInt(qtyDisplay.value) || 1;
             const subtotal = pricePerUnit * qty * rentalDays(startDate, endDate);
-            const total = subtotal;
-            
             const subtotalEl = getEl('subtotal');
-            const totalTransferEl = getEl('total-amount-transfer');
-            const totalCashEl = getEl('total-amount-cash');
-
             if (subtotalEl) subtotalEl.textContent = 'Rp. ' + subtotal.toLocaleString('id-ID');
-            if (totalTransferEl) totalTransferEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
-            if (totalCashEl) totalCashEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
-            const walletTotal = getEl('total-amount-ewallet');
-            if (walletTotal) walletTotal.textContent = 'Rp. ' + total.toLocaleString('id-ID');
+            if ((deliveryMethodInput ? deliveryMethodInput.value : 'antar') === 'antar') {
+                syncPaymentTotals(subtotal);
+            }
         }
 
         function updateTotalsJemput() {
             if (!qtyDisplayJemput) return;
             const qty = parseInt(qtyDisplayJemput.value) || 1;
             const subtotal = pricePerUnit * qty * rentalDays(startDateJemput, endDateJemput);
-            const total = subtotal;
-            
             const subtotalEl = getEl('subtotal-jemput');
-            const totalTransferEl = getEl('total-amount-transfer-jemput');
-            const totalCashEl = getEl('total-amount-cash-jemput');
-
             if (subtotalEl) subtotalEl.textContent = 'Rp. ' + subtotal.toLocaleString('id-ID');
-            if (totalTransferEl) totalTransferEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
-            if (totalCashEl) totalCashEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
+            if ((deliveryMethodInput ? deliveryMethodInput.value : 'antar') === 'jemput') {
+                syncPaymentTotals(subtotal);
+            }
         }
 
         function calculateDays() {
@@ -1142,14 +1077,6 @@
                 this.classList.add('active');
                 
                 deliveryMethodInput.value = method;
-
-                // Panel transfer hanya ada di alur ANTAR. Kalau warga pindah ke
-                // JEMPUT, metode bayar harus kembali ke tunai — kalau tidak,
-                // form mengirim payment_method=transfer tanpa bukti apa pun dan
-                // ditolak server tanpa ada kolom unggah yang terlihat.
-                if (typeof window.kunciMetodeBayarSewa === 'function') {
-                    window.kunciMetodeBayarSewa(method);
-                }
 
                 if (method === 'antar') {
                     antarForm.classList.remove('hidden');
@@ -1338,26 +1265,28 @@
                         return;
                     }
 
+                    // Payment method availability check
+                    if (!paymentMethodHidden || !paymentMethodHidden.value) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Pembayaran Belum Tersedia',
+                            text: 'Wilayah ini belum mengaktifkan metode pembayaran apa pun. Silakan hubungi pengelola.',
+                            confirmButtonColor: '#3085d6',
+                        });
+                        return;
+                    }
+
                     // SOP Validation
                     const sopRequired = {{ !empty($sop_penyewaan_alat) ? 'true' : 'false' }};
-                    if (sopRequired) {
-                        if (deliveryMethod === 'antar' && !getEl('agree-sop-antar').checked) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Perhatian',
-                                text: 'Mohon setujui Ketentuan SOP terlebih dahulu.',
-                                confirmButtonColor: '#3085d6',
-                            });
-                            return;
-                        } else if (deliveryMethod === 'jemput' && !getEl('agree-sop-jemput').checked) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Perhatian',
-                                text: 'Mohon setujui Ketentuan SOP terlebih dahulu.',
-                                confirmButtonColor: '#3085d6',
-                            });
-                            return;
-                        }
+                    const sopCheckbox = getEl('agree-sop') || getEl('agree-sop-' + deliveryMethod);
+                    if (sopRequired && sopCheckbox && !sopCheckbox.checked) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Perhatian',
+                            text: 'Mohon setujui Ketentuan SOP terlebih dahulu.',
+                            confirmButtonColor: '#3085d6',
+                        });
+                        return;
                     }
 
                     // Show confirmation modal
@@ -1426,12 +1355,13 @@
                 }
                 formData.set('quantity', deliveryMethod === 'jemput' ? qtyDisplayJemput.value : qtyDisplay.value);
                 formData.set('idempotency_key', submissionKey);
-                formData.set('sop_accepted', getEl('agree-sop-' + deliveryMethod)?.checked ? '1' : '0');
-                const selectedPayment = deliveryMethod === 'jemput' ? 'tunai' : paymentMethodHidden.value;
+                const sopCheckboxSubmit = getEl('agree-sop') || getEl('agree-sop-' + deliveryMethod);
+                formData.set('sop_accepted', sopCheckboxSubmit?.checked ? '1' : '0');
+                const selectedPayment = paymentMethodHidden ? paymentMethodHidden.value : '';
                 formData.set('payment_method', selectedPayment);
                 formData.delete('payment_proof');
-                const proofPanel = selectedPayment === 'transfer' ? 'transfer-payment-sewa' : 'ewallet-payment-sewa';
-                const selectedProof = selectedPayment === 'tunai' ? null : getEl(proofPanel)?.querySelector('input[type="file"]')?.files[0];
+                const proofPanel = selectedPayment === 'transfer' ? 'transfer-payment-sewa' : (selectedPayment === 'ewallet' ? 'ewallet-payment-sewa' : null);
+                const selectedProof = proofPanel ? getEl(proofPanel)?.querySelector('input[type="file"]')?.files[0] : null;
                 if (selectedProof) formData.set('payment_proof', selectedProof);
 
                 fetch('{{ route("rental.booking.store") }}', {

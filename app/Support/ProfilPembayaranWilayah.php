@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Region;
 use App\Models\SystemSetting;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Profil pembayaran milik SATU WILAYAH.
@@ -48,8 +49,8 @@ class ProfilPembayaranWilayah
     public static function untuk(?int $regionId): self
     {
         return new self(
-            $regionId ? Region::find($regionId) : null,
-            SystemSetting::query()->first(),
+            ($regionId && Schema::hasTable('regions')) ? Region::find($regionId) : null,
+            Schema::hasTable('system_settings') ? SystemSetting::query()->first() : null,
         );
     }
 
@@ -102,29 +103,31 @@ class ProfilPembayaranWilayah
         $info = $this->region?->payment_info ?? [];
         $metode = [];
 
-        // Transfer manual: cukup bank dan nomor rekening terisi, dan tidak
-        // dimatikan lewat sakelar bank_active.
-        $bankAktif = $info['bank_active'] ?? true;
+        // Transfer manual: aktif bila sakelar bank_active menyala dan bank + nomor rekening terisi.
+        $bankAktif = (bool) ($info['bank_active'] ?? true);
 
         if ($bankAktif && $this->punyaRekeningSendiri()) {
             $metode[] = 'transfer';
         }
 
-        // E-Wallet manual milik wilayah. Perlakuannya sama dengan transfer —
-        // warga mengirim ke nomor DANA/OVO desa lalu mengunggah bukti — dan
-        // sakelarnya ewallet_active di Pengaturan Pembayaran Wilayah. Sebelum
-        // ini kepala desa bisa mengisi nomornya sampai lengkap tetapi metodenya
-        // tidak pernah muncul di halaman pemesanan mana pun.
-        $ewalletAktif = $info['ewallet_active'] ?? false;
+        // E-Wallet manual: aktif bila sakelar ewallet_active menyala dan nama + nomor e-wallet terisi.
+        $ewalletAktif = (bool) ($info['ewallet_active'] ?? false);
 
         if ($ewalletAktif && $this->punyaEwalletSendiri()) {
             $metode[] = 'ewallet';
         }
 
-        // Tunai selalu tersedia. Selain memang lazim di layanan desa, ini juga
-        // jaring pengaman: wilayah yang belum mengisi rekening tetap punya satu
-        // cara membayar, sehingga halaman pemesanannya tidak buntu.
-        $metode[] = 'tunai';
+        // Pembayaran Tunai (Cash):
+        // - Mengikuti sakelar cash_only_active dari Pengaturan Pembayaran Wilayah jika sudah disimpan.
+        // - Untuk wilayah baru yang belum pernah mengatur pembayaran (belum ada bank/e-wallet),
+        //   tunai tetap menjadi pilihan bawaan agar halaman pemesanan tidak buntu.
+        $tunaiAktif = array_key_exists('cash_only_active', $info)
+            ? (bool) $info['cash_only_active']
+            : empty($metode);
+
+        if ($tunaiAktif) {
+            $metode[] = 'tunai';
+        }
 
         return array_values(array_unique($metode));
     }
@@ -163,14 +166,18 @@ class ProfilPembayaranWilayah
      */
     public function publik(): array
     {
+        $metode = $this->metodeTersedia();
+        $bankAktif = in_array('transfer', $metode, true);
+        $ewalletAktif = in_array('ewallet', $metode, true);
+
         return [
-            'bank_name' => $this->bank_name,
-            'account_number' => $this->bank_account_number,
-            'account_name' => $this->bank_account_holder,
-            'ewallet_name' => $this->ewallet_name,
-            'ewallet_number' => $this->ewallet_number,
-            'ewallet_account_name' => $this->ewallet_account_holder,
-            'payment_methods' => $this->metodeTersedia(),
+            'bank_name' => $bankAktif ? $this->bank_name : null,
+            'account_number' => $bankAktif ? $this->bank_account_number : null,
+            'account_name' => $bankAktif ? $this->bank_account_holder : null,
+            'ewallet_name' => $ewalletAktif ? $this->ewallet_name : null,
+            'ewallet_number' => $ewalletAktif ? $this->ewallet_number : null,
+            'ewallet_account_name' => $ewalletAktif ? $this->ewallet_account_holder : null,
+            'payment_methods' => $metode,
         ];
     }
 }

@@ -210,19 +210,49 @@ class RegionSettingController extends Controller
             return redirect()->back()->with('error', 'Region tidak ditemukan.');
         }
 
+        $bankActive = $request->has('bank_active');
+        $cashActive = $request->has('cash_only_active');
+        $ewalletActive = $request->has('ewallet_active');
+
+        $bankName = trim((string) $request->input('bank_name', ''));
+        $accountNumber = trim((string) $request->input('account_number', ''));
+        $accountName = trim((string) $request->input('account_name', ''));
+
+        $ewalletName = trim((string) $request->input('ewallet_name', ''));
+        $ewalletNumber = trim((string) $request->input('ewallet_number', ''));
+        $ewalletAccountName = trim((string) $request->input('ewallet_account_name', ''));
+
+        if (! $bankActive && ! $cashActive && ! $ewalletActive) {
+            return redirect()->back()
+                ->with('error', 'Gagal: Minimal satu metode pembayaran (Transfer Bank, Tunai, atau E-Wallet) harus diaktifkan.')
+                ->withInput();
+        }
+
+        if ($bankActive && ($bankName === '' || $accountNumber === '')) {
+            return redirect()->back()
+                ->with('error', 'Gagal: Pilih Bank dan isi Nomor Rekening jika Transfer Bank Manual diaktifkan.')
+                ->withInput();
+        }
+
+        if ($ewalletActive && ($ewalletName === '' || $ewalletNumber === '')) {
+            return redirect()->back()
+                ->with('error', 'Gagal: Pilih layanan E-Wallet dan isi Nomor HP / E-Wallet jika E-Wallet diaktifkan.')
+                ->withInput();
+        }
+
         $paymentInfo = $region->payment_info ?? [];
-        $paymentInfo['bank_name'] = $request->bank_name;
-        $paymentInfo['account_number'] = $request->account_number;
-        $paymentInfo['account_name'] = $request->account_name;
-        $paymentInfo['bank_active'] = $request->has('bank_active');
-        
-        $paymentInfo['ewallet_name'] = $request->ewallet_name;
-        $paymentInfo['ewallet_number'] = $request->ewallet_number;
-        $paymentInfo['ewallet_account_name'] = $request->ewallet_account_name;
-        $paymentInfo['ewallet_active'] = $request->has('ewallet_active');
-        
-        $paymentInfo['card_theme'] = $request->card_theme;
-        $paymentInfo['cash_only_active'] = $request->has('cash_only_active');
+        $paymentInfo['bank_name'] = $bankName ?: null;
+        $paymentInfo['account_number'] = $accountNumber ?: null;
+        $paymentInfo['account_name'] = $accountName ?: null;
+        $paymentInfo['bank_active'] = $bankActive;
+
+        $paymentInfo['ewallet_name'] = $ewalletName ?: null;
+        $paymentInfo['ewallet_number'] = $ewalletNumber ?: null;
+        $paymentInfo['ewallet_account_name'] = $ewalletAccountName ?: null;
+        $paymentInfo['ewallet_active'] = $ewalletActive;
+
+        $paymentInfo['card_theme'] = $request->input('card_theme', 'blue');
+        $paymentInfo['cash_only_active'] = $cashActive;
 
         $region->update([
             'payment_info' => $paymentInfo,

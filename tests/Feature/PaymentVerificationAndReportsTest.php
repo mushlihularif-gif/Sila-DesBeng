@@ -43,6 +43,8 @@ class PaymentVerificationAndReportsTest extends TestCase
                 'bank_name' => 'Bank BRI',
                 'account_number' => '1234567890',
                 'account_name' => 'BUMDes Desa A',
+                'bank_active' => true,
+                'cash_only_active' => true,
             ],
         ]);
 

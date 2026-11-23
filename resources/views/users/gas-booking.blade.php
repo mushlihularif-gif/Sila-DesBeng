@@ -88,28 +88,21 @@
     // curiga pada halaman pembayarannya sendiri.
     $adaLogoEwallet = $ewalletLogoPath !== null && is_file(public_path($ewalletLogoPath));
 
-    // Tentukan metode pembayaran manual yang tersedia dengan fallback yang lebih baik
-    $methods = $setting?->payment_methods ?? ['transfer', 'tunai'];
-    if (!is_array($methods) || empty($methods)) {
-        $methods = ['transfer', 'tunai'];
-    }
-    $hasTransfer = in_array('transfer', $methods);
-    $hasTunai = in_array('tunai', $methods);
+    // Tentukan metode pembayaran manual yang benar-benar diaktifkan wilayah
+    $methods = is_array($setting?->payment_methods) ? $setting->payment_methods : [];
+    $hasTransfer = in_array('transfer', $methods, true);
+    $hasTunai = in_array('tunai', $methods, true);
 
     // E-Wallet menuruti sakelarnya di Pengaturan Pembayaran Wilayah, bukan
     // sekadar "kolomnya terisi". Wilayah yang pernah mengisi nomornya lalu
     // mematikan sakelarnya tidak boleh tetap menerima kiriman ke situ.
-    $hasEwallet = in_array('ewallet', $methods)
+    $hasEwallet = in_array('ewallet', $methods, true)
         && !empty($setting->ewallet_name) && !empty($setting->ewallet_number);
-    
-    // Pastikan setidaknya satu metode tersedia
-    if (!$hasTransfer && !$hasTunai && !$hasEwallet) {
-        $hasTransfer = true;
-        $hasTunai = true;
-    }
-    
-    // Tentukan metode aktif default
-    $defaultMethod = $hasTransfer ? 'transfer' : 'tunai';
+
+    $hasAnyPayment = $hasTransfer || $hasTunai || $hasEwallet;
+
+    // Tentukan metode aktif default mengikuti urutan yang tersedia
+    $defaultMethod = $hasTransfer ? 'transfer' : ($hasEwallet ? 'ewallet' : ($hasTunai ? 'tunai' : ''));
 
 @endphp
 
@@ -360,13 +353,9 @@
                          sehingga wilayah yang hanya menyalakan salah satunya tidak
                          memunculkan tombol pembayaran sama sekali — pembeli melihat
                          judul "Metode Pembayaran" dengan ruang kosong di bawahnya. --}}
-                    @if($hasTransfer || $hasTunai || $hasEwallet)
+                    @if($hasAnyPayment)
 
-                    {{-- KELOMPOK 1 — Bayar langsung ke desa.
-                         Diletakkan paling atas karena inilah cara yang uangnya
-                         langsung masuk ke rekening desa penyelenggara layanan,
-                         tanpa perantara gateway. --}}
-                    @if($hasTransfer || $hasTunai)
+                    {{-- Bayar langsung ke desa (Transfer Bank / E-Wallet / Tunai sesuai sakelar wilayah) --}}
                     <div class="mb-5">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Bayar Langsung ke Pengelola</span>
@@ -428,7 +417,6 @@
                         @endif
                         </div>
                     </div>
-                    @endif
 
                     <!-- Transfer Manual ke Rekening Wilayah -->
                     {{-- Hanya dirender kalau transfer memang tersedia. Menyembunyikannya
@@ -524,6 +512,7 @@
                     </div>
                     @endif
                     <!-- Cash Payment Card -->
+                    @if($hasTunai)
                     <div id="cash-payment" class="payment-content {{ $defaultMethod === 'tunai' ? '' : 'hidden' }}">
                         <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
                             <div class="flex flex-col items-center sm:flex-row sm:justify-between gap-6">
@@ -548,16 +537,12 @@
                             </div>
                         </div>
                     </div>
-
-                    @if(! $hasTransfer && ! $hasTunai && ! $hasEwallet)
-                        {{-- Tidak mungkin dicapai lewat @if pembungkus di atas, tetapi
-                             ditulis agar keadaan "tidak ada metode apa pun" punya
-                             tampilan, bukan ruang kosong. --}}
+                    @endif
+                    @else
                         <div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-                            Wilayah ini belum menyalakan metode pembayaran apa pun.
+                            Wilayah ini belum mengaktifkan metode pembayaran apa pun.
                             Silakan hubungi pengelola layanan.
                         </div>
-                    @endif
                     @endif {{-- ada metode --}}
                     <input type="hidden" name="payment_method" id="payment-method-hidden" value="{{ $defaultMethod }}">
 
@@ -905,8 +890,8 @@
         };
 
         // Initialize display based on default value
-        const initialMethod = document.getElementById('payment-method-hidden')?.value || 'tunai';
-        if(initialMethod) setPaymentMethod(initialMethod);
+        const initialMethod = document.getElementById('payment-method-hidden')?.value || '';
+        if (initialMethod) setPaymentMethod(initialMethod);
 
         // File Upload Display
         const fileInput = document.getElementById('payment-proof');
@@ -957,6 +942,17 @@
                 }
 
 
+
+                const selectedPayment = document.getElementById('payment-method-hidden')?.value || '';
+                if (!selectedPayment) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Pembayaran Belum Tersedia',
+                        text: 'Wilayah ini belum mengaktifkan metode pembayaran apa pun. Silakan hubungi pengelola.',
+                        confirmButtonColor: '#3085d6',
+                    });
+                    return;
+                }
 
                 gasConfirmationModal.style.display = 'flex';
                 gasConfirmationModal.classList.remove('hidden');

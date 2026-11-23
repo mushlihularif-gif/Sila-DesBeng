@@ -108,6 +108,14 @@ class FasilitasUmumBookingController extends Controller
 
         // Metode bayar hanya bermakna kalau pesanannya memang ditagih.
         $metodeBayar = $totalAmount > 0 ? ($validated['payment_method'] ?? 'tunai') : null;
+        if ($totalAmount > 0) {
+            $profile = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
+            if ($profile->region() && ! in_array($metodeBayar, $profile->metodeTersedia(), true)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'payment_method' => 'Metode pembayaran ini tidak diaktifkan oleh pengelola wilayah.',
+                ]);
+            }
+        }
         if ($totalAmount > 0 && in_array($metodeBayar, ['transfer', 'ewallet'], true) && ! $request->hasFile('payment_proof')) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'payment_proof' => ['Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.'],

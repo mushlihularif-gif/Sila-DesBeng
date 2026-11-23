@@ -70,19 +70,15 @@
     }
     $adaLogoEwallet = $ewalletLogoPath !== null && is_file(public_path($ewalletLogoPath));
 
-    // Metode transfer, ewallet dan gateway
-    $methods = $setting?->payment_methods ?? ['tunai'];
-    if (!is_array($methods) || empty($methods)) $methods = ['tunai'];
-    $hasTransfer = in_array('transfer', $methods);
-    $hasTunai = in_array('tunai', $methods);
-    $hasEwallet = in_array('ewallet', $methods)
+    // Metode pembayaran manual mengikuti pengaturan Pembayaran Wilayah
+    $methods = is_array($setting?->payment_methods) ? $setting->payment_methods : [];
+    $hasTransfer = in_array('transfer', $methods, true);
+    $hasTunai = in_array('tunai', $methods, true);
+    $hasEwallet = in_array('ewallet', $methods, true)
         && !empty($setting->ewallet_name) && !empty($setting->ewallet_number);
+    $hasAnyPayment = $hasTransfer || $hasTunai || $hasEwallet;
 
-    if (!$hasTransfer && !$hasTunai) {
-        $hasTunai = true;
-    }
-
-    $defaultPaymentMethod = $hasTransfer ? 'transfer' : 'tunai';
+    $defaultPaymentMethod = $hasTransfer ? 'transfer' : ($hasEwallet ? 'ewallet' : ($hasTunai ? 'tunai' : ''));
 @endphp
 
 @section('page')
@@ -686,6 +682,7 @@
                     @endif
 
                     <!-- Cash Payment Card -->
+                    @if($hasTunai)
                     <div id="cash-payment-mobil" class="payment-content {{ $defaultPaymentMethod === 'tunai' ? '' : 'hidden' }}">
                         <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
                             <div class="flex flex-col items-center sm:flex-row sm:justify-between gap-6">
@@ -707,6 +704,13 @@
                             </div>
                         </div>
                     </div>
+                    @endif
+
+                    @if(! $hasAnyPayment)
+                    <div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+                        Wilayah ini belum mengaktifkan metode pembayaran apa pun. Silakan hubungi pengelola layanan.
+                    </div>
+                    @endif
 
                 </div>
 
@@ -1225,6 +1229,11 @@
             Swal.fire({ icon: 'warning', title: 'Persetujuan SOP', text: 'Anda harus menyetujui Ketentuan SOP terlebih dahulu.' });
             return;
         }
+        const selectedPayment = document.getElementById('payment-method-mobil')?.value || '';
+        if (!selectedPayment) {
+            Swal.fire({ icon: 'warning', title: 'Pembayaran Belum Tersedia', text: 'Wilayah ini belum mengaktifkan metode pembayaran apa pun. Silakan hubungi pengelola.' });
+            return;
+        }
 
         // Buka Modal Konfirmasi
         if (confirmationModal) {
@@ -1297,7 +1306,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal Memesan',
-                    text: data.message || 'Terjadi kendala saat memproses pesanan.'
+                    text: Object.values(data.errors || {}).flat()[0] || data.message || 'Terjadi kendala saat memproses pesanan.'
                 });
             }
         })

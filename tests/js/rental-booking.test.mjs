@@ -17,7 +17,7 @@ function page(delivery, payment, basis = 'per_activity') {
     element('booking-form'); element('delivery-method-input', delivery);
     element('payment-method-hidden', payment); element('quantity-display', '2'); element('quantity-display-jemput', '3');
     element('hidden-quantity', '1'); element('confirmation-modal'); element('proceed-confirmation');
-    element('agree-sop-antar'); element('agree-sop-jemput');
+    element('agree-sop'); element('agree-sop-antar'); element('agree-sop-jemput');
     element('start-date', '2026-11-12'); element('end-date', '2026-11-14');
     element('start-date-jemput', '2026-11-15'); element('end-date-jemput', '2026-11-16');
     element('rental-purpose', 'Acara'); element('rental-purpose-jemput', 'Acara Jemput');
@@ -54,14 +54,28 @@ for (const payment of ['transfer', 'ewallet']) {
     });
 }
 
-test('collection uses its own quantity and dates, cash, and no hidden transfer proof', () => {
-    const p = page('jemput', 'transfer'); p.nodes.get('proceed-confirmation').handlers.click();
-    const data = p.requests[0].body;
-    assert.equal(data.get('quantity'), '3'); assert.equal(data.get('payment_method'), 'tunai');
-    assert.equal(data.has('payment_proof'), false);
-    assert.equal(p.nodes.get('start-date').value, '2026-11-15');
-    assert.equal(p.nodes.get('end-date').value, '2026-11-16');
-    assert.equal(p.nodes.get('rental-purpose').value, 'Acara Jemput');
+test('collection uses its own quantity and dates and respects selected payment method (transfer, ewallet, tunai)', () => {
+    const withTransfer = page('jemput', 'transfer');
+    withTransfer.nodes.get('proceed-confirmation').handlers.click();
+    const transferData = withTransfer.requests[0].body;
+    assert.equal(transferData.get('quantity'), '3');
+    assert.equal(transferData.get('payment_method'), 'transfer');
+    assert.equal(transferData.get('payment_proof'), withTransfer.bankFile);
+    assert.equal(withTransfer.nodes.get('start-date').value, '2026-11-15');
+    assert.equal(withTransfer.nodes.get('end-date').value, '2026-11-16');
+    assert.equal(withTransfer.nodes.get('rental-purpose').value, 'Acara Jemput');
+
+    const withEwallet = page('jemput', 'ewallet');
+    withEwallet.nodes.get('proceed-confirmation').handlers.click();
+    const ewalletData = withEwallet.requests[0].body;
+    assert.equal(ewalletData.get('payment_method'), 'ewallet');
+    assert.equal(ewalletData.get('payment_proof'), withEwallet.walletFile);
+
+    const withCash = page('jemput', 'tunai');
+    withCash.nodes.get('proceed-confirmation').handlers.click();
+    const cashData = withCash.requests[0].body;
+    assert.equal(cashData.get('payment_method'), 'tunai');
+    assert.equal(cashData.has('payment_proof'), false);
 });
 
 test('daily totals include both dates; single use ignores duration', () => {

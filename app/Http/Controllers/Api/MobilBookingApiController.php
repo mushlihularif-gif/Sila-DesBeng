@@ -114,8 +114,8 @@ class MobilBookingApiController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'recipient_name' => 'required|string|max:255',
             'delivery_address' => 'nullable|string|max:500',
-            'payment_method' => 'required|in:tunai,transfer',
-            'payment_proof' => 'required_if:payment_method,transfer|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'payment_method' => 'required|in:tunai,transfer,ewallet',
+            'payment_proof' => 'required_if:payment_method,transfer,ewallet|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'rental_purpose' => 'nullable|string|max:500',
             'delivery_method' => 'nullable|in:antar,jemput',
             'dengan_supir' => 'nullable|boolean',
@@ -134,12 +134,19 @@ class MobilBookingApiController extends Controller
                     ], 422);
                 }
 
+                $profile = \App\Support\ProfilPembayaranWilayah::untuk($mobil->region_id);
+                if ($profile->region() && ! in_array($request->payment_method, $profile->metodeTersedia(), true)) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'payment_method' => 'Metode pembayaran ini tidak diaktifkan oleh pengelola wilayah.',
+                    ]);
+                }
+
                 $startDate = \Carbon\Carbon::parse($request->start_date);
                 $endDate = \Carbon\Carbon::parse($request->end_date);
                 $daysCount = $startDate->diffInDays($endDate) + 1;
                 $totalAmount = $mobil->harga_sewa * $daysCount;
 
-                if ($request->payment_method === 'transfer') {
+                if (in_array($request->payment_method, ['transfer', 'ewallet'], true)) {
                     $proofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
                 }
 

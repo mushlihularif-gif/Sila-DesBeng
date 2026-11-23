@@ -125,12 +125,18 @@
 </style>
 
 @php
-    $bankActive = (bool) old('bank_active', $region->payment_info['bank_active'] ?? true);
-    $cashActive = (bool) old('cash_only_active', $region->payment_info['cash_only_active'] ?? false);
-    $ewalletActive = (bool) old('ewallet_active', $region->payment_info['ewallet_active'] ?? false);
-    $currentBank = old('bank_name', $region->payment_info['bank_name'] ?? '');
-    $currentEwallet = old('ewallet_name', $region->payment_info['ewallet_name'] ?? '');
-    $currentTheme = old('card_theme', $region->payment_info['card_theme'] ?? 'blue');
+    $hasOld = session()->hasOldInput();
+    $payInfo = $region->payment_info ?? [];
+    $bankActive = $hasOld ? (bool) old('bank_active') : (bool) ($payInfo['bank_active'] ?? true);
+    $ewalletActive = $hasOld ? (bool) old('ewallet_active') : (bool) ($payInfo['ewallet_active'] ?? false);
+    $hasNonCashReady = ($bankActive && filled($payInfo['bank_name'] ?? null) && filled($payInfo['account_number'] ?? null))
+        || ($ewalletActive && filled($payInfo['ewallet_name'] ?? null) && filled($payInfo['ewallet_number'] ?? null));
+    $cashActive = $hasOld
+        ? (bool) old('cash_only_active')
+        : (array_key_exists('cash_only_active', $payInfo) ? (bool) $payInfo['cash_only_active'] : ! $hasNonCashReady);
+    $currentBank = old('bank_name', $payInfo['bank_name'] ?? '');
+    $currentEwallet = old('ewallet_name', $payInfo['ewallet_name'] ?? '');
+    $currentTheme = old('card_theme', $payInfo['card_theme'] ?? 'blue');
 
     $bankOptions = [
         ['value' => 'BSI', 'logo' => 'bsi.png'],

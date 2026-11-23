@@ -211,10 +211,14 @@
                         // mengikuti pilihan Kategori Acara, bukan langsung.
                         $bisaBerbayar = $item->status_biaya === 'berbayar' && $item->harga_sewa > 0;
 
-                        // Transfer manual hanya ditawarkan kalau wilayah sudah
-                        // mengisi rekeningnya sendiri di panel admin daerah.
-                        $metodeWilayah = $setting?->payment_methods ?? [];
-                        $hasTransfer = in_array('transfer', is_array($metodeWilayah) ? $metodeWilayah : []);
+                        // Semua metode pembayaran mengikuti sakelar Pembayaran Wilayah.
+                        $metodeWilayah = is_array($setting?->payment_methods) ? $setting->payment_methods : [];
+                        $hasTransfer = in_array('transfer', $metodeWilayah, true);
+                        $hasTunai = in_array('tunai', $metodeWilayah, true);
+                        $hasEwallet = in_array('ewallet', $metodeWilayah, true)
+                            && !empty($setting->ewallet_name) && !empty($setting->ewallet_number);
+                        $hasAnyPayment = $hasTransfer || $hasTunai || $hasEwallet;
+                        $defaultPaymentMethod = $hasTransfer ? 'transfer' : ($hasEwallet ? 'ewallet' : ($hasTunai ? 'tunai' : ''));
 
                         $bankLogos = [
                             'Bank Syariah Indonesia' => 'Admin/img/banks/bsi.png',
@@ -236,26 +240,53 @@
                                 break;
                             }
                         }
+
+                        $ewalletLogos = [
+                            'DANA' => 'assets/img/payment_logos/dana.png',
+                            'OVO' => 'assets/img/payment_logos/ovo.png',
+                            'GOPAY' => 'assets/img/payment_logos/gopay.png',
+                            'SHOPEEPAY' => 'assets/img/payment_logos/shopeepay.png',
+                        ];
+                        $ewalletName = strtoupper($setting->ewallet_name ?? '');
+                        $ewalletLogoPath = null;
+                        foreach ($ewalletLogos as $kunci => $jalur) {
+                            if ($ewalletName !== '' && str_contains($ewalletName, strtoupper($kunci))) {
+                                $ewalletLogoPath = $jalur;
+                                break;
+                            }
+                        }
+                        $adaLogoEwallet = $ewalletLogoPath !== null && is_file(public_path($ewalletLogoPath));
                     @endphp
 
                     @if($bisaBerbayar)
                     <div id="pembayaran-fasilitas" class="mb-6 hidden">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">Metode Pembayaran</h3>
-                        <input type="hidden" name="payment_method" id="payment-method-fasilitas" value="{{ $hasTransfer ? 'transfer' : 'tunai' }}">
+                        <input type="hidden" name="payment_method" id="payment-method-fasilitas" value="{{ $defaultPaymentMethod }}">
 
-                        @if($hasTransfer)
-                        <div class="grid grid-cols-2 gap-3 mb-6">
+                        @if($hasAnyPayment)
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                            @if($hasTransfer)
                             <button type="button" onclick="pilihMetodeFasilitas('transfer')" id="btn-fasilitas-transfer"
-                                    class="py-4 px-3 rounded-2xl font-bold border-2 border-blue-500 bg-blue-50 text-blue-700 transition-all">
+                                    class="py-4 px-3 rounded-2xl font-bold border-2 {{ $defaultPaymentMethod === 'transfer' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 bg-white text-gray-600' }} transition-all">
                                 Transfer Bank
                             </button>
+                            @endif
+                            @if($hasTunai)
                             <button type="button" onclick="pilihMetodeFasilitas('tunai')" id="btn-fasilitas-tunai"
-                                    class="py-4 px-3 rounded-2xl font-bold border-2 border-gray-200 bg-white text-gray-600 transition-all">
+                                    class="py-4 px-3 rounded-2xl font-bold border-2 {{ $defaultPaymentMethod === 'tunai' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 bg-white text-gray-600' }} transition-all">
                                 Bayar di Tempat
                             </button>
+                            @endif
+                            @if($hasEwallet)
+                            <button type="button" onclick="pilihMetodeFasilitas('ewallet')" id="btn-fasilitas-ewallet"
+                                    class="py-4 px-3 rounded-2xl font-bold border-2 {{ $defaultPaymentMethod === 'ewallet' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 bg-white text-gray-600' }} transition-all">
+                                {{ $setting->ewallet_name }}
+                            </button>
+                            @endif
                         </div>
 
-                        <div id="transfer-payment-fasilitas">
+                        @if($hasTransfer)
+                        <div id="transfer-payment-fasilitas" class="fasilitas-payment-content {{ $defaultPaymentMethod === 'transfer' ? '' : 'hidden' }}">
                             <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-lg p-6">
                                 <h4 class="font-bold text-gray-800 mb-4">Transfer ke Rekening Berikut</h4>
 
@@ -292,9 +323,58 @@
                                 </p>
                             </div>
                         </div>
+                        @endif
+
+                        @if($hasEwallet)
+                        <div id="ewallet-payment-fasilitas" class="fasilitas-payment-content {{ $defaultPaymentMethod === 'ewallet' ? '' : 'hidden' }}">
+                            <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-lg p-6">
+                                <h4 class="font-bold text-gray-800 mb-4">Kirim ke E-Wallet Berikut</h4>
+
+                                <div class="flex items-center gap-4 bg-gradient-to-br from-sky-50 to-cyan-50 rounded-2xl p-5 mb-4">
+                                    @if($adaLogoEwallet)
+                                        <img src="{{ asset($ewalletLogoPath) }}" alt="{{ $setting->ewallet_name }}" class="h-8 object-contain">
+                                    @endif
+                                    <div class="min-w-0">
+                                        <div class="text-xs uppercase tracking-wider text-gray-500">{{ $setting->ewallet_name }}</div>
+                                        <div class="text-xl font-black tracking-wide text-gray-900 select-all break-all">
+                                            {{ $setting->ewallet_number }}
+                                        </div>
+                                        <div class="text-sm text-gray-600">a.n. {{ $setting->ewallet_account_holder ?: '-' }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-5">
+                                    <p class="text-sm text-amber-800">
+                                        <strong>Kirim dari sesama {{ $setting->ewallet_name }}</strong>
+                                        agar tidak dikenai biaya transfer. Pengiriman dari aplikasi lain tetap diterima,
+                                        tetapi biayanya ditanggung Anda.
+                                    </p>
+                                </div>
+
+                                <label class="block text-sm font-bold text-gray-700 mb-2">
+                                    Unggah Bukti Pengiriman <span class="text-red-500">*</span>
+                                </label>
+                                <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
+                                       class="block w-full text-sm text-gray-600 border-2 border-dashed border-sky-200 rounded-xl p-3
+                                              file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                                              file:bg-sky-500 file:text-white file:font-semibold hover:file:bg-sky-600">
+                                <p class="text-xs text-gray-500 mt-2">
+                                    JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda diperiksa petugas sebelum pesanan diproses.
+                                </p>
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($hasTunai)
+                        <div id="cash-payment-fasilitas" class="fasilitas-payment-content {{ $defaultPaymentMethod === 'tunai' ? '' : 'hidden' }}">
+                            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+                                <p class="text-gray-700">Pembayaran tunai dilakukan langsung kepada petugas pengelola di lokasi.</p>
+                            </div>
+                        </div>
+                        @endif
                         @else
-                        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6">
-                            <p class="text-gray-700">Pembayaran dilakukan langsung di tempat saat pengambilan atau pengantaran.</p>
+                        <div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+                            Wilayah ini belum mengaktifkan metode pembayaran apa pun. Silakan hubungi pengelola layanan.
                         </div>
                         @endif
                     </div>
@@ -553,7 +633,7 @@
                         successModal.style.display = 'flex';
                         successModal.classList.remove('hidden');
                     } else {
-                        Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Terjadi kesalahan' });
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: Object.values(data.errors || {}).flat()[0] || data.message || 'Terjadi kesalahan' });
                     }
                 })
                 .catch(error => {
@@ -576,10 +656,27 @@
         var input = document.getElementById('payment-method-fasilitas');
         if (input) input.value = metode;
 
-        var panel = document.getElementById('transfer-payment-fasilitas');
-        if (panel) panel.classList.toggle('hidden', metode !== 'transfer');
+        var panels = [
+            ['transfer-payment-fasilitas', 'transfer'],
+            ['ewallet-payment-fasilitas', 'ewallet'],
+            ['cash-payment-fasilitas', 'tunai']
+        ];
+        panels.forEach(function (pair) {
+            var panel = document.getElementById(pair[0]);
+            if (!panel) return;
+            var hidden = pair[1] !== metode;
+            panel.classList.toggle('hidden', hidden);
+            panel.querySelectorAll('input[type="file"]').forEach(function (inp) {
+                inp.disabled = hidden;
+                if (hidden) inp.value = '';
+            });
+        });
 
-        [['btn-fasilitas-transfer', 'transfer'], ['btn-fasilitas-tunai', 'tunai']].forEach(function (pasangan) {
+        [
+            ['btn-fasilitas-transfer', 'transfer'],
+            ['btn-fasilitas-tunai', 'tunai'],
+            ['btn-fasilitas-ewallet', 'ewallet']
+        ].forEach(function (pasangan) {
             var el = document.getElementById(pasangan[0]);
             if (!el) return;
             var aktif = pasangan[1] === metode;
@@ -591,5 +688,12 @@
             el.classList.toggle('text-gray-600', !aktif);
         });
     };
+
+    (function initMetodeFasilitas() {
+        var input = document.getElementById('payment-method-fasilitas');
+        if (input && input.value && typeof window.pilihMetodeFasilitas === 'function') {
+            window.pilihMetodeFasilitas(input.value);
+        }
+    })();
 </script>
 @endpush

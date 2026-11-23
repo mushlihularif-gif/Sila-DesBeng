@@ -112,7 +112,7 @@ class FasilitasBookingApiController extends Controller
             'jenis_acara' => 'nullable|in:sosial,komersial,pribadi',
             'butuh_gudang' => 'nullable|boolean',
             'quantity' => 'nullable|integer|min:1|max:100',
-            'payment_method' => 'nullable|in:tunai,transfer',
+            'payment_method' => 'nullable|in:tunai,transfer,ewallet',
             'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'delivery_method' => 'nullable|string',
             'dengan_supir' => 'nullable|boolean',
@@ -140,8 +140,17 @@ class FasilitasBookingApiController extends Controller
                     ? $daysCount * $fasilitas->harga_sewa * ($request->quantity ?? 1) : 0;
                 $paymentMethod = $totalAmount > 0 ? ($request->payment_method ?? 'tunai') : null;
 
-                if ($paymentMethod === 'transfer') {
-                    $request->validate(['payment_proof'=>'required|file|mimes:jpg,jpeg,png,pdf|max:5120'], ['payment_proof.required'=>'Unggah bukti transfer untuk melanjutkan pemesanan.']);
+                if ($totalAmount > 0) {
+                    $profile = \App\Support\ProfilPembayaranWilayah::untuk($fasilitas->region_id);
+                    if ($profile->region() && ! in_array($paymentMethod, $profile->metodeTersedia(), true)) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'payment_method' => 'Metode pembayaran ini tidak diaktifkan oleh pengelola wilayah.',
+                        ]);
+                    }
+                }
+
+                if (in_array($paymentMethod, ['transfer', 'ewallet'], true)) {
+                    $request->validate(['payment_proof'=>'required|file|mimes:jpg,jpeg,png,pdf|max:5120'], ['payment_proof.required'=>'Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.']);
                     $proofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
                 }
 
