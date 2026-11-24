@@ -182,15 +182,24 @@
                                 <p class="text-xs sm:text-sm text-gray-600 mb-3">
                                     Peminjaman fasilitas gedung/ruang publik digunakan langsung di lokasi bangunan yang bersangkutan.
                                 </p>
-                                <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-blue-100/80 text-xs sm:text-sm">
+                                <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-blue-100 text-xs sm:text-sm">
                                     <div class="flex items-center gap-1.5 text-gray-700">
                                         <i class="bx bx-map-pin text-red-500 text-base flex-shrink-0"></i>
                                         <span class="font-semibold">{{ $item->lokasi ?? 'Area Desa / Gedung Serbaguna' }}</span>
                                     </div>
                                     @if($item->latitude && $item->longitude)
-                                    <a href="https://www.google.com/maps?q={{ $item->latitude }},{{ $item->longitude }}" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold underline text-xs">
-                                        <i class="bx bx-navigation"></i> Buka di Google Maps
-                                    </a>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <a href="https://www.google.com/maps?q={{ $item->latitude }},{{ $item->longitude }}" target="_blank" rel="noopener noreferrer"
+                                           class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 font-bold text-xs shadow-sm transition-colors">
+                                            <i class="bx bx-map-pin text-sm"></i>
+                                            <span>Buka di Google Maps</span>
+                                        </a>
+                                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ $item->latitude }},{{ $item->longitude }}" target="_blank" rel="noopener noreferrer"
+                                           class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-bold text-xs shadow-sm transition-colors">
+                                            <i class="bx bx-navigation text-sm"></i>
+                                            <span>Petunjuk Arah</span>
+                                        </a>
+                                    </div>
                                     @endif
                                 </div>
                             </div>

@@ -76,7 +76,12 @@
 
     @endif
 
-    <button type="button" id="btn-alamat-baru-pesanan" class="mt-3 text-sm font-semibold text-blue-700 underline">Gunakan alamat baru untuk pesanan ini</button>
+    <button type="button" id="btn-alamat-baru-pesanan" class="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-xl border border-blue-600 bg-white text-xs font-bold text-blue-600 hover:bg-blue-50 shadow-sm transition-colors">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Gunakan Alamat Baru untuk Pesanan Ini</span>
+    </button>
     @unless($gunakanPetaTerpisah ?? false)
     <div class="mt-3 rounded-xl border border-blue-100 bg-blue-50/60 p-3">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
