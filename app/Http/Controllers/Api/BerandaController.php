@@ -89,7 +89,7 @@ class BerandaController extends Controller
      */
     public function services()
     {
-        $user = auth('sanctum')->user();
+        $user = auth('sanctum')->user() ?? auth()->user();
         $userRegionId = $user?->region_id;
 
         $rentals = app(\App\Services\RentalOrdering::class)->visibleQuery($user)
@@ -120,7 +120,7 @@ class BerandaController extends Controller
                 ];
             });
 
-        $visibleMobilRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil');
+        $visibleMobilRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil', $user === null);
         $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()
             ->whereRaw('LOWER(status) = ?', ['tersedia'])
             ->whereIn('region_id', $visibleMobilRegions ?: [-1]);
@@ -134,7 +134,7 @@ class BerandaController extends Controller
             ];
         });
 
-        $visibleFasilitasRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'fasilitas-umum');
+        $visibleFasilitasRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'fasilitas-umum', $user === null);
         $fasilitasQuery = \App\Models\FasilitasUmum::inCatalog()
             ->whereRaw('LOWER(status) = ?', ['tersedia'])
             ->whereIn('region_id', $visibleFasilitasRegions ?: [-1]);
@@ -199,7 +199,7 @@ class BerandaController extends Controller
 
     public function popular(Request $request)
     {
-        $user = auth('sanctum')->user();
+        $user = auth('sanctum')->user() ?? auth()->user();
         $userRegionId = $user?->region_id;
         $limitPerCategory = 5;
 
@@ -241,7 +241,7 @@ class BerandaController extends Controller
                 ];
             });
 
-        $visibleMobilRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil');
+        $visibleMobilRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil', $user === null);
         $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()
             ->whereRaw('LOWER(status) = ?', ['tersedia'])
             ->whereIn('region_id', $visibleMobilRegions ?: [-1]);

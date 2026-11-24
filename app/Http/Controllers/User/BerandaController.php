@@ -197,13 +197,14 @@ class BerandaController extends Controller
         $regionIds = array_merge([$regionId], \App\Models\Region::getDescendantIds($regionId));
         $viewer = auth()->user();
         $viewerRegionId = $viewer?->region_id ? (int) $viewer->region_id : null;
+        $isGuest = $viewer === null;
 
-        // Hormati aturan akses layanan wilayah (is_active & is_exclusive) agar produk
-        // "Khusus Warga Desa" atau unit nonaktif tidak pernah bocor ke desa lain / tamu.
+        // Untuk guest (belum login): tampilkan etalase produk dari seluruh desa yang unitnya aktif.
+        // Untuk warga login: hormati aturan is_active & is_exclusive (Khusus Warga Desa).
         $visibleRentalIds = app(\App\Services\RentalOrdering::class)->visibleQuery($viewer)->pluck('id')->all();
         $visibleGasIds = app(\App\Services\GasOrdering::class)->visibleQuery($viewer)->pluck('id')->all();
-        $visibleMobilRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'penyewaan-mobil');
-        $visibleFasilitasRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'fasilitas-umum');
+        $visibleMobilRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'penyewaan-mobil', $isGuest);
+        $visibleFasilitasRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'fasilitas-umum', $isGuest);
 
         $visibleMobilIds = empty($visibleMobilRegionIds)
             ? []
@@ -688,10 +689,11 @@ class BerandaController extends Controller
         $results = collect([]);
         $viewer = auth()->user();
         $viewerRegionId = $viewer?->region_id ? (int) $viewer->region_id : null;
+        $isGuest = $viewer === null;
 
         // 1. Search Mobil Items (Only if mobil intent or general search, respecting is_exclusive & is_active)
         if (!$hasSpecificIntent || $isMobilIntent) {
-            $visibleMobilRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'penyewaan-mobil');
+            $visibleMobilRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'penyewaan-mobil', $isGuest);
             $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()
                 ->where('status', '!=', 'rusak')
                 ->whereIn('region_id', $visibleMobilRegionIds ?: [-1]);
@@ -802,7 +804,7 @@ class BerandaController extends Controller
 
         // 4. Search Fasilitas Umum Items (Only if fasilitas intent or general search, respecting is_exclusive & is_active)
         if (!$hasSpecificIntent || $isFasilitasIntent) {
-            $visibleFasilitasRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'fasilitas-umum');
+            $visibleFasilitasRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'fasilitas-umum', $isGuest);
             $fasilitasQuery = \App\Models\FasilitasUmum::inCatalog()
                 ->where('status', '!=', 'Tidak Tersedia')
                 ->whereIn('region_id', $visibleFasilitasRegionIds ?: [-1]);

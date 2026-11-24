@@ -58,6 +58,7 @@
     <form action="{{ route('admin.system-settings.update') }}" method="POST" id="region-settings-form">
         @csrf
         @method('PUT')
+        <input type="hidden" name="access_toggle_mode" value="public">
         
         <div class="nav-align-top mb-4">
             <ul class="nav nav-pills mb-4 gap-2 flex-nowrap overflow-x-auto pb-1" role="tablist" style="scrollbar-width: none;">
@@ -230,17 +231,20 @@
                                                 </small>
                                             </div>
 
+                                            @php
+                                                $isPublicSys = in_array($service->id, $publicAccessServices ?? []);
+                                            @endphp
                                             <div class="border-top pt-2 mt-2">
                                                 <label class="form-label text-dark fw-bold small mb-2 d-flex align-items-center">
-                                                    <i class="bx bx-shield-quarter text-warning me-1"></i> Hak Akses Eksklusif
+                                                    <i class="bx bx-world text-info me-1"></i> Izinkan Desa / Wilayah Lain
                                                 </label>
                                                 
                                                 <div class="form-check form-switch mb-1">
-                                                    <input type="checkbox" name="exclusive_services[]" value="{{ $service->id }}" class="form-check-input exclusive-toggle" style="cursor: pointer; border-color: #ffab00;" {{ in_array($service->id, $exclusiveServices) ? 'checked' : '' }}>
-                                                    <label class="form-check-label small fw-bold text-dark exclusive-label-main">{{ in_array($service->id, $exclusiveServices) ? 'Eksklusif Warga Lokal' : 'Publik (Terbuka Umum)' }}</label>
+                                                    <input type="checkbox" name="public_services[]" value="{{ $service->id }}" class="form-check-input public-access-toggle" style="cursor: pointer;" {{ $isPublicSys ? 'checked' : '' }}>
+                                                    <label class="form-check-label small fw-bold text-dark exclusive-label-main">{{ $isPublicSys ? 'Terbuka Desa Lain' : 'Khusus Warga Lokal' }}</label>
                                                 </div>
-                                                <small class="exclusive-desc-text {{ in_array($service->id, $exclusiveServices) ? 'text-warning' : 'text-primary' }} d-block text-break" style="font-size: 0.75rem;">
-                                                    {{ in_array($service->id, $exclusiveServices) ? 'Hanya warga domisili '.$region->name.' '.$descText : 'Semua warga termasuk dari luar wilayah dapat mengakses layanan ini.' }}
+                                                <small class="exclusive-desc-text {{ $isPublicSys ? 'text-primary' : 'text-warning' }} d-block text-break" style="font-size: 0.75rem;">
+                                                    {{ $isPublicSys ? 'Semua warga termasuk dari luar wilayah dapat mengakses layanan ini.' : 'Hanya warga domisili '.$region->name.' '.$descText }}
                                                 </small>
                                             </div>
 
@@ -848,32 +852,21 @@
         toggle.addEventListener('change', function() { updateServiceCard(this); });
     });
 
-    // Logika Hak Akses Eksklusif Toggle
-    const exclusiveToggles = document.querySelectorAll('.exclusive-toggle');
-    exclusiveToggles.forEach(toggle => {
-        const updateExclusiveCard = (el) => {
+    // Logika Sakelar Izinkan Desa / Wilayah Lain (OFF = Khusus Warga Lokal, ON = Terbuka Desa Lain)
+    const publicAccessToggles = document.querySelectorAll('.public-access-toggle');
+    publicAccessToggles.forEach(toggle => {
+        const updateAccessCard = (el) => {
             const card = el.closest('.card-service-item');
             if (!card) return;
             const label = card.querySelector('.exclusive-label-main');
             const descContainer = card.querySelector('.exclusive-desc-text');
             const isPengumuman = card.querySelector('span.fw-bold') && card.querySelector('span.fw-bold').innerText.includes('Kabar dan Informasi');
-            const regionName = "{{ $region->name }}";
+            const regionName = @json($region->name);
             const actionText = card.getAttribute('data-action') || 'yang dapat mengakses layanan ini.';
             
             if(label && label.classList.contains('exclusive-label-main')) {
                 if(el.checked) {
-                    label.innerText = 'Eksklusif Warga Lokal';
-                    if(descContainer) {
-                        descContainer.classList.remove('text-primary');
-                        descContainer.classList.add('text-warning');
-                        if (isPengumuman) {
-                            descContainer.innerText = 'Pengumuman HANYA tampil untuk warga domisili ' + regionName + '.';
-                        } else {
-                            descContainer.innerText = 'Hanya warga domisili ' + regionName + ' ' + actionText;
-                        }
-                    }
-                } else {
-                    label.innerText = 'Publik (Terbuka Umum)';
+                    label.innerText = 'Terbuka Desa Lain';
                     if(descContainer) {
                         descContainer.classList.remove('text-warning');
                         descContainer.classList.add('text-primary');
@@ -883,12 +876,23 @@
                             descContainer.innerText = 'Semua warga termasuk dari luar wilayah dapat mengakses layanan ini.';
                         }
                     }
+                } else {
+                    label.innerText = 'Khusus Warga Lokal';
+                    if(descContainer) {
+                        descContainer.classList.remove('text-primary');
+                        descContainer.classList.add('text-warning');
+                        if (isPengumuman) {
+                            descContainer.innerText = 'Pengumuman HANYA tampil untuk warga domisili ' + regionName + '.';
+                        } else {
+                            descContainer.innerText = 'Hanya warga domisili ' + regionName + ' ' + actionText;
+                        }
+                    }
                 }
             }
         };
         
-        updateExclusiveCard(toggle);
-        toggle.addEventListener('change', function() { updateExclusiveCard(this); });
+        updateAccessCard(toggle);
+        toggle.addEventListener('change', function() { updateAccessCard(this); });
     });
 })();
 </script>

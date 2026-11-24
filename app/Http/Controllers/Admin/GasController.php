@@ -129,14 +129,11 @@ class GasController extends Controller
 
         $gas->save();
 
-        // Auto-aktifkan layanan Penjualan Gas untuk wilayah ini di region_services
+        // Auto-aktifkan layanan Penjualan Gas untuk wilayah ini di region_services (default Khusus Warga Desa)
         if ($gas->region_id) {
             $serviceGas = \App\Models\Service::where('slug', 'penjualan-gas')->first();
             if ($serviceGas) {
-                \App\Models\RegionService::updateOrInsert(
-                    ['region_id' => $gas->region_id, 'service_id' => $serviceGas->id],
-                    ['is_active' => true, 'updated_at' => now()]
-                );
+                \App\Models\RegionService::aktifkanUntukWilayah((int) $gas->region_id, (int) $serviceGas->id);
             }
         }
 

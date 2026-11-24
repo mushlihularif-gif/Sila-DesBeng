@@ -125,13 +125,31 @@ class Region extends Model
         return RegionService::where('service_id', $layananId)->exists();
     }
 
-    public static function wilayahLayananTerlihat(?int $userRegionId, string $namaLayanan): array
+    public static function wilayahLayananTerlihat(?int $userRegionId, string $namaLayanan, bool $isGuest = false): array
     {
         $slug = \Illuminate\Support\Str::slug($namaLayanan);
         $layanan = Service::where('name', $namaLayanan)
             ->orWhere('slug', $slug)
             ->orWhere('slug', str_replace('peminjaman-', '', $slug))
             ->first();
+
+        // Pengunjung tamu (guest belum login) belum jelas domisili desanya, sehingga
+        // boleh melihat etalase produk dari seluruh desa yang layanannya aktif (is_active = true).
+        // Layanan yang dinonaktifkan (is_active = false) tetap disembunyikan, dan begitu user login
+        // aturan Khusus Warga Desa (is_exclusive = true) diterapkan secara ketat.
+        if ($isGuest) {
+            if (! $layanan) {
+                return [];
+            }
+
+            return RegionService::where('service_id', $layanan->id)
+                ->where('is_active', true)
+                ->pluck('region_id')
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values()
+                ->all();
+        }
 
         $garis = self::garisLayananUntukWarga($userRegionId);
 

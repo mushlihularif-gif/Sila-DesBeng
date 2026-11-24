@@ -16,12 +16,13 @@ class FasilitasBookingApiController extends Controller
     {
         $query = FasilitasUmum::inCatalog()->whereRaw('LOWER(status) = ?', ['tersedia']);
 
-        $user = $request->user('sanctum');
+        $sanctumUser = $request->user('sanctum');
+        $viewer = $sanctumUser ?? $request->user() ?? auth()->user();
         if (\App\Models\Region::adaPengaturanLayanan('fasilitas-umum')) {
-            $visibleRegionIds = \App\Models\Region::wilayahLayananTerlihat($user?->region_id, 'fasilitas-umum');
+            $visibleRegionIds = \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'fasilitas-umum', $viewer === null);
             $query->whereIn('region_id', $visibleRegionIds ?: [-1]);
-        } elseif ($user && $user->region_id) {
-            $query->where('region_id', $user->region_id);
+        } elseif ($sanctumUser && $sanctumUser->region_id) {
+            $query->where('region_id', $sanctumUser->region_id);
         }
 
         $items = $query->get()
@@ -70,9 +71,9 @@ class FasilitasBookingApiController extends Controller
             ], 404);
         }
 
-        $viewer = request()->user('sanctum');
+        $viewer = request()->user('sanctum') ?? request()->user() ?? auth()->user();
         if ($item->region_id && \App\Models\Region::adaPengaturanLayanan('fasilitas-umum') && \App\Models\Region::whereKey($item->region_id)->exists()) {
-            $allowed = \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'fasilitas-umum');
+            $allowed = \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'fasilitas-umum', $viewer === null);
             if (! in_array((int) $item->region_id, array_map('intval', $allowed), true)) {
                 return response()->json([
                     'status' => 'error',

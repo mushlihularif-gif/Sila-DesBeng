@@ -17,7 +17,7 @@ class MobilRentalUserController extends Controller
         $viewer = auth()->user();
         $isSuperAdmin = $viewer && $viewer->role === 'super_admin';
         $allowedRegionIds = (! $isSuperAdmin && \App\Models\Region::adaPengaturanLayanan('Penyewaan Mobil'))
-            ? \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'Penyewaan Mobil')
+            ? \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'Penyewaan Mobil', $viewer === null)
             : null;
         $visibleRegionIds = $allowedRegionIds;
 
@@ -64,7 +64,7 @@ class MobilRentalUserController extends Controller
         if ($item->region_id && (! $viewer || $viewer->role !== 'super_admin')
             && \App\Models\Region::adaPengaturanLayanan('Penyewaan Mobil')
             && \App\Models\Region::whereKey($item->region_id)->exists()) {
-            $allowed = \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'Penyewaan Mobil');
+            $allowed = \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'Penyewaan Mobil', $viewer === null);
             abort_unless(in_array((int) $item->region_id, array_map('intval', $allowed), true), 403, 'Layanan ini khusus warga lokal atau sedang tidak aktif.');
         }
 

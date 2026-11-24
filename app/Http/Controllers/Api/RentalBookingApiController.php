@@ -14,7 +14,7 @@ class RentalBookingApiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = app(\App\Services\RentalOrdering::class)->visibleQuery($request->user())->where('status', 'tersedia')->where('stok', '>', 0);
+        $query = app(\App\Services\RentalOrdering::class)->visibleQuery($request->user('sanctum') ?? $request->user())->where('status', 'tersedia')->where('stok', '>', 0);
 
         $items = $query->get()
             ->map(function ($item) {
@@ -45,7 +45,7 @@ class RentalBookingApiController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $item = app(\App\Services\RentalOrdering::class)->visibleQuery($request->user())->find($id);
+        $item = app(\App\Services\RentalOrdering::class)->visibleQuery($request->user('sanctum') ?? $request->user())->find($id);
 
         if (!$item) {
             return response()->json([

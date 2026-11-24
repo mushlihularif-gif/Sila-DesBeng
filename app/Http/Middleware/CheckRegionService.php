@@ -84,13 +84,10 @@ class CheckRegionService
             }
 
             if ($hasProducts) {
-                // Auto-sync & aktifkan region_service agar akses cepat dan konsisten
+                // Auto-sync & aktifkan region_service agar akses cepat dan konsisten (default Khusus Warga Desa)
                 $service = \App\Models\Service::whereIn('slug', $targetSlugs)->first();
                 if ($service && $regionId) {
-                    \App\Models\RegionService::updateOrInsert(
-                        ['region_id' => $regionId, 'service_id' => $service->id],
-                        ['is_active' => true, 'is_exclusive' => false, 'updated_at' => now()]
-                    );
+                    \App\Models\RegionService::aktifkanUntukWilayah((int) $regionId, (int) $service->id, true);
                 }
                 return $next($request);
             }
@@ -114,42 +111,24 @@ class CheckRegionService
             return redirect($fallback)->with('error_service_unavailable', 'Mohon Maaf, Daerah ini belum menyediakan Layanan ini');
         }
 
-        // Cek eksklusivitas layanan (hanya untuk warga lokal)
-        if ($regionService && $regionService->is_exclusive) {
+        // Cek eksklusivitas layanan (hanya untuk warga lokal).
+        // Pengunjung tamu (belum login) tetap diperbolehkan melihat etalase katalog desa yang aktif;
+        // saat hendak memesan (booking), middleware auth akan meminta login terlebih dahulu lalu
+        // identitas wilayah diverifikasi secara ketat.
+        if ($regionService && $regionService->is_exclusive && auth()->check()) {
             $isAuthorized = false;
-            if (auth()->check()) {
-                $userRegionId = auth()->user()->region_id;
-                if ($userRegionId == $regionId) {
+            $userRegionId = auth()->user()->region_id;
+            if ($userRegionId == $regionId) {
+                $isAuthorized = true;
+            } else {
+                // Cek apakah region user adalah anak/turunan dari region layanan
+                $ancestorIds = \App\Models\Region::getAncestorIds($userRegionId);
+                if (in_array($regionId, $ancestorIds) || in_array($regionService->region_id, $ancestorIds) || $userRegionId == $regionService->region_id) {
                     $isAuthorized = true;
-                } else {
-                    // Cek apakah region user adalah anak/turunan dari region layanan
-                    $ancestorIds = \App\Models\Region::getAncestorIds($userRegionId);
-                    if (in_array($regionId, $ancestorIds) || in_array($regionService->region_id, $ancestorIds) || $userRegionId == $regionService->region_id) {
-                        $isAuthorized = true;
-                    }
                 }
             }
 
             if (!$isAuthorized) {
-                if (!auth()->check()) {
-                    $fallback = route('beranda');
-                    if ($regionId) {
-                        $region = \App\Models\Region::find($regionId);
-                        if ($region && $region->type === 'desa' && $region->parent_id) {
-                            $fallback = route('bumdes.profil.desa', $region->parent_id);
-                        } else {
-                            $fallback = route('bumdes.profil');
-                        }
-                    } else if (url()->previous() && url()->previous() !== url()->current()) {
-                        $fallback = url()->previous();
-                    }
-                    
-                    return redirect($fallback)->with([
-                        'error' => 'Layanan ini khusus untuk warga setempat. Silakan login terlebih dahulu untuk melanjutkan.',
-                        'show_login_modal' => true
-                    ]);
-                }
-
                 $currentRoute = \Route::currentRouteName();
                 $fallback = route('beranda');
                 

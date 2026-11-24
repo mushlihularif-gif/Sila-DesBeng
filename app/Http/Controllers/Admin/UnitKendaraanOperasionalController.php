@@ -97,8 +97,8 @@ class UnitKendaraanOperasionalController extends Controller
     {
         $this->saveVehicle($request, new Mobil(), $this->validated($request));
         $service = Service::where('slug', 'fasilitas-umum')->first();
-        if ($service) {
-            RegionService::updateOrInsert(['region_id' => $this->regionId(), 'service_id' => $service->id], ['is_active' => true, 'updated_at' => now()]);
+        if ($service && $this->regionId()) {
+            RegionService::aktifkanUntukWilayah((int) $this->regionId(), (int) $service->id);
         }
         return redirect()->route('admin.unit.kendaraan_operasional.index')->with('success', 'Kendaraan operasional berhasil ditambahkan.');
     }

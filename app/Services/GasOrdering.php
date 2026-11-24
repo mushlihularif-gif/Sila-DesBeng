@@ -13,7 +13,13 @@ class GasOrdering
 {
     public function visibleQuery(?User $user)
     {
-        $line = Region::garisLayananUntukWarga($user?->region_id);
+        if ($user === null) {
+            return Gas::query()->where('status', '!=', 'rusak')->whereHas('region', function ($q) {
+                $q->whereHas('services', fn ($s) => $s->where('slug', 'penjualan-gas')->where('region_services.is_active', true));
+            });
+        }
+
+        $line = Region::garisLayananUntukWarga($user->region_id);
         return Gas::query()->where('status', '!=', 'rusak')->whereHas('region', function ($q) use ($line) {
             $q->where(function ($q) use ($line) {
                 $q->whereHas('services', fn ($s) => $s->where('slug', 'penjualan-gas')->where('region_services.is_active', true)

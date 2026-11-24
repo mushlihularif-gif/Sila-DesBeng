@@ -220,14 +220,11 @@ class UnitPenyewaanMobilController extends Controller
 
         $mobil = Mobil::create($data);
 
-        // Auto-aktifkan layanan Penyewaan Mobil untuk wilayah ini di region_services
+        // Auto-aktifkan layanan Penyewaan Mobil untuk wilayah ini di region_services (default Khusus Warga Desa)
         if ($mobil->region_id) {
             $serviceMobil = \App\Models\Service::where('slug', 'penyewaan-mobil')->first();
             if ($serviceMobil) {
-                \App\Models\RegionService::updateOrInsert(
-                    ['region_id' => $mobil->region_id, 'service_id' => $serviceMobil->id],
-                    ['is_active' => true, 'updated_at' => now()]
-                );
+                \App\Models\RegionService::aktifkanUntukWilayah((int) $mobil->region_id, (int) $serviceMobil->id);
             }
         }
 

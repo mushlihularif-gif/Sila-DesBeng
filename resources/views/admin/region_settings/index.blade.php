@@ -48,9 +48,9 @@
         background: #f5f7ff;
         border-color: rgba(105, 108, 255, 0.35);
     }
-    .form-check-input.exclusive-toggle:checked {
-        background-color: #ffab00 !important;
-        border-color: #ffab00 !important;
+    .form-check-input.public-access-toggle:checked {
+        background-color: #03c3ec !important;
+        border-color: #03c3ec !important;
     }
     .rs-nav-pills {
         overflow-x: auto !important;
@@ -86,8 +86,9 @@
     $publicServices = $allServices->filter(fn($s) => strpos(strtolower($s->name), 'pengumuman') !== false);
 
     $totalOperational = $operationalServices->count();
+    $publicAccessServices = $publicAccessServices ?? [];
     $activeOperationalCount = $operationalServices->filter(fn($s) => in_array($s->id, $activeServices))->count();
-    $exclusiveOperationalCount = $operationalServices->filter(fn($s) => in_array($s->id, $activeServices) && in_array($s->id, $exclusiveServices))->count();
+    $exclusiveOperationalCount = $operationalServices->filter(fn($s) => in_array($s->id, $activeServices) && !in_array($s->id, $publicAccessServices))->count();
     $isWaActive = !empty($region->payment_info['whatsapp_active']);
 
     $alatAntarActive = isset($region->payment_info['alat_delivery_antar_active']) ? (bool) $region->payment_info['alat_delivery_antar_active'] : true;
@@ -151,7 +152,7 @@
                     <div>
                         <h6 class="fw-bold text-primary mb-1">Kelola Unit Usaha &amp; Pengaturan Desa</h6>
                         <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.55;">
-                            Aktifkan unit layanan yang tersedia di desa Anda, tentukan akses publik atau khusus warga desa, atur opsi pengantaran, serta tombol kontak WhatsApp. Jangan lupa klik <strong>Simpan Pengaturan</strong> setelah selesai mengubah.
+                            Secara bawaan, unit layanan aktif hanya diperuntukkan bagi <strong>warga desa Anda sendiri</strong>. Geser sakelar <strong>Izinkan Desa Lain</strong> bila ingin membuka layanan ke desa lain, atur opsi pengantaran, lalu klik <strong>Simpan Pengaturan</strong>.
                         </p>
                     </div>
                 </div>
@@ -187,6 +188,7 @@
 
     <form action="{{ route('admin.region-settings.update') }}" method="POST" id="region-settings-form">
         @csrf
+        <input type="hidden" name="access_toggle_mode" value="public">
         {{-- Hidden input untuk kompatibilitas validasi controller Transportasi --}}
         <input type="hidden" name="mobil_rental_delivery_antar_active" value="1">
         <input type="hidden" name="mobil_rental_delivery_jemput_active" value="1">
@@ -265,7 +267,8 @@
                             }
 
                             $isActive = in_array($service->id, $activeServices);
-                            $isExclusive = in_array($service->id, $exclusiveServices);
+                            $isPublic = in_array($service->id, $publicAccessServices);
+                            $isExclusive = ! $isPublic;
                         @endphp
                         <div class="col-12 col-md-6">
                             <div class="card rs-service-card shadow-sm h-100 card-service-item {{ $isActive ? '' : 'is-off' }}"
@@ -299,30 +302,30 @@
                                         </div>
                                     </div>
 
-                                    <!-- Bottom Box: Jangkauan Akses (Publik vs Eksklusif) -->
+                                    <!-- Bottom Box: Jangkauan Akses (Default Khusus Warga Desa, ON = Izinkan Desa Lain) -->
                                     <div class="rs-access-box mt-auto">
                                         <div class="d-flex align-items-center justify-content-between gap-2 mb-1.5">
                                             <div class="d-flex align-items-center gap-1.5 min-w-0">
-                                                <i class="bx bx-shield-quarter text-warning fs-5 flex-shrink-0"></i>
-                                                <span class="fw-semibold text-dark small text-truncate">Akses Layanan</span>
+                                                <i class="bx {{ $isPublic ? 'bx-world text-info' : 'bx-shield-quarter text-warning' }} fs-5 flex-shrink-0 access-status-icon"></i>
+                                                <span class="fw-semibold text-dark small text-truncate">Izinkan Desa Lain</span>
                                             </div>
                                             <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                                                <span class="badge {{ $isExclusive ? 'bg-label-warning text-warning' : 'bg-label-info text-info' }} rounded-pill px-2 py-1 fw-semibold exclusive-badge-pill" style="font-size: 0.7rem;">
-                                                    {{ $isExclusive ? 'Khusus Warga Desa' : 'Terbuka Publik' }}
+                                                <span class="badge {{ $isPublic ? 'bg-label-info text-info' : 'bg-label-warning text-warning' }} rounded-pill px-2 py-1 fw-semibold exclusive-badge-pill" style="font-size: 0.7rem;">
+                                                    {{ $isPublic ? 'Terbuka Desa Lain' : 'Khusus Warga Desa' }}
                                                 </span>
                                                 <div class="form-check form-switch mb-0">
                                                     <input type="checkbox"
-                                                        name="exclusive_services[]"
+                                                        name="public_services[]"
                                                         value="{{ $service->id }}"
-                                                        class="form-check-input exclusive-toggle"
+                                                        class="form-check-input public-access-toggle"
                                                         style="cursor: pointer;"
-                                                        {{ $isExclusive ? 'checked' : '' }}
-                                                        title="Alihkan antara Khusus Warga Desa atau Terbuka Publik">
+                                                        {{ $isPublic ? 'checked' : '' }}
+                                                        title="OFF = Khusus Warga Desa (bawaan), ON = Izinkan Desa Lain / Terbuka Publik">
                                                 </div>
                                             </div>
                                         </div>
                                         <small class="exclusive-desc-text text-muted d-block" style="font-size: 0.75rem; line-height: 1.45;">
-                                            {{ $isExclusive ? 'Hanya warga berdomisili ' . $region->name . ' ' . $descText : 'Dapat diakses dan dipesan oleh seluruh warga, termasuk dari luar desa.' }}
+                                            {{ $isPublic ? 'Terbuka publik — warga dari luar desa juga diizinkan mengakses dan memesan layanan ini.' : 'Hanya warga berdomisili ' . $region->name . ' ' . $descText }}
                                         </small>
                                     </div>
                                 </div>
@@ -567,7 +570,7 @@
 <script>
 (function() {
     const mainToggles = document.querySelectorAll('.service-main-toggle');
-    const exclusiveToggles = document.querySelectorAll('.exclusive-toggle');
+    const publicAccessToggles = document.querySelectorAll('.public-access-toggle');
 
     function updateSummaryAndDelivery() {
         let activeCount = 0;
@@ -578,11 +581,11 @@
         mainToggles.forEach(cb => {
             const card = cb.closest('.card-service-item');
             const type = cb.getAttribute('data-service-type');
-            const excl = card ? card.querySelector('.exclusive-toggle') : null;
+            const pubToggle = card ? card.querySelector('.public-access-toggle') : null;
 
             if (cb.checked) {
                 activeCount++;
-                if (excl && excl.checked) exclusiveCount++;
+                if (!pubToggle || !pubToggle.checked) exclusiveCount++;
                 if (type === 'alat') showAlat = true;
                 if (type === 'gas') showGas = true;
             }
@@ -632,37 +635,44 @@
         toggle.addEventListener('change', function() { syncCard(this); });
     });
 
-    // Update UI Akses Eksklusif vs Publik
-    exclusiveToggles.forEach(toggle => {
-        const syncExclusive = (el) => {
+    // Update UI Akses Layanan (OFF = Khusus Warga Desa, ON = Terbuka Desa Lain)
+    publicAccessToggles.forEach(toggle => {
+        const syncPublicAccess = (el) => {
             const card = el.closest('.card-service-item');
             if (!card) return;
             const badgePill = card.querySelector('.exclusive-badge-pill');
             const descContainer = card.querySelector('.exclusive-desc-text');
+            const statusIcon = card.querySelector('.access-status-icon');
             const regionName = @json($region->name);
             const actionText = card.getAttribute('data-action') || 'yang dapat mengakses layanan ini.';
 
             if (el.checked) {
                 if (badgePill) {
-                    badgePill.className = 'badge bg-label-warning text-warning rounded-pill px-2 py-1 fw-semibold exclusive-badge-pill';
-                    badgePill.textContent = 'Khusus Warga Desa';
+                    badgePill.className = 'badge bg-label-info text-info rounded-pill px-2 py-1 fw-semibold exclusive-badge-pill';
+                    badgePill.textContent = 'Terbuka Desa Lain';
+                }
+                if (statusIcon) {
+                    statusIcon.className = 'bx bx-world text-info fs-5 flex-shrink-0 access-status-icon';
                 }
                 if (descContainer) {
-                    descContainer.textContent = 'Hanya warga berdomisili ' + regionName + ' ' + actionText;
+                    descContainer.textContent = 'Terbuka publik — warga dari luar desa juga diizinkan mengakses dan memesan layanan ini.';
                 }
             } else {
                 if (badgePill) {
-                    badgePill.className = 'badge bg-label-info text-info rounded-pill px-2 py-1 fw-semibold exclusive-badge-pill';
-                    badgePill.textContent = 'Terbuka Publik';
+                    badgePill.className = 'badge bg-label-warning text-warning rounded-pill px-2 py-1 fw-semibold exclusive-badge-pill';
+                    badgePill.textContent = 'Khusus Warga Desa';
+                }
+                if (statusIcon) {
+                    statusIcon.className = 'bx bx-shield-quarter text-warning fs-5 flex-shrink-0 access-status-icon';
                 }
                 if (descContainer) {
-                    descContainer.textContent = 'Dapat diakses dan dipesan oleh seluruh warga, termasuk dari luar desa.';
+                    descContainer.textContent = 'Hanya warga berdomisili ' + regionName + ' ' + actionText;
                 }
             }
             updateSummaryAndDelivery();
         };
 
-        toggle.addEventListener('change', function() { syncExclusive(this); });
+        toggle.addEventListener('change', function() { syncPublicAccess(this); });
     });
 
     // Update UI Delivery Switches

@@ -197,15 +197,12 @@ class UnitFasilitasUmumController extends Controller
 
         $fasilitas = FasilitasUmum::create($data);
 
-        // Auto-aktifkan layanan Fasilitas Umum untuk wilayah admin ini di region_services
+        // Auto-aktifkan layanan Fasilitas Umum untuk wilayah admin ini di region_services (default Khusus Warga Desa)
         $adminRegionId = auth()->user() ? auth()->user()->region_id : null;
         if ($adminRegionId) {
             $service = \App\Models\Service::whereIn('slug', ['fasilitas-umum', 'peminjaman-fasilitas-umum'])->first();
             if ($service) {
-                \App\Models\RegionService::updateOrInsert(
-                    ['region_id' => $adminRegionId, 'service_id' => $service->id],
-                    ['is_active' => true, 'updated_at' => now()]
-                );
+                \App\Models\RegionService::aktifkanUntukWilayah((int) $adminRegionId, (int) $service->id);
             }
         }
 

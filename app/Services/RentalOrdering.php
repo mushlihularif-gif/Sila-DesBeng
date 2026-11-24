@@ -13,7 +13,13 @@ class RentalOrdering
 {
     public function visibleQuery(?User $user)
     {
-        $line = Region::garisLayananUntukWarga($user?->region_id);
+        if ($user === null) {
+            return Barang::query()->where('status', '!=', 'rusak')->whereHas('region', function ($q) {
+                $q->whereHas('services', fn ($s) => $s->where('slug', 'penyewaan-alat')->where('region_services.is_active', true));
+            });
+        }
+
+        $line = Region::garisLayananUntukWarga($user->region_id);
         return Barang::query()->where('status', '!=', 'rusak')->whereHas('region', function ($q) use ($line) {
             $q->where(function ($q) use ($line) {
                 $q->whereHas('services', fn ($s) => $s->where('slug', 'penyewaan-alat')->where('region_services.is_active', true)

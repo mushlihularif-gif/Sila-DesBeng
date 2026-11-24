@@ -198,9 +198,9 @@ class UnitPenyewaanController extends Controller
             $barang = \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
                 $barang = Barang::create($data);
                 $serviceAlat = \App\Models\Service::where('slug', 'penyewaan-alat')->first();
-                if ($serviceAlat) \App\Models\RegionService::updateOrInsert(
-                    ['region_id'=>$barang->region_id,'service_id'=>$serviceAlat->id], ['is_active'=>true,'updated_at'=>now()]
-                );
+                if ($serviceAlat && $barang->region_id) {
+                    \App\Models\RegionService::aktifkanUntukWilayah((int) $barang->region_id, (int) $serviceAlat->id);
+                }
                 return $barang;
             });
         } catch (\Throwable $e) {

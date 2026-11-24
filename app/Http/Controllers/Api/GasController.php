@@ -13,7 +13,7 @@ class GasController extends Controller
      */
     public function index(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user('sanctum') ?? $request->user();
 
         // Get gas products that are available and belong to user's region
         $query = app(\App\Services\GasOrdering::class)->visibleQuery($user);
@@ -37,7 +37,7 @@ class GasController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $gas = app(\App\Services\GasOrdering::class)->visibleQuery($request->user())->find($id);
+        $gas = app(\App\Services\GasOrdering::class)->visibleQuery($request->user('sanctum') ?? $request->user())->find($id);
 
         if (!$gas) {
             return response()->json([

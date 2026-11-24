@@ -283,10 +283,16 @@ class PartnerApplicationController extends Controller
         // Layanan yang sudah sengaja dimatikan wilayah juga tidak dinyalakan
         // paksa - hanya yang belum ada yang ditambahkan.
         if (in_array($application->region_type, ['desa', 'kelurahan'], true)) {
-            $baru = Service::available()->whereNotIn('id', $region->services()->pluck('services.id'))->pluck('id');
+            $existingIds = $region->services()->pluck('services.id');
+            $baru = Service::available()->whereNotIn('id', $existingIds)->get(['id', 'slug']);
 
             $region->services()->syncWithoutDetaching(
-                $baru->mapWithKeys(fn ($id) => [$id => ['is_active' => true]])->all()
+                $baru->mapWithKeys(fn ($service) => [
+                    $service->id => [
+                        'is_active' => true,
+                        'is_exclusive' => $service->slug !== 'pengumuman',
+                    ],
+                ])->all()
             );
         }
 

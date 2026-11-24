@@ -22,7 +22,7 @@ class FasilitasUmumUserController extends Controller
 
         $isSuperAdmin = $user && $user->role === 'super_admin';
         $allowedRegionIds = (! $isSuperAdmin && Region::adaPengaturanLayanan('Fasilitas Umum'))
-            ? Region::wilayahLayananTerlihat($user?->region_id, 'Fasilitas Umum')
+            ? Region::wilayahLayananTerlihat($user?->region_id, 'Fasilitas Umum', $user === null)
             : null;
 
         if ($targetRegionId) {
@@ -86,7 +86,7 @@ class FasilitasUmumUserController extends Controller
         if ($item->region_id && (! $viewer || $viewer->role !== 'super_admin')
             && Region::adaPengaturanLayanan('Fasilitas Umum')
             && Region::whereKey($item->region_id)->exists()) {
-            $allowed = Region::wilayahLayananTerlihat($viewer?->region_id, 'Fasilitas Umum');
+            $allowed = Region::wilayahLayananTerlihat($viewer?->region_id, 'Fasilitas Umum', $viewer === null);
             abort_unless(in_array((int) $item->region_id, array_map('intval', $allowed), true), 403, 'Layanan ini khusus warga lokal atau sedang tidak aktif.');
         }
 

@@ -39,8 +39,9 @@ class RegionSettingController extends Controller
         }
 
         $allServices = Service::available()->get();
-        $activeServices = $region->services->pluck('id')->toArray();
+        $activeServices = $region->services->where('pivot.is_active', true)->pluck('id')->toArray();
         $exclusiveServices = $region->services->where('pivot.is_exclusive', true)->pluck('id')->toArray();
+        $publicAccessServices = $region->services->where('pivot.is_active', true)->where('pivot.is_exclusive', false)->pluck('id')->toArray();
 
         $hasFasilitasKendaraan = \App\Models\FasilitasUmum::inCatalog()->where('region_id', $region->id)
             ->where(function($q) {
@@ -49,7 +50,7 @@ class RegionSettingController extends Controller
                   ->orWhere('nama_fasilitas', 'like', '%pick%up%');
             })->exists();
 
-        return view('admin.region_settings.index', compact('region', 'allServices', 'activeServices', 'exclusiveServices', 'hasFasilitasKendaraan'));
+        return view('admin.region_settings.index', compact('region', 'allServices', 'activeServices', 'exclusiveServices', 'publicAccessServices', 'hasFasilitasKendaraan'));
     }
 
     public function update(Request $request)
@@ -131,14 +132,25 @@ class RegionSettingController extends Controller
             'payment_info' => $paymentInfo,
         ]);
 
-        // Sync services
+        // Sync services (Default bawaan: Khusus Warga Desa / is_exclusive = true;
+        // hanya terbuka untuk desa lain bila sakelar public_services[] dinyalakan).
         $syncData = [];
         if ($request->has('services')) {
-            $exclusives = $request->input('exclusive_services', []);
+            $usePublicMode = $request->input('access_toggle_mode') === 'public' || $request->has('public_services');
+            $publicIds = array_map('intval', $request->input('public_services', []));
+            $exclusiveIds = array_map('intval', $request->input('exclusive_services', []));
             foreach ($request->services as $serviceId) {
+                $sid = (int) $serviceId;
+                if ($usePublicMode) {
+                    $isExclusive = ! in_array($sid, $publicIds, true);
+                } elseif ($request->has('exclusive_services')) {
+                    $isExclusive = in_array($sid, $exclusiveIds, true);
+                } else {
+                    $isExclusive = true;
+                }
                 $syncData[$serviceId] = [
                     'is_active' => true,
-                    'is_exclusive' => in_array($serviceId, $exclusives)
+                    'is_exclusive' => $isExclusive,
                 ];
             }
         }
@@ -159,7 +171,7 @@ class RegionSettingController extends Controller
             if ($fasilitasServiceId && !isset($syncData[$fasilitasServiceId])) {
                 $syncData[$fasilitasServiceId] = [
                     'is_active' => true,
-                    'is_exclusive' => false
+                    'is_exclusive' => true
                 ];
             }
         }

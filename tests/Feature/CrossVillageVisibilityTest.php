@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Admin\RegionSettingController;
 use App\Http\Controllers\Api\BerandaController as ApiBerandaController;
 use App\Http\Controllers\Api\FasilitasBookingApiController;
 use App\Http\Controllers\Api\MobilBookingApiController;
@@ -34,6 +35,9 @@ class CrossVillageVisibilityTest extends TestCase
         $this->editorialSetUp();
 
         Schema::table('regions', function (Blueprint $t) {
+            $t->text('profile_text')->nullable();
+            $t->string('contact_phone')->nullable();
+            $t->string('contact_email')->nullable();
             $t->json('settings')->nullable();
             $t->json('payment_info')->nullable();
             $t->boolean('is_gas_crisis')->default(false);
@@ -149,38 +153,45 @@ class CrossVillageVisibilityTest extends TestCase
         }
     }
 
-    public function test_exclusive_village_products_never_leak_to_guests_or_other_villages_in_beranda_search_api_or_booking(): void
+    public function test_guest_browses_all_active_villages_while_logged_in_other_village_is_strictly_blocked(): void
     {
         $beranda = app(BerandaController::class);
         $popularMethod = new \ReflectionMethod($beranda, 'getPopularProducts');
 
         // 1. GUEST (unauthenticated) browsing Kecamatan Bengkalis (11)
+        // Guest belum punya identitas desa, jadi etalase semua desa yang layanannya AKTIF (is_active = true) tetap tampil
+        // walaupun is_exclusive = true (Khusus Warga Desa). Layanan nonaktif (is_active = false) tetap disembunyikan.
         Auth::logout();
         $guestPopular = $popularMethod->invoke($beranda, now()->year, 11);
         $guestNames = $guestPopular->pluck('name')->all();
-        foreach (['Gas Eksklusif Desa A', 'Tenda Eksklusif Desa A', 'Mobil Eksklusif Desa A', 'Aula Eksklusif Desa A'] as $secret) {
-            $this->assertNotContains($secret, $guestNames, "Guest Beranda leaked: {$secret}");
-        }
-        $this->assertContains('Tenda Publik Desa B', $guestNames);
+        $this->assertNotEmpty($guestNames);
 
         $guestSearch = collect($beranda->liveSearch(Request::create('/beranda/live-search', 'GET', ['search' => 'Eksklusif']))->getData());
-        $this->assertCount(0, $guestSearch);
+        $this->assertSame(4, $guestSearch->count(), 'Guest harus bisa melihat etalase semua unit aktif di pencarian.');
 
         $apiBeranda = app(ApiBerandaController::class);
         $guestApiServices = collect($apiBeranda->services()->getData(true)['data'])->pluck('name')->all();
-        $guestApiPopular = collect($apiBeranda->popular(Request::create('/api/beranda/popular'))->getData(true)['data'])->pluck('name')->all();
-        foreach (['Gas Eksklusif Desa A', 'Tenda Eksklusif Desa A', 'Mobil Eksklusif Desa A', 'Aula Eksklusif Desa A'] as $secret) {
-            $this->assertNotContains($secret, $guestApiServices);
-            $this->assertNotContains($secret, $guestApiPopular);
+        foreach (['Gas Eksklusif Desa A', 'Tenda Eksklusif Desa A', 'Mobil Eksklusif Desa A', 'Aula Eksklusif Desa A'] as $activeItem) {
+            $this->assertContains($activeItem, $guestApiServices);
         }
 
-        // Direct detail & API show blocked for guests on Desa A's exclusive Mobil & Fasilitas
-        $this->assertForbidden(fn () => app(MobilRentalUserController::class)->show(1));
-        $this->assertForbidden(fn () => app(FasilitasUmumUserController::class)->show(1));
-        $this->assertSame(403, app(MobilBookingApiController::class)->show(1)->getStatusCode());
-        $this->assertSame(403, app(FasilitasBookingApiController::class)->show(1)->getStatusCode());
+        // Guest dapat melihat halaman detail & API show produk dari unit aktif (saat klik Booking akan diminta login)
+        $this->assertSame(200, app(MobilBookingApiController::class)->show(1)->getStatusCode());
+        $this->assertSame(200, app(FasilitasBookingApiController::class)->show(1)->getStatusCode());
 
-        // 2. DESA B RESIDENT (user 6, region_id = 5)
+        // Guest juga boleh lewat middleware katalog GET untuk desa yang layanannya aktif walau eksklusif
+        $guestCatalogReq = Request::create('/unit-penyewaan-mobil', 'GET', ['region_id' => 1]);
+        $guestCatalogRes = app(CheckRegionService::class)->handle($guestCatalogReq, fn () => response('OK'), 'penyewaan-mobil');
+        $this->assertSame(200, $guestCatalogRes->getStatusCode());
+
+        // Tetapi jika unit DINONAKTIFKAN (is_active = false), guest pun tidak boleh melihatnya
+        DB::table('region_services')->where('region_id', 1)->where('service_id', 3)->update(['is_active' => false]);
+        $this->assertSame(403, app(MobilBookingApiController::class)->show(1)->getStatusCode());
+        $guestSearchDisabled = collect($beranda->liveSearch(Request::create('/beranda/live-search', 'GET', ['search' => 'Mobil Eksklusif Desa A']))->getData());
+        $this->assertCount(0, $guestSearchDisabled);
+        DB::table('region_services')->where('region_id', 1)->where('service_id', 3)->update(['is_active' => true]);
+
+        // 2. DESA B RESIDENT (user 6, region_id = 5) — SUDAH LOGIN: blokir ketat seluruh layanan eksklusif Desa A!
         $desaBUser = $this->user(6);
         $this->actingAs($desaBUser);
         $desaBPopular = $popularMethod->invoke($beranda, now()->year, 11);
@@ -188,6 +199,7 @@ class CrossVillageVisibilityTest extends TestCase
         foreach (['Gas Eksklusif Desa A', 'Tenda Eksklusif Desa A', 'Mobil Eksklusif Desa A', 'Aula Eksklusif Desa A'] as $secret) {
             $this->assertNotContains($secret, $desaBNames, "Desa B Beranda leaked: {$secret}");
         }
+        $this->assertContains('Tenda Publik Desa B', $desaBNames);
 
         $desaBSearch = collect($beranda->liveSearch(Request::create('/beranda/live-search', 'GET', ['search' => 'Eksklusif']))->getData());
         $this->assertCount(0, $desaBSearch);
@@ -195,6 +207,8 @@ class CrossVillageVisibilityTest extends TestCase
         // Direct show & store blocked for Desa B resident on Desa A's Mobil & Fasilitas
         $this->assertForbidden(fn () => app(MobilRentalUserController::class)->show(1));
         $this->assertForbidden(fn () => app(FasilitasUmumUserController::class)->show(1));
+        $this->assertSame(403, app(MobilBookingApiController::class)->show(1)->getStatusCode());
+        $this->assertSame(403, app(FasilitasBookingApiController::class)->show(1)->getStatusCode());
 
         $mobilStoreReq = Request::create('/mobil/booking', 'POST', [
             'mobil_id' => 1, 'jenis_sewa' => 'harian', 'quantity' => 1,
@@ -239,6 +253,59 @@ class CrossVillageVisibilityTest extends TestCase
 
         $desaASearch = collect($beranda->liveSearch(Request::create('/beranda/live-search', 'GET', ['search' => 'Eksklusif']))->getData());
         $this->assertSame(4, $desaASearch->count());
+    }
+
+    public function test_default_exclusive_migration_and_inverted_admin_toggle_work_as_expected(): void
+    {
+        // Tambahkan layanan pengumuman agar migrasi teruji membedakan unit usaha vs pengumuman
+        DB::table('services')->insert(['id' => 5, 'name' => 'Pengumuman', 'slug' => 'pengumuman', 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('region_services')->insert([
+            'region_id' => 5, 'service_id' => 5, 'is_active' => true, 'is_exclusive' => false, 'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        // Jalankan migrasi default eksklusif: Desa B (sebelumnya is_exclusive = false) harus terkunci otomatis, kecuali pengumuman
+        (require database_path('migrations/2026_11_24_000002_default_region_services_exclusive.php'))->up();
+
+        $this->assertTrue((bool) DB::table('region_services')->where('region_id', 5)->where('service_id', 1)->value('is_exclusive'));
+        $this->assertFalse((bool) DB::table('region_services')->where('region_id', 5)->where('service_id', 5)->value('is_exclusive'));
+
+        // Admin Desa A menyimpan pengaturan dengan sakelar "Izinkan Desa Lain" OFF untuk semua (default), lalu ON hanya untuk Mobil (id=3)
+        $adminDesaA = $this->user(4);
+        $this->actingAs($adminDesaA);
+
+        $reqAllLocked = Request::create('/admin/region-settings', 'POST', [
+            'access_toggle_mode' => 'public',
+            'services' => [1, 2, 3, 4],
+            'public_services' => [],
+            'gas_delivery_antar_active' => '1',
+            'alat_delivery_antar_active' => '1',
+            'mobil_rental_delivery_antar_active' => '1',
+        ]);
+        $reqAllLocked->setUserResolver(fn () => $adminDesaA);
+        app(RegionSettingController::class)->update($reqAllLocked);
+
+        foreach ([1, 2, 3, 4] as $sid) {
+            $this->assertTrue((bool) DB::table('region_services')->where('region_id', 1)->where('service_id', $sid)->value('is_exclusive'));
+        }
+
+        // Nyalakan sakelar "Izinkan Desa Lain" khusus Mobil (id=3)
+        $reqOpenMobil = Request::create('/admin/region-settings', 'POST', [
+            'access_toggle_mode' => 'public',
+            'services' => [1, 2, 3, 4],
+            'public_services' => [3],
+            'gas_delivery_antar_active' => '1',
+            'alat_delivery_antar_active' => '1',
+            'mobil_rental_delivery_antar_active' => '1',
+        ]);
+        $reqOpenMobil->setUserResolver(fn () => $adminDesaA);
+        app(RegionSettingController::class)->update($reqOpenMobil);
+
+        $this->assertFalse((bool) DB::table('region_services')->where('region_id', 1)->where('service_id', 3)->value('is_exclusive'));
+        $this->assertTrue((bool) DB::table('region_services')->where('region_id', 1)->where('service_id', 1)->value('is_exclusive'));
+
+        // Auto-aktivasi produk tambahan tidak boleh menimpa is_exclusive = false yang sudah dipilih admin
+        \App\Models\RegionService::aktifkanUntukWilayah(1, 3);
+        $this->assertFalse((bool) DB::table('region_services')->where('region_id', 1)->where('service_id', 3)->value('is_exclusive'));
     }
 
     public function test_disabled_service_stays_hidden_even_for_own_village_and_middleware_does_not_reenable_it(): void

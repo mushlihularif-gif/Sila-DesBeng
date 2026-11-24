@@ -25,8 +25,9 @@ class SystemSettingController extends Controller
         }
 
         $allServices = Service::available()->get();
-        $activeServices = $region ? $region->services->pluck('id')->toArray() : [];
+        $activeServices = $region ? $region->services->where('pivot.is_active', true)->pluck('id')->toArray() : [];
         $exclusiveServices = $region ? $region->services->where('pivot.is_exclusive', true)->pluck('id')->toArray() : [];
+        $publicAccessServices = $region ? $region->services->where('pivot.is_active', true)->where('pivot.is_exclusive', false)->pluck('id')->toArray() : [];
 
         $hasFasilitasKendaraan = false;
         if ($region) {
@@ -38,7 +39,7 @@ class SystemSettingController extends Controller
                 })->exists();
         }
 
-        return view('admin.system_settings.index', compact('region', 'allServices', 'activeServices', 'exclusiveServices', 'hasFasilitasKendaraan'));
+        return view('admin.system_settings.index', compact('region', 'allServices', 'activeServices', 'exclusiveServices', 'publicAccessServices', 'hasFasilitasKendaraan'));
     }
 
     public function update(Request $request)
@@ -143,14 +144,24 @@ class SystemSettingController extends Controller
             'payment_info' => $paymentInfo,
         ]);
 
-        // Sync services
+        // Sync services (default Khusus Warga Desa / is_exclusive = true)
         $syncData = [];
         if ($request->has('services')) {
-            $exclusives = $request->input('exclusive_services', []);
+            $usePublicMode = $request->input('access_toggle_mode') === 'public' || $request->has('public_services');
+            $publicIds = array_map('intval', $request->input('public_services', []));
+            $exclusiveIds = array_map('intval', $request->input('exclusive_services', []));
             foreach ($request->services as $serviceId) {
+                $sid = (int) $serviceId;
+                if ($usePublicMode) {
+                    $isExclusive = ! in_array($sid, $publicIds, true);
+                } elseif ($request->has('exclusive_services')) {
+                    $isExclusive = in_array($sid, $exclusiveIds, true);
+                } else {
+                    $isExclusive = true;
+                }
                 $syncData[$serviceId] = [
                     'is_active' => true,
-                    'is_exclusive' => in_array($serviceId, $exclusives)
+                    'is_exclusive' => $isExclusive,
                 ];
             }
         }
