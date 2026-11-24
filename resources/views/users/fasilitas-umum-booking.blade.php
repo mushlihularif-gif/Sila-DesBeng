@@ -1,6 +1,14 @@
 @extends('layouts.user')
 
 @section('page')
+@php
+    $skemaBiaya = $item->effectivePricingScheme();
+    $tarifPerHari = $item->isPaidScheme() ? (float) $item->harga_sewa : 0;
+    $tarifFormatted = 'Rp ' . number_format($tarifPerHari, 0, ',', '.');
+    $bisaBerbayar = $item->isPaidScheme();
+    $sosialBerbayar = $item->isPaidForEvent('sosial');
+    $komersialBerbayar = $item->isPaidForEvent('komersial');
+@endphp
 <main class="flex-grow relative w-full">
     <section class="relative z-10 min-h-screen pt-32 pb-16 bg-cover bg-center bg-no-repeat bg-fixed" 
              style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
@@ -15,7 +23,13 @@
                     <span class="text-gray-800">Form </span>
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Peminjaman Fasilitas Umum</span>
                 </h1>
-                <p class="text-gray-600">Peminjaman fasilitas ini tidak dipungut biaya (Gratis).</p>
+                @if($skemaBiaya === 'berbayar_semua')
+                    <p class="text-gray-600">Fasilitas ini dikenakan tarif sewa <strong>{{ $tarifFormatted }} / hari</strong> untuk semua kategori acara.</p>
+                @elseif($skemaBiaya === 'berbayar')
+                    <p class="text-gray-600">Gratis untuk acara sosial/masyarakat, dan berbayar <strong>{{ $tarifFormatted }} / hari</strong> untuk acara komersial/pribadi.</p>
+                @else
+                    <p class="text-gray-600">Peminjaman fasilitas ini tidak dipungut biaya (Gratis) untuk acara sosial maupun pribadi.</p>
+                @endif
             </div>
 
             <form id="booking-form" action="#" method="POST" onsubmit="return false;" enctype="multipart/form-data" data-turbo="false">
@@ -24,10 +38,25 @@
 
                 <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
                     <div class="flex items-center gap-3 mb-6 border-b pb-4">
-                        <img src="{{ asset('storage/' . $item->foto) }}" alt="{{ $item->nama_fasilitas }}" class="w-20 h-20 object-cover rounded-lg">
-                        <div>
+                        <img src="{{ asset('storage/' . $item->foto) }}" alt="{{ $item->nama_fasilitas }}" class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
+                        <div class="min-w-0">
                             <h3 class="text-xl font-bold text-gray-800">{{ $item->nama_fasilitas }}</h3>
-                            <span class="text-sm text-gray-600">{{ str_replace('&', 'dan', $item->kategori) }} | Stok: {{ $item->stok }} {{ $item->satuan }}</span>
+                            <span class="text-sm text-gray-600 block">{{ str_replace('&', 'dan', $item->kategori) }} | Stok: {{ $item->stok }} {{ $item->satuan }}</span>
+                            <div class="mt-2">
+                                @if($skemaBiaya === 'berbayar_semua')
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                        Tarif Sewa: {{ $tarifFormatted }} / hari (Semua Acara)
+                                    </span>
+                                @elseif($skemaBiaya === 'berbayar')
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                        Sosial Gratis · Pribadi {{ $tarifFormatted }} / hari
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        Gratis Sepenuhnya
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -35,13 +64,17 @@
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-gray-700 mb-3">Kategori Acara <span class="text-red-500">*</span></label>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
-                                <input type="radio" name="jenis_acara" value="sosial" class="w-4 h-4 text-blue-600 focus:ring-blue-500" required>
-                                <span class="text-sm font-semibold text-gray-700">Sosial / Masyarakat (Gratis)</span>
+                            <label id="label-acara-sosial" class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
+                                <input type="radio" name="jenis_acara" value="sosial" class="w-4 h-4 text-blue-600 focus:ring-blue-500 flex-shrink-0" required>
+                                <span class="text-sm font-semibold text-gray-700">
+                                    Sosial / Masyarakat ({{ $sosialBerbayar ? $tarifFormatted . ' / hari' : 'Gratis' }})
+                                </span>
                             </label>
-                            <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
-                                <input type="radio" name="jenis_acara" value="komersial" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                                <span class="text-sm font-semibold text-gray-700">Komersial / Pribadi (Berbayar)</span>
+                            <label id="label-acara-komersial" class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
+                                <input type="radio" name="jenis_acara" value="komersial" class="w-4 h-4 text-blue-600 focus:ring-blue-500 flex-shrink-0">
+                                <span class="text-sm font-semibold text-gray-700">
+                                    Komersial / Pribadi ({{ $komersialBerbayar ? $tarifFormatted . ' / hari' : 'Gratis' }})
+                                </span>
                             </label>
                         </div>
                     </div>
@@ -87,6 +120,31 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Tanggal Selesai <span class="text-red-500">*</span></label>
                             <input type="date" name="end_date" id="end-date" min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                    </div>
+
+                    <!-- Ringkasan Biaya Peminjaman -->
+                    <div id="ringkasan-biaya-fasilitas" class="rounded-xl border {{ $bisaBerbayar ? 'bg-slate-50 border-slate-200' : 'bg-emerald-50 border-emerald-200' }} p-4 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <div class="text-xs font-bold uppercase tracking-wider {{ $bisaBerbayar ? 'text-slate-600' : 'text-emerald-700' }}">Ringkasan Biaya Peminjaman</div>
+                            <p id="fasilitas-cost-detail" class="text-xs sm:text-sm text-gray-600 mt-0.5 mb-0">
+                                @if($skemaBiaya === 'berbayar_semua')
+                                    {{ $tarifFormatted }} / hari × 1 hari × {{ $quantity }} unit (pilih tanggal untuk hitung durasi)
+                                @elseif($skemaBiaya === 'berbayar')
+                                    Pilih Kategori Acara untuk melihat rincian biaya peminjaman.
+                                @else
+                                    Tidak dipungut biaya (Gratis untuk acara sosial maupun pribadi).
+                                @endif
+                            </p>
+                        </div>
+                        <div id="fasilitas-cost-total" class="text-xl sm:text-2xl font-black {{ $bisaBerbayar ? 'text-blue-600' : 'text-emerald-700' }}">
+                            @if($skemaBiaya === 'berbayar_semua')
+                                Rp {{ number_format($tarifPerHari * $quantity, 0, ',', '.') }}
+                            @elseif($skemaBiaya === 'berbayar')
+                                -
+                            @else
+                                Gratis
+                            @endif
                         </div>
                     </div>
                     </div>
@@ -206,11 +264,6 @@
 
 
                     @php
-                        // Fasilitas berbayar hanya ditagih untuk acara komersial;
-                        // acara sosial tetap gratis. Panel bayar karena itu muncul
-                        // mengikuti pilihan Kategori Acara, bukan langsung.
-                        $bisaBerbayar = $item->status_biaya === 'berbayar' && $item->harga_sewa > 0;
-
                         // Semua metode pembayaran mengikuti sakelar Pembayaran Wilayah.
                         $metodeWilayah = is_array($setting?->payment_methods) ? $setting->payment_methods : [];
                         $hasTransfer = in_array('transfer', $metodeWilayah, true);
@@ -259,7 +312,7 @@
                     @endphp
 
                     @if($bisaBerbayar)
-                    <div id="pembayaran-fasilitas" class="mb-6 hidden">
+                    <div id="pembayaran-fasilitas" class="mb-6 {{ $skemaBiaya === 'berbayar_semua' ? '' : 'hidden' }}">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">Metode Pembayaran</h3>
                         <input type="hidden" name="payment_method" id="payment-method-fasilitas" value="{{ $defaultPaymentMethod }}">
 
@@ -288,6 +341,14 @@
                         @if($hasTransfer)
                         <div id="transfer-payment-fasilitas" class="fasilitas-payment-content {{ $defaultPaymentMethod === 'transfer' ? '' : 'hidden' }}">
                             <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-lg p-6">
+                                <div class="flex flex-wrap items-center justify-between gap-2 bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
+                                    <div>
+                                        <div class="text-xs font-bold uppercase tracking-wider text-blue-700">Total yang Harus Ditransfer</div>
+                                        <div class="text-xs text-gray-600 mt-1 fasilitas-total-breakdown">{{ $tarifFormatted }} / hari × 1 hari × {{ $quantity }} unit</div>
+                                    </div>
+                                    <div class="text-2xl font-black text-blue-600 fasilitas-total-nominal">Rp {{ number_format($tarifPerHari * $quantity, 0, ',', '.') }}</div>
+                                </div>
+
                                 <h4 class="font-bold text-gray-800 mb-4">Transfer ke Rekening Berikut</h4>
 
                                 <div class="flex items-center gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 mb-4">
@@ -328,6 +389,14 @@
                         @if($hasEwallet)
                         <div id="ewallet-payment-fasilitas" class="fasilitas-payment-content {{ $defaultPaymentMethod === 'ewallet' ? '' : 'hidden' }}">
                             <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-lg p-6">
+                                <div class="flex flex-wrap items-center justify-between gap-2 bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
+                                    <div>
+                                        <div class="text-xs font-bold uppercase tracking-wider text-blue-700">Total yang Harus Dikirim</div>
+                                        <div class="text-xs text-gray-600 mt-1 fasilitas-total-breakdown">{{ $tarifFormatted }} / hari × 1 hari × {{ $quantity }} unit</div>
+                                    </div>
+                                    <div class="text-2xl font-black text-blue-600 fasilitas-total-nominal">Rp {{ number_format($tarifPerHari * $quantity, 0, ',', '.') }}</div>
+                                </div>
+
                                 <h4 class="font-bold text-gray-800 mb-4">Kirim ke E-Wallet Berikut</h4>
 
                                 <div class="flex items-center gap-4 bg-gradient-to-br from-sky-50 to-cyan-50 rounded-2xl p-5 mb-4">
@@ -367,8 +436,15 @@
 
                         @if($hasTunai)
                         <div id="cash-payment-fasilitas" class="fasilitas-payment-content {{ $defaultPaymentMethod === 'tunai' ? '' : 'hidden' }}">
-                            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6">
-                                <p class="text-gray-700">Pembayaran tunai dilakukan langsung kepada petugas pengelola di lokasi.</p>
+                            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+                                <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-xl p-4 mb-3">
+                                    <div>
+                                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600">Total Pembayaran Tunai</div>
+                                        <div class="text-xs text-gray-600 mt-1 fasilitas-total-breakdown">{{ $tarifFormatted }} / hari × 1 hari × {{ $quantity }} unit</div>
+                                    </div>
+                                    <div class="text-2xl font-black text-blue-600 fasilitas-total-nominal">Rp {{ number_format($tarifPerHari * $quantity, 0, ',', '.') }}</div>
+                                </div>
+                                <p class="text-sm text-gray-700 mb-0">Pembayaran tunai dilakukan langsung kepada petugas pengelola di lokasi.</p>
                             </div>
                         </div>
                         @endif
@@ -379,19 +455,20 @@
                         @endif
                     </div>
                     @endif
-                    @if(! $bisaBerbayar)
-                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg mt-6">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-yellow-700">
-                                    Peminjaman ini <b>gratis</b>. Harap kembalikan fasilitas sesuai dengan tanggal selesai peminjaman dalam kondisi baik.
-                                </p>
-                            </div>
+
+                    @if($skemaBiaya !== 'berbayar_semua')
+                    <div id="fasilitas-gratis-notice" class="bg-emerald-50 border border-emerald-200 p-4 mb-6 rounded-xl {{ $bisaBerbayar ? 'hidden' : '' }}">
+                        <div class="flex items-start gap-3">
+                            <svg class="h-5 w-5 text-emerald-700 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <p class="text-sm text-emerald-800 mb-0">
+                                @if($skemaBiaya === 'berbayar')
+                                    Peminjaman untuk kategori <b>Acara Sosial / Masyarakat</b> tidak dipungut biaya (<b>Gratis</b>). Harap kembalikan fasilitas sesuai jadwal dalam kondisi baik.
+                                @else
+                                    Peminjaman fasilitas ini <b>gratis</b> (tidak dipungut biaya). Harap kembalikan fasilitas sesuai dengan tanggal selesai peminjaman dalam kondisi baik.
+                                @endif
+                            </p>
                         </div>
                     </div>
                     @endif
@@ -439,7 +516,8 @@
             <div class="text-center">
                 <img src="{{ asset('Admin/img/illustrations/isewalogo.webp') }}" alt="SegiDaerah" class="w-40 mx-auto mb-6">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Konfirmasi Peminjaman</h2>
-                <p class="text-gray-600 mb-6">Apakah Anda yakin ingin meminjam fasilitas ini?</p>
+                <p class="text-gray-600 mb-3">Apakah Anda yakin ingin meminjam fasilitas ini?</p>
+                <div id="confirmation-modal-summary" class="text-sm font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 mb-6"></div>
                 
                 <div class="flex gap-4">
                     <button type="button" id="cancel-confirmation" class="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-full transition-colors">
@@ -525,6 +603,47 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Pemilih metode bayar fasilitas umum.
+    window.pilihMetodeFasilitas = function (metode) {
+        var input = document.getElementById('payment-method-fasilitas');
+        if (input) input.value = metode;
+
+        var panelUtama = document.getElementById('pembayaran-fasilitas');
+        var panelUtamaHidden = !panelUtama || panelUtama.classList.contains('hidden');
+
+        var panels = [
+            ['transfer-payment-fasilitas', 'transfer'],
+            ['ewallet-payment-fasilitas', 'ewallet'],
+            ['cash-payment-fasilitas', 'tunai']
+        ];
+        panels.forEach(function (pair) {
+            var panel = document.getElementById(pair[0]);
+            if (!panel) return;
+            var hidden = pair[1] !== metode;
+            panel.classList.toggle('hidden', hidden);
+            panel.querySelectorAll('input[type="file"]').forEach(function (inp) {
+                inp.disabled = panelUtamaHidden || hidden;
+                if (panelUtamaHidden || hidden) inp.value = '';
+            });
+        });
+
+        [
+            ['btn-fasilitas-transfer', 'transfer'],
+            ['btn-fasilitas-tunai', 'tunai'],
+            ['btn-fasilitas-ewallet', 'ewallet']
+        ].forEach(function (pasangan) {
+            var el = document.getElementById(pasangan[0]);
+            if (!el) return;
+            var aktif = pasangan[1] === metode;
+            el.classList.toggle('border-blue-500', aktif);
+            el.classList.toggle('bg-blue-50', aktif);
+            el.classList.toggle('text-blue-700', aktif);
+            el.classList.toggle('border-gray-200', !aktif);
+            el.classList.toggle('bg-white', !aktif);
+            el.classList.toggle('text-gray-600', !aktif);
+        });
+    };
+
     (() => {
         function initFasilitasBooking() {
             const form = document.getElementById('booking-form');
@@ -534,70 +653,246 @@
             const qtyInput = document.getElementById('quantity');
             const decreaseBtn = document.getElementById('decrease-qty');
             const increaseBtn = document.getElementById('increase-qty');
-            const maxStock = {{ $item->stok }};
-        
-        // Logic Jenis Acara -> Surat Pengantar
-        const jenisAcaraRadios = document.querySelectorAll('input[name="jenis_acara"]');
-        const suratContainer = document.getElementById('surat-pengantar-container');
-        
-        jenisAcaraRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.value === 'sosial') {
-                    suratContainer.classList.remove('hidden');
-                } else {
-                    suratContainer.classList.add('hidden');
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+            const maxStock = {{ (int) $item->stok }};
+            const skemaBiaya = @json($skemaBiaya);
+            const tarifPerHari = {{ number_format($tarifPerHari, 0, '.', '') }};
+            const hasAnyPayment = {{ $hasAnyPayment ? 'true' : 'false' }};
+
+            const jenisAcaraRadios = document.querySelectorAll('input[name="jenis_acara"]');
+            const suratContainer = document.getElementById('surat-pengantar-container');
+            const panelBayar = document.getElementById('pembayaran-fasilitas');
+            const gratisNotice = document.getElementById('fasilitas-gratis-notice');
+            const costSummaryCard = document.getElementById('ringkasan-biaya-fasilitas');
+            const costDetailEl = document.getElementById('fasilitas-cost-detail');
+            const costTotalEl = document.getElementById('fasilitas-cost-total');
+            const modalSummaryEl = document.getElementById('confirmation-modal-summary');
+
+            function formatRp(amount) {
+                return 'Rp ' + Math.round(amount || 0).toLocaleString('id-ID');
+            }
+
+            function getSelectedAcara() {
+                const checked = document.querySelector('input[name="jenis_acara"]:checked');
+                return checked ? checked.value : null;
+            }
+
+            function isPaidSelection(jenisAcara) {
+                if (tarifPerHari <= 0) return false;
+                if (skemaBiaya === 'berbayar_semua') return true;
+                if (skemaBiaya === 'berbayar') return jenisAcara === 'komersial';
+                return false;
+            }
+
+            function getDurationDays() {
+                const s = startDateInput?.value;
+                const e = endDateInput?.value;
+                if (!s || !e) return { days: 1, estimated: true };
+                const start = new Date(s + 'T00:00:00');
+                const end = new Date(e + 'T00:00:00');
+                if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) {
+                    return { days: 1, estimated: true };
+                }
+                const diffDays = Math.round((end - start) / 86400000) + 1;
+                return { days: Math.max(1, diffDays), estimated: false };
+            }
+
+            function updateFasilitasPricing() {
+                const selectedAcara = getSelectedAcara();
+                const qty = Math.max(1, parseInt(qtyInput?.value || '1', 10) || 1);
+                const duration = getDurationDays();
+                const days = duration.days;
+                const paid = isPaidSelection(selectedAcara);
+                const total = paid ? (tarifPerHari * days * qty) : 0;
+
+                // Highlight pilihan Kategori Acara
+                const labelSosial = document.getElementById('label-acara-sosial');
+                const labelKomersial = document.getElementById('label-acara-komersial');
+                if (labelSosial) {
+                    const active = selectedAcara === 'sosial';
+                    labelSosial.classList.toggle('border-blue-500', active);
+                    labelSosial.classList.toggle('bg-blue-50', active);
+                    labelSosial.classList.toggle('border-gray-300', !active);
+                    labelSosial.classList.toggle('bg-white', !active);
+                }
+                if (labelKomersial) {
+                    const active = selectedAcara === 'komersial';
+                    labelKomersial.classList.toggle('border-blue-500', active);
+                    labelKomersial.classList.toggle('bg-blue-50', active);
+                    labelKomersial.classList.toggle('border-gray-300', !active);
+                    labelKomersial.classList.toggle('bg-white', !active);
                 }
 
-                // Hanya acara komersial yang ditagih; acara sosial gratis,
-                // jadi panel bayarnya ikut disembunyikan beserta isiannya.
-                var panelBayar = document.getElementById('pembayaran-fasilitas');
+                // Surat pengantar opsional untuk acara sosial
+                if (suratContainer) {
+                    suratContainer.classList.toggle('hidden', selectedAcara !== 'sosial');
+                }
+
+                // Tampilkan / sembunyikan panel pembayaran & pastikan file input tidak ikut terkirim saat gratis
                 if (panelBayar) {
-                    panelBayar.classList.toggle('hidden', this.value !== 'komersial');
-                }
-            });
-        });
-
-
-        if (decreaseBtn && increaseBtn && qtyInput) {
-            decreaseBtn.addEventListener('click', () => {
-                let val = parseInt(qtyInput.value) || 1;
-                if (val > 1) qtyInput.value = val - 1;
-            });
-            increaseBtn.addEventListener('click', () => {
-                let val = parseInt(qtyInput.value) || 1;
-                if (val < maxStock) qtyInput.value = val + 1;
-            });
-        }
-
-        const confirmBtns = document.querySelectorAll('.confirm-action-btn');
-        const modal = document.getElementById('confirmation-modal');
-        const cancelBtn = document.getElementById('cancel-confirmation');
-        const proceedBtn = document.getElementById('proceed-confirmation');
-        const successModal = document.getElementById('success-modal');
-
-        confirmBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const purposeInput = document.getElementById('rental-purpose');
-                const purposeVal = purposeInput ? purposeInput.value.trim() : '';
-
-                const startDate = document.getElementById('start-date').value;
-                const endDate = document.getElementById('end-date').value;
-                
-                const agreeSop = document.getElementById('agree-sop');
-
-                if (!purposeVal || !startDate || !endDate) {
-                    Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon lengkapi Tujuan, Tanggal Mulai dan Tanggal Selesai.' });
-                    return;
+                    const showPayment = (skemaBiaya === 'berbayar_semua') || (skemaBiaya === 'berbayar' && selectedAcara === 'komersial');
+                    panelBayar.classList.toggle('hidden', !showPayment);
+                    if (!showPayment) {
+                        panelBayar.querySelectorAll('input[type="file"]').forEach(inp => {
+                            inp.disabled = true;
+                            inp.value = '';
+                        });
+                    } else {
+                        const activeMethod = document.getElementById('payment-method-fasilitas')?.value;
+                        if (activeMethod && typeof window.pilihMetodeFasilitas === 'function') {
+                            window.pilihMetodeFasilitas(activeMethod);
+                        }
+                    }
                 }
 
-                if (agreeSop && !agreeSop.checked) {
-                    Swal.fire({ icon: 'warning', title: 'Ketentuan SOP', text: 'Anda harus menyetujui Ketentuan SOP terlebih dahulu sebelum melanjutkan pemesanan.' });
-                    return;
+                if (gratisNotice) {
+                    if (skemaBiaya === 'gratis') {
+                        gratisNotice.classList.remove('hidden');
+                    } else if (skemaBiaya === 'berbayar') {
+                        gratisNotice.classList.toggle('hidden', selectedAcara !== 'sosial');
+                    } else {
+                        gratisNotice.classList.add('hidden');
+                    }
                 }
-                modal.style.display = 'flex';
-                modal.classList.remove('hidden');
+
+                // Perbarui nominal di seluruh panel pembayaran (Transfer Bank, E-Wallet, Tunai)
+                const breakdownText = formatRp(tarifPerHari) + ' / hari × ' + days + ' hari × ' + qty + ' unit' + (duration.estimated ? ' (estimasi)' : '');
+                document.querySelectorAll('.fasilitas-total-nominal').forEach(el => {
+                    el.textContent = formatRp(total);
+                });
+                document.querySelectorAll('.fasilitas-total-breakdown').forEach(el => {
+                    el.textContent = breakdownText;
+                });
+
+                // Perbarui Ringkasan Biaya di dalam kartu form
+                if (costDetailEl && costTotalEl && costSummaryCard) {
+                    if (skemaBiaya === 'gratis') {
+                        costDetailEl.textContent = 'Tidak dipungut biaya (Gratis untuk acara sosial maupun pribadi).';
+                        costTotalEl.textContent = 'Gratis';
+                        costTotalEl.className = 'text-xl sm:text-2xl font-black text-emerald-700';
+                        costSummaryCard.className = 'rounded-xl border bg-emerald-50 border-emerald-200 p-4 flex flex-wrap items-center justify-between gap-3';
+                    } else if (skemaBiaya === 'berbayar' && !selectedAcara) {
+                        costDetailEl.textContent = 'Pilih Kategori Acara untuk melihat rincian biaya peminjaman.';
+                        costTotalEl.textContent = '-';
+                        costTotalEl.className = 'text-xl sm:text-2xl font-black text-slate-600';
+                        costSummaryCard.className = 'rounded-xl border bg-slate-50 border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3';
+                    } else if (!paid) {
+                        costDetailEl.textContent = 'Acara Sosial / Masyarakat tidak dipungut biaya (Gratis).';
+                        costTotalEl.textContent = 'Gratis';
+                        costTotalEl.className = 'text-xl sm:text-2xl font-black text-emerald-700';
+                        costSummaryCard.className = 'rounded-xl border bg-emerald-50 border-emerald-200 p-4 flex flex-wrap items-center justify-between gap-3';
+                    } else {
+                        costDetailEl.textContent = breakdownText;
+                        costTotalEl.textContent = formatRp(total);
+                        costTotalEl.className = 'text-xl sm:text-2xl font-black text-blue-600';
+                        costSummaryCard.className = 'rounded-xl border bg-blue-50 border-blue-200 p-4 flex flex-wrap items-center justify-between gap-3';
+                    }
+                }
+
+                return { selectedAcara, paid, total, days, qty };
+            }
+
+            jenisAcaraRadios.forEach(radio => {
+                radio.addEventListener('change', updateFasilitasPricing);
             });
-        });
+
+            if (startDateInput) {
+                startDateInput.addEventListener('change', () => {
+                    if (endDateInput) {
+                        endDateInput.min = startDateInput.value || '{{ date('Y-m-d') }}';
+                        if (endDateInput.value && endDateInput.value < startDateInput.value) {
+                            endDateInput.value = startDateInput.value;
+                        }
+                    }
+                    updateFasilitasPricing();
+                });
+            }
+            if (endDateInput) {
+                endDateInput.addEventListener('change', updateFasilitasPricing);
+            }
+
+            if (decreaseBtn && increaseBtn && qtyInput) {
+                decreaseBtn.addEventListener('click', () => {
+                    let val = parseInt(qtyInput.value, 10) || 1;
+                    if (val > 1) {
+                        qtyInput.value = val - 1;
+                        updateFasilitasPricing();
+                    }
+                });
+                increaseBtn.addEventListener('click', () => {
+                    let val = parseInt(qtyInput.value, 10) || 1;
+                    if (val < maxStock) {
+                        qtyInput.value = val + 1;
+                        updateFasilitasPricing();
+                    }
+                });
+            }
+
+            updateFasilitasPricing();
+
+            const confirmBtns = document.querySelectorAll('.confirm-action-btn');
+            const modal = document.getElementById('confirmation-modal');
+            const cancelBtn = document.getElementById('cancel-confirmation');
+            const proceedBtn = document.getElementById('proceed-confirmation');
+            const successModal = document.getElementById('success-modal');
+
+            confirmBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const summary = updateFasilitasPricing();
+                    const purposeInput = document.getElementById('rental-purpose');
+                    const purposeVal = purposeInput ? purposeInput.value.trim() : '';
+
+                    const startDate = startDateInput ? startDateInput.value : '';
+                    const endDate = endDateInput ? endDateInput.value : '';
+                    const agreeSop = document.getElementById('agree-sop');
+
+                    if (!summary.selectedAcara) {
+                        Swal.fire({ icon: 'warning', title: 'Pilih Kategori Acara', text: 'Silakan pilih Kategori Acara (Sosial / Masyarakat atau Komersial / Pribadi) terlebih dahulu.' });
+                        return;
+                    }
+
+                    if (!purposeVal || !startDate || !endDate) {
+                        Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon lengkapi Tujuan, Tanggal Mulai dan Tanggal Selesai.' });
+                        return;
+                    }
+
+                    if (endDate < startDate) {
+                        Swal.fire({ icon: 'warning', title: 'Tanggal Tidak Valid', text: 'Tanggal Selesai tidak boleh lebih awal dari Tanggal Mulai.' });
+                        return;
+                    }
+
+                    if (summary.paid) {
+                        if (!hasAnyPayment) {
+                            Swal.fire({ icon: 'warning', title: 'Metode Pembayaran Belum Aktif', text: 'Pengelola wilayah belum mengaktifkan metode pembayaran. Silakan hubungi pengelola layanan.' });
+                            return;
+                        }
+                        const activeMethod = document.getElementById('payment-method-fasilitas')?.value || '';
+                        if (activeMethod === 'transfer' || activeMethod === 'ewallet') {
+                            const activePanelId = activeMethod === 'transfer' ? 'transfer-payment-fasilitas' : 'ewallet-payment-fasilitas';
+                            const proofInput = document.querySelector('#' + activePanelId + ' input[type="file"]');
+                            if (!proofInput || !proofInput.files || proofInput.files.length === 0) {
+                                Swal.fire({ icon: 'warning', title: 'Bukti Pembayaran Wajib', text: 'Silakan unggah bukti transfer/pembayaran sebesar ' + formatRp(summary.total) + ' terlebih dahulu.' });
+                                return;
+                            }
+                        }
+                    }
+
+                    if (agreeSop && !agreeSop.checked) {
+                        Swal.fire({ icon: 'warning', title: 'Ketentuan SOP', text: 'Anda harus menyetujui Ketentuan SOP terlebih dahulu sebelum melanjutkan pemesanan.' });
+                        return;
+                    }
+
+                    if (modalSummaryEl) {
+                        modalSummaryEl.textContent = summary.paid
+                            ? ('Total Biaya: ' + formatRp(summary.total) + ' (' + summary.days + ' hari × ' + summary.qty + ' unit)')
+                            : 'Biaya Peminjaman: Gratis (Rp 0)';
+                    }
+
+                    modal.style.display = 'flex';
+                    modal.classList.remove('hidden');
+                });
+            });
 
         if (cancelBtn) {
             cancelBtn.addEventListener('click', () => {
@@ -649,51 +944,6 @@
             initFasilitasBooking();
         }
         document.addEventListener('turbo:load', initFasilitasBooking);
-    })();
-
-    // Pemilih metode bayar fasilitas umum.
-    window.pilihMetodeFasilitas = function (metode) {
-        var input = document.getElementById('payment-method-fasilitas');
-        if (input) input.value = metode;
-
-        var panels = [
-            ['transfer-payment-fasilitas', 'transfer'],
-            ['ewallet-payment-fasilitas', 'ewallet'],
-            ['cash-payment-fasilitas', 'tunai']
-        ];
-        panels.forEach(function (pair) {
-            var panel = document.getElementById(pair[0]);
-            if (!panel) return;
-            var hidden = pair[1] !== metode;
-            panel.classList.toggle('hidden', hidden);
-            panel.querySelectorAll('input[type="file"]').forEach(function (inp) {
-                inp.disabled = hidden;
-                if (hidden) inp.value = '';
-            });
-        });
-
-        [
-            ['btn-fasilitas-transfer', 'transfer'],
-            ['btn-fasilitas-tunai', 'tunai'],
-            ['btn-fasilitas-ewallet', 'ewallet']
-        ].forEach(function (pasangan) {
-            var el = document.getElementById(pasangan[0]);
-            if (!el) return;
-            var aktif = pasangan[1] === metode;
-            el.classList.toggle('border-blue-500', aktif);
-            el.classList.toggle('bg-blue-50', aktif);
-            el.classList.toggle('text-blue-700', aktif);
-            el.classList.toggle('border-gray-200', !aktif);
-            el.classList.toggle('bg-white', !aktif);
-            el.classList.toggle('text-gray-600', !aktif);
-        });
-    };
-
-    (function initMetodeFasilitas() {
-        var input = document.getElementById('payment-method-fasilitas');
-        if (input && input.value && typeof window.pilihMetodeFasilitas === 'function') {
-            window.pilihMetodeFasilitas(input.value);
-        }
     })();
 </script>
 @endpush

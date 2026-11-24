@@ -102,12 +102,27 @@
                             </div>
                             @endif
                             
+                            @php
+                                $skemaBiaya = $item->effectivePricingScheme();
+                            @endphp
                             <div class="mt-auto pt-3 flex items-end justify-between gap-2 border-t border-slate-100">
                                 <div class="flex flex-col">
-                                    <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Akses Layanan</span>
-                                    <p class="text-gray-900 font-bold text-xs sm:text-base tracking-tight leading-none text-blue-600">
-                                        Fasilitas Publik
-                                    </p>
+                                    @if($skemaBiaya === 'berbayar_semua')
+                                        <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Tarif Sewa</span>
+                                        <p class="font-bold text-xs sm:text-base tracking-tight leading-none text-blue-600">
+                                            Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}<span class="text-[9px] sm:text-xs text-gray-400 font-medium">/hari</span>
+                                        </p>
+                                    @elseif($skemaBiaya === 'berbayar')
+                                        <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Sosial Gratis · Pribadi</span>
+                                        <p class="font-bold text-xs sm:text-base tracking-tight leading-none text-blue-600">
+                                            Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}<span class="text-[9px] sm:text-xs text-gray-400 font-medium">/hari</span>
+                                        </p>
+                                    @else
+                                        <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Biaya Peminjaman</span>
+                                        <p class="font-bold text-xs sm:text-base tracking-tight leading-none text-emerald-700">
+                                            Gratis
+                                        </p>
+                                    @endif
                                 </div>
                                 <div class="text-right flex flex-col">
                                     <span class="text-[10px] sm:text-xs text-gray-400 mb-0.5 font-medium">Tersedia</span>

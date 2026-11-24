@@ -107,11 +107,11 @@ class FasilitasUmumBookingController extends Controller
         }
 
         $totalAmount = 0;
-        if ($item->status_biaya === 'berbayar' && $validated['jenis_acara'] === 'komersial' && $item->harga_sewa > 0) {
+        if ($item->isPaidForEvent($validated['jenis_acara'])) {
             $startDate = \Carbon\Carbon::parse($validated['start_date']);
             $endDate = \Carbon\Carbon::parse($validated['end_date']);
             $days = $startDate->diffInDays($endDate) + 1;
-            $totalAmount = $days * $item->harga_sewa * $validated['quantity'];
+            $totalAmount = $days * (float) $item->harga_sewa * $validated['quantity'];
         }
 
         // Metode bayar hanya bermakna kalau pesanannya memang ditagih.

@@ -45,6 +45,8 @@ class FasilitasBookingApiController extends Controller
                     'is_vehicle' => $isVehicle,
                     'opsi_supir' => $item->opsi_supir,
                     'bbm_ditanggung' => $item->bbm_ditanggung,
+                    'status_biaya' => $item->effectivePricingScheme(),
+                    'price' => $item->isPaidScheme() ? (float) $item->harga_sewa : 0.0,
                 ];
             });
 
@@ -101,8 +103,8 @@ class FasilitasBookingApiController extends Controller
                 'nama_supir' => $firstPengurus?->nama,
                 'kontak_supir' => $firstPengurus?->no_hp,
                 'bbm_ditanggung' => $item->bbm_ditanggung,
-                'price' => (float) $item->harga_sewa,
-                'status_biaya' => $item->status_biaya,
+                'price' => $item->isPaidScheme() ? (float) $item->harga_sewa : 0.0,
+                'status_biaya' => $item->effectivePricingScheme(),
                 'payment_info' => \App\Support\ProfilPembayaranWilayah::untuk($item->region_id)->publik(),
             ],
         ]);
@@ -154,8 +156,8 @@ class FasilitasBookingApiController extends Controller
 
                 // Harga mengikuti katalog dan kebijakan yang sama dengan web.
                 $jenisAcara = $request->jenis_acara === 'pribadi' ? 'komersial' : ($request->jenis_acara ?? 'sosial');
-                $totalAmount = $fasilitas->status_biaya === 'berbayar' && $jenisAcara === 'komersial'
-                    ? $daysCount * $fasilitas->harga_sewa * ($request->quantity ?? 1) : 0;
+                $totalAmount = $fasilitas->isPaidForEvent($jenisAcara)
+                    ? $daysCount * (float) $fasilitas->harga_sewa * ($request->quantity ?? 1) : 0;
                 $paymentMethod = $totalAmount > 0 ? ($request->payment_method ?? 'tunai') : null;
 
                 if ($totalAmount > 0) {

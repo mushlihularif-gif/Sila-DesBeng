@@ -162,16 +162,13 @@ class UnitFasilitasUmumController extends Controller
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
-            'status_biaya' => 'required|in:gratis,berbayar',
+            'status_biaya' => ['required', Rule::in(FasilitasUmum::allowedPricingSchemes())],
             'harga_sewa' => 'nullable|string',
             'pengurus_ids' => 'nullable|array',
             'pengurus_ids.*' => ['integer','distinct', Rule::exists('supirs','id')->where('region_id',auth()->user()->region_id)->where('tipe','pengurus_gedung')],
         ]);
 
-        $hargaBersih = 0;
-        if ($request->status_biaya === 'berbayar' && $request->harga_sewa) {
-            $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
-        }
+        $hargaBersih = $this->resolveValidatedHargaSewa($request->status_biaya, $request->input('harga_sewa'));
 
         $data = [
             'nama_fasilitas' => $request->nama_fasilitas,
@@ -287,17 +284,13 @@ class UnitFasilitasUmumController extends Controller
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
-            'status_biaya' => 'required|in:gratis,berbayar',
+            'status_biaya' => ['required', Rule::in(FasilitasUmum::allowedPricingSchemes())],
             'harga_sewa' => 'nullable|string',
             'pengurus_ids' => 'nullable|array',
             'pengurus_ids.*' => ['integer','distinct', Rule::exists('supirs','id')->where('region_id',$fasilitas->region_id)->where('tipe','pengurus_gedung')],
         ]);
 
-
-        $hargaBersih = 0;
-        if ($request->status_biaya === 'berbayar' && $request->harga_sewa) {
-            $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
-        }
+        $hargaBersih = $this->resolveValidatedHargaSewa($request->status_biaya, $request->input('harga_sewa'));
 
         $data = [
             'nama_fasilitas' => $request->nama_fasilitas,
@@ -343,5 +336,21 @@ class UnitFasilitasUmumController extends Controller
         $fasilitas->pengurus()->sync($request->pengurus_ids ?? []);
 
         return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'gedung'])->with('success', 'Fasilitas Umum berhasil diperbarui.');
+    }
+
+    private function resolveValidatedHargaSewa(string $statusBiaya, mixed $rawHarga): int
+    {
+        if ($statusBiaya === FasilitasUmum::BIAYA_GRATIS) {
+            return 0;
+        }
+
+        $hargaBersih = (int) preg_replace('/[^0-9]/', '', (string) $rawHarga);
+        if ($hargaBersih <= 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'harga_sewa' => 'Tarif sewa per hari wajib diisi (lebih dari Rp 0) jika memilih skema berbayar.',
+            ]);
+        }
+
+        return $hargaBersih;
     }
 }

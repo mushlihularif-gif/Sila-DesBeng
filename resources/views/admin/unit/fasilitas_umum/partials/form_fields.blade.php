@@ -115,12 +115,15 @@
         </div>
 
         {{-- 2. Skema Pembiayaan --}}
+        @php
+            $isPaidSelection = in_array($statusBiaya, ['berbayar', 'berbayar_semua'], true);
+        @endphp
         <div class="card up-card mb-4">
             <div class="up-card-header d-flex align-items-center gap-2.5">
                 <span class="up-step-num bg-label-success text-success">2</span>
                 <div>
                     <h6 class="fw-bold text-dark mb-0">Skema Pembiayaan Peminjaman</h6>
-                    <small class="text-muted">Tentukan apakah fasilitas sepenuhnya gratis atau berbayar untuk acara pribadi</small>
+                    <small class="text-muted">Tentukan apakah semua acara gratis, hanya acara pribadi yang berbayar, atau semua acara berbayar</small>
                 </div>
             </div>
             <div class="card-body p-3 p-md-4">
@@ -134,15 +137,17 @@
                                 name="status_biaya"
                                 required
                                 onchange="toggleHargaSewa()">
-                            <option value="gratis" @selected($statusBiaya === 'gratis')>Gratis Sepenuhnya (Khusus Kegiatan Sosial)</option>
-                            <option value="berbayar" @selected($statusBiaya === 'berbayar')>Multifungsi (Sosial Gratis, Pribadi Berbayar)</option>
+                            <option value="gratis" @selected($statusBiaya === 'gratis')>Gratis Sepenuhnya (Acara Sosial &amp; Pribadi Gratis)</option>
+                            <option value="berbayar" @selected($statusBiaya === 'berbayar')>Sosial Gratis, Komersial / Pribadi Berbayar</option>
+                            <option value="berbayar_semua" @selected($statusBiaya === 'berbayar_semua')>Semua Acara Berbayar (Acara Sosial &amp; Pribadi Berbayar)</option>
                         </select>
                         @error('status_biaya')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <div id="status_biaya_hint" class="small text-muted mt-2"></div>
                     </div>
 
-                    <div class="col-12 col-md-6" id="harga_sewa_container" style="{{ $statusBiaya === 'berbayar' ? '' : 'display: none;' }}">
-                        <label class="form-label" for="harga_sewa">
-                            Tarif Acara Pribadi (Per Hari) <span class="text-danger">*</span>
+                    <div class="col-12 col-md-6" id="harga_sewa_container" style="{{ $isPaidSelection ? '' : 'display: none;' }}">
+                        <label class="form-label" for="harga_sewa" id="harga_sewa_label">
+                            {{ $statusBiaya === 'berbayar_semua' ? 'Tarif Sewa Semua Acara (Per Hari)' : 'Tarif Acara Komersial / Pribadi (Per Hari)' }} <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
@@ -151,13 +156,20 @@
                                    id="harga_sewa"
                                    name="harga_sewa"
                                    value="{{ $hargaSewaVal }}"
-                                   placeholder="1.000.000"
+                                   placeholder="500.000"
                                    inputmode="numeric"
-                                   @required($statusBiaya === 'berbayar')
-                                   oninput="formatRupiah(this)" />
+                                   @required($isPaidSelection)
+                                   oninput="formatRupiah(this); clearHargaSewaError();" />
                         </div>
-                        <small class="text-muted d-block mt-1">Hanya ditagihkan jika warga memilih kategori Acara Pribadi.</small>
-                        @error('harga_sewa')<small class="text-danger d-block mt-1">{{ $message }}</small>@enderror
+                        <small id="harga_sewa_helper" class="text-muted d-block mt-1">
+                            {{ $statusBiaya === 'berbayar_semua'
+                                ? 'Wajib diisi (> Rp 0). Ditagihkan untuk acara Sosial/Masyarakat maupun Komersial/Pribadi.'
+                                : 'Wajib diisi (> Rp 0). Hanya ditagihkan jika warga memilih kategori Acara Komersial / Pribadi.' }}
+                        </small>
+                        <div id="harga_sewa_client_error" class="text-danger small fw-semibold mt-1" style="display: none;">
+                            Tarif sewa per hari wajib diisi (lebih dari Rp 0) jika memilih skema berbayar.
+                        </div>
+                        @error('harga_sewa')<small class="text-danger d-block mt-1 fw-semibold">{{ $message }}</small>@enderror
                     </div>
                 </div>
             </div>
@@ -363,19 +375,41 @@
 
 @push('scripts')
 <script>
+    function clearHargaSewaError() {
+        const input = document.getElementById('harga_sewa');
+        const errEl = document.getElementById('harga_sewa_client_error');
+        if (input) input.classList.remove('is-invalid');
+        if (errEl) errEl.style.display = 'none';
+    }
+
     function toggleHargaSewa() {
         const statusBiaya = document.getElementById('status_biaya')?.value;
         const container = document.getElementById('harga_sewa_container');
         const input = document.getElementById('harga_sewa');
+        const label = document.getElementById('harga_sewa_label');
+        const helper = document.getElementById('harga_sewa_helper');
+        const hint = document.getElementById('status_biaya_hint');
         if (!container || !input) return;
 
-        if (statusBiaya === 'berbayar') {
+        clearHargaSewaError();
+
+        if (statusBiaya === 'berbayar' || statusBiaya === 'berbayar_semua') {
             container.style.display = '';
             input.required = true;
+            if (statusBiaya === 'berbayar_semua') {
+                if (label) label.innerHTML = 'Tarif Sewa Semua Acara (Per Hari) <span class="text-danger">*</span>';
+                if (helper) helper.textContent = 'Wajib diisi (> Rp 0). Ditagihkan untuk acara Sosial/Masyarakat maupun Komersial/Pribadi.';
+                if (hint) hint.textContent = 'Semua kategori acara (sosial dan pribadi) akan dikenakan biaya sesuai tarif harian.';
+            } else {
+                if (label) label.innerHTML = 'Tarif Acara Komersial / Pribadi (Per Hari) <span class="text-danger">*</span>';
+                if (helper) helper.textContent = 'Wajib diisi (> Rp 0). Hanya ditagihkan jika warga memilih kategori Acara Komersial / Pribadi.';
+                if (hint) hint.textContent = 'Kegiatan sosial/masyarakat gratis; hanya acara komersial/pribadi yang dikenakan tarif harian.';
+            }
         } else {
             container.style.display = 'none';
             input.required = false;
             input.value = '';
+            if (hint) hint.textContent = 'Seluruh peminjaman (acara sosial maupun pribadi) tidak dipungut biaya (Gratis).';
         }
     }
 
@@ -467,6 +501,27 @@
     document.addEventListener('DOMContentLoaded', function () {
         updateAssignedPengurusCount();
         toggleHargaSewa();
+
+        const formFasilitas = document.getElementById('formFasilitasUmum');
+        if (formFasilitas) {
+            formFasilitas.addEventListener('submit', function (e) {
+                const statusBiaya = document.getElementById('status_biaya')?.value;
+                const inputHarga = document.getElementById('harga_sewa');
+                const errEl = document.getElementById('harga_sewa_client_error');
+                if (statusBiaya === 'berbayar' || statusBiaya === 'berbayar_semua') {
+                    const numericVal = parseInt(String(inputHarga?.value || '').replace(/[^0-9]/g, ''), 10) || 0;
+                    if (numericVal <= 0) {
+                        e.preventDefault();
+                        if (inputHarga) {
+                            inputHarga.classList.add('is-invalid');
+                            inputHarga.focus();
+                            inputHarga.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        if (errEl) errEl.style.display = 'block';
+                    }
+                }
+            });
+        }
 
         const searchInput = document.getElementById('searchPengurusInput');
         if (searchInput) {

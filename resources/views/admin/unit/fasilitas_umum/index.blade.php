@@ -216,13 +216,23 @@
                                             {{ str_replace('&', 'dan', $item->kategori) }}
                                         </span>
                                     </div>
-                                    <div class="mb-2">
-                                        @if($item->status_biaya === 'berbayar' && $item->harga_sewa > 0)
-                                            <span class="badge bg-label-primary rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.76rem;">
-                                                Rp {{ number_format($item->harga_sewa, 0, ',', '.') }} / hari
+                                    <div class="mb-2 d-flex flex-wrap gap-1">
+                                        @php
+                                            $skemaBiaya = $item->effectivePricingScheme();
+                                        @endphp
+                                        @if($skemaBiaya === 'berbayar_semua')
+                                            <span class="badge bg-label-primary rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.74rem;">
+                                                Semua Acara: Rp {{ number_format($item->harga_sewa, 0, ',', '.') }} / hari
+                                            </span>
+                                        @elseif($skemaBiaya === 'berbayar')
+                                            <span class="badge bg-label-info rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.74rem;">
+                                                Pribadi: Rp {{ number_format($item->harga_sewa, 0, ',', '.') }} / hari
+                                            </span>
+                                            <span class="badge bg-label-success rounded-pill px-2 py-1 fw-semibold" style="font-size: 0.68rem;">
+                                                Sosial Gratis
                                             </span>
                                         @else
-                                            <span class="badge bg-label-success rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.76rem;">Gratis</span>
+                                            <span class="badge bg-label-success rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.74rem;">Gratis Sepenuhnya</span>
                                         @endif
                                     </div>
 

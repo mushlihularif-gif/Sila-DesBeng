@@ -77,6 +77,36 @@
                                 <span class="text-gray-600 font-medium text-sm">Kategori</span>
                                 <span class="text-gray-800 font-semibold text-sm">{{ str_replace('&', 'dan', $item->kategori) }}</span>
                             </div>
+
+                            <!-- Pricing Scheme -->
+                            @php
+                                $skemaBiaya = $item->effectivePricingScheme();
+                            @endphp
+                            <div class="flex justify-between items-center gap-2">
+                                <span class="text-gray-600 font-medium text-sm">Skema Biaya</span>
+                                @if($skemaBiaya === 'berbayar_semua')
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                        Semua Acara Berbayar
+                                    </span>
+                                @elseif($skemaBiaya === 'berbayar')
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                        Sosial Gratis · Pribadi Berbayar
+                                    </span>
+                                @else
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        Gratis Sepenuhnya
+                                    </span>
+                                @endif
+                            </div>
+
+                            @if($item->isPaidScheme())
+                            <div class="flex justify-between items-center gap-2">
+                                <span class="text-gray-600 font-medium text-sm">Tarif Sewa</span>
+                                <span class="text-blue-600 font-bold text-sm">
+                                    Rp {{ number_format($item->harga_sewa, 0, ',', '.') }} / hari
+                                </span>
+                            </div>
+                            @endif
                         </div>
 
                         @if($item->pengurus && $item->pengurus->count() > 0)
@@ -211,7 +241,11 @@
         :regionId="$item->region_id" 
         :regionName="$item->region->name ?? ''"
         :itemName="$item->nama_fasilitas"
-        :itemPrice="$item->harga_sewa > 0 ? 'Rp ' . number_format($item->harga_sewa, 0, ',', '.') . ' / kegiatan' : 'Gratis / Fasilitas Publik'"
+        :itemPrice="$item->effectivePricingScheme() === 'berbayar_semua'
+            ? 'Rp ' . number_format($item->harga_sewa, 0, ',', '.') . ' / hari (Semua Acara)'
+            : ($item->effectivePricingScheme() === 'berbayar'
+                ? 'Gratis (Sosial) · Rp ' . number_format($item->harga_sewa, 0, ',', '.') . ' / hari (Pribadi)'
+                : 'Gratis Sepenuhnya')"
         :itemImage="$item->foto ? url('storage/' . $item->foto) : ''"
     />
 @endsection

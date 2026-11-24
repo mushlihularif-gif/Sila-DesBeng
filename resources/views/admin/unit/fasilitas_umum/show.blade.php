@@ -19,7 +19,8 @@
     };
 
     $satuanLabel = $fasilitas->satuan ?: 'Unit';
-    $isBerbayar = $fasilitas->status_biaya === 'berbayar';
+    $skemaBiaya = $fasilitas->effectivePricingScheme();
+    $isBerbayar = $fasilitas->isPaidScheme();
     $pengurusList = $fasilitas->pengurus ?? collect();
     $statusBadgeHtml = '<span class="badge ' . $statusCfg['badge'] . ' rounded-pill px-3 py-1.5 shadow-sm fw-semibold" style="font-size: 0.74rem;"><i class="bx ' . $statusCfg['icon'] . ' me-1"></i>' . e($statusCfg['label']) . '</span>';
     $stockBadgeHtml = '<span class="badge bg-dark bg-opacity-75 rounded-pill px-3 py-1.5 shadow-sm fw-semibold" style="font-size: 0.74rem;">Kapasitas: ' . (int) $fasilitas->stok . ' ' . e($satuanLabel) . '</span>';
@@ -82,8 +83,8 @@
                             <span class="badge bg-label-primary rounded-pill px-2.5 py-1 fw-semibold" style="font-size: 0.74rem;">
                                 <i class="bx bx-category me-1"></i>{{ str_replace('&', 'dan', (string) ($fasilitas->kategori ?: 'Fasilitas')) }}
                             </span>
-                            <span class="badge {{ $isBerbayar ? 'bg-label-info' : 'bg-label-success' }} rounded-pill px-2.5 py-1 fw-semibold" style="font-size: 0.74rem;">
-                                {{ $isBerbayar ? 'Multifungsi (Sosial Gratis / Pribadi Berbayar)' : 'Gratis Sepenuhnya' }}
+                            <span class="badge {{ $skemaBiaya === 'berbayar_semua' ? 'bg-label-primary' : ($skemaBiaya === 'berbayar' ? 'bg-label-info' : 'bg-label-success') }} rounded-pill px-2.5 py-1 fw-semibold" style="font-size: 0.74rem;">
+                                {{ $fasilitas->pricingSchemeLabel() }}
                             </span>
                         </div>
                         <h5 class="fw-bold text-dark mb-1">{{ $fasilitas->nama_fasilitas }}</h5>
@@ -117,10 +118,23 @@
 
                 <div class="card-body p-3 p-md-4">
                     <div class="up-price-banner mb-4">
-                        @if($isBerbayar)
+                        @if($skemaBiaya === 'berbayar_semua')
                             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                                 <div>
-                                    <span class="up-spec-label text-primary mb-1">Tarif Acara Pribadi (Multifungsi)</span>
+                                    <span class="up-spec-label text-primary mb-1">Tarif Sewa Semua Acara</span>
+                                    <div class="d-flex align-items-baseline flex-wrap gap-1.5">
+                                        <h3 class="fw-bold text-primary mb-0">Rp {{ number_format((float) ($fasilitas->harga_sewa ?? 0), 0, ',', '.') }}</h3>
+                                        <span class="text-muted small fw-medium">/ hari</span>
+                                    </div>
+                                </div>
+                                <span class="badge bg-label-primary rounded-pill px-3 py-1.5 fw-semibold">
+                                    Berbayar untuk Sosial &amp; Pribadi
+                                </span>
+                            </div>
+                        @elseif($skemaBiaya === 'berbayar')
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                <div>
+                                    <span class="up-spec-label text-primary mb-1">Tarif Acara Komersial / Pribadi</span>
                                     <div class="d-flex align-items-baseline flex-wrap gap-1.5">
                                         <h3 class="fw-bold text-primary mb-0">Rp {{ number_format((float) ($fasilitas->harga_sewa ?? 0), 0, ',', '.') }}</h3>
                                         <span class="text-muted small fw-medium">/ hari</span>
@@ -137,7 +151,7 @@
                                     <h4 class="fw-bold text-success mb-0">Gratis Sepenuhnya</h4>
                                 </div>
                                 <span class="badge bg-white text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold small">
-                                    Khusus Kegiatan Sosial &amp; Warga
+                                    Acara Sosial &amp; Pribadi Gratis
                                 </span>
                             </div>
                         @endif
