@@ -16,10 +16,10 @@
             <!-- Detail Card - HORIZONTAL LAYOUT -->
             <div class="catalog-detail-card">
                 <div class="flex flex-col lg:flex-row gap-8">
-                    <!-- Left Side: Product Image + Location -->
+                    <!-- Left Side: Product Image -->
                     <div class="lg:w-5/12 flex-shrink-0">
                         <!-- Product Image Carousel -->
-                        <div class="catalog-detail-gallery mb-5 group">
+                        <div class="catalog-detail-gallery group">
                             @php
                                 $images = collect([$item->foto, $item->foto_2, $item->foto_3])->filter()->values();
                             @endphp
@@ -38,9 +38,6 @@
 
                             @include('users.partials.product-gallery-controls')
                         </div>
-
-                        <!-- Location - Below Image -->
-                        <x-service-location :item="$item" />
                     </div>
 
                     <!-- Right Side: Product Information -->
@@ -160,6 +157,11 @@
                             @endif
                         </div>
                     </div>
+                </div>
+
+                <!-- Location & Map: Left Info, Right Map -->
+                <div class="mt-6 pt-6 border-t border-gray-100">
+                    <x-service-location :item="$item" layout="horizontal" />
                 </div>
             </div>
         </div>
