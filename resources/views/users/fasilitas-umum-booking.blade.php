@@ -79,11 +79,23 @@
                         </div>
                     </div>
 
-                    <!-- Upload Surat Pengantar (Dinamic: Hanya muncul untuk acara Sosial) -->
-                    <div id="surat-pengantar-container" class="mb-6 hidden bg-yellow-50 border border-yellow-200 p-5 rounded-xl">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Upload Surat Pengantar (Opsional) <span class="text-xs text-gray-500 font-normal">Mempercepat validasi dari Admin</span></label>
-                        <input type="file" name="surat_pengantar" accept=".pdf,.jpg,.jpeg,.png" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                        <p class="text-xs text-gray-500 mt-2">* Format: PDF/JPG/PNG. Maksimal ukuran file: 5MB.</p>
+                    <!-- Surat Pengantar (Hanya muncul untuk acara Sosial) -->
+                    <div id="surat-pengantar-container" class="mb-6 hidden bg-amber-50 border border-amber-200 p-5 rounded-xl">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span class="text-sm font-bold text-gray-800">Surat Pengantar RT/RW atau Panitia</span>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Opsional</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mb-3">
+                            Tidak wajib. Jika ada surat keterangan dari RT/RW atau panitia acara, silakan lampirkan agar pengajuan Anda lebih cepat disetujui petugas desa.
+                        </p>
+                        <x-file-upload
+                            name="surat_pengantar"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            tone="amber"
+                            button-text="Pilih Surat / Foto"
+                            empty-text="Belum ada surat dipilih"
+                            helper="Format JPG, PNG, atau PDF · Maksimal 5 MB."
+                        />
                     </div>
 
                     <!-- Keterangan / Tujuan Peminjaman -->
@@ -375,13 +387,14 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">
                                     Unggah Bukti Transfer <span class="text-red-500">*</span>
                                 </label>
-                                <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
-                                       class="block w-full text-sm text-gray-600 border-2 border-dashed border-blue-200 rounded-xl p-3
-                                              file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
-                                              file:bg-blue-500 file:text-white file:font-semibold hover:file:bg-blue-600">
-                                <p class="text-xs text-gray-500 mt-2">
-                                    JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda diperiksa petugas sebelum pesanan diproses.
-                                </p>
+                                <x-file-upload
+                                    name="payment_proof"
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    tone="blue"
+                                    button-text="Pilih Bukti Transfer"
+                                    empty-text="Belum ada bukti transfer dipilih"
+                                    helper="Format JPG, PNG, atau PDF · Maksimal 5 MB. Bukti Anda akan diperiksa petugas desa sebelum pengajuan diproses."
+                                />
                             </div>
                         </div>
                         @endif
@@ -423,13 +436,14 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">
                                     Unggah Bukti Pengiriman <span class="text-red-500">*</span>
                                 </label>
-                                <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
-                                       class="block w-full text-sm text-gray-600 border-2 border-dashed border-sky-200 rounded-xl p-3
-                                              file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
-                                              file:bg-sky-500 file:text-white file:font-semibold hover:file:bg-sky-600">
-                                <p class="text-xs text-gray-500 mt-2">
-                                    JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda diperiksa petugas sebelum pesanan diproses.
-                                </p>
+                                <x-file-upload
+                                    name="payment_proof"
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    tone="sky"
+                                    button-text="Pilih Bukti Pengiriman"
+                                    empty-text="Belum ada bukti pengiriman dipilih"
+                                    helper="Format JPG, PNG, atau PDF · Maksimal 5 MB. Bukti Anda akan diperiksa petugas desa sebelum pengajuan diproses."
+                                />
                             </div>
                         </div>
                         @endif

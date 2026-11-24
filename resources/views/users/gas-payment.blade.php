@@ -87,8 +87,17 @@
             @if($order->status === 'pending' && $order->cancellation_status !== 'pending' && !$paid && !$order->proof_of_payment && strtolower($order->payment_method) !== 'tunai')
                 <form action="{{ route('user.gas.payment.proof', $order->id) }}" method="POST" enctype="multipart/form-data" class="mt-5 space-y-3">
                     @csrf
-                    <label for="gas-proof" class="block font-semibold">Bukti pembayaran (JPG, PNG, atau PDF, maksimal 5 MB)</label>
-                    <input id="gas-proof" type="file" name="payment_proof" accept="image/jpeg,image/png,application/pdf" required class="block w-full">
+                    <label for="gas-proof" class="block text-sm font-bold text-gray-800">Unggah Bukti Pembayaran <span class="text-red-500">*</span></label>
+                    <x-file-upload
+                        id="gas-proof"
+                        name="payment_proof"
+                        accept="image/jpeg,image/png,application/pdf"
+                        :required="true"
+                        tone="blue"
+                        button-text="Pilih Bukti Pembayaran"
+                        empty-text="Belum ada bukti pembayaran dipilih"
+                        helper="Format JPG, PNG, atau PDF · Maksimal 5 MB."
+                    />
                     <button type="submit" class="rounded-xl bg-blue-600 text-white px-5 py-3 font-bold">Kirim Bukti Pembayaran</button>
                 </form>
             @endif

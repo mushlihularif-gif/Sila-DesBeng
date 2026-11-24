@@ -499,6 +499,12 @@ class FasilitasPricingAndGasLayoutTest extends TestCase
             'adaGateway' => false,
         ])->render();
         $this->assertStringNotContainsString('Peminjaman fasilitas ini tidak dipungut biaya (Gratis).', $htmlMixed);
+        $this->assertStringNotContainsString('Mempercepat validasi dari Admin', $htmlMixed);
+        $this->assertStringContainsString('Surat Pengantar RT/RW atau Panitia', $htmlMixed);
+        $this->assertStringContainsString('Pilih Surat / Foto', $htmlMixed);
+        $this->assertStringContainsString('Belum ada surat dipilih', $htmlMixed);
+        $this->assertStringContainsString('Pilih Bukti Transfer', $htmlMixed);
+        $this->assertStringContainsString('segi-file-upload-input', $htmlMixed);
         $this->assertStringContainsString('Sosial / Masyarakat (Gratis)', $htmlMixed);
         $this->assertStringContainsString('Komersial / Pribadi (Rp 500.000 / hari)', $htmlMixed);
         $this->assertStringContainsString('Total yang Harus Ditransfer', $htmlMixed);
@@ -572,6 +578,8 @@ class FasilitasPricingAndGasLayoutTest extends TestCase
         $this->assertGreaterThan($posChoices, $posLokasiLayanan, 'Peta lokasi layanan tidak boleh muncul di atas tombol Diantar / Ambil Sendiri.');
         $this->assertGreaterThan($posJemputCard, $posLokasiLayanan, 'Peta lokasi layanan harus berada di dalam kartu Ambil Sendiri.');
         $this->assertSame(1, substr_count($html, 'Lokasi Layanan'), 'Peta lokasi layanan hanya boleh muncul satu kali (tidak duplikat).');
+        $this->assertStringContainsString('Pilih Bukti Transfer', $html);
+        $this->assertStringContainsString('segi-file-upload-input', $html);
     }
 
     public function test_admin_staff_form_fields_renders_all_three_pricing_schemes(): void

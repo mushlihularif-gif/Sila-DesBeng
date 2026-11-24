@@ -399,14 +399,14 @@
                             <label class="block text-sm font-bold text-gray-700 mb-2">
                                 Unggah Bukti Transfer <span class="text-red-500">*</span>
                             </label>
-                            <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
-                                   class="block w-full text-sm text-gray-600 border-2 border-dashed border-blue-200 rounded-xl p-3
-                                          file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
-                                          file:bg-blue-500 file:text-white file:font-semibold hover:file:bg-blue-600">
-                            <p class="text-xs text-gray-500 mt-2">
-                                Format JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda akan diperiksa petugas
-                                sebelum pesanan diproses.
-                            </p>
+                            <x-file-upload
+                                name="payment_proof"
+                                accept=".jpg,.jpeg,.png,.pdf"
+                                tone="blue"
+                                button-text="Pilih Bukti Transfer"
+                                empty-text="Belum ada bukti transfer dipilih"
+                                helper="Format JPG, PNG, atau PDF · Maksimal 5 MB. Bukti Anda akan diperiksa petugas desa sebelum pesanan diproses."
+                            />
                         </div>
                     </div>
                     @endif
@@ -447,14 +447,14 @@
                             <label class="block text-sm font-bold text-gray-700 mb-2">
                                 Unggah Bukti Pengiriman <span class="text-red-500">*</span>
                             </label>
-                            <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
-                                   class="block w-full text-sm text-gray-600 border-2 border-dashed border-sky-200 rounded-xl p-3
-                                          file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
-                                          file:bg-sky-500 file:text-white file:font-semibold hover:file:bg-sky-600">
-                            <p class="text-xs text-gray-500 mt-2">
-                                Format JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda akan diperiksa petugas
-                                sebelum pesanan diproses.
-                            </p>
+                            <x-file-upload
+                                name="payment_proof"
+                                accept=".jpg,.jpeg,.png,.pdf"
+                                tone="sky"
+                                button-text="Pilih Bukti Pengiriman"
+                                empty-text="Belum ada bukti pengiriman dipilih"
+                                helper="Format JPG, PNG, atau PDF · Maksimal 5 MB. Bukti Anda akan diperiksa petugas desa sebelum pesanan diproses."
+                            />
                         </div>
                     </div>
                     @endif

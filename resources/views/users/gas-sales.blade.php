@@ -208,12 +208,21 @@
                 <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-2xl mx-auto flex items-center justify-center text-4xl mb-4">
                     <i class='bx bx-id-card'></i>
                 </div>
-                <p class="text-sm text-gray-600">Ambil foto Kartu Keluarga (KK) asli secara jelas. Pastikan NIK anggota keluarga dapat terbaca oleh sistem kami.</p>
+                <p class="text-sm text-gray-600">Ambil foto Kartu Keluarga (KK) asli secara jelas agar nama dan NIK anggota keluarga mudah dibaca petugas desa.</p>
             </div>
             
             <div class="mb-6">
-                <label class="block text-sm font-bold text-gray-800 mb-2">Foto Kartu Keluarga</label>
-                <input type="file" name="kk_image" accept="image/*" capture="environment" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                <label class="block text-sm font-bold text-gray-800 mb-2">Foto Kartu Keluarga <span class="text-red-500">*</span></label>
+                <x-file-upload
+                    name="kk_image"
+                    accept="image/*"
+                    capture="environment"
+                    :required="true"
+                    tone="blue"
+                    button-text="Ambil / Pilih Foto KK"
+                    empty-text="Belum ada foto KK dipilih"
+                    helper="Format foto JPG atau PNG. Pastikan tulisan & NIK pada KK terlihat jelas."
+                />
             </div>
 
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center gap-2" style="background-color: #2563eb !important;">

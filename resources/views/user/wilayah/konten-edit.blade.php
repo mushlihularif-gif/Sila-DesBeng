@@ -22,7 +22,18 @@
         @if($announcement->image_path)
             <img src="{{ asset('storage/'.$announcement->image_path) }}" alt="Gambar saat ini" class="max-h-48 rounded-xl">
         @endif
-        <div><label for="image" class="block mb-2 font-semibold">Ganti gambar (opsional, maksimal 5 MB)</label><input id="image" name="image" type="file" accept="image/jpeg,image/png,image/gif" class="w-full"></div>
+        <div>
+            <label for="image" class="block mb-2 font-semibold">Ganti Gambar <span class="text-xs font-normal text-gray-500">(Opsional)</span></label>
+            <x-file-upload
+                id="image"
+                name="image"
+                accept="image/jpeg,image/png,image/gif"
+                tone="blue"
+                button-text="Pilih Gambar Baru"
+                empty-text="Belum ada gambar baru dipilih"
+                helper="Tidak wajib. Format JPG, PNG, atau GIF · Maksimal 5 MB."
+            />
+        </div>
         <div><label for="description" class="block mb-2 font-semibold">Isi</label><textarea id="description" name="description" required rows="10" class="w-full border rounded-xl p-3">{{ old('description', $announcement->description) }}</textarea></div>
         <div class="flex gap-3 justify-end">
             <a href="{{ route($announcement->post_category === 'Berita' ? 'wilayah.berita.index' : 'wilayah.pengumuman.index') }}" class="px-5 py-3 border rounded-full">Batal</a>
