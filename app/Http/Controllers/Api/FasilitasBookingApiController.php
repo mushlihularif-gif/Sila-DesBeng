@@ -17,13 +17,11 @@ class FasilitasBookingApiController extends Controller
         $query = FasilitasUmum::inCatalog()->whereRaw('LOWER(status) = ?', ['tersedia']);
 
         $user = $request->user('sanctum');
-        if ($user && $user->region_id) {
-            if (\Illuminate\Support\Facades\Schema::hasTable('regions') && \Illuminate\Support\Facades\Schema::hasTable('region_services')) {
-                $visibleRegionIds = \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'fasilitas-umum');
-                $query->whereIn('region_id', $visibleRegionIds);
-            } else {
-                $query->where('region_id', $user->region_id);
-            }
+        if (\App\Models\Region::adaPengaturanLayanan('fasilitas-umum')) {
+            $visibleRegionIds = \App\Models\Region::wilayahLayananTerlihat($user?->region_id, 'fasilitas-umum');
+            $query->whereIn('region_id', $visibleRegionIds ?: [-1]);
+        } elseif ($user && $user->region_id) {
+            $query->where('region_id', $user->region_id);
         }
 
         $items = $query->get()
@@ -68,6 +66,17 @@ class FasilitasBookingApiController extends Controller
                 'status' => 'error',
                 'message' => 'Fasilitas tidak ditemukan.',
             ], 404);
+        }
+
+        $viewer = request()->user('sanctum');
+        if ($item->region_id && \App\Models\Region::adaPengaturanLayanan('fasilitas-umum') && \App\Models\Region::whereKey($item->region_id)->exists()) {
+            $allowed = \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'fasilitas-umum');
+            if (! in_array((int) $item->region_id, array_map('intval', $allowed), true)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Layanan ini khusus warga lokal atau sedang tidak aktif.',
+                ], 403);
+            }
         }
 
         $firstPengurus = (\Illuminate\Support\Facades\Schema::hasTable('fasilitas_pengurus') && \Illuminate\Support\Facades\Schema::hasTable('supirs'))
@@ -122,6 +131,15 @@ class FasilitasBookingApiController extends Controller
         try {
             return \Illuminate\Support\Facades\DB::transaction(function () use ($request, &$proofPath) {
                 $fasilitas = FasilitasUmum::inCatalog()->lockForUpdate()->findOrFail($request->fasilitas_id);
+
+                if ($fasilitas->region_id
+                    && \Illuminate\Support\Facades\Schema::hasTable('regions')
+                    && \Illuminate\Support\Facades\Schema::hasTable('services')
+                    && \Illuminate\Support\Facades\Schema::hasTable('region_services')
+                    && \App\Models\Region::whereKey($fasilitas->region_id)->exists()) {
+                    $allowed = \App\Models\Region::wilayahLayananTerlihat($request->user()?->region_id, 'fasilitas-umum');
+                    abort_unless(in_array((int) $fasilitas->region_id, array_map('intval', $allowed), true), 403, 'Layanan ini tidak tersedia untuk wilayah akun Anda.');
+                }
 
                 if (strtolower((string) $fasilitas->status) !== 'tersedia' || ($fasilitas->stok !== null && $fasilitas->stok < ($request->quantity ?? 1))) {
                     return response()->json([

@@ -99,6 +99,32 @@ class Region extends Model
      *
      * @return array<int> region_id yang layanannya aktif dan boleh dilihat
      */
+    /**
+     * Apakah tabel dan pengaturan region_services untuk layanan ini sudah terisi
+     * (true di produksi dan di pengujian yang mengatur region_services; false hanya
+     * pada fixture pengujian terisolasi yang tidak membuat/mengisi region_services).
+     */
+    public static function adaPengaturanLayanan(string $namaLayanan): bool
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('regions')
+            || ! \Illuminate\Support\Facades\Schema::hasTable('services')
+            || ! \Illuminate\Support\Facades\Schema::hasTable('region_services')) {
+            return false;
+        }
+
+        $slug = \Illuminate\Support\Str::slug($namaLayanan);
+        $layananId = Service::where('name', $namaLayanan)
+            ->orWhere('slug', $slug)
+            ->orWhere('slug', str_replace('peminjaman-', '', $slug))
+            ->value('id');
+
+        if (! $layananId) {
+            return false;
+        }
+
+        return RegionService::where('service_id', $layananId)->exists();
+    }
+
     public static function wilayahLayananTerlihat(?int $userRegionId, string $namaLayanan): array
     {
         $slug = \Illuminate\Support\Str::slug($namaLayanan);
@@ -118,16 +144,31 @@ class Region extends Model
                       ->orWhereIn('region_id', $garis);
                 })
                 ->pluck('region_id')
+                ->map(fn ($id) => (int) $id)
                 ->all();
+
+            // Wilayah milik warga sendiri hanya diikutkan secara otomatis bila belum
+            // punya baris region_services untuk layanan ini (kompatibilitas wilayah lama).
+            // Jika admin wilayah menonaktifkan layanan (is_active = false), tetap disembunyikan.
+            if (! empty($garis)) {
+                $configuredOwnIds = RegionService::where('service_id', $layanan->id)
+                    ->whereIn('region_id', $garis)
+                    ->pluck('region_id')
+                    ->map(fn ($id) => (int) $id)
+                    ->all();
+
+                foreach ($garis as $gId) {
+                    $gInt = (int) $gId;
+                    if (! in_array($gInt, $configuredOwnIds, true)) {
+                        $allowed[] = $gInt;
+                    }
+                }
+            }
+        } elseif (! empty($garis)) {
+            $allowed = array_map('intval', $garis);
         }
 
-        // Pastikan garis wilayah warga sendiri (RT/RW/Desa) selalu terikut
-        // agar warga tidak terblokir dari produk yang disediakan oleh desanya sendiri
-        if (!empty($garis)) {
-            $allowed = array_values(array_unique(array_merge($allowed, $garis)));
-        }
-
-        return $allowed;
+        return array_values(array_unique(array_map('intval', $allowed)));
     }
 
     public function getFullPathAttribute()

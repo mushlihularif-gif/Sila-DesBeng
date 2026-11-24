@@ -14,18 +14,23 @@ class MobilRentalUserController extends Controller
         $query = Mobil::forRental()->where('status', '!=', 'rusak');
 
         $targetRegion = null;
-        $visibleRegionIds = null;
+        $viewer = auth()->user();
+        $isSuperAdmin = $viewer && $viewer->role === 'super_admin';
+        $allowedRegionIds = (! $isSuperAdmin && \App\Models\Region::adaPengaturanLayanan('Penyewaan Mobil'))
+            ? \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'Penyewaan Mobil')
+            : null;
+        $visibleRegionIds = $allowedRegionIds;
+
         if ($targetRegionId) {
             $targetRegion = \App\Models\Region::find($targetRegionId);
-            $visibleRegionIds = array_merge([$targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId));
-            $query->whereIn('region_id', $visibleRegionIds);
-        } elseif (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
-            $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Mobil');
-            $visibleRegionIds = array_values(array_unique(array_map('intval', $allowed)));
-            $query->where(function($sub) use ($allowed) {
-                $sub->whereIn('region_id', $allowed)
-                    ->orWhereNull('region_id');
-            });
+            $targetTreeIds = array_map('intval', array_merge([$targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId)));
+            $visibleRegionIds = $allowedRegionIds !== null
+                ? array_values(array_intersect($targetTreeIds, array_map('intval', $allowedRegionIds)))
+                : $targetTreeIds;
+            $query->whereIn('region_id', $visibleRegionIds ?: [-1]);
+        } elseif ($allowedRegionIds !== null) {
+            $visibleRegionIds = array_values(array_unique(array_map('intval', $allowedRegionIds)));
+            $query->whereIn('region_id', $visibleRegionIds ?: [-1]);
         }
 
         $availableRegionIds = (clone $query)->whereNotNull('region_id')->distinct()->pluck('region_id')->map(fn ($id) => (int) $id)->all();
@@ -55,7 +60,14 @@ class MobilRentalUserController extends Controller
     public function show($id)
     {
         $item = Mobil::inCatalog()->findOrFail($id);
-        
+        $viewer = auth()->user();
+        if ($item->region_id && (! $viewer || $viewer->role !== 'super_admin')
+            && \App\Models\Region::adaPengaturanLayanan('Penyewaan Mobil')
+            && \App\Models\Region::whereKey($item->region_id)->exists()) {
+            $allowed = \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'Penyewaan Mobil');
+            abort_unless(in_array((int) $item->region_id, array_map('intval', $allowed), true), 403, 'Layanan ini khusus warga lokal atau sedang tidak aktif.');
+        }
+
         // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening
         // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
         $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);

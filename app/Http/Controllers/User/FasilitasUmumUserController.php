@@ -20,29 +20,33 @@ class FasilitasUmumUserController extends Controller
         // Gedung & Ruang Publik
         $itemsQuery = FasilitasUmum::inCatalog()->with('pengurus')->where('status', '!=', 'Tidak Tersedia');
 
+        $isSuperAdmin = $user && $user->role === 'super_admin';
+        $allowedRegionIds = (! $isSuperAdmin && Region::adaPengaturanLayanan('Fasilitas Umum'))
+            ? Region::wilayahLayananTerlihat($user?->region_id, 'Fasilitas Umum')
+            : null;
+
         if ($targetRegionId) {
             // Ketika pengunjung memilih desa/wilayah tertentu dari direktori layanan
             $targetRegion = Region::find($targetRegionId);
-            $visibleRegionIds = array_merge([$targetRegionId], Region::getDescendantIds($targetRegionId));
+            $targetTreeIds = array_map('intval', array_merge([$targetRegionId], Region::getDescendantIds($targetRegionId)));
+            $visibleRegionIds = $allowedRegionIds !== null
+                ? array_values(array_intersect($targetTreeIds, array_map('intval', $allowedRegionIds)))
+                : $targetTreeIds;
 
-            // Fasilitas gedung hanya menampilkan milik wilayah yang dipilih
-            $itemsQuery->whereIn('region_id', $visibleRegionIds);
+            // Fasilitas gedung hanya menampilkan milik wilayah yang dipilih dan memang boleh diakses
+            $itemsQuery->whereIn('region_id', $visibleRegionIds ?: [-1]);
 
             $region = $targetRegion ?: Region::where('type', 'kabupaten')->first();
         } else {
             // Akses umum / dari beranda berdasarkan akun user login
-            $userRegionId = ($user && $user->role === 'user') ? $user->region_id : null;
+            $userRegionId = $user?->region_id;
+
+            if ($allowedRegionIds !== null) {
+                $visibleRegionIds = array_values(array_unique(array_map('intval', $allowedRegionIds)));
+                $itemsQuery->whereIn('region_id', $visibleRegionIds ?: [-1]);
+            }
 
             if ($userRegionId) {
-                $relevantRegionIds = array_merge([$userRegionId], Region::getAncestorIds($userRegionId));
-                $allowed = Region::wilayahLayananTerlihat($userRegionId, 'Fasilitas Umum');
-                $visibleRegionIds = array_values(array_unique(array_merge($allowed, $relevantRegionIds)));
-
-                $itemsQuery->where(function($sub) use ($allowed, $relevantRegionIds) {
-                    $sub->whereIn('region_id', $allowed)
-                        ->orWhereIn('region_id', $relevantRegionIds);
-                });
-
                 $region = Region::find($userRegionId);
             } else {
                 $region = Region::where('type', 'kabupaten')->first() ?: Region::first();
@@ -78,7 +82,14 @@ class FasilitasUmumUserController extends Controller
     public function show($id)
     {
         $item = FasilitasUmum::inCatalog()->with('pengurus')->findOrFail($id);
-        
+        $viewer = Auth::user();
+        if ($item->region_id && (! $viewer || $viewer->role !== 'super_admin')
+            && Region::adaPengaturanLayanan('Fasilitas Umum')
+            && Region::whereKey($item->region_id)->exists()) {
+            $allowed = Region::wilayahLayananTerlihat($viewer?->region_id, 'Fasilitas Umum');
+            abort_unless(in_array((int) $item->region_id, array_map('intval', $allowed), true), 403, 'Layanan ini khusus warga lokal atau sedang tidak aktif.');
+        }
+
         // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening
         // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
         $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);

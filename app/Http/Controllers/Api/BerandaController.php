@@ -120,10 +120,10 @@ class BerandaController extends Controller
                 ];
             });
 
-        $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()->whereRaw('LOWER(status) = ?', ['tersedia']);
-        if ($userRegionId) {
-            $mobilQuery->whereIn('region_id', \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil'));
-        }
+        $visibleMobilRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil');
+        $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()
+            ->whereRaw('LOWER(status) = ?', ['tersedia'])
+            ->whereIn('region_id', $visibleMobilRegions ?: [-1]);
         $mobils = $mobilQuery->take(10)->get()->map(function ($item) {
             return [
                 'id' => $item->id,
@@ -134,10 +134,10 @@ class BerandaController extends Controller
             ];
         });
 
-        $fasilitasQuery = \App\Models\FasilitasUmum::inCatalog()->whereRaw('LOWER(status) = ?', ['tersedia']);
-        if ($userRegionId) {
-            $fasilitasQuery->whereIn('region_id', \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'fasilitas-umum'));
-        }
+        $visibleFasilitasRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'fasilitas-umum');
+        $fasilitasQuery = \App\Models\FasilitasUmum::inCatalog()
+            ->whereRaw('LOWER(status) = ?', ['tersedia'])
+            ->whereIn('region_id', $visibleFasilitasRegions ?: [-1]);
         $fasilitas = $fasilitasQuery->take(10)->get()->map(function ($item) {
             return [
                 'id' => $item->id,
@@ -241,10 +241,10 @@ class BerandaController extends Controller
                 ];
             });
 
-        $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()->whereRaw('LOWER(status) = ?', ['tersedia']);
-        if ($userRegionId) {
-            $mobilQuery->whereIn('region_id', \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil'));
-        }
+        $visibleMobilRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'penyewaan-mobil');
+        $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()
+            ->whereRaw('LOWER(status) = ?', ['tersedia'])
+            ->whereIn('region_id', $visibleMobilRegions ?: [-1]);
         $mobilProducts = $mobilQuery
             ->withCount('bookings')
             ->orderBy('bookings_count', 'desc')

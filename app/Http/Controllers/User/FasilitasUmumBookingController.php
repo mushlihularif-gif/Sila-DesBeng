@@ -76,6 +76,14 @@ class FasilitasUmumBookingController extends Controller
         ], ['payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
 
         $item = FasilitasUmum::inCatalog()->findOrFail($validated['fasilitas_id']);
+        if ($item->region_id
+            && \Illuminate\Support\Facades\Schema::hasTable('regions')
+            && \Illuminate\Support\Facades\Schema::hasTable('services')
+            && \Illuminate\Support\Facades\Schema::hasTable('region_services')
+            && \App\Models\Region::whereKey($item->region_id)->exists()) {
+            $allowed = \App\Models\Region::wilayahLayananTerlihat(Auth::user()?->region_id, 'Fasilitas Umum');
+            abort_unless(in_array((int) $item->region_id, array_map('intval', $allowed), true), 403, 'Layanan ini tidak tersedia untuk wilayah akun Anda.');
+        }
         
         $deliveryMethod = $validated['delivery_method'] ?? 'lokasi';
         $recipientName = $validated['recipient_name'] ?? (Auth::user()->name ?? 'Warga');

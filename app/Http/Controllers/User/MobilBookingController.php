@@ -87,6 +87,14 @@ class MobilBookingController extends Controller
         ], ['payment_proof.required_if'=>'Unggah bukti pembayaran untuk melanjutkan pembayaran transfer atau e-wallet.', 'payment_proof.mimes'=>'Bukti pembayaran harus berupa JPG, PNG, atau PDF.', 'payment_proof.max'=>'Ukuran bukti pembayaran maksimal 5 MB.']);
 
         $item = Mobil::inCatalog()->findOrFail($validated['mobil_id']);
+        if ($item->region_id
+            && \Illuminate\Support\Facades\Schema::hasTable('regions')
+            && \Illuminate\Support\Facades\Schema::hasTable('services')
+            && \Illuminate\Support\Facades\Schema::hasTable('region_services')
+            && \App\Models\Region::whereKey($item->region_id)->exists()) {
+            $allowed = \App\Models\Region::wilayahLayananTerlihat(Auth::user()?->region_id, 'Penyewaan Mobil');
+            abort_unless(in_array((int) $item->region_id, array_map('intval', $allowed), true), 403, 'Layanan ini tidak tersedia untuk wilayah akun Anda.');
+        }
         $profile = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         if ($profile->region() && ! in_array($validated['payment_method'], $profile->metodeTersedia(), true)) {
             throw \Illuminate\Validation\ValidationException::withMessages([

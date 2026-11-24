@@ -86,7 +86,8 @@ class BerandaController extends Controller
 
         $regionId = $desaDipilih?->id ?? $kecamatanId;
         if ($desaId === 'all' && auth()->check() && auth()->user()->region_id) {
-            $userRegion = Region::find(auth()->user()->region_id);
+            $resolvedVillageId = Region::resolveServiceRegionId((int) auth()->user()->region_id);
+            $userRegion = $resolvedVillageId ? Region::find($resolvedVillageId) : null;
             if ($userRegion && in_array((int) $userRegion->id, array_map('intval', Region::getDescendantIds($kecamatanId)), true)) {
                 if (in_array($userRegion->type, ['desa', 'kelurahan'], true)) {
                     $desaId = $userRegion->id;
@@ -194,12 +195,26 @@ class BerandaController extends Controller
     {
         $year = $year ?? (int)date('Y');
         $regionIds = array_merge([$regionId], \App\Models\Region::getDescendantIds($regionId));
+        $viewer = auth()->user();
+        $viewerRegionId = $viewer?->region_id ? (int) $viewer->region_id : null;
+
+        // Hormati aturan akses layanan wilayah (is_active & is_exclusive) agar produk
+        // "Khusus Warga Desa" atau unit nonaktif tidak pernah bocor ke desa lain / tamu.
+        $visibleRentalIds = app(\App\Services\RentalOrdering::class)->visibleQuery($viewer)->pluck('id')->all();
+        $visibleGasIds = app(\App\Services\GasOrdering::class)->visibleQuery($viewer)->pluck('id')->all();
+        $visibleMobilRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'penyewaan-mobil');
+        $visibleFasilitasRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'fasilitas-umum');
+
+        $visibleMobilIds = empty($visibleMobilRegionIds)
+            ? []
+            : Mobil::inCatalog()->forRental()->where('status', '!=', 'rusak')->whereIn('region_id', $visibleMobilRegionIds)->pluck('id')->all();
 
         // 1. Get Rental Scores
-        $rentalPopularity = RentalBooking::withTrashed()
+        $rentalPopularity = empty($visibleRentalIds) ? collect() : RentalBooking::withTrashed()
             ->select('barang_id', DB::raw('SUM(quantity) as total_sold'))
             ->whereYear('created_at', $year)
             ->whereIn('region_id', $regionIds)
+            ->whereIn('barang_id', $visibleRentalIds)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('barang_id')
             ->groupBy('barang_id')
@@ -225,10 +240,11 @@ class BerandaController extends Controller
         })->filter();
 
         // 2. Get Gas Scores
-        $gasPopularity = GasOrder::withTrashed()
+        $gasPopularity = empty($visibleGasIds) ? collect() : GasOrder::withTrashed()
             ->select('gas_id', DB::raw('SUM(quantity) as total_sold'))
             ->whereYear('created_at', $year)
             ->whereIn('region_id', $regionIds)
+            ->whereIn('gas_id', $visibleGasIds)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('gas_id')
             ->groupBy('gas_id')
@@ -254,10 +270,11 @@ class BerandaController extends Controller
         })->filter();
 
         // 3. Get Mobil Scores
-        $mobilPopularity = \App\Models\MobilBooking::withTrashed()
+        $mobilPopularity = empty($visibleMobilIds) ? collect() : \App\Models\MobilBooking::withTrashed()
             ->select('mobil_id', DB::raw('COUNT(id) as total_sold'))
             ->whereYear('created_at', $year)
             ->whereIn('region_id', $regionIds)
+            ->whereIn('mobil_id', $visibleMobilIds)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('mobil_id')
             ->groupBy('mobil_id')
@@ -286,12 +303,13 @@ class BerandaController extends Controller
         $combined = $products->concat($gasProducts)->concat($mobilProducts)->sortByDesc('sold');
 
         // SMART FALLBACK: Jika riwayat transaksi masih kurang dari 4 (Cold Start)
-        // Isi slot produk dengan produk yang tersedia/ready stock di wilayah tersebut!
+        // Isi slot produk hanya dengan produk yang aktif dan memang boleh diakses viewer!
         if ($combined->count() < 4) {
             $existingKeys = $combined->map(fn($p) => $p->type . '-' . $p->id)->toArray();
 
-            // Fallback 1: Gas Elpiji Ready
-            $fallbackGas = \App\Models\Gas::whereIn('region_id', $regionIds)
+            // Fallback 1: Gas Elpiji Ready (hanya yang visible)
+            $fallbackGas = app(\App\Services\GasOrdering::class)->visibleQuery($viewer)
+                ->whereIn('region_id', $regionIds)
                 ->where('stok', '>', 0)
                 ->latest()
                 ->take(2)
@@ -317,8 +335,9 @@ class BerandaController extends Controller
                 }
             }
 
-            // Fallback 2: Alat Sewa Ready
-            $fallbackBarang = app(\App\Services\RentalOrdering::class)->visibleQuery(auth()->user())->whereIn('region_id', $regionIds)
+            // Fallback 2: Alat Sewa Ready (hanya yang visible)
+            $fallbackBarang = app(\App\Services\RentalOrdering::class)->visibleQuery($viewer)
+                ->whereIn('region_id', $regionIds)
                 ->where('stok', '>', 0)
                 ->latest()
                 ->take(2)
@@ -344,9 +363,15 @@ class BerandaController extends Controller
                 }
             }
 
-            // Fallback 3: Mobil Sewa Ready
-            $fallbackMobil = \App\Models\Mobil::inCatalog()->whereIn('region_id', $regionIds)
+            // Fallback 3: Mobil Sewa Ready (hanya yang visible)
+            $allowedMobilInScope = array_values(array_intersect(
+                array_map('intval', $regionIds),
+                array_map('intval', $visibleMobilRegionIds)
+            ));
+            $fallbackMobil = empty($allowedMobilInScope) ? collect() : \App\Models\Mobil::inCatalog()
+                ->whereIn('region_id', $allowedMobilInScope)
                 ->forRental()
+                ->where('status', '!=', 'rusak')
                 ->where('stok', '>', 0)
                 ->latest()
                 ->take(2)
@@ -372,8 +397,14 @@ class BerandaController extends Controller
                 }
             }
 
-            // Fallback 4: Fasilitas Umum Desa
-            $fallbackFasilitas = \App\Models\FasilitasUmum::inCatalog()->whereIn('region_id', $regionIds)
+            // Fallback 4: Fasilitas Umum Desa (hanya yang visible)
+            $allowedFasilitasInScope = array_values(array_intersect(
+                array_map('intval', $regionIds),
+                array_map('intval', $visibleFasilitasRegionIds)
+            ));
+            $fallbackFasilitas = empty($allowedFasilitasInScope) ? collect() : \App\Models\FasilitasUmum::inCatalog()
+                ->whereIn('region_id', $allowedFasilitasInScope)
+                ->where('status', '!=', 'Tidak Tersedia')
                 ->latest()
                 ->take(1)
                 ->get();
@@ -398,9 +429,9 @@ class BerandaController extends Controller
                 }
             }
 
-            // Fallback 6: Master produk di desa-desa Kecamatan Bengkalis jika desa terpilih kosong
+            // Fallback 6: Produk terbuka publik (is_exclusive = false) di desa lain bila desa terpilih belum memenuhi 4 slot
             if ($combined->count() < 4) {
-                $globalBarang = app(\App\Services\RentalOrdering::class)->visibleQuery(auth()->user())->where('stok', '>', 0)->latest()->take(4)->get();
+                $globalBarang = app(\App\Services\RentalOrdering::class)->visibleQuery($viewer)->where('stok', '>', 0)->latest()->take(4)->get();
                 foreach ($globalBarang as $b) {
                     $key = 'rental-' . $b->id;
                     if (!in_array($key, $existingKeys) && $combined->count() < 4) {
@@ -418,6 +449,29 @@ class BerandaController extends Controller
                             'badge_color' => 'bg-emerald-600 text-white',
                             'unit' => $b->satuan ?? 'hari',
                             'link' => route('rental.equipment.show', $b->id)
+                        ]);
+                    }
+                }
+            }
+            if ($combined->count() < 4) {
+                $globalGas = app(\App\Services\GasOrdering::class)->visibleQuery($viewer)->where('stok', '>', 0)->latest()->take(4)->get();
+                foreach ($globalGas as $g) {
+                    $key = 'gas-' . $g->id;
+                    if (!in_array($key, $existingKeys) && $combined->count() < 4) {
+                        $existingKeys[] = $key;
+                        $combined->push((object) [
+                            'id' => $g->id,
+                            'name' => $g->jenis_gas,
+                            'image' => $g->foto,
+                            'price' => $g->harga_satuan,
+                            'price_formatted' => 'Rp ' . number_format($g->harga_satuan, 0, ',', '.'),
+                            'stock' => $g->stok,
+                            'sold' => 0,
+                            'type' => 'gas',
+                            'category' => 'Unit Penjualan Gas',
+                            'badge_color' => 'bg-orange-500 text-white',
+                            'unit' => 'tabung',
+                            'link' => route('gas.sales.show', $g->id)
                         ]);
                     }
                 }
@@ -632,10 +686,15 @@ class BerandaController extends Controller
         $hasSpecificIntent = $isGasIntent || $isMobilIntent || $isRentalIntent || $isFasilitasIntent;
 
         $results = collect([]);
+        $viewer = auth()->user();
+        $viewerRegionId = $viewer?->region_id ? (int) $viewer->region_id : null;
 
-        // 1. Search Mobil Items (Only if mobil intent or general search)
+        // 1. Search Mobil Items (Only if mobil intent or general search, respecting is_exclusive & is_active)
         if (!$hasSpecificIntent || $isMobilIntent) {
-            $mobilQuery = \App\Models\Mobil::inCatalog()->forRental();
+            $visibleMobilRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'penyewaan-mobil');
+            $mobilQuery = \App\Models\Mobil::inCatalog()->forRental()
+                ->where('status', '!=', 'rusak')
+                ->whereIn('region_id', $visibleMobilRegionIds ?: [-1]);
             $mobilQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
                 if (trim($rawSearch) === 'mobil' || trim($rawSearch) === 'sewa mobil' || trim($rawSearch) === 'transportasi' || trim($rawSearch) === 'sewa transportasi') {
                     $q->orWhereRaw('1 = 1');
@@ -669,9 +728,9 @@ class BerandaController extends Controller
             $results = $results->concat($mobilResults);
         }
 
-        // 2. Search Gas Items (Only if gas intent or general search)
+        // 2. Search Gas Items (Only if gas intent or general search, respecting is_exclusive & is_active)
         if (!$hasSpecificIntent || $isGasIntent) {
-            $gasQuery = \App\Models\Gas::query();
+            $gasQuery = app(\App\Services\GasOrdering::class)->visibleQuery($viewer);
             $gasQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
                 if (trim($rawSearch) === 'gas' || trim($rawSearch) === 'beli gas' || trim($rawSearch) === 'elpiji' || trim($rawSearch) === 'lpg') {
                     $q->orWhereRaw('1 = 1');
@@ -707,7 +766,7 @@ class BerandaController extends Controller
 
         // 3. Search Rental Items (Barang) (Only if rental intent or general search)
         if (!$hasSpecificIntent || $isRentalIntent) {
-            $rentalQuery = app(\App\Services\RentalOrdering::class)->visibleQuery(auth()->user());
+            $rentalQuery = app(\App\Services\RentalOrdering::class)->visibleQuery($viewer);
             $rentalQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
                 if (trim($rawSearch) === 'alat' || trim($rawSearch) === 'sewa alat') {
                     $q->orWhereRaw('1 = 1');
@@ -741,9 +800,12 @@ class BerandaController extends Controller
             $results = $results->concat($rentalResults);
         }
 
-        // 4. Search Fasilitas Umum Items (Only if fasilitas intent or general search)
+        // 4. Search Fasilitas Umum Items (Only if fasilitas intent or general search, respecting is_exclusive & is_active)
         if (!$hasSpecificIntent || $isFasilitasIntent) {
-            $fasilitasQuery = \App\Models\FasilitasUmum::inCatalog();
+            $visibleFasilitasRegionIds = Region::wilayahLayananTerlihat($viewerRegionId, 'fasilitas-umum');
+            $fasilitasQuery = \App\Models\FasilitasUmum::inCatalog()
+                ->where('status', '!=', 'Tidak Tersedia')
+                ->whereIn('region_id', $visibleFasilitasRegionIds ?: [-1]);
             $fasilitasQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
                 if (trim($rawSearch) === 'fasilitas' || trim($rawSearch) === 'gedung') {
                     $q->orWhereRaw('1 = 1');

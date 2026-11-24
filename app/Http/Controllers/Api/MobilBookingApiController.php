@@ -18,13 +18,11 @@ class MobilBookingApiController extends Controller
             ->where('stok', '>', 0);
 
         $user = $request->user('sanctum');
-        if ($user && $user->region_id) {
-            if (\Illuminate\Support\Facades\Schema::hasTable('regions') && \Illuminate\Support\Facades\Schema::hasTable('region_services')) {
-                $visibleRegionIds = \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'penyewaan-mobil');
-                $query->whereIn('region_id', $visibleRegionIds);
-            } else {
-                $query->where('region_id', $user->region_id);
-            }
+        if (\App\Models\Region::adaPengaturanLayanan('penyewaan-mobil')) {
+            $visibleRegionIds = \App\Models\Region::wilayahLayananTerlihat($user?->region_id, 'penyewaan-mobil');
+            $query->whereIn('region_id', $visibleRegionIds ?: [-1]);
+        } elseif ($user && $user->region_id) {
+            $query->where('region_id', $user->region_id);
         }
 
         $items = $query->get()
@@ -68,6 +66,17 @@ class MobilBookingApiController extends Controller
                 'status' => 'error',
                 'message' => 'Kendaraan tidak ditemukan.',
             ], 404);
+        }
+
+        $viewer = request()->user('sanctum');
+        if ($item->region_id && \App\Models\Region::adaPengaturanLayanan('penyewaan-mobil') && \App\Models\Region::whereKey($item->region_id)->exists()) {
+            $allowed = \App\Models\Region::wilayahLayananTerlihat($viewer?->region_id, 'penyewaan-mobil');
+            if (! in_array((int) $item->region_id, array_map('intval', $allowed), true)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Layanan ini khusus warga lokal atau sedang tidak aktif.',
+                ], 403);
+            }
         }
 
         $firstSupir = (\Illuminate\Support\Facades\Schema::hasTable('mobil_supir') && \Illuminate\Support\Facades\Schema::hasTable('supirs'))
@@ -126,6 +135,15 @@ class MobilBookingApiController extends Controller
         try {
             return \Illuminate\Support\Facades\DB::transaction(function () use ($request, &$proofPath) {
                 $mobil = Mobil::inCatalog()->lockForUpdate()->findOrFail($request->mobil_id);
+
+                if ($mobil->region_id
+                    && \Illuminate\Support\Facades\Schema::hasTable('regions')
+                    && \Illuminate\Support\Facades\Schema::hasTable('services')
+                    && \Illuminate\Support\Facades\Schema::hasTable('region_services')
+                    && \App\Models\Region::whereKey($mobil->region_id)->exists()) {
+                    $allowed = \App\Models\Region::wilayahLayananTerlihat($request->user()?->region_id, 'penyewaan-mobil');
+                    abort_unless(in_array((int) $mobil->region_id, array_map('intval', $allowed), true), 403, 'Layanan ini tidak tersedia untuk wilayah akun Anda.');
+                }
 
                 if (strtolower((string) $mobil->status) !== 'tersedia' || !$mobil->hasStock(1)) {
                     return response()->json([

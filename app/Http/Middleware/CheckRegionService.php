@@ -58,17 +58,29 @@ class CheckRegionService
             ->first();
 
         if (!$regionService) {
+            // Jika admin wilayah sudah secara eksplisit menonaktifkan layanan ini (is_active = false),
+            // jangan pernah mengaktifkannya ulang secara otomatis.
+            $explicitlyDisabled = RegionService::whereIn('region_id', $relevantRegionIds)
+                ->whereHas('service', function($q) use ($targetSlugs) {
+                    $q->whereIn('slug', $targetSlugs);
+                })
+                ->where('is_active', false)
+                ->exists();
+
             // Fallback khusus jika wilayah atau leluhurnya memiliki data produk/armada langsung
+            // dan belum memiliki pengaturan layanan eksplisit sama sekali.
             $hasProducts = false;
-            if (in_array('fasilitas-umum', $targetSlugs) || in_array('peminjaman-fasilitas-umum', $targetSlugs)) {
-                $hasProducts = \App\Models\FasilitasUmum::inCatalog()->whereIn('region_id', $relevantRegionIds)->where('status', '!=', 'Tidak Tersedia')->exists()
-                    || \App\Models\Mobil::inCatalog()->whereIn('region_id', $relevantRegionIds)->where('kategori', 'kendaraan_operasional')->exists();
-            } elseif (in_array('penyewaan-mobil', $targetSlugs)) {
-                $hasProducts = \App\Models\Mobil::inCatalog()->whereIn('region_id', $relevantRegionIds)->forRental()->exists();
-            } elseif (in_array('penyewaan-alat', $targetSlugs)) {
-                $hasProducts = \App\Models\Barang::whereIn('region_id', $relevantRegionIds)->exists();
-            } elseif (in_array('penjualan-gas', $targetSlugs)) {
-                $hasProducts = \App\Models\Gas::whereIn('region_id', $relevantRegionIds)->exists();
+            if (! $explicitlyDisabled) {
+                if (in_array('fasilitas-umum', $targetSlugs) || in_array('peminjaman-fasilitas-umum', $targetSlugs)) {
+                    $hasProducts = \App\Models\FasilitasUmum::inCatalog()->whereIn('region_id', $relevantRegionIds)->where('status', '!=', 'Tidak Tersedia')->exists()
+                        || \App\Models\Mobil::inCatalog()->whereIn('region_id', $relevantRegionIds)->where('kategori', 'kendaraan_operasional')->exists();
+                } elseif (in_array('penyewaan-mobil', $targetSlugs)) {
+                    $hasProducts = \App\Models\Mobil::inCatalog()->whereIn('region_id', $relevantRegionIds)->forRental()->exists();
+                } elseif (in_array('penyewaan-alat', $targetSlugs)) {
+                    $hasProducts = \App\Models\Barang::whereIn('region_id', $relevantRegionIds)->exists();
+                } elseif (in_array('penjualan-gas', $targetSlugs)) {
+                    $hasProducts = \App\Models\Gas::whereIn('region_id', $relevantRegionIds)->exists();
+                }
             }
 
             if ($hasProducts) {
