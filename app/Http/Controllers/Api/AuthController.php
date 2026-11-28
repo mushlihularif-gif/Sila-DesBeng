@@ -178,42 +178,52 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
+            'name' => 'nullable|string|max:255',
             'username' => 'required|string|max:255|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:20',
             'region_id' => ['required', $this->desaKecamatanBengkalisRule()],
             'password' => 'required|string|min:8|confirmed',
+            'otp_method' => 'nullable|in:email,whatsapp',
         ]);
 
         $otpCode = str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        $otpMethod = $request->input('otp_method', 'email');
+        $fullName = trim((string) ($request->input('name') ?: $request->username));
         
         // Simpan data pendaftaran ke Cache selama 5 menit
         $cacheKey = 'register_otp_' . $request->email;
         Cache::put($cacheKey, [
+            'name' => $fullName,
             'username' => $request->username,
             'email' => $request->email,
             'phone' => $request->phone,
             'region_id' => $request->region_id,
             'password' => Hash::make($request->password),
             'otp_code' => $otpCode,
+            'otp_method' => $otpMethod,
         ], now()->addMinutes(5));
 
-        // Kirim OTP via Email
-        try {
-            Mail::to($request->email)->queue(new OtpMail($otpCode));
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Gagal kirim email OTP API: " . $e->getMessage());
+        if ($otpMethod === 'whatsapp') {
+            try {
+                $fonnte = new FonnteService();
+                $fonnte->sendOtp($request->phone, $otpCode);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal kirim WhatsApp OTP API: " . $e->getMessage());
+            }
+        } else {
+            try {
+                Mail::to($request->email)->queue(new OtpMail($otpCode));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal kirim email OTP API: " . $e->getMessage());
+            }
         }
 
-        // Kirim OTP via WA (opsional / jika Fonnte aktif)
-        // try {
-        //     $fonnte = new FonnteService();
-        //     $fonnte->sendOtp($request->phone, $otpCode);
-        // } catch (\Exception $e) {}
+        $methodLabel = $otpMethod === 'whatsapp' ? 'nomor WhatsApp' : 'email';
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Kode OTP telah dikirim ke email Anda. Berlaku selama 5 menit.',
+            'message' => 'Kode OTP telah dikirim ke ' . $methodLabel . ' Anda. Berlaku selama 5 menit.',
             'data' => [
                 'email' => $request->email
             ]
@@ -290,7 +300,7 @@ class AuthController extends Controller
         $user = User::create([
             'nik' => null,
             'username' => $tempData['username'],
-            'name' => $tempData['username'],
+            'name' => !empty($tempData['name']) ? $tempData['name'] : $tempData['username'],
             'email' => $tempData['email'],
             'phone' => $tempData['phone'],
             'address' => '-',
@@ -307,6 +317,21 @@ class AuthController extends Controller
         $user->forceFill(['role' => 'user', 'status' => 'aktif', 'email_verified_at' => now()])->save();
         abort_unless($user->hasSupportedRole(), 403, 'Peran akun tidak didukung.');
         abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
+
+        try {
+            \App\Models\Notification::create([
+                'user_id' => $user->id,
+                'type' => 'akun_baru',
+                'title' => 'Selamat Datang di SegiDaerah!',
+                'message' => 'Akun Anda berhasil didaftarkan. Silakan lengkapi verifikasi identitas (KYC e-KTP) untuk menikmati seluruh layanan desa.',
+                'link' => null,
+                'icon' => 'bx bx-user-check',
+                'is_read' => false,
+            ]);
+        } catch (\Throwable $e) {
+            // Abaikan bila tabel notifikasi belum tersedia pada konteks uji terbatas
+        }
+
         $token = $user->createToken('flutter-mobile-app')->plainTextToken;
 
         return response()->json([

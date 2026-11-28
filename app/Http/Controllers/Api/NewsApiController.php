@@ -13,7 +13,7 @@ class NewsApiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Announcement::with(['region', 'admin', 'images'])
+        $query = Announcement::with(['region', 'admin', 'publisher', 'images'])
             ->visibleTo(auth('sanctum')->user());
 
         // Filter by type if provided
@@ -70,6 +70,7 @@ class NewsApiController extends Controller
                 'id' => $item->id,
                 'title' => $item->title,
                 'category' => $displayCategory,
+                'post_category' => $item->post_category,
                 'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
                 'desc' => $item->description,
                 'image' => count($images) > 0 ? $images[0] : null,
@@ -98,7 +99,7 @@ class NewsApiController extends Controller
      */
     public function show($id)
     {
-        $item = Announcement::with(['region', 'admin', 'images'])->visibleTo(auth('sanctum')->user())->findOrFail($id);
+        $item = Announcement::with(['region', 'admin', 'publisher', 'images'])->visibleTo(auth('sanctum')->user())->findOrFail($id);
         
         $images = [];
         if ($item->image_path) {
@@ -119,6 +120,7 @@ class NewsApiController extends Controller
             'id' => $item->id,
             'title' => $item->title,
             'category' => $item->type ?? 'Pengumuman',
+            'post_category' => $item->post_category,
             'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
             'desc' => $item->description,
             'image' => count($images) > 0 ? $images[0] : null,

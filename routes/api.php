@@ -32,6 +32,9 @@ Route::get('/popular', [BerandaController::class, 'popular']);
     Route::get('/region-profile/{id}', [\App\Http\Controllers\Api\RegionApiController::class, 'getProfile']);
     Route::get('/kemitraan/check-desa/{id}', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'checkDesaAdmin']);
 
+    // Chatbot Asisten Virtual (Selaras dengan web /chatbot/ask: mendukung mode tamu & akun login dengan rate limit)
+    Route::post('/chatbot', [\App\Http\Controllers\User\ChatbotController::class, 'ask'])->middleware('throttle:chat-write');
+
 // Protected Routes (Harus mengirimkan Bearer Token dari hasil Login)
 Route::post('/webhooks/fonnte-status', [\App\Http\Controllers\NotificationChannelController::class, 'webhook'])->middleware('throttle:60,1');
 Route::middleware('auth:sanctum')->group(function () {
@@ -89,9 +92,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead'])->whereNumber('id');
     Route::post('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
     Route::delete('/notifications/delete-all', [\App\Http\Controllers\Api\NotificationController::class, 'deleteAll']);
-    
-    // Chatbot (Gemini AI)
-    Route::post('/chatbot', [\App\Http\Controllers\User\ChatbotController::class, 'ask'])->middleware('throttle:chat-write');
 
 
     // Mutasi Domisili

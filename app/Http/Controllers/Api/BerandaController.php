@@ -39,7 +39,7 @@ class BerandaController extends Controller
     public function announcements()
     {
         $formatted = (function () {
-            $announcements = Announcement::with(['region', 'admin', 'images'])
+            $announcements = Announcement::with(['region', 'admin', 'publisher', 'images'])
                 ->visibleTo(auth('sanctum')->user())
                 ->orderBy('published_at', 'desc')
                 ->take(5)
@@ -64,6 +64,7 @@ class BerandaController extends Controller
                     'id' => $item->id,
                     'title' => $item->title,
                     'category' => $item->type ?? 'Pengumuman',
+                    'post_category' => $item->post_category,
                     'date' => ($item->event_date ?? $item->published_at ?? $item->created_at)->format('Y-m-d'),
                     'published_at' => $item->published_at?->toIso8601String(),
                     'workflow_state' => $item->workflow_state,
@@ -74,6 +75,7 @@ class BerandaController extends Controller
                     'images' => $images,
                     'location' => $item->location,
                     'author' => $item->admin ? $item->admin->name : 'Admin Desa',
+                    'publisher' => $item->publisher?->name,
                 ];
             });
         })();

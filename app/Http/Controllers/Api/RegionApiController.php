@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Region;
 use App\Models\BumdesMember;
+use App\Support\VillageParticipation;
 
 class RegionApiController extends Controller
 {
@@ -23,12 +24,24 @@ class RegionApiController extends Controller
         }
 
         $kecamatans = collect([$kecamatanFokus])->map(function ($kec) {
-            $desas = Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $kec->id)->orderBy('name')->get()->map(function ($desa) {
-                return [
-                    'id' => $desa->id,
-                    'name' => $desa->name,
-                ];
-            });
+            $desas = VillageParticipation::query(
+                Region::whereIn('type', ['desa', 'kelurahan'])
+                    ->where('parent_id', $kec->id)
+            )
+                ->get()
+                ->sortBy([
+                    fn ($a, $b) => (int) VillageParticipation::joined($b) <=> (int) VillageParticipation::joined($a),
+                    fn ($a, $b) => strnatcasecmp($a->name, $b->name),
+                ])
+                ->values()
+                ->map(function ($desa) {
+                    return [
+                        'id' => $desa->id,
+                        'name' => $desa->name,
+                        'type' => $desa->type,
+                        'is_joined' => VillageParticipation::joined($desa),
+                    ];
+                });
 
             return [
                 'id' => $kec->id,
@@ -133,6 +146,13 @@ class RegionApiController extends Controller
             }
         }
 
+        $paymentInfo = is_array($region->payment_info) ? $region->payment_info : [];
+        $hasWhatsappFlag = array_key_exists('whatsapp_active', $paymentInfo);
+        $isWhatsappActive = $hasWhatsappFlag
+            ? (bool) $paymentInfo['whatsapp_active']
+            : !empty($region->contact_phone);
+        $contactPhone = $isWhatsappActive ? $region->contact_phone : null;
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -141,7 +161,8 @@ class RegionApiController extends Controller
                     'name' => $region->name,
                     'type' => $region->type,
                     'profile_text' => $region->profile_text,
-                    'contact_phone' => $region->contact_phone,
+                    'contact_phone' => $contactPhone,
+                    'whatsapp_active' => $isWhatsappActive,
                     'contact_email' => $region->contact_email,
                     'active_services' => $region->services ? $region->services->pluck('name')->toArray() : [],
                 ],
